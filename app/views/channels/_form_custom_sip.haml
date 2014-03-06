@@ -1,21 +1,38 @@
 .field
-  = f.label :username
+  = f.label :username, t('views.channels._form_custom_sip.label.username')
   = f.text_field :username, :autocomplete => 'off'
 .field
-  = f.label :password
+  = f.label :password, t('views.channels._form_custom_sip.label.password')
   = f.password_field :password, :value => @channel.password, :autocomplete => 'off'
 .field
-  = f.label :number
+  = f.label :number, t('views.channels._form_custom_sip.label.number')
   = f.text_field :number
+
 .field
-  = f.label :limit
+  = f.label :prefix, t('views.channels._form_custom_sip.label.prefix')
+  = f.text_field :prefix
+
+.field
+  = f.label :limit, t('views.channels._form_custom_sip.label.limit')
   = f.text_field :limit
 .field
-  = f.label :domain
+  = f.label :domain, t('views.channels._form_custom_sip.label.domain')
   = f.text_field :domain
 .field
-  = f.label :direction
-  = f.select :direction, [['Incoming', 'inbound'], ['Outgoing', 'outbound'], ['Both directions', 'both']]
+  = f.label :port, t('views.channels._form_custom_sip.label.port')
+  = f.text_field :port, placeholder: '5060'
+- if allow_prefix_called_number?
+  .field
+    = f.label :prefix_called_number, t('views.channels._form_custom_sip.label.prefix_called_number')
+    = f.text_field :prefix_called_number
+ 
 .field
-  = f.label :register, style: 'display:inline-block'
+  = f.label :protocol, t('views.channels._form_custom_sip.label.protocol')
+  = f.select :protocol, [[t('views.channels._form_custom_sip.label.udp'), 'udp'], [t('views.channels._form_custom_sip.label.tcp'), 'tcp']]
+
+.field
+  = f.label :direction, t('views.channels._form_custom_sip.label.direction')
+  = f.select :direction, [[t('views.channels._form_custom_sip.label.incoming'), 'inbound'], [t('views.channels._form_custom_sip.label.outgoing'), 'outbound'], [t('views.channels._form_custom_sip.label.both_directions'), 'both']]
+.field
+  = f.label :register, t('views.channels._form_custom_sip.label.register'), style: 'display:inline-block'
   = f.check_box :register

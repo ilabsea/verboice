@@ -24,15 +24,33 @@ describe RecordingManager do
 
   it "should retrieve an absolute path for a recording of an aplication" do
     manager = RecordingManager.for project
-    manager.recording_path_for('key').should eq(File.join Rails.root, "data","projects", "#{project.id}" ,"recordings", "key.wav")
+    manager.recording_path_for('key').should eq(File.join Rails.root, "spec", "data", "projects", "#{project.id}" ,"recordings", "key.wav")
   end
 
   it "should retrieve an absolute path for a result of a call_log" do
     manager = RecordingManager.for call_log
-    manager.result_path_for(2).should eq(File.join Rails.root, "data","call_logs", "#{call_log.id}" ,"results", "2.wav")
+    manager.result_path_for(2).should eq(File.join Rails.root, "spec", "data", "call_logs", "#{call_log.id}" ,"results", "2.wav")
   end
 
   it "should format recording" do
     RecordingManager.format_recording(12345, 'explanation').should eq('12345-explanation')
+  end
+
+  it "should retrieve absolute path in production env" do
+    stub_env 'production' do
+      manager = RecordingManager.for call_log
+      manager.results_folder.should eq File.join Rails.root, "data", "call_logs", "#{call_log.id}", "results"
+    end
+  end
+
+  describe ".size" do
+    include RecordedAudioFileHelper
+
+    it "should get recordings size" do
+      with_sample_wav { call_log.recorded_audios.make }
+      with_sample_wav { call_log.recorded_audios.make }
+
+      RecordingManager.for(call_log).size.should eq(sample_wav_size * 2)
+    end
   end
 end

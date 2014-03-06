@@ -19,13 +19,19 @@ gem 'delayed_job_active_record'
 gem 'rubyzip', :require => 'zip/zip'
 gem 'rest-client'
 gem 'enumerated_attribute', :git => "https://github.com/edave/enumerated_attribute.git"
-gem 'csv_builder'
+gem 'csv_builder', :git => "https://github.com/lchanmann/csv_builder.git"
 gem 'newrelic_rpm'
 gem 'language_list'
 gem 'bertrpc'
+gem 'whenever', :require => false
+gem 'bertrpc'
 gem 'formatted_rails_logger'
+gem 'fabrication'
 gem 'instedd-pigeon', :require => 'pigeon'
-gem 'poirot_rails', git: 'https://bitbucket.org/instedd/poirot_rails.git', branch: 'master'
+gem 'ice_cube'
+gem 'aws-sdk'
+gem 'rails_config'
+gem 'awesome_print'
 
 group :assets do
   gem 'sass-rails',   '~> 3.2.5'

@@ -1,5 +1,5 @@
 -module(channel).
--export([find_all_sip/0, find_all_twilio/0, domain/1, number/1, limit/1, broker/1, username/1, password/1, is_outbound/1, register/1]).
+-export([find_all_sip/0, find_all_twilio/0, domain/1, port/1, protocol/1, number/1, limit/1, broker/1, username/1, password/1, is_outbound/1, register/1]).
 -export([account_sid/1, auth_token/1]).
 -define(CACHE, true).
 -define(TABLE_NAME, "channels").
@@ -21,6 +21,12 @@ domain(Channel = #channel{type = <<"Channels::TemplateBasedSip">>}) ->
 
 domain(#channel{config = Config}) ->
   proplists:get_value("domain", Config, []).
+
+port(#channel{config = Config}) ->
+  util:to_string(proplists:get_value("port", Config, <<>>)).
+
+protocol(#channel{config = Config}) ->
+  list_to_binary(proplists:get_value("protocol", Config, [])).
 
 number(#channel{config = Config}) ->
   util:to_string(proplists:get_value("number", Config, <<>>)).

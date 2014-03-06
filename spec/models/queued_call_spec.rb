@@ -25,4 +25,5 @@ describe QueuedCall do
     qcall.cancel_call!
     call_log.reload.state.should eq(:cancelled)
   end
+
 end

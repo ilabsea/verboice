@@ -17,14 +17,16 @@
 
 class CallLogsController < ApplicationController
   before_filter :authenticate_account!
+  before_filter :paginate, only: [:index, :queued]
+  before_filter :search, only: [:index, :download_project_call_logs, :generate_zip]
+  before_filter :check_max_row, only: [:download_project_call_logs]
+  before_filter :csv_settings, only: [:download, :download_details, :download_project_call_logs]
+
+  helper_method :paginate
 
   def index
-    @page = params[:page] || 1
-    @search = params[:search]
-    @per_page = 10
-    @logs = current_account.call_logs.includes(:project).includes(:channel).order('id DESC')
-    @logs = @logs.search @search, :account => current_account if @search.present?
     @logs = @logs.paginate :page => @page, :per_page => @per_page
+    render "projects/call_logs/index" if @project
   end
 
   def show
@@ -37,28 +39,69 @@ class CallLogsController < ApplicationController
   end
 
   def queued
-    @page = params[:page] || 1
-    @per_page = 10
     @calls = current_account.queued_calls.includes(:channel).includes(:call_log).includes(:schedule).order('id DESC')
     @calls = @calls.paginate :page => @page, :per_page => @per_page
   end
 
   def play_result
     @log = current_account.call_logs.find params[:id]
-    send_file RecordingManager.for(@log).result_path_for(params[:key]), :x_sendfile => true
+    send_file RecordingManager.for(@log).result_path_for(params[:key]), :type => "audio/x-wav"
   end
 
-  def download
-    @filename = "Call_logs_(#{Time.now.to_s.gsub(' ', '_')}).csv"
-    @streaming = true
-    @csv_options = { :col_sep => ',' }
+  def download_project_call_logs
+    render layout: false
   end
 
   def download_details
     @log = current_account.call_logs.includes(:entries).find params[:id]
-    @filename = "Call details #{@log.id} (#{Time.now}).csv"
-    @streaming = true
-    @csv_options = { :col_sep => ',' }
   end
 
+  def generate_zip
+    Delayed::Job.enqueue Jobs::DownloadCallLogsJob.new current_account.id, @project.id, @search
+    render layout: false
+  end
+
+  def download_zip
+    path = File.join RecordingManager.for(current_account).path_for('downloads'), params[:filename]
+    send_file path if File.exists? path
+  end
+
+  private
+    def search
+      @search = params[:search] || ""
+      @logs = current_account.call_logs.includes(:project).includes(:channel).includes(:call_flow).order('call_logs.id DESC')
+      if params[:project_id].present?
+        %w(phone_number after before call_flow_id).each do |key|
+          @search << search_by_key(key)
+        end
+        @project = current_account.projects.find(params[:project_id]) 
+        @logs = @logs.includes(project: :project_variables).includes(:call_log_answers).includes(:call_log_recorded_audios)
+        @logs = @logs.where(:project_id => @project.id)
+      end
+      @logs = @logs.search @search, :account => current_account if @search.present?
+    end
+    
+    def search_by_key(key)
+      params[key].present? ? " #{key}:\"#{params[key]}\"" : ""
+    end
+
+    def check_max_row
+      if @logs.count > CallLog::CSV_MAX_ROWS
+        flash[:error] = I18n.t("controllers.call_logs_controller.csv_is_too_big",
+          max: CallLog::CSV_MAX_ROWS, count: @logs.count)
+        redirect_to :back
+      end
+    end
+
+    def csv_settings
+      @filename = "Call_logs_(#{Time.now.to_s.gsub(' ', '_')}).csv"
+      @output_encoding = 'UTF-8'
+      @streaming = true
+      @csv_options = { :col_sep => ',' }
+    end
+
+    def paginate
+      @page = params[:page] || 1
+      @per_page = 10
+    end
 end

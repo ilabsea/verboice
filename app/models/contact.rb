@@ -32,6 +32,49 @@ class Contact < ActiveRecord::Base
   validates_presence_of :project
   validate :at_least_one_address
 
+  #TODO refactoring to remove coupling
+  def evaluate? conditions
+    match = false
+    conditions.each do |condition|
+      if !condition.evaluate? project, persisted_variables
+        match = false
+        break
+      else
+        match = true
+      end
+    end if conditions
+    match
+  end
+
+  def self.get address, project
+    project.contacts.joins(:addresses).where(contact_addresses: {address: address}).first
+  end
+
+  def self.register addresses, project
+    addresses.each do |address|
+      contact = get address, project
+      if contact.nil?
+        contact = project.contacts.build
+        contact.addresses.build(address: address)
+        contact.save
+      end
+    end
+  end
+
+  def register address
+     self.addresses.where(address: address).first_or_create!
+  end
+
+  def remove_address address
+    addresses.each do |x|
+      x.destroy if x.address == address
+    end
+  end
+
+  def as_json(options={})
+    super(options.merge({except: [:anonymous]}))
+  end
+
   def first_address
     addresses.first.try(&:address)
   end

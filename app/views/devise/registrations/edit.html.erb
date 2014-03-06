@@ -1,0 +1,48 @@
+<%= form_for(resource, :as => resource_name, :url => account_registration_path) do |f| %>
+  <%= devise_error_messages! %>
+  <%= f.hidden_field :reset_password_token %>
+
+  <h2><%= t('views.devise.registrations.edit.title') %></h2>
+
+  <div class='field w30'>
+    <%= f.label :email %>
+    <%= f.text_field :email, :disabled => true %>
+  </div>
+
+  <div class='field w30'>
+    <%= f.label :current_password, t('views.devise.registrations.edit.label.current_password') %>
+    <p><%= "(#{t('views.devise.registrations.edit.label.confirm_password_change')})" %></p>
+    <%= f.password_field :current_password %>
+  </div>
+
+  <div class='field w30'>
+    <%= f.label :locale, t('views.devise.registrations.edit.label.language') %>
+    <%= f.select :locale, options_for_select([['English', 'en'], ['Khmer', 'kh']], I18n.locale) %>
+  </div>
+
+  <div class='ux-collapsible collapsed w30' data-on-expanded='box grey'>
+    <span><a class='fsettings' href='#'><%= t('views.devise.registrations.edit.label.change_my_password') %></a></span>
+    <div class='ux-content'>
+      <div class='field w30'>
+        <%= f.label :password, t('views.devise.registrations.edit.label.new_password') %>
+        <p><%= "(#{t('views.devise.registrations.edit.label.leave_blank_no_change')})" %></p>
+        <%= f.password_field :password %>
+      </div>
+      <div class='field w30'>
+        <%= f.label :password_confirmation, t('views.devise.registrations.edit.label.confirm_new_password') %>
+        <%= f.password_field :password_confirmation %>
+      </div>
+    </div>
+  </div>
+
+  <div class='actions'>
+    <%= button_tag t('views.devise.registrations.edit.action.update'), :class => "white" %>
+    <%= link_to t('views.devise.registrations.edit.action.back'), home_url, :class => "button white cancel" %>
+  </div>
+
+  <hr class='w30'>
+
+  <p>
+    <%= link_to t('views.devise.registrations.edit.action.delete_my_account'), account_registration_path  , :confirm => "#{t('views.devise.registrations.edit.action.confirm_delete')}", :method => :delete, :class => 'fdelete' %>
+  </p>
+<% end %>

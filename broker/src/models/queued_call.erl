@@ -2,11 +2,13 @@
 -export([reschedule/1, start_session/1]).
 -define(TABLE_NAME, "queued_calls").
 -include("session.hrl").
+
 -define(MAP, [
   {flow, flow_serializer},
   {callback_params, yaml_serializer},
   {variables, yaml_serializer}
 ]).
+
 -include_lib("erl_dbmodel/include/model.hrl").
 
 reschedule(#queued_call{schedule_id = undefined}) -> no_schedule;
@@ -18,7 +20,10 @@ reschedule(_, #schedule{retries = undefined}) -> max_retries;
 reschedule(Q, S) when Q#queued_call.retries >= length(S#schedule.retries) -> max_retries;
 reschedule(Q = #queued_call{retries = Retries, time_zone = TimeZone}, S) ->
   NextRetryOffset = trunc(lists:nth(Retries + 1, S#schedule.retries) * 60 * 60),
-  TimeZoneOffset = tz_server:get_timezone_offset(TimeZone),
+  TimeZoneOffset = case TimeZone of
+    undefined -> 0;
+    _ -> tz_server:get_timezone_offset(TimeZone)
+  end,
   NextRetry = calendar:datetime_to_gregorian_seconds(calendar:universal_time()) + NextRetryOffset + TimeZoneOffset,
   RetryTime = calendar:gregorian_seconds_to_datetime(S:next_available_time(NextRetry) - TimeZoneOffset),
   QueuedCall = queued_call:create(Q#queued_call{not_before = {datetime, RetryTime}, retries = Retries + 1}),

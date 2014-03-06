@@ -26,6 +26,7 @@ module AudioUtils
   end
 
   def convert_to_8000_hz_gsm(input, output)
+    convert_to_wav input if File.is_mpeg? input
     new_input = File.is_wav?(input) ? "#{input}.wav" : "#{input}.gsm"
     FileUtils.mv input, new_input
     FileUtils.makedirs File.dirname(output)
@@ -70,4 +71,23 @@ module AudioUtils
     http.errback { f.resume Exception.new(http.error) }
     Fiber.yield
   end
+  
+  def save_tempororay_file_as_wav(content_file, file_name, content_type)
+    content = nil
+    if content_type.mpeg_mime_type?
+      path = File.join(Rails.root, "/tmp/data/")
+      Dir.mkdir path unless Dir.exists? path
+      source_path = File.join(path,"#{Time.now.to_s.split(" ").join("-")}.mp3")
+      destination_path = File.join(path,"#{Time.now.to_s.split(" ").join("-")}.wav")
+      File.open(source_path, 'wb:ASCII-8BIT'){ |f| f.write(content_file)}
+      `sox #{source_path} -r 8000 -c1 #{destination_path}`
+      File.open(destination_path, 'rb'){ |f| content = f.read() } if File.exists? destination_path
+      File.delete(source_path) if File.exists? source_path
+      File.delete(destination_path) if File.exists? destination_path
+    else
+      content = content_file
+    end
+    content
+  end
+
 end

@@ -1,13 +1,18 @@
+:javascript
+  $(function(){
+    allowKeyInput($(".new_address"), /[0-9\+]/);
+  });
+
 = form_for [@project, @contact] do |f|
   - if @contact.errors.any?
     #error_explanation
-      %h2= "#{pluralize(@contact.errors.count, "error")} prohibited this contact from being saved:"
+      %h2= t('views.contacts._form.errors.prohibited', :count => @contact.errors.count)
       %ul
         - @contact.errors.full_messages.each do |msg|
           %li= msg
 
   .field
-    = f.label :address, 'Phone numbers'
+    = f.label :address, t('views.contacts._form.label.phone_number')
     %ul.addresses.clist.w30
       - @contact.addresses.each do |caddr|
         = render partial: 'address', locals: { f: f, caddr: caddr, child_index: nil }
@@ -37,7 +42,8 @@
           = recorded_audio.created_at
           = link_to '', result_call_log_path(recorded_audio.call_log, {:key => recorded_audio.key}), :class => 'button fimport'
 
+
   %hr/
 
-  %button.white{:type =>'submit'} Save
-  = link_to 'Cancel', project_contacts_path(@project), :class => 'cancel'
+  %button.white{:type =>'submit'}= t('views.contacts._form.action.save')
+  = link_to t('views.contacts._form.action.cancel'), project_contacts_path(@project), :class => 'button white cancel'

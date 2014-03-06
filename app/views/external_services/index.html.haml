@@ -1,16 +1,16 @@
 = render 'shared/project_tabs_and_title', :project => project
 
-%h2 External services
-%p Use the following tool to define your application's external services
+%h2= t('views.external_services.index.title')
+%p= t('views.external_services.index.desc')
 
 %a.button.fimport{:href => "/docs/sample_manifest.xml", :target=>"_blank"}
-  Download a sample manifest (4 KB)
+  = "#{t('views.external_services.index.action.download_sample_manifest')} (4 KB)"
 
 - external_services.each do |external_service|
   = render 'box', :external_service => external_service, :expanded => external_service.errors.any?
 
 .box.grey.w60.addqueue
   %span
-    = link_to_add_box :external_service, "Add External service", @project, :class => 'add_fields'
+    = link_to_add_box :external_service, t('views.external_services.index.action.add_external_service'), @project, :class => 'add_fields'
   %button.cadd.right{:onclick => "$('.add_fields').click();", :type => "button"}
   .clear

@@ -6,12 +6,12 @@
 
     %table.GralTable.TwoColumn.CleanTable.NoHead
       %tr
-        %th End call
+        %th= t('views.call_flows._hang_up_step_template.label.end_call')
         %th
       %tr
-        %td Call will be hung up here
+        %td= t('views.call_flows._hang_up_step_template.label.hang_up_here')
         %td
 
     .content
       .bottom-actions
-        %button.fdelete{ 'data-bind' => 'click: remove_with_confirm' } Remove this step
+        %button.fdelete{ 'data-bind' => 'click: remove_with_confirm' }= t('views.call_flows._hang_up_step_template.action.remove_this_step')

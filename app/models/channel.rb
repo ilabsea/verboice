@@ -16,6 +16,7 @@
 # along with Verboice.  If not, see <http://www.gnu.org/licenses/>.
 
 class Channel < ActiveRecord::Base
+  PREFIX_SEPARATOR = ','
   belongs_to :account
   belongs_to :call_flow
   has_one :project, :through => :call_flow
@@ -54,6 +55,17 @@ class Channel < ActiveRecord::Base
     super
   end
 
+  def new_session(options = {})
+    session = Session.new options
+    session.call_flow ||= call_flow
+    session.channel = self
+    unless session.call_log
+      session.call_log = call_logs.create! :direction => :incoming, :call_flow => session.call_flow, :account => account, :project => session.call_flow.project, :started_at => Time.now.utc
+    end
+    session.commands = session.call_flow.commands.dup
+    session
+  end
+
   def call(address, options = {})
     queued_call = enqueue_call_to address, options
     call_log = queued_call.call_log
@@ -71,8 +83,14 @@ class Channel < ActiveRecord::Base
     call_log
   end
 
+  def address_with_prefix_called_number address
+    prefix_called_number = config["prefix_called_number"]
+    "#{prefix_called_number}#{address}"
+  end
+
   def enqueue_call_to address, options
     via = options.fetch(:via, 'API')
+    address = address_with_prefix_called_number address
 
     if options[:call_flow_id]
       current_call_flow = account.call_flows.find(options[:call_flow_id])
@@ -119,7 +137,8 @@ class Channel < ActiveRecord::Base
         :address => address,
         :state => :queued,
         :schedule => schedule,
-        :not_before => not_before
+        :not_before => not_before,
+        :prefix_called_number => self.config["prefix_called_number"]
       )
       call_log.save!
       call_log.info "Received via #{via}: call #{address}"
@@ -144,7 +163,7 @@ class Channel < ActiveRecord::Base
       :schedule => schedule,
       :call_flow => current_call_flow,
       :project => project,
-      :time_zone => (time_zone ? time_zone.tzinfo.identifier : nil),
+      :time_zone => time_zone.try(:name),
       :variables => variables,
       :session_id => session_id,
       :callback_params => callback_params,
@@ -159,12 +178,28 @@ class Channel < ActiveRecord::Base
     queued_call
   end
 
+  def active_calls_count_in_call_flow(call_flow)
+    BrokerClient.active_calls_count_for_call_flow(id, call_flow)
+  end
+
+  def poll_call
+    self.class.transaction do
+      queued_call = queued_calls.where('not_before IS NULL OR not_before <= ?', Time.now.utc).order(:created_at).first
+      queued_call.destroy if queued_call
+      queued_call
+    end
+  end
+
   def has_limit?
     limit.present?
   end
 
   def broker
     :asterisk_broker
+  end
+
+  def notify_broker
+    broker.instance.notify_call_queued self
   end
 
   def call_broker_create_channel
@@ -218,7 +253,7 @@ class Channel < ActiveRecord::Base
   end
 
   def as_json(options = {})
-    options = { only: [:name, :config] }.merge(options)
+    options = { only: [:id, :name, :config] }.merge(options)
     super(options).merge({
       kind: kind.try(:downcase),
       call_flow: call_flow.try(:name)

@@ -1,5 +1,5 @@
 -record(call_flow, {id, callback_url, broker_flow, project_id, encrypted_config, store_in_fusion_tables, created_at, updated_at}).
--record(call_log, {id, account_id, project_id, finished_at, direction, address, state, created_at, updated_at, channel_id, started_at, schedule_id, not_before, call_flow_id, pbx_logs_guid, fail_reason}).
+-record(call_log, {id, account_id, project_id, finished_at, direction, address, state, created_at, updated_at, channel_id, started_at, schedule_id, not_before, call_flow_id, pbx_logs_guid, fail_reason, duration, retries, step_interaction}).
 -record(call_log_entry, {id, call_id, severity, details, created_at, updated_at}).
 -record(channel, {id, account_id, call_flow_id, name, config, type, created_at, updated_at}).
 -record(contact, {id, project_id, anonymous, created_at, updated_at}).
@@ -11,8 +11,11 @@
 -record(pbx_log, {id, guid, details, created_at, updated_at}).
 -record(project, {id, account_id, name, status_callback_url, default_language, languages, encrypted_config, created_at, updated_at}).
 -record(project_variable, {id, project_id, name, created_at, updated_at}).
--record(queued_call, {id, channel_id, call_log_id, address, callback_url, flow, call_flow_id, status_callback_url, schedule_id, not_before, retries, project_id, time_zone, variables, session_id, callback_params, created_at, updated_at}).
+-record(queued_call, {id, channel_id, call_log_id, address, callback_url, flow, call_flow_id, status_callback_url, schedule_id, not_before, retries, project_id, time_zone, variables, session_id, callback_params, created_at, updated_at, answered_at}).
 -record(recorded_audio, {id, project_id, contact_id, call_log_id, key, description, created_at, updated_at}).
 -record(resource, {id, name, project_id, guid, created_at, updated_at}).
 -record(schedule, {id, name, retries, time_from, time_to, weekdays, project_id, created_at, updated_at}).
 -record(trace_record, {id, call_flow_id, call_id, step_name, step_id, result, created_at, updated_at}).
+-record(reminder_group, {id, project_id, name, addresses, created_at, updated_at}).
+-record(call_log_recorded_audio, {id, call_log_id, project_variable_id, key, description, created_at, updated_at}).
+-record(call_log_variable, {id, call_log_id, project_variable_id, value, created_at, updated_at}).

@@ -48,16 +48,11 @@ onWorkflow ->
 
     command_selected: (cmd_type) =>
       parent = @step.parent()
-      workflow.create_step cmd_type, parent, (new_step) =>
-        new_step.next_id = @step.id
-        new_step.root = @step.root
+      new_step = workflow.create_step cmd_type, parent, (step) =>
+        step.next_id = @step.id
+        step.root = @step.root
         @step.root = false
-        workflow.set_as_current(new_step)
-        if parent
-          workflow.steps.push new_step
-        else
-          idx = workflow.steps.indexOf @step
-          workflow.steps.splice(idx, 0, new_step)
+        workflow.set_as_current(step)
 
   class window.InsertAfterRequestor
     constructor: (step) ->
@@ -69,5 +64,4 @@ onWorkflow ->
       new_step = workflow.create_step cmd_type, @step, (new_step) =>
         new_step.next_id = next_id
         workflow.set_as_current(new_step)
-        workflow.steps.push new_step
 

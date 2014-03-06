@@ -1,51 +1,52 @@
 = render :partial => 'call_logs/tabs'
 
 %p
-  Here you can see the details of incoming and outgoing calls.
+  = t('views.call_logs.index.label.desc')
 %form
   %p
-    Search: #{text_field_tag :search, @search, :size => 80, :class => (@search.present? ? 'highlighted' : '')}
+    = t('views.call_logs.index.label.search')
+    = text_field_tag :search, @search, :size => 80, :class => (@search.present? ? 'highlighted' : '')
   %p
-    = link_to 'Download as CSV', download_call_logs_path(:format => :csv, :search => @search), :class => "button fimport"
-  %div= page_entries_info @logs, :entry_name => 'call log'
+    = link_to t('views.call_logs.index.action.download_csv'), download_call_logs_path(:format => :csv, :search => @search), :class => "button fimport"
+  %div= page_entries_info @logs, :entry_name => "call_log" #t('views.call_logs.index.label.call_log')
   = will_paginate @logs, :param_name => 'page'
   - if @logs.present?
     %br/
     %table.GralTable
       %tr
-        %th ID
-        %th Started
-        %th Finished
-        %th Duration
-        %th Caller ID
-        %th Direction
-        %th Channel
-        %th Queue
-        %th Project
-        %th Call Flow
-        %th State
+        %th= t('views.call_logs.index.label.started')
+        %th= t('views.call_logs.index.label.finished')
+        %th= t('views.call_logs.index.label.duration_in_second')
+        %th= t('views.call_logs.index.label.caller_id')
+        %th= t('views.call_logs.index.label.direction')
+        %th= t('views.call_logs.index.label.number_retried')
+        %th= t('views.call_logs.index.label.channel')
+        %th= t('views.call_logs.index.label.project')
+        %th= t('views.call_logs.index.label.call_flow')
+        %th= t('views.call_logs.index.label.status')
         %th
       - @logs.each do |log|
         %tr
-          %td= log.id
-          %td= raw time_ago log.created_at
-          %td= raw time_ago log.finished_at
-          %td= distance_of_time_in_words(log.finished_at, log.created_at, true) if log.finished_at
+          %td= datetime_format log.created_at, log.project_time_zone
+          %td= datetime_format log.finished_at, log.project_time_zone
+          %td= log.duration if log.duration && log.duration > 0
           - if log.address.present?
-            %td= link_to log.address, call_logs_path(:search => "caller:#{log.address}")
+            %td= link_to log.address_without_prefix, call_logs_path(:search => "caller:#{log.address_without_prefix}")
           - else
             %td= log.address
           %td= log.direction
+          %td= log.retries if log.retries && log.retries > 0
           %td= log.channel.try(:name)
-          %td= log.schedule.try(:name)
           %td= log.project.try(:name)
           %td= log.call_flow.try(:name)
           %td
-            = log.state
-            - if log.fail_reason.present?
-              = "(#{log.fail_reason})"
-          %td= link_to 'view details', call_log_path(log)
+            - if log.state == CallLog::STATE_FAILED
+              = CallLog::FAIL_REASONS[log.fail_reason]
+            - else
+              = log.state
+            
+          %td= link_to t('views.call_logs.index.action.view_details'), call_log_path(log)
     %br/
-    %div= page_entries_info @logs, :entry_name => 'call log'
+    %div= page_entries_info @logs, :entry_name => "call_log" #t('views.call_logs.index.label.call_log')
     = will_paginate @logs, :param_name => 'page'
 %br/

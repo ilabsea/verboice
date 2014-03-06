@@ -6,27 +6,26 @@
   - if @project.errors.any?
     #error_explanation
       %h2
-        = pluralize(@project.errors.count, "error")
-        prohibited this project from being saved:
+        = t('views.projects._form.errors.prohibited', :count => @project.errors.count)
       %ul
         - @project.errors.full_messages.each do |msg|
           %li= msg
 
   %br
 
-  %h1 Properties
+  %h1= t('views.projects._form.label.properties')
 
-  = f.text_field :name
-  = f.time_zone_select :time_zone, TZInfo::Timezone.all.sort, :model => TZInfo::Timezone
+  = f.text_field :name, :label => t('views.projects._form.label.name')
+  = f.time_zone_select :time_zone, ActiveSupport::TimeZone.all, :label => t('views.projects._form.label.time_zone')
 
   %hr
 
   %br
   %br
 
-  %h1 Languages
+  %h1= t('views.projects._form.label.languages')
 
-  = f.label :default_language
+  = f.label :default_language, "#{t('views.projects._form.label.default_language')}"
   %br
   %select.w30{ko(value: 'defaultLanguage', options: 'languages', optionsText: "'label'", optionsValue: "'value'"), name: 'project[default_language]'}
 
@@ -35,7 +34,7 @@
   = f.select :tts_engine, options_for_select([['Built in', 'built-in'], ['iSpeech', 'ispeech']], @project.tts_engine), label: 'Text-to-speech Engine'
   = f.text_field :tts_ispeech_api_key, label: 'iSpeech API key'
 
-  = f.label :languages, "Languages you will support in this project"
+  = f.label :languages, t('views.projects._form.label.supported_languages')
   %br
 
   %ul.clist.w30
@@ -47,7 +46,7 @@
       %button.clist-remove{ko(click: '$root.removeLanguage')}
     //ko
     %li
-      %input#add_language.ux-type{ko(value: 'newLanguage', valueUpdate: 'afterkeydown', event: {keydown: 'keydown'}), type: 'text', placeholder: 'Add a new language'}
+      %input#add_language.ux-type{ko(value: 'newLanguage', valueUpdate: 'afterkeydown', event: {keydown: 'keydown'}), type: 'text', placeholder: "#{t('views.projects._form.label.add_new_language')}"}
       %button#add_language_button.clist-add{ko(click: 'addLanguage')}
 
   %br
@@ -57,17 +56,17 @@
   %br
   %br
 
-  %h1 Status callback
+  %h1= t('views.projects._form.label.status_callback')
 
-  = f.text_field :status_callback_url, :label => 'URL'
-  = f.text_field :status_callback_url_user, :label => 'User', :autocomplete => 'off'
-  = f.password_field :status_callback_url_password, :label => 'Password', :autocomplete => 'off'
+  = f.text_field :status_callback_url, :label => t('views.projects._form.label.url')
+  = f.text_field :status_callback_url_user, :label => t('views.projects._form.label.user'), :autocomplete => 'off'
+  = f.password_field :status_callback_url_password, :label => t('views.projects._form.label.password'), :autocomplete => 'off'
 
   %hr
 
   - if @project.new_record?
-    %button.grey{:type => "submit"} Save
-    = link_to "Cancel", projects_path, :class => "button white cancel", :style => 'top: 1px;'
+    %button.white{:type => "submit"}= t('views.projects._form.action.save')
+    = link_to t('views.projects._form.action.cancel'), projects_path, :class => "button white cancel", :style => 'top: 1px;'
   - else
-    %button.grey{:type => "submit"} Update
-    = link_to "Cancel", project_path(@project), :class => "button white cancel", :style => 'top: 1px;'
+    %button.white{:type => "submit"}= t('views.projects._form.action.update')
+    = link_to t('views.projects._form.action.cancel'), project_path(@project), :class => "button white cancel", :style => 'top: 1px;'

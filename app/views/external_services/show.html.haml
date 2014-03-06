@@ -1,15 +1,15 @@
 %p#notice= notice
 
 %p
-  %b Name:
+  %b= "#{t('views.external_services.show.label.name')}:"
   = external_service.name
 %p
-  %b Url:
+  %b= "#{t('views.external_services.show.label.url')}:"
   = external_service.url
 %p
-  %b Xml:
+  %b= "#{t('views.external_services.show.label.xml')}:"
   = external_service.xml
 
-= link_to 'Edit', edit_external_service_path(external_service)
+= link_to t('views.external_services.show.action.edit'), edit_external_service_path(external_service)
 \|
-= link_to 'Back', project_external_services_path(project)
+= link_to t('views.external_services.show.action.back'), project_external_services_path(project)

@@ -72,6 +72,7 @@ record(FileName, StopKeys, Timeout, {?MODULE, Pid}) ->
 
   try
     case agi_session:record_file(Pid, filename:absname(filename:rootname(FileName)), "gsm", StopKeys, Timeout * 1000) of
+      hangup -> throw(hangup);
       error -> throw(error);
       _ ->
         sox:convert(TempFile, FileName)
@@ -81,7 +82,7 @@ record(FileName, StopKeys, Timeout, {?MODULE, Pid}) ->
   end.
 
 dial(Channel, Address, undefined, {?MODULE, Pid}) ->
-  DialAddress = binary_to_list(asterisk_broker:dial_address(Channel, Address)),
+  DialAddress = asterisk_broker:dial_address(Channel, Address),
   agi_session:dial(Pid, [DialAddress, "60", "m"]),
   case agi_session:get_variable(Pid, "DIALSTATUS") of
     hangup -> throw(hangup);

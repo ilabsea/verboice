@@ -2,44 +2,57 @@
 
 = render 'enqueue_new_call', :project => @project, :call_flows => @call_flows, :channels => @channels, :schedules => @schedules
 
-%h1 Calls
-%p Total number of calls made and received
+%h1= t('views.projects.show.title')
+%p.desc= t('views.projects.show.desc')
 
 .sbox.grey.StateDisplay.w30
   .values
     .U
       %span.big= @call_logs.size
-      %span= "#{@call_logs.size == 1 ? 'call' : 'calls'} registered"
-  = link_to 'Download as CSV', download_call_logs_path(:format => :csv, :search => "project_id:\"#{@project.id}\""), :class => "button white"
+      %span= "#{@call_logs.size == 1 ? t('views.projects.show.label.call') : t('views.projects.show.label.calls')} #{t('views.projects.show.label.registered')}"
+
+  = link_to t('views.projects.show.action.download_csv'), download_project_call_logs_path(@project, format: :csv), class: 'button white'
 
 %br/
+
+%h1= t('views.projects.show.concurrent_call')
+%p.desc= t('views.projects.show.concurrent_call_detail')
+
+.sbox.grey.StateDisplay.w30
+  .values{style: "width:100%;padding-left:2px;"}
+    .U
+      %span.big= @project.number_of_active_call
+      %span=  t('views.projects.show.label.active_call')
+%br/
+
+
 %hr/
 %br/
 
-%h1 Properties
+%h1= t('views.projects.show.label.properties')
 
 %ul.call-properties.left
   %li
     .i48grad-call-flow
     %div
-      %span="#{pluralize @call_flows.size, 'Call flow'} in this project"
-    = link_to "Edit Call Flows", project_call_flows_path(@project), :class => "button farrow"
+      %span="#{pluralize @call_flows.size, 'Call flow'} #{t('views.projects.show.label.in_this_project')}"
+    = link_to t('views.projects.show.action.edit_call_flows'), project_call_flows_path(@project), :class => "button faccept"
   %li
     .i48grad-channel
     %div
-      %span= "#{pluralize @project_channels.size, 'channel'} in this project"
-    = link_to "Manage channels", channels_path, :class => "button farrow"
+      %span= "#{pluralize @project_channels.size, 'channel'} #{t('views.projects.show.label.in_this_project')}"
+    = link_to t('views.projects.show.action.manage_channels'), channels_path, :class => "button faccept"
 
   %li
     .i48grad-time
     %div
       %span= pluralize @queued_calls.size, 'queued call'
-    = link_to "View calls", queued_call_logs_path, :class => "button farrow"
+    = link_to t('views.projects.show.action.view_calls'), queued_call_logs_path, :class => "button faccept"
 
 %br{ :clear => 'left'}
 
-= link_to 'Edit settings', edit_project_path(@project), :class => "button farrow"
+= link_to t('views.projects.show.action.edit_settings'), edit_project_path(@project), :class => "button faccept"
 %hr
 
-= link_to 'Delete this project', @project, :confirm => "Are you sure you want to delete the project #{@project.name}?", :method => :delete, :class => "button fdelete"
+= link_to t('views.projects.show.action.delete_this_project'), @project, :confirm => "#{t('views.projects.show.action.confirm_delete')} #{@project.name}?", :method => :delete, :class => "button fdelete"
 .clear

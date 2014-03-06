@@ -8,11 +8,11 @@
       %span.left.i48grad-sound{ ko(css: '{ "orange": is_invalid }') }
       %input.ux-text.w20.right{ ko(value: 'name', valueUpdate: '"afterkeydown"', css: '{ "error": is_name_invalid }')}
     .content
-      %label Record one message for each supported language. Callers will hear each message and will be asked to type the number associated with the language. Make sure you include a reference to that number, for example: "For english, press 2".
+      %label= t('views.call_flows._language_step_template.label.record_message_support_language')
     %br
     %table.GralTable.TwoColumn.CleanTable.NoHead
       %tr
-        %th Languages
+        %th= t('views.call_flows._language_step_template.label.languages')
         %th
       / ko foreach: languages
       %tr
@@ -30,4 +30,4 @@
       %br
 
       .bottom-actions
-        %button.fdelete{ 'data-bind' => 'click: remove_with_confirm' } Remove this step
+        %button.fdelete{ 'data-bind' => 'click: remove_with_confirm' }= t('views.call_flows._language_step_template.action.remove_this_step')

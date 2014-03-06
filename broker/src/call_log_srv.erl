@@ -1,5 +1,5 @@
 -module(call_log_srv).
--export([new/2, error/3, info/3, trace/3, trace_record/5, update/2, id/1, associate_pbx_log/2]).
+-export([new/2, error/3, info/3, trace/3, trace_record/5, update/2, id/1, associate_pbx_log/2, end_step_interaction/1]).
 
 -behaviour(gen_server).
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2, terminate/2, code_change/3]).
@@ -34,6 +34,9 @@ id({?MODULE, Pid}) ->
 associate_pbx_log(SessionId, PbxLogId) ->
   gen_server:cast({global, {call_log_srv, SessionId}}, {associate_pbx_log, PbxLogId}).
 
+end_step_interaction({?MODULE, Pid}) ->
+  gen_server:call(Pid, end_step_interaction).
+
 %% @private
 init({CallLog, Owner}) ->
   monitor(process, Owner),
@@ -45,7 +48,12 @@ init({CallLog, Owner}) ->
 
 %% @private
 handle_call(get_id, _From, State = #state{call_log = CallLog}) ->
-  {reply, CallLog#call_log.id, State}.
+  {reply, CallLog#call_log.id, State};
+
+%% @private
+handle_call(end_step_interaction, _From, State = #state{call_log = CallLog}) ->
+  NewCallLog = CallLog:append_step_interaction("end"),
+  {reply, NewCallLog#call_log.step_interaction, State#state{call_log = NewCallLog}}.
 
 %% @private
 handle_cast(create, State = #state{call_log = CallLog}) ->
@@ -71,7 +79,8 @@ handle_cast({trace_record, CallFlowId, StepId, StepName, Result}, State = #state
   % },
   % TraceRecord:save(),
   call_log_entry_srv:trace(CallLog#call_log.id, CallFlowId, StepId, StepName, Result),
-  {noreply, State};
+  NewCallLog = CallLog:append_step_interaction(StepName),
+  {noreply, State#state{call_log = NewCallLog}};
 
 handle_cast({associate_pbx_log, PbxLogId}, State = #state{call_log = CallLog}) ->
   NewCallLog = call_log:update(CallLog#call_log{pbx_logs_guid = PbxLogId}),

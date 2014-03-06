@@ -38,14 +38,15 @@ dial_address(#channel{id = Id}, Address) ->
   ["SIP/verboice_", integer_to_list(Id), "-outbound/", Address].
 
 dispatch(#session{session_id = SessionId, channel = Channel, address = Address}) ->
+  CallerId = channel:number(Channel),
   DialAddress = dial_address(Channel, Address),
   {ok, BrokerPort} = application:get_env(broker_port),
   ami_client:originate([
+    {callerid, CallerId},
     {channel, DialAddress},
     {application, "AGI"},
     {data, ["agi://localhost:", integer_to_list(BrokerPort), ",", SessionId]},
     {async, true},
     {actionid, SessionId},
-    {timeout, 60000},
     {variable, ["verboice_session_id=", SessionId]}
   ]).

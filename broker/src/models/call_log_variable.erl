@@ -1,0 +1,3 @@
+-module(call_log_variable).
+-define(TABLE_NAME, "call_log_answers").
+-include_lib("erl_dbmodel/include/model.hrl").

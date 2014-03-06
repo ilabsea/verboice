@@ -63,7 +63,8 @@ onWorkflow ->
 
     to_hash: () =>
       $.extend(super,
-        store: (if @defines_store() then @store() else null)
+        # store: (if @defines_store() then @store() else null)
+        store: (if @store() then @store() else null)
         invalid_resource: @resources.invalid.to_hash()
         instructions_resource: @resources.instructions.to_hash()
         min_input_length: @min_input_length()

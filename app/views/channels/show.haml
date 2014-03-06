@@ -1,51 +1,55 @@
 = render 'shared/channel_tabs_and_title', :channel => @channel
 
-%h1 Calls
-%p Total number of calls made and received
+%h1= t('views.channels.show.title')
+%p= t('views.channels.show.desc')
 
 .sbox.grey.StateDisplay.w30
   .values
     .U
       %span.big= @channel.call_logs.size
-      %span= "#{@channel.call_logs.size == 1 ? 'call' : 'calls'} registered"
-  = link_to 'Download as CSV', download_call_logs_path(:format => :csv, :search => "channel_id:\"#{@channel.id}\""), :class => "button white"
+      %span= t('views.channels.show.label.registerd', :count => @channel.call_logs.size)
+      
+  = link_to t('views.channels.show.action.download_as_csv'), download_call_logs_path(:format => :csv, :search => "channel_id:\"#{@channel.id}\""), :class => "button white"
+
+- if !current_account.google_oauth_token.nil? && !@channel.try(:call_flow).try(:get_fusion_table_url).nil?
+  = link_to t('views.channels.show.action.view_in_fusion_table'), @channel.try(:call_flow).try(:get_fusion_table_url), :class => "button farrow"
 
 %br/
 %hr/
 %br/
 
-%h1 Properties
+%h1= t('views.channels.show.label.properties')
 
 %ul.call-properties.left
   %li
     .i48grad-call-flow
     %div{style: 'overflow: hidden'}
       %span
-        %nobr Default Call flow
+        %nobr= t('views.channels.show.label.default_call_flow')
         - if @channel.call_flow
           %nobr= @channel.call_flow.name
         - else
-          None
+          = t('views.channels.show.label.none')
     - if @channel.project
-      = link_to "Manage Call Flow", project_call_flows_path(@channel.project), :class => "button farrow"
+      = link_to t('views.channels.show.action.manage_call_flow'), project_call_flows_path(@channel.project), :class => "button farrow"
   %li
     .i48grad-time
     %div
-      %span= pluralize @channel.queued_calls.size, 'queued call'
-    = link_to "View calls", queued_call_logs_path, :class => "button farrow"
+      %span= t('views.channels.show.label.queued_call', :count => @channel.queued_calls.size)
+    = link_to t('views.channels.show.action.view_calls'), queued_call_logs_path, :class => "button farrow"
   - if @channel.is_a?(Channels::Sip)
     %li
       .i48grad-dataBase
       %div
         - if @errors_count == 0
-          %span No errors
+          %span= t('views.channels.show.label.no_errors')
         - else
-          %span.orange #{pluralize @errors_count, 'error'}
-      = link_to "Edit settings", edit_channel_path(@channel), :class => "button farrow"
+          %span.orange= t('views.channels.show.label.error', :count => @errors_count)
+      = link_to t('views.channels.show.action.edit_settings'), edit_channel_path(@channel), :class => "button farrow"
 
 %br{ :clear => 'left'}
 
 %hr
 
-= link_to 'Delete this channel', @channel, :confirm => "Are you sure you want to delete the channel #{@channel.name}?", :method => :delete, :class => "button fdelete"
+= link_to t('views.channels.show.action.delete_this_channel'), @channel, :confirm => "#{t('views.channels.show.action.confirm_delete', :channel_name => @channel.name)}", :method => :delete, :class => "button fdelete"
 .clear

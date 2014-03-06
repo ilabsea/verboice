@@ -6,6 +6,6 @@
     %button.frecording{ko(click: 'record', visible: '!recording()', css: "{disabled: playing()}")}
     %button.fstopped{ko(click: 'stop', visible: 'recording()', css: "{active: recording(), disabled: playing()}")}
   .w100.h08m{ko(visible: '$parent.editing')}
-    %textarea{:rows => 6, :placeholder => 'Write here a description of the recording, either as a reminder for you or as a reference for the person that will record the message.', 'data-bind' => 'value: description'}
+    %textarea{:rows => 6, :placeholder => "#{t('views.resources._record_localized_resource_template.label.placeholder')}", 'data-bind' => 'value: description'}
   %span.i18b-audio{ko(visible: '! $parent.editing()')}
   %span{ko(text: 'description', visible: '! $parent.editing()')}

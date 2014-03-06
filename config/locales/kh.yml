@@ -1,0 +1,1191 @@
+# Sample localization file for English. Add more files in this directory for other locales.
+# See http://github.com/svenfuchs/rails-i18n/tree/master/rails%2Flocale for starting points.
+
+kh:
+  activerecord:
+    models:
+      channel: "ឆានែល"
+      project: "គម្រោង"
+      call_flow: "លំហូរការហៅ"
+      schedule: "កាលវិភាគ"
+      contact: "សៀវភៅទូរស័ព្ទ"
+      ext/reminder_schedule: "កាលវិភាគ​កម្មវិធី​រំលឹក"
+    attributes:
+      channel:
+        name: "ឈ្មោះ"
+        account: "គណនី"
+        call_flow: "លំហូរការហៅ"
+      project:
+        name: "ឈ្មោះ"
+      call_flow:
+        name: "ឈ្មោះ"
+      schedule:
+        name: "ឈ្មោះ"
+        time_from: "ម៉ោងចាប់ផ្តើម"
+        time_to: "រហូតទៅដល់ម៉ោង់"
+      contact:
+        address: "លេខទូរស័ព្ទ"
+      addresses:
+        address: "លេខទូរស័ព្ទ"
+      ext/reminder_schedule:
+        name: "ឈ្មោះ"
+        call_flow_id: "លំហូរការហៅ"
+        channel_id: "ឆានែល"
+        start_date: "កាលបរិច្ឆេទចាប់ផ្តើម"
+      application:
+        callback_url_user: "អ្នក​ប្រើ"
+        callback_url_password: "ពាក្យ​សម្ងាត់"
+        status_callback_url_user: "អ្នក​ប្រើ"
+        status_callback_url_password: "ពាក្យ​សម្ងាត់"
+
+    errors:
+      models:
+        project:
+          attributes:
+            name:
+              blank: មិន​អាច​ទទេ
+        call_flow:
+          attributes:
+            name:
+              blank: មិន​អាច​ទទេ
+        channel:
+          domain_not_found: "ដែនរកមិនឃើញ"
+          attributes:
+            name:
+              blank: មិន​អាច​ទទេ
+        schedule:
+          attributes:
+            name:
+              blank: មិន​អាច​ទទេ
+            time_from:
+              blank: មិន​អាច​ទទេ
+            time_to:
+              blank: មិន​អាច​ទទេ
+        contact:
+          attributes:
+            address:
+              blank: មិន​អាច​ទទេ
+        external_service:
+          attributes:
+            url:
+              blank: មិន​អាច​ទទេ
+        resource:
+          attributes:
+            name:
+              blank: មិន​អាច​ទទេ
+        ext/reminder_schedule:
+          attributes:
+            name:
+              blank: មិន​អាច​ទទេ
+            call_flow_id:
+              blank: មិន​អាច​ទទេ
+            channel_id:
+              blank: មិន​អាច​ទទេ
+        ext/date_time_validator:
+          attributes:
+            date:
+              incorrect_format: "ទំរង់កាលបរិច្ឆេទមិនត្រឹមត្រូវទេ"
+              require: "ទំរង់កាលបរិច្ឆេទដាច់ខាតត្រូវតែផ្តល់អោយ"
+
+  support:
+    array:
+      words_connector: ", "
+      last_word_connector: ", និង "
+
+  datetime:
+    distance_in_words:
+      about_x_hours:
+        one: ប្រហែល 1 ម៉ោង
+        other: ប្រហែល %{count} ម៉ោង
+      about_x_months:
+        one: ប្រហែល 1 ខែ
+        other: ប្រហែល %{count} ខែ
+      about_x_years:
+        one: ប្រហែល 1 ឆ្នាំ
+        other: ប្រហែល %{count} ឆ្នាំ
+      almost_x_years:
+        one: ជិត 1 ឆ្នាំ
+        other: ជិត %{count} ឆ្នាំ
+      half_a_minute: កន្លះ​នាទី
+      less_than_x_minutes:
+        one: តិច​ជាង​ 1 ​នាទី
+        other: តិច​ជាង %{count} នាទី
+      less_than_x_seconds:
+        one: តិច​ជាង​ 1 វិនាទី
+        other: តិច​ជាង %{count} វិនាទី
+      over_x_years:
+        one: ជាង​មួយ​ឆ្នាំ
+        other: ជាង %{count} ឆ្នាំ
+      x_days:
+        one: 1 ថ្ងៃ
+        other: ! '%{count} ថ្ងៃ'
+      x_minutes:
+        one: 1 នាទី
+        other: ! '%{count} នាទី'
+      x_months:
+        one: 1 ខែ
+        other: ! '%{count} ខែ'
+      x_seconds:
+        one: 1 វិនាទី
+        other: ! '%{count} វិនាទី'
+
+  will_paginate:
+    previous_label: "&#8592; មុន"
+    next_label: "បន្ទាប់ &#8594;"
+    page_gap: "&hellip;"
+    page_entries_info:
+      single_page:
+        zero:  "រក​មិន​ឃើញ %{model} "
+        one:   "បង្ហាញ  %{model} 1"
+        other: "បង្ហាញ​ទាំង %{count} %{model}"
+      single_page_html:
+        zero:  "រក​មិន​​ឃើញ %{model}"
+        one:   "បង្ហាញ %{model}<b>1</b> "
+        other: "បង្ហាញ​ទាំង <b>&nbsp;%{count}</b> %{model}"
+      multi_page: "បង្ហាញ %{model} %{from} - %{to} នៃ %{count} សរុប"
+      multi_page_html: "បង្ហាញ %{model} <b>%{from}&nbsp;-&nbsp;%{to}</b> នៃ <b>%{count}</b> សរុប"
+
+    models:
+      line_item:
+        zero:  line items
+        one:   line item
+        few:   line items
+        other: line items
+
+  errors: &errors
+    format: ! '%{attribute} %{message}'
+    messages:
+      accepted: "ត្រូវតែអាចទទួលយកបាន"
+      blank: "មិនអាចទទេ"
+      confirmation: "តំលៃផ្ទៀងផ្ទាត់មិនត្រឹមត្រូវ"
+      empty: "មិនអាចទទេ"
+      equal_to: "ត្រូវតែស្មើ %{count}"
+      even: "ត្រូវតែជាលេខគូ"
+      exclusion: "គឺជាពាក្យបច្េកទេសបំរុងទុក"
+      greater_than: "ត្រូវតែធំជាង %{count}"
+      greater_than_or_equal_to: "ត្រូវតែធំជាង ឬ ស្មើ​ %{count}"
+      inclusion: "មិនមាននៅក្នុងតារាង"
+      invalid: "គឺមិនត្រឹមត្រូវ"
+      less_than: "គឺតូចជាង %{count}"
+      less_than_or_equal_to: "គឺតូចជាង ឬ ស្មើ %{count}"
+      not_a_number: "គឺមិនមែនជាលេខ"
+      not_an_integer: "គឺមិនមែនជាចំនួនគត់"
+      odd: "ត្រូវតែជាលេខសេស"
+      record_invalid: "! 'ឯកសារ %{errors}' មិនត្រឹមត្រូវ"
+      taken: "ទទួលយកបាន"
+      too_long: "ចំនួនអក្សរច្រើនពេក (អាចបានត្រឹម %{count} អក្សរ)"
+      too_short: "ចំនួនអក្សរតិចពេក (តិចបំផុត %{count} អក្សរ)"
+      wrong_length: "ប្រវែងអក្សរមិនត្រឹមត្រូវ (ត្រូវតែ %{count} អក្សរ)"
+    template:
+      body: "វាលទាំងនេះមានកំហុស"
+      header:
+        one: "មានកំហុស ១ បានកើតឡើងនាំអោយ %{model} មិនអាចរក្សាទុកបាន"
+        other: "កំហុស %{count} បានកើតឡើងនៅ %{model} មិនអាចរក្សាទុកបាន"
+
+  controllers:
+    api_controller:
+      problem_action: "មាន​បញ្ហា %{action} នៅ %{model_name}"
+    call_flows_controller:  
+      call_flow_successfully_updated: "បាន​ធ្វើ​បច្ចុប្បន្នភាព​លំហូរ​ការ​ហៅ %{call_flow_name} ដោយ​ជោគជ័យ។"
+      no_file_found: "រក​មិន​ឃើញ​ឯកសារ"
+      invalide_extension: "លេខ​ខ្លី​មិន​ត្រឹមត្រូវ"
+      invalide_file: "ឯកសារ​មិន​ត្រឹមត្រូវ៖ %{ex}"
+    channels_controller:
+      create_new: "បង្កើត​ថ្មី..."
+      channel_type_invalid: "ប្រភេទ​ឆានែល​មិន​ត្រឹមត្រូវ។"
+      channel_successfully_created: "បាន​បង្កើត​ឆានែល %{channel_name} ដោយ​ជោគជ័យ។"
+      channel_successfully_updated: "បាន​ធ្វើ​បច្ចុប្បន្នភាព​ឆានែល %{channel_name} ដោយ​ជោគជ័យ។"
+      channel_successfully_deleted: "បាន​លុបឆានែល %{channel_name} ដោយ​ជោគជ័យ។"
+    contacts_controller:
+      contact_was_successfully_created: "បាន​បង្កើត​ទំនាក់ទំនង​ដោយ​ជោគជ័យ។"
+      contact_was_successfully_updated: "បាន​ធ្វើ​បច្ចុប្បន្នភាព​ទំនាក់ទំនង​ដោយ​ជោគជ័យ។"
+    external_services_controller:
+      manifest_successfully_update: "បាន​ធ្វើ​បច្ចុប្បន្នភាព​របាយការណ៍​ដោយ​ជោគជ័យ"
+      error_updating_manifest: "កំហុស​ក្នុង​ការ​ធ្វើ​បច្ចុប្បន្នភាព​របាយការណ៍"
+    localized_resources_controller:
+      invalid_audio_file: "ឯកសារ​អូឌីយ៉ូ​មិន​ត្រឹមត្រូវ"
+    oauth_controller:
+      access_fusion_tables_successfully: "បាន​រៀបចំ​​ការ​ចូល​តារាង​បន្សំដោយ​ជោគជ័យ"
+      error_retrieving_access_token_from_google: "កំហុស​ក្នុង​ការ​ទៅ​យក​និមិត្ត​សញ្ញា​ចូល​ពី google: %{ex}"
+      could_not_obtain_access_to_your_fusion_tables_account: "មិន​អាច​ចូល​គណនី​តារាង​បន្សំ​របស់​អ្នក​បាន​ទេ"
+    projects_controller:
+      project_successfully_created: "បាន​បង្កើត​គម្រោង %{project_name} ដោយ​ជោគជ័យ។"
+      project_successfully_updated: "បាន​ធ្វើ​បច្ចុប្បន្នភាព​គម្រោង %{project_name} ដោយ​ជោគជ័យ។"
+      you_need_to_select_call_flow: "អ្នក​​ចាំបាច់​ត្រូវ​ជ្រើ​សលំហូរ​កា​រហៅ"
+      you_need_to_select_channel: អ្នក​​ចាំបាច់​ត្រូវ​ជ្រើស​ឆានែល
+      enter_valid_date: "បញ្ចូល​កាលបរិច្ឆេទ​ត្រឹមត្រូវ"
+      enqueued_call_to_on_channel: "បាន​ដាក់កា​រហៅ​ជា​ជួរ %{pluralize} នៅ​លើ​ឆានែល %{channel_name}"
+      project_successfully_deleted: "បាន​លុប​គម្រោង %{project_name} ដោយ​ជោគជ័យ"
+      columns_successfully_updated: "បាន​ធ្វើ​បច្ចុប្បន្នភាព​ជួរឈរ​ដោយ​ជោគជ័យ"
+      error_updating_columns: "កំហុស​ក្នុង​ការ​ធ្វើ​បច្ចុប្បន្នភាព​ជួរឈរ"
+    queued_calls_controller:
+      call_successfully_canceled: "បាន​បោះបង់​ការ​ហៅ %{call_address} ដោយ​ជោគជ័យ"
+    schedules_controller:
+      schedule_succesfully_deleted: "បាន​លុប​​កាលវិភាគ %{schedule_name} ដោយ​ជោគជ័យ"
+    call_logs_controller:
+      csv_is_too_big: "សូមទោស កំណត់ត្រាច្រើន​មិនអាច​ទាញយក​បានទេ។ ប្រព័ន្ធអាច​រៀបចំ​បាន​កំណត់ត្រា %{max} តែប៉ុណ្ណោះ។ អ្នកមាន %{count} កំណត់ត្រា។"
+    ext:
+      reminder_groups_controller:
+        successfully_updated: "បាន​ធ្វើ​បច្ចុប្បន្នភាព​ក្រុមនៃការរំលឹក %{reminder_group_name} ដោយ​ជោគជ័យ។"
+        no_file_found: "រក​មិន​ឃើញ​ឯកសារ"
+        invalid_extension: "លេខ​ខ្លី​មិន​ត្រឹមត្រូវ"
+        invalid_file: "ឯកសារ​មិន​ត្រឹមត្រូវ៖ %{ex}"
+
+  views:
+    form:
+      close: "បោះបង់"
+      cancel: "បោះបង់"
+      save: "រក្សាទុក"
+    browser:
+      compatibility:
+        audio: "Your browser does not support the audio element"    
+
+
+    devise:
+      registrations:
+        edit:
+          title: "កែតម្រូវការកំណត់"
+          label:
+            confirm_password_change: "ត្រូវការពាក្យសម្ងាត់ដើម្បីបញ្ជាក់ការធ្វើ​បច្ចុប្បន្នភាព"
+            language: "ភាសា"
+            change_my_password: "កែតម្រូវពាក្យសម្ងាត់"
+            current_password: "ពាក្យសម្ងាត់បច្ចុប្បន្ន"
+            new_password: "ពាក្យសម្ងាត់ថ្មី"
+            leave_blank_no_change: "ទុកទទេបើមិនចង់កែប្រែ"
+            confirm_new_password: "បញ្ជាក់ពាក្យសម្ងាត់ថ្មី"
+          action:
+            update: "ធ្វើ​បច្ចុប្បន្នភាព"
+            back: "ត្រលប់ក្រោយ"
+            delete_my_account: "លុបគណនីនេះ"
+            confirm_delete: "តើអ្នកពិតជាចង់លុបគណនីនេះឬ?"
+
+    api:
+      logs:
+        list_csv:
+          label:
+            entry_id: "លេខ​សម្គាល់​ធាតុ"
+            time: "ពេលវេលា​"
+            step_name: "ឈ្មោះ​ជំហាន"
+            command: "ពាក្យ​បញ្ជា"
+            action: "សកម្មភាព"
+            detail: "សេចក្ដី​លម្អិត"
+
+    call_flows:
+      _box:
+      _box_content:
+        errors:
+          prohibited:
+            one: "មានកំហុស ១ ដែលបាន​ការ​ពារ​មិន​ឲ្យ​រក្សាទុក​​លំហូរកាហៅនេះ"
+            other: "មានកំហុស %{count} ដែលបាន​ការ​ពារ​មិន​ឲ្យ​រក្សាទុក​​លំហូរកាហៅនេះ"
+        action:
+          confirm_delete: "តើ​អ្នក​ប្រាកដ​ឬ?"
+      _branch_option_template:
+        action:
+          add_condition: "បន្ថែម​លក្ខខណ្ឌ"
+          save: "រក្សាទុក"
+          cancel: "បោះបង់"
+      _branch_step_template:
+        label:
+          branches: "មែកធាង"
+          if_none_the_above_conditions: "បើ​លក្ខខណ្ឌ​ខាង​លើ​មិន​ត្រូវ​គ្នា"
+          default: "លំនាំដើម"
+        action:
+          add_branch: "បន្ថែម​មែកធាង"
+          remove_this_step: "លុប​ជំហាន​នេះ"
+      _capture_step_template:
+        label:
+          message: "សារ"
+          instructions: "ការ​ណែនាំ៖"
+          invalid: "មិន​ត្រឹមត្រូវ"
+          attempts: "ការ​ព្យាយាម"
+          second_before_repeating_options: "វិនានទី​មុន​ពេល​​អនុវត្ត​ជម្រើស​ម្ដង​ទៀត"
+          after_final_attempt_fails: "បន្ទាប់​ពី​បរាជ័យ​នៃ​ការ​ព្យាយាម​ចុង​ក្រោយ៖"
+          validation: "សុពលភាព"
+          input_length: "ប្រវែង​បញ្ចូល​"
+          from: "ពី"
+          to: "ដល់"
+          input_length_from: "ប្រវែង​បញ្ចូល​ពី"
+          valid_values: "តម្លៃ​មិន​ត្រឹមត្រូវ"
+          finish_on_key: "បញ្ចប់​នៅ​ប៊ូតុង"
+        action:
+          remove_this_step: "លុប​ជំហាន​នេះ"
+      _command_selector_template:
+        label:
+          add_step: "បន្ថែម​ជំហាន"
+          choose_one_option_to_insert: "ជ្រើស​ជំហាន​មួយ​ក្នុង​ចំណោម​ជំហាន​ខាង​ក្រោម ដើម្បី​បញ្ចូល​ជំហាន​ថ្មី​ក្នុង​កម្មវិធី"
+        action:
+          manage_external_services: "គ្រប់គ្រង​សេវា​ខាង​ក្រៅ"
+      _external_setting_template:
+        label:
+          fill: "បំពេញ"
+          with: "ដោយ"
+        action:
+          save: "រក្សាទុក"
+          cancel: "បោះបង់"
+      _external_step_template:
+        label:
+          parameters: "ប៉ារ៉ាម៉ែត្រ"
+          desc: "វា​នឹង​ត្រូវ​បាន​ផ្ញើ​ទៅ​សេវា​​ខាង​ក្រៅ"
+          response: "ឆ្លើយតប"
+          will_returned_by_external_service: "វា​នឹង​ត្រូវ​បាន​ត្រឡប់​ដោយ​សេវា​ខាង​ក្រៅ"
+          store_the_address_book: "រក្សាទុក​សៀវភៅ​អាសយដ្ឋាន​ជា៖"
+          placeholder: 'បញ្ចូល​ឈ្មោះ​សម្រាប់​តម្លៃ'
+        action:
+          remove_this_step: "លុប​ជំហាន"
+      _form:
+        label:
+          name: "ឈ្មោះ"
+          choose_external_app_or_build_on_verboice: "ជ្រើស​ថាតើ​អ្នក​នឹង​ប្រើ​កម្មវិធី​ពី​ខាង​ក្រៅ ឬ​បង្កើត​កម្មវិធី​មួយ​ដោយ​ប្រើ Verboice"
+          use_external_application: "ប្រើ​កម្មវិធី​ខាង​ក្រៅ"
+          design_app_in_verboice: "រចនា​កម្មវិធី​របស់​អ្នក​ក្នុង Verboice"
+          url: "URL"
+          user: "អ្នក​ប្រើ"
+          password: "ពាក្យ​សម្ងាត់"
+          fusion_tables_title: "តារាង​បន្សំ"
+          fusion_tables_desc: "បញ្ចូល​ឈ្មោះ​តារាង​បន្សំ ហើយ Verboice នឹង​បង្កើត​តារាង​ ព្រមទាំង​រក្សាទុក​លទ្ធផល​​ហៅ​​ជាក់ស្ដែង។ ចំណាំ​ថា ក្នុង​ករណី​ដែល​ផ្លាស់ប្ដូរ​ការ​កំណត់​លំហូរ Verboice អាច​បង្កើត​តារាង​ថ្មី​ដោយ​មាន​រចនា​​សម្ព័ន្ធ​ថ្មី​ ដើម្បី​រក្សាទុក​លទ្ធផល​ថ្មី ក្នុង​ករណី​បែប​នេះ Verboice នឹង​បង្កើត​តារាង​ថ្មី​ដោយ​ប្រើ​ឈ្មោះ​ និង​លេខ​កំណែ​ដែល​អ្នក​បាន​ផ្ដល់។"
+          store_results_call_flow: "រក្សាទុក​លទ្ធផល​នៃ​លំហូរ​ការ​ហៅ​នេះ"
+          fusion_table_name: "ឈ្មោះ​តារាង​បន្សំ"
+        action:
+          go_to_designer: "ទៅ​ទំព័រ​រៀបចំ"
+          download_call_result_as_csv: "ទាញយក​លទ្ធផល​​ហៅ​ជា​ឯកសារ CSV"
+          set_google_account: "កំណត់​គណនី Google របស់​អ្នក"
+          change_google_account: "ប្ដូរ​គណនី Google របស់​អ្នក"
+          save: "រក្សាទុក"
+          update: "ធ្វើ​បច្ចុប្បន្នភាព"
+          cancel: "បោះបង់"
+      _goto_step_template:
+        label:
+          go_to_step: "ទៅជំហាន"
+          select_one: "ជ្រើស​​ជំហាន​មួយ..."
+        action:
+          remove_this_step: "លុប​ជំហាន​នេះ"
+      _hang_up_step_template:
+        label:
+          end_call: "បញ្ចប់​ការ​ហៅ"
+          hang_up_here: "ការ​ហៅ​នឹង​បញ្ចប់​នៅ​ទីនេះ"
+        action:
+          remove_this_step: "លុ​ប​ជំហាន​នេះ"
+      _language_step_template:
+        label:
+          record_message_support_language: "ថត​​សារ​មួយ​សម្រាប់​ភាសា​ដែល​បាន​គាំទ្រ​នីមួយៗ។ អ្នក​ហៅ​នឹង​ឮ​សារ​នីមួយៗ និង​ត្រូវ​បាន​ស្នើ​ឲ្យ​ចុច​លេខ​​ដែល​បាន​​ភ្ជាប់​ជា​មួយ​ភាសា។ សូម​ប្រាកដ​ថា អ្នក​បញ្ចូល​ឯកសារ​យោង​​សម្រាប់​លេខ​នោះ ឧទាហរណ៍ 'ចុច​លេខ ២ សម្រាប់​ភាសា​អង់គ្លេស។"
+          languages: "ភាសា"
+        action:
+          remove_this_step: "លុប​ជំហាន​នេះ"
+      _menu_step_template:
+        label:
+          messages: "សារ"
+          explanation: "ការ​ពន្យល់"
+          options: "ជម្រើស៖"
+          invalid: "មិន​ត្រឹមត្រូវ៖"
+          attempts: "ការ​ព្យាយាម"
+          seconds_before_repeat_options: "វិនាទី​មុន​ពេល​អនុវត្ត​ជម្រើស​ម្ដង​ទៀត"
+          after_final_attempt_fails: "បន្ទាប់​ពី​ការ​ព្យាយាម​ចុងក្រោយ​បរាជ័យ៖"
+        action:
+          add_an_option: "បន្ថែម​ជម្រើស"
+          remove_this_step: "លុប​ជំហាន​នេះ"
+      _play_step_template:
+        label:
+          message: "សារ៖"
+        action:
+          remove_this_step: "លុប​ជំហាន​នេះ"
+      _record_localized_resource_template:
+        label:
+          placeholder: "នៅ​ទីនេះ​សរសេរ​ការ​ពណ៌នា​សម្រាប់​ការ​ថត ឬ​ជា​កម្មវិធី​រំលឹក​សម្រាប់​អ្នក ឬ​ជា​ឯកសារ​យោង​សម្រាប់​មនុស្ស​ដែល​នឹង​ថត​សារ។"
+      _record_step_template:
+        label:
+          messages: "សារ"
+          explanation: "ពន្យល់៖"
+          confirmation: "បញ្ជាក់៖"
+          time: "ពេលវេលា"
+          maximum_recording_time_in_second: "ពេលវេលា​ថត​អតិបរមា​គិត​ជា​វិនាទី"
+          properties: "លក្ខណសម្បត្តិ"
+          stop_recording_audio_with_key: "បញ្ឈប់​ការ​ថត​ដោយ​ប្រើ​ប៊ូតុង៖"
+          store_this_result_as: "រក្សា​លទ្ធ​ផល "
+        action:
+          remove_this_step: "លុប​ជំហាន​នេះ"
+      _register_step_template:
+        label:
+          messages: "សារ"
+          confirmation: "បញ្ជាក់៖"
+          phone_book_type: "ប្រភេទសៀវភៅទូរស័ព្ទ"
+          reminder_group: "ក្រុមនៃការរំលឹក"
+          to: "ទៅ"
+          store_registered_date: 'រក្សាថ្ងៃ'
+          select: "--- ជ្រើសរើស ---"
+        action:
+          remove_this_step: "លុប​ជំហាន​នេះ"
+      _register_option_template:
+        label:
+          number: "លេខ"
+      _deregister_step_template:
+        label:
+          messages: "សារ"
+          confirmation: "បញ្ជាក់៖"
+          phone_book_type: "ប្រភេទសៀវភៅទូរស័ព្ទ"
+          reminder_group: "ក្រុមនៃការរំលឹក"
+          select: "--- ជ្រើសរើស ---"
+        action:
+          remove_this_step: "លុប​ជំហាន​នេះ"
+      _datetime_step_template:
+        label:
+          messages: "សារ"
+          explanation: "ការពន្យល់"
+          unit: "ឯកតា"
+        action:
+          remove_this_step: "លុបជំហ៊ាននេះ"
+      _resource_editor_template:
+        label:
+          message: "សារ"
+          create_new_message: "បង្កើត​សារ​ថ្មី"
+          enter_message_name: "បញ្ចូល​ឈ្មោះ​សារ"
+          select_existing_one: "ជ្រើស​សារ​មាន​ស្រាប់"
+          name: "ឈ្មោះ"
+        languages: "ភាសា"
+        action:
+          next: "បន្ទាប់"
+          cancel: "បោះបង់"
+          save: "រក្សាទុក"
+          replace: "ជំនួស"
+      _summary:
+        action:
+          edit: "កែ​សម្រួល"
+          download_call_result_as_csv: "ទាញយក​លទ្ធផល​ហៅ​ជា​ឯកសារ CSV"
+          goto_designer: "ទៅ​ទំព័រ​រៀបចំ"
+      _text_localized_resource_template:
+        label:
+          placeholder: "នៅ​ទីនេះ​សរសេរ​អត្ថបទ​ដែល​អ្នក​ចង់​ឲ្យ​អ្នក​ប្រើ​ស្ដាប់​ឮ"
+      _transfer_step_template:
+        label:
+          forward_to: "បញ្ជូន​បន្ត​ទៅ"
+          phone_number: "លេខ​ទូរស័ព្ទ៖"
+          channel: "ឆានែល៖"
+          use_current_channel: "ប្រើ​ឆានែល​បច្ចុប្បន្ន"
+        action:
+          remove_this_step: "លុប​ជំហាន​នេះ"
+      _upload_localized_resource_template:
+        label:
+          no_file_uploaded_yet: "មិនទាន់​មាន​ឯកសារ​បានផ្ទុក​ឡើង​​"
+          placeholder: "នៅ​ទីនេះ​សរសេរ​ការ​ពណ៌នា​សម្រាប់​ការ​ថត ឬ​ជា​កម្មវិធី​រំលឹក​សម្រាប់​អ្នក ឬ​ជា​ឯកសារ​យោង​សម្រាប់​មនុស្ស​ដែល​នឹង​ថត​សារ។"
+        action:
+          upload: "ផ្ទុក​ឡើង"
+          replace: "ជំនួស"
+      _url_localized_resource_template:
+        label:
+          placeholder: "នៅ​ទីនេះ​សរសេរ​ URL ដែល​មាន​ឯកសារ​​សំឡេង ដែល​អ្នក​ចង់​ឲ្យ​អ្នក​ប្រើ​ស្ដាប់​ឮ"
+      _workflow_step_template:
+        label:
+          insert_before: "បញ្ចូល​ជំហាន​ថ្មី​ពី​មុខ"
+          insert_after: "បញ្ចូល​ជំហាន​ថ្មី​ខាង​ក្រោយ"
+      download_result_csv:
+        label:
+          call_id: "លេខ​សម្គាល់​ហៅ"
+          phone_number: "លេខ​ទូរស័ព្ទ"
+          start_time: "ពេល​វេលា​ចាប់ផ្ដើម"
+          end_time: "ពេល​វេលា​បញ្ចប់"
+      edit_workflow:
+        label:
+          desc: "ប្រើ​ឧបករណ៍​ដូច​ខា​ងក្រោម ដើម្បី​កំណត់​លំហូរ​ការ​ហៅ​របស់​កម្មវិធី"
+          include_audio_recording: "រួម​ទាំង​ការ​ថត​សំឡេង"
+        action:
+          export_call_flow: "នាំចេញ​លំហូរ​ការ​ហៅ"
+          import_new_call_flow: "នាំចូល​លំហូរ​ការ​ហៅ​ថ្មី៖"
+          create_new_sub_flow: "បង្កើត​លំហូ​ររង"
+          browse: "រក​មើល"
+          upload: "ផ្ទុក​ឡើង"
+          save: "រក្សាទុក"
+          back: "ថយក្រោយ"
+      index:
+        title: "លំហូរ​ការ​ហៅ"
+        desc: "ប្រើ​ឧបករណ៍​ដូច​ខាង​ក្រោម ដើម្បី​កំណត់​លំហូរ​ការ​ហៅ​នៃ​កម្មវិធី​របស់​អ្នក"
+        action:
+          add_call_flow: "បន្ថែម​លំហូរ​ការ​ហៅ"
+
+    call_logs:
+      _tabs:
+        action:
+          calls_log: "កំណត់​ហេតុ​ហៅ"
+          queued_calls: "កា​រហៅ​បានដាក់​ជាជួរ"
+      download_csv:
+        label:
+          call_id: "លេខ​សម្គាល់​ហៅ"
+          phone_number: "លេខ​ទូរស័ព្ទ"
+          time: "ពេលវេលា"
+          severity: "តឹងរ៉ឹង"
+          step_name: "ឈ្មោះ​ជំហាន"
+          step_id: "លេខ​សម្គាល់​ជំហាន"
+          command: "ពាក្យ​បញ្ជា"
+          action: "សកម្មភាព"
+          detail: "សេចក្ដី​លម្អិត"
+      download_details_csv:
+        label:
+          call_id: "លេខ​សម្គាល់​ហៅ"
+          phone_number: "លេខ​ទូរស័ព្ទ"
+          time: "ពេលវេលា"
+          severity: "តឹងរ៉ឹង"
+          step_name: "ឈ្មោះ​ជំហាន"
+          step_id: "លេខ​សម្គាល់​ជំហាន"
+          command: "ពាក្យ​បញ្ជា"
+          action: "សកម្មភាព"
+          detail: "សេចក្ដី​លម្អិត"
+      index:
+        label:
+          desc: "នៅ​ទីនេះ​អ្នក​អាច​ឃើញ​សេចក្ដី​លម្អិត​នៃ​ការ​ហៅ​ចេញ និង​ចូល។"
+          search: "ស្វែងរក"
+          id: "លេខ​សម្គាល់"
+          started: "បាន​ចាប់ផ្ដើម"
+          finished: "បាន​បញ្ចប់"
+          duration_in_second: "រយៈពេល"
+          duration: "រយៈពេល"
+          caller_id: "លេខ​សម្គាល់​អ្នក​ហៅ"
+          direction: "ទិសដៅ"
+          number_retried: "ព្យាយាម(ចំនួន)"
+          channel: "ឆានែល"
+          queue: "ជួរ"
+          project: "គម្រោង"
+          call_flow: "លំហូរ​ការ​ហៅ"
+          status: "ស្ថានភាព"
+          call_log: "កំណត់​ហេតុ​ហៅ"
+          annotation: "កត់​ត្រា"
+        action:
+          download_csv: "ទាញយក​ជា​ឯកសារ CSV"
+          view_details: "មើល​សេចក្ដី​លម្អិត"
+      progress:
+        label:
+          call_with: "ហៅ​ដោយ​ប្រើ"
+          from_channel: "ពី​ឆានែល"
+          severity: "តឹងរ៉ឹង"
+          when: "ពេល​ណា"
+          text: "អត្ថបទ"
+      queued:
+        label:
+          title: "កា​រហៅ​បាន​ដាក់​ជា​ជួរ"
+          desc: "នៅ​ទីនេះ អ្នក​អាច​ឃើញ​សេចក្ដី​លម្អិត​នៃ​ការ​ហៅ​ដែល​បាន​ដាក់​ជា​ជួរ។"
+          id: "លេខ​សម្គាល់"
+          channel: "ឆានែល"
+          date: "កាលបរិច្ឆេទ"
+          phone_number: "លេខ​ទូរស័ព្ទ"
+          queue: "ជួរ"
+          project: "គម្រោង"
+          state: "ស្ថានភាព"
+          queued_calls: "កា​រហៅ​បាន​ដាក់​ជា​ជួរ"
+        action:
+          view_log_details: "មើល​សេច​ក្ដី​លម្អិត​កំណត់​ហេតុ"
+          confirm_delete: "តើអ្នក​ប្រាកដ​ជា​ចង់​លុប​ការ​ហៅ​"
+      show:
+        label:
+          title: "សេចក្ដី​លម្អិត​កំណត់ហេតុ​ហៅ"
+          not_before: "មិន​មែន​មុន"
+          started: "បាន​ចាប់ផ្ដើម"
+          finished: "បាន​បញ្ចប់"
+          duration: "រយៈពេល"
+          call_id: "លេខ​សម្គាល់​អ្នក​ហៅ"
+          direction: "ទិសដៅ"
+          channel: "ឆានែល"
+          queue: "ជួរ"
+          project: "គម្រោង"
+          state: "ស្ថានភាព"
+          fail_reason: "ហេតុផល​បរាជ័យ"
+          severity: "តឹងរឹង"
+          when: "ពេល​ណា"
+          text: "អត្ថបទ"
+        action:
+          download_csv: "ទាញយក​ជា​ឯកសារ CSV"
+          back: "ថយក្រោយ"
+      download_project_call_log:
+        label:
+          download_call_logs: "ទាញយក​​កំណត់ហេតុ​ការហៅ"
+          summary: "មាន %{audios} សារ​សំឡេងនៅក្នុង​កំណត់ហេតុ​ការហៅ​នេះ​ដែល​មានទំហំ​សរុប %{size}។"
+          do_you_want_to_download: "តើអ្នកចង់ទាញយកកំណត់ហេតុការហៅរួមជាមួយសារសំឡេង​ដែរឫទេ?"
+          processing: "កំពុង​ដំណើកា..."
+          processing_message: "ដោយហេតុថា​ឯកសារមាន​ទំហំ​ធំប្រព័ន្ធត្រូវ​ចំណាយពេល​មួយរយះ។ យើងនឹងផ្ញើអ៊ីមែលទៅអ្នកក្នុងរយៈពេលខ្លីជាមួយនឹងលីងដើម្បីទាញយក." 
+        action:
+          yes_csv_and_voice: "បាទ CSV និង​សំលេង"
+          no_only_csv: "ទេ​ជា CSV តែប៉ុណ្ណោះ"
+
+    channels:
+      title: "ឆានែល"
+      _form:
+        errors:
+          prohibited:
+            one: "មានកំហុស ១ ដែលបាន​ការ​ពារ​មិន​ឲ្យ​រក្សាទុក​​ឆានែលនេះ"
+            other: "មានកំហុស %{count} ដែលបាន​ការ​ពារ​មិន​ឲ្យ​រក្សាទុក​​ឆានែលនេះ"
+        label:
+          name: "ឈ្មោះ"
+          call_flow: "លំហូរការហៅ"
+        action:
+          save: "រក្សាទុក"
+          update: "ធ្វើ​បច្ចុប្បន្នភាព"
+          cancel: "បោះបង់"
+      _form_custom:
+        label:
+          dial_string: "Dial string"  
+        action:
+      _form_custom_sip:
+        label:
+          username: "អ្នកប្រើប្រាស់"
+          password: "ពាក្យសម្ងាត់"
+          number: "លេខ"
+          prefix: "បុព្វបទ"
+          limit: "ចំនួនកំនត់"
+          domain: "ដែន"
+          port: "ផត"
+          protocol: "ប្រូតូកូ"
+          direction: "ទិសដៅ"
+          register: "ចុះឈ្មោះ"
+          incoming: "ចូល"
+          outgoing: "ចេញ"
+          both_directions: "ទាំង​ពីរ"
+          prefix_called_number: "បុព្វបទ"
+          udp: "UDP"
+          tcp: "TCP"
+        action:
+          remove_this_server: "លុប​ម៉ាស៊ីន​មេ​នេះ"
+          add_another_server: "បន្ថែម​ម៉ាស៊ីន​មេ​ផ្សេង..."
+      _form_template_based_sip:
+        label:
+          username: "អ្នកប្រើប្រាស់"
+          password: "ពាក្យសម្ងាត់"
+          number: "លេខ"
+        action:
+      _form_voxeo:
+        label:
+          token: "Token"
+          url: "Url"
+        action:
+      _show_voxeo:
+        label:
+          use_this_url: "ប្រើ URL នេះ​ជា 'URL សំឡេង' ក្នុង​កា​រកំណត់ Voxeo របស់​អ្នក"
+        action:
+      call:
+        label:
+          call_channel: "ឆានែល​ហៅ"
+          number: "លេខ"
+        action:
+          call: "ហៅ"
+      edit:
+        label:
+          settings: "ការកំណត់"
+          edit: "កែសម្រួល"
+        action:
+          go_back: "ថយក្រោយ"
+      index:
+        title: "ឆានែលរបស់ខ្ញុំ"
+        label:
+          name: "ឈ្មោះ"
+          you_have_no_channel_yet: "អ្នកមិនទាន់មានឆានែលទេ"
+          call_flow: "លំហូរ​ការ​ហៅ"
+          kind: "ប្រភេទ"
+          create_new: "បង្កើតថ្មី"
+        action:
+          view: "ទិដ្ឋភាព"
+          queued_calls: "ការ​ហៅ​បាន​ដាក់​ជា​ជួរ"
+          call: "ហៅ"
+          edit: "កែសម្រួល"
+          delete: "លុប"
+          confirm_delete: "តើ​អ្នក​ប្រាកដ​ជា​ចង់​លុប​ឆានែល"
+      new:
+        label:
+          new: "ថ្មី"
+          channel: "ឆានែល"
+        action:
+          back: "ថយក្រោយ"
+      show:
+        title: "ការហៅ"
+        desc: "ចំនួនសរុបនៃការហៅចេញដែលត្រូវបានទទួល"
+        label:
+          registerd:
+            one: "ការហៅដែលត្រូវបានចុះឈ្មោះ"
+            other: "ការហៅដែលត្រូវបានចុះឈ្មោះ"
+          properties: "ទ្រព្យសម្បត្តិ"
+          default_call_flow: "លំហូរការហៅចម្បង"
+          none: "គ្មាន"
+          queued_call:
+            one: "ការហៅចេញដែលកំពុងរង់ចាំ"
+            other: "ការហៅចេញដែលកំពុងរង់ចាំ"
+          no_errors: "គ្មានកំហុស"
+          error:
+            one: "កំហុស"
+            other: "កំហុស"
+        action:
+          view_in_fusion_table: "បង្ហាញក្នុង Fusion Table"
+          download_as_csv: "ទាញយកជា​ឯកសារ​ CSV"
+          manage_call_flow: "គ្រប់គ្រងលំហូរការហៅ"
+          view_calls: "មើលការហៅ"
+          edit_settings: "កែតម្រូវការកំណត់"
+          delete_this_channel: "លុបឆានែលនេះ"
+          confirm_delete: "តើអ្នកពិតជាចង់លុបឆានែល %{channel_name}?"
+
+    contacts:
+      _form:
+        errors:
+          prohibited:
+            one: "មានកំហុស ១ ដែលបាន​ការ​ពារ​មិន​ឲ្យ​រក្សាទុក​​ទំនាក់ទំនងនេះ"
+            other: "មានកំហុស %{count} ដែលបាន​ការ​ពារ​មិន​ឲ្យ​រក្សាទុក​​ទំនាក់ទំនងនេះ"
+        label:
+          phone_number: "លេខ​ទូរស័ព្ទ"
+        action:
+          save: "រក្សាទុក"
+          cancel: "បោះបង់"
+      _project_variable_fields:
+        label:
+        action:
+      edit:
+        label:
+          title: "ទំនាក់ទំនង"
+        action:
+      index:
+        title: "សៀវភៅ​ទូរស័ព្ទ"
+        desc: "រាយ​មនុស្ស​ទាំងអស់​ដែល​បាន​ធ្វើ​ការ​ហៅ​ចេញ ឬ​ទទួល​ការ​ហៅ​ក្នុង​គម្រោង​នេះ"
+        label:
+          add_new_variable: "បន្ថែម​អថេរ​ថ្មី"
+          phone_number: "លេខ​ទូរស័ព្ទ"
+        action:
+          manage_phone_book_columns: "គ្រប់គ្រង​ជួរឈរ​សៀវភៅ​​ទូរស័ព្ទ"
+          cancel: "បោះបង់"
+          confirm: "បញ្ជាក់"
+          confirm_delete: "តើអ្នក​ប្រាកដ​ឬ?"
+          new_contact: "ទំនាក់ទំនង​ថ្មី"
+      new:
+        title: "ទំនាក់ទំនង​ថ្មី"
+
+    ext:
+      pregnancy_reminders:
+        _form:
+          errors:
+            prohibited:
+              one: "មានកំហុស ១ ដែលបាន​ការ​ពារ​មិន​ឲ្យ​រក្សាទុក​​ការរំលឹកការមានផ្ទៃពោះនេះ"
+              other: "មានកំហុស %{count} ដែលបាន​ការ​ពារ​មិន​ឲ្យ​រក្សាទុក​​ការរំលឹកការមានផ្ទៃពោះនេះ"
+          label:
+            name: "ឈ្មោះ"
+            select_call_flow: "ជ្រើស​លំហូរ​ការ​ហៅ"
+            select_schedule: "ជ្រើស​កាលវិភាគ"
+            select_channel: "ជ្រើស​​ឆានែល"
+            description: "ការ​ពណ៌នា"
+            remind_patients_that_have_pregnant: "រំលឹក​អ្នក​ជំងឺ​ថា​មាន​គភ៌"
+            weeks: "សប្ដាហ៍"
+          action:
+            save: "រក្សាទុក"
+            cancel: "បោះបង់"
+        _start:
+          label:
+            start: "ចាប់ផ្ដើម"
+          action:
+        edit:
+          title: កម្មវិធី​រំលឹក​ពេល​មាន​គភ៌
+        index:
+          title: "កម្មវិធី​រំលឹក​ពេល​មាន​គភ៌"
+          desc: "រាយ​កម្មវិធី​រំលឹក​ពេល​មាន​គភ៌​ទាំងអស់"
+          label:
+            reminder: "កម្មវិធី​រំលឹក"
+            call_flow: "លំហូរ​ការ​ហៅ"
+          action:
+            confirm_delete: "តើ​អ្នក​ប្រាកដ​ឬ?"
+            new_pregnancy_reminder: "កម្មវិធី​រំលឹក​ពេល​មាន​គភ៌​ថ្មី"
+        new:
+          title: "កម្មវិធី​រំលឹក​ពេល​មាន​គភ៌​ថ្មី"
+
+      reminder_groups:
+        title: "ក្រុមនៃការរំលឹក"
+        label:
+          name: "ឈ្មោះ"
+          contacts: "លេខ​ទូរស័ព្ទ"
+          add_contact: "បន្ថែមលេខ​ទូរស័ព្ទថ្មី"
+          successfully_created: "បានបង្កើតក្រុមរំលឹកដោយជោគជ័យ"
+          create_error: "បានបង្កើតក្រុមរំលឹកបរាជ័យ"
+          successfully_updated: "បាន​ធ្វើ​បច្ចុប្បន្នភាព​ក្រុមរំលឹកដោយជោគជ័យ"
+          update_error: "បាន​ធ្វើ​បច្ចុប្បន្នភាព​ក្រុមរំលឹកបរាជ័យ"
+          successfully_deleted: "បានលុបក្រុមរំលឹកដោយជោគជ័យ"
+          delete_error: "លុបក្រុមរំលឹកបរាជ័យ"
+          confirm_delete: "តើ​អ្នក​ប្រាកដ​ឬ?"
+          address_exists: "លេខ​ទូរស័ព្ទធ្លាប់មានរួចហើយ"
+          name_exists: "ឈ្មោះ ធ្លាប់មានរួចហើយ"
+        action:
+          edit: "កែសម្រួល"
+          save: "រក្សាទុក"
+          cancel: "បោះបង់"
+          new: "ក្រុមនៃការរំលឹកថ្មី"
+          import_csv: "នាំចូលបញ្ជីលេខទំនាក់ទំនងក្រុមរំលឹក"
+          upload: "ផ្ទុក​ឡើង"
+
+      reminder_schedules:
+        title: "កាលវិភាគ​ទូរស័ព្ទ​នៃ​កម្មវិធីរំលឹក"
+        desc: "រាយ​កាលវិភាគ​រំលឹក​ទាំងអស់"
+        label:
+          add_channel: "ឆានែល"
+          name: "ឈ្មោះ"
+          call_all_contacts_in: "ហៅចេញទៅគ្រប់លេខទូរស័ព្ទទាំងអស់នៅក្នុង"
+          with: "ជាមួយ"
+          when: "នៅពេល"
+          and: "នឹង"
+          using: "ប្រើប្រាស់"
+          reminder_group: "ក្រុមនៃការរំលឹក"
+          select_reminder_group: "ជ្រើសរើសក្រុមនៃការរំលឹក"
+          call_flow: "លំហូរ​ការ​ហៅ"
+          select_call_flow: "ជ្រើស​លំហូរ​ការ​ហៅ"
+          schedule: "កាលវិភាគ"
+          select_schedule: "ជ្រើស​កាលវិភាគ"
+          channel: "ឆានែល"
+          select_channel: "ជ្រើស​ឆានែល"
+          description: "ការ​ពណ៌នា"
+          time_zone: "ល្វែងម៉ោង"
+          start_on: "ចាប់ផ្តើបពី"
+          date_format: "(ថ្ងៃ/ខែ/ឆ្នាំ)"
+          time_format: "(ម៉ោង:នាទី)"
+          call_time: "ម៉ោងហៅ"
+          from_must_be_less_than_to: "ម៉ោងចាប់ផ្តើមត្រូវតែតូចជាងម៉ោងបញ្ចប់"
+          repeat: "សារឡើងវិញ"
+          yes: "បើក"
+          no: "បិទ"
+          sun: "អាទិត្យ"
+          mon: "ចន្ទ"
+          tue: "អង្គារ"
+          wed: "ពុធ"
+          thu: "ព្រហស្បតិ៍"
+          fri: "សុក្រ"
+          sat: "សៅរ៍"
+          every: "រៀងរាល់"
+          weeks: "សប្តាហ៏"
+          from: "ចាប់ពី"
+          to: "រហូតដល់"
+          conditions: "ល័ក្ខខ័ណ្ឌ:"
+          variable: "អថេរ"
+          select_variable: "ជ្រើសរើសអថេរ"
+          select_operator: "ជ្រើសរើសល័ក្ខខ័ណ្ឌ"
+          please_select_at_least_one_day_to_apply: "សូមជ្រើសរើសថ្ងៃយ៉ាងតិចមួយ"
+          ago: "មុន"
+          today: "ថ្ងៃនេះ"
+          channel_exists: "ឆានែលធ្លាប់មានរួចហើយ"
+        action:
+          save: "រក្សាទុក"
+          cancel: "បោះបង់"
+          edit: "កែសម្រួល"
+          done: "យល់ព្រម"
+          confirm_delete: "តើ​អ្នក​ប្រាកដ​ឬ?"
+          new_reminder_schedule: "កាលវិភាគ​កម្មវិធី​រំលឹក​ថ្មី"
+          add_condition: "បន្ថែមល័ក្ខខណ្ឌ"
+
+      shared:
+        _project_tabs:
+          action:
+            reminder_group: "ក្រុមរំលឹក"
+            reminder_schedule: "កាលវិភាគ​កម្មវិធី​រំលឹក"
+            pregnancy_reminder: "កម្មវិធី​រំលឹក​ពេល​មាន​គភ៌"
+
+    external_services:
+      _box:
+      _box_content:
+        errors:
+          prohibited:
+            one: "មានកំហុស ១ ដែលបាន​ការ​ពារ​មិន​ឲ្យ​រក្សាទុក​​សេវាខាងក្រៅនេះ"
+            other: "មានកំហុស %{count} ដែលបាន​ការ​ពារ​មិន​ឲ្យ​រក្សាទុក​​សេវាខាងក្រៅនេះ"
+      _form:
+        label:
+          url: "URL"
+          settings: "ការ​កំណត់"
+          steps: "ជំហាន"
+        action:
+          update_manifest: "ធ្វើ​បច្ចុប្បន្នភាព​របាយការណ៍"
+          save: "រក្សាទុក"
+          update: "ធ្វើ​បច្ចុប្បន្នភាព"
+          cancel: "បោះបង់"
+      _summary:
+        action:
+          edit: "កែសម្រួល"
+          update_manifest: "ធ្វើ​បច្ចុប្បន្នភាព​របាយការណ៍"
+      index:
+        title: "សេវា​ខាង​ក្រៅ"
+        desc: "ប្រើ​ឧបករណ៍​ដូច​ខាង​ក្រោម​ដើម្បី​កំណត់​សេវា​ខាង​ក្រៅ​នៃ​កម្មវិធី​របស់​អ្នក"
+        action:
+          download_sample_manifest: "ទាញយក​របាយការណ៍​គំរូ"
+          add_external_service: "បន្ថែម​សេវា​ខាង​ក្រៅ"
+      show:
+        label:
+          name: "ឈ្មោះ"
+          url: "Url"
+          xml: "Xml"
+        action:
+          edit: "កែសម្រួល"
+          back: "ថយក្រោយ"
+
+    home:
+      download_brochure: ទាញយក​ប័ណ្ណ​ប្រកាស
+      listen_and_response: ស្ដាប់ ហើយ​ឆ្លើយតប
+      listen_and_response_sub: សំឡេង​​សហគមន៍​របស់​អ្នក។
+      listen_and_response_body: "សំឡេង​គឺ​ជា​មធ្យោបាយ​​ទំនាក់ទំនង​ជា​សកល និង​ទូលំទូលាយ​បំផុត ព្រម​ទាំង​​ជា​មធ្យោបាយ​ដ៏​ល្អ​បំផុត​ ដើម្បី​បង្រីក​ការ​​ចូល​ដល់ និង​ឥទ្ធិពល​​នៃ​បច្ចេកវិទ្យា​ផ្នែក​សុខភាព និង​មនុស្ស​ធម៌។ Verboice គឺ​ជា​កម្មវិធី​​ឥត​គិត​ថ្លៃ និង​កូដ​ចំហ ដែល​ធ្វើ​ឲ្យ​ងាយស្រួល​សម្រាប់​អ្នក​រាល់​គ្នា​ក្នុងការ​បង្កើត និង​ដំណើរការ​គម្រោង​ដែល​មាន​ទំនាក់ទំនង​គ្នា​តាមរយៈ​សំឡេង ដោយ​អនុញ្ញាត​ឲ្យ​អ្នក​ប្រើ​ស្ដាប់ និង​​ថត​សារ​ជា​ភាសា​ផ្ទាល់​​ខ្លួន​របស់​ពួក​គេ និង​គ្រាមភាសា ឬ​ឆ្លើយ​​សំណួរ​​ដោយ​ប្រើ​ប៊ូតុង​ទូរស័ព្ទ។ គម្រោង Verboice អាច​ចាប់ផ្ដើម​ពី​គម្រោង​តូច​ដល់​គម្រោង​​ធំ ដែល​គម្រោង​នេះ​អាច​លើក​កម្ពស់​ជីវភាព​រស់​នៅ​​ក្នុង​សហគមន៍​ដែល​ពីមុន​មាន​​ឧបសគ្គផ្នែក​​បច្ចេកវិទ្យា ព្រមទាំង​​ការ​អាន និង​ការ​សរសេរ។"
+      get_started: ចាប់ផ្ដើម
+      view_your_project: មើល​គម្រោង​របស់​អ្នក
+      create_an_account: បង្កើត​គណនី
+      already_a_member: ជាសមាជិក​រួច​ហើយ?
+      log_in: ចូល
+      overcome: យក​ឈ្នះ
+      literacy_barriers_with_verbal_communication: ឧបសគ្គ​​ការ​អាន និងសរសេរ​​ដោយ​ប្រើ​​ការ​ប្រាស្រ័យ​ទាក់ទង​ជា​សំឡេង
+      create: បង្កើត
+      voice_based_programs_without_coding: កម្មវិធី​មាន​មូលដ្ឋាន​លើ​សំឡេង​ដោយ​មិន​ចាំបាច់​សរសេរ​កូដ
+      scales: ធ្វើ​មាត្រដ្ឋាន
+      to_suit_your_needs: តាម​តម្រូវ​ការ​របស់​អ្នក
+      generate: បង្កើត
+      project_using_any_computer_with_internet_access: គម្រោង​ដោយ​ប្រើ​កុំព្យុទ័រ​បាន​ភ្ជាប់​អ៊ីនធឺណិត
+      reach: ចូល
+      out_to_any_community_anywhere_there_access_to_basic_phones: "សហគមន៍​ណាមួយ ពី​កន្លែង​ណាមួយ​ ដែល​អាច​ប្រើ​ទូរស័ព្ទ​បាន"
+      api: API
+      based_on_standards: ផ្អែក​លើ​ស្តង់ដារ
+      free: ឥតគិត​ថ្លៃ
+      for_anyone_to_use_to_help_increase_their_social_impact: អ្នក​រាល់​គ្នា​អាច​ប្រើ ​ដើម្បី​ជួយ​​​លើក​កម្ពស់​ផលប៉ះពាល់​សង្គម​របស់​ពួកគេ
+      open_source: កម្មវិធី​កូដ​ចំហ
+      code_for_developers_to_use_to_improve_its_design_and_functionality: "កូដ​សម្រាប់​អ្នក​អភិវឌ្ឍន៍​ប្រើ​ដើម្បី​លើកកម្ពស់​ការ​​រចនា និង​មុខងារ​​ផ្សេងៗ"
+      container_first_title: "តើ​ខ្ញុំ​អាច​ប្រើ​វា​​សម្រាប់​អ្វី?"
+      container_first_desc: "Verboice គឺ​ជា​ដំណោះស្រាយ​ដ៏​ល្អ​បំផុត​ដើម្បី​ចូល​ដល់​សហគមន៍​ទោះ​បី​ជា​កម្រិត​យល់​ដឹង​បច្ចេកវិទ្យា និង​ការ​ចេះអាន និង​សរសេរ​របស់​ពួកគេ​កម្រិត​ណា​ក៏​ដោយ។ នេះ​ជា​មធ្យោបាយ​មួយ​ចំនួន​ដែល​ Verboice អាច​ជួយ​អ្នក​ក្នុង​កា​រជូន​ដំណឹង អប់រំ និង​លើកកម្ពស់​កម្រិត​ជីវភាព​​រស់​នៅ​ក្នុង​សហគមន៍​ដោយ​ប្រើ​សេវា​​ទូរស័ព្ទ​ជា​មូលដ្ឋាន៖"
+      container_first_panel_first_title: "ការ​មាន​គភ៌​ប្រកប​ដោយ​សុខភាព ​ទារកក៏​​មាន​សុខភាព​ល្អដែរ​"
+      container_first_panel_first_desc: "ម្ដាយ និង​ទារក​មាន​សុខភាព​ល្អ​​បង្កើត​ជា​មូលដ្ឋាន​គ្រឹះ​នៃ​ការ​រីកចម្រើន​ក្នុង​សហគមន៍​។ ជា​មួយ Verboice ការ​គាំពារ​ម្ដាយ/ទារក​អាច​​ពង្រីក​​យុទ្ធនា​ការ​អប់រំ​របស់​ពួកគេ​ដល់​សហគម​ន៍ ដែល​ពី​មុន​មក​មាន​ការ​ចូល​សេវា​​អប់រំ​សុខភាព​មាតា និង​មុន​ពេល​ឆ្លង​ទន្លេ​តិចតួច​បំផុត​។ ដោយ​មាន​ការ​ធ្វើ​បច្ចុប្បន្ន​ភាព​ពី​មួយ​ខែ​ទៅ​មួយ​ខែ​ស្ដី​អំពី​អ្វី​ដែល​រំពឹង​អំឡុង​មាន​គភ៌​​ដើម្បី​ពិនិត្យ​តាមដាន​សុខភាព​ និង​ដំបូន្មាន​ថែ​ទាំ​ទារក​​ យុទ្ធនាការ​​ជា​សំឡេង​អន្តរកម្ម​របស់ Verboice អាច​បង្កើត​ភាព​ខុស​គ្នា​ជា​វិជ្ជមាន​ ដែល​នឹង​​ត្រូវ​បាន​​យកចិត្ត​ទុកដាក់​ចំពោះ​មនុស្ស​ជំនាន់​ក្រោយ។" 
+      container_first_panel_second_title: "ស្រាវជ្រាវ​អំពី​ស្ថានភាព​សិទ្ធិ​មនុស្ស"
+      container_first_panel_second_desc: "មិនមាន​ប្រភព​ណា​ដែល​ដឹង​អំពី​ស្ថានភាព​សិទ្ធិ​មនុស្ស​ក្នុង​សហគមន៍​ជា​ជាង​សមាជិក​សហគមន៍​នោះ​ទេ។ Verboice អនុញ្ញាត​ឲ្យ​អ្នក​ស៊ើបអង្កេត​សិទ្ធិ​មនុស្ស​​ធ្វើ​ការ​ស្ទង់មតិ​​អ្នក​ហៅ​​ទូរស័ព្ទ​ដោយ​អនាមិក និង​ទទួល​បាន​ស្ថានភាព​​ពិតប្រាកដ​ក្នុង​សហគមន៍។ ពេល​មាន​ការ​រំលោភ​សិទ្ធិ​មនុស្ស អង្គការ​ផ្នែក​សិទ្ធិមនុស្ស​អាច​ប្រើ Verboice ដើម្បី​ផ្ដល់​នូវធន់ធាន​​ជំនួយ​/ការពារ ផ្ដល់​ព័ត៌មាន​ផ្លូវ​ច្បាប់ និង​ឲ្យ​ពួកគេ​ដឹង​អំពី​បញ្ហា​សិទ្ធិ​មនុស្ស​យ៉ាង​ទូលំទូលាយ​ក្នុង​សហគមន៍​របស់​ពួក​គេ។"
+      container_first_panel_third_title: "ការ​សម្របសម្រួល​អ្នក​ឆ្លើយតប​ដំបូង"
+      container_first_panel_third_desc: "សម្របសម្រួល​ការព្យាយាម​ឆ្លើយតប​ដំបូង​ដែល​មាន​ប្រសិទ្ធភាព​អាច​មាន​ន័យ​ថា​មាន​ភាព​ខុសគ្នា​រវាង​គ្រោះ​មហន្តរាយ និង​​​ស្ថានភាព​​អកុសល​​តិចតួច។ ដោយ​ប្រើ​ប្រាស់ Verboice អ្នក​ឆ្លើយត​ប​ដំបូង​ទទួល​បាន​ព័ត៌មាន​​​ដោយ​ផ្ទាល់​យ៉ាង​លឿន​អំពី​ស្ថានភាព​សូម្បី​តែ​នៅ​សហគមន៍​ដោយ​ឡែក​ពី​គ្នា​ក៏​ដោយ មិន​ចាំបាច់​ចំណាយ​ពេល​ដ៏​មាន​តម្លៃ​ក្នុង​ការ​ធ្វើ​ដំណើរ​ពី​កន្លែង​មួយ​ទៅ​កន្លែង​មួយ​ទៀត​ទេ។ ការ​ព្យាយាម​​ក្នុង​ការ​ជ្រើសរើស​​ជា​ក្រុម​ផ្អែក​លើ​របាយការណ៍​ជា​សំឡេង​ដែល​បាន​ប្រមូល​ដោយ​ផ្ទាល់​ពី​ជន​រងគ្រោះ ដែល​ជួយ​ក្រុម​ឆ្លើយតប​មាន​ដំណោះ​ស្រាយ​​កាន់​តែ​ប្រសើរ​​ដែល​ជា​រឿយៗ​មាន​ការ​ផ្លាស់ប្ដូរ​តាម​កាលៈទេសៈ និង​ផ្ដល់​នូវ​​ជំនួយ​ដ៏​ល្អ​បំផុត។"
+      container_first_panel_fourth_title: "រៀបចំ​សកម្មជន​យុទ្ធនាការ"
+      container_first_panel_fourth_desc: "ជា​មួយ Verboice សកម្មជន​​អាច​រៀបចំ​សមាជិក​របស់​ពួកគេ​ពី​កន្លែង​ណាមួយ​ក្នុង​ពិភពលោក ដោយ​ប្រើ​តែ​ទូរស័ព្ទ​ប៉ុណ្ណោះ។ ពី​ព័ត៌មាន​ស្ដី​អំពី​វិធី​ចូលរួម​សារ​បំផុត​គំនិត​​ពី​អ្នក​ដឹកនាំ​សហគមន៍ ការ​ប្រាស្រ័យ​ទាក់ទង​​​ទៅ​ខាង​ក្រៅ​អាច​ត្រូវ​បាន​ថត​ និង​ប្រើ​បាន​ភ្លាមៗ​យ៉ាង​ងាយស្រួល។ ដើម្បី​តាមដាន​អ្នក​រាល់​គ្នា សកម្មជន​អាច​ចែករំលែក​គំនិត​អំពី​អាទិភាព​ និង​គំនិត​ផ្ដួចផ្ដើម​ថ្មីៗ​ពី​ទូរស័ព្ទ​ចល័ត ឬ​ទូរស័ព្ទ​ប្រើ​ខ្សែ​។ មិន​ថា​មាន​អ្វី​កើត​ឡើង​ទេ Verboice អាច​ធ្វើ​ការ​ផ្លាស់ប្ដូរ​យ៉ាង​ងាយស្រួល​ដើម្បី​សម្រេច​គោល​បំណង។ "
+      container_features_title: "លក្ខណៈ"
+      container_features_point_one: "ចំណុច​ប្រទាក់​បណ្ដាញ​សាមញ្ញ​សម្រាប់​បង្កើត​ប្រព័ន្ធ​ឆ្លើយតប​ជា​សំឡេង​​អន្តរកម្ម"
+      container_features_point_two: "រួម​បញ្ចូល​យ៉ាង​ងាយស្រួល​ជា​មួយ​នឹង​គម្រោង​មាន​ស្រាប់​របស់​អ្នក​ ដោយ​ប្រើ​ស្តង់ដារ​សហគ្រាស។"
+      container_features_point_three: "ដំណើរការ​​ស្ទើរ​តែ​គ្រប់ VoIP ឬ​អាច​ដំឡើង​ជា​ម៉ាស៊ីនមេ​មូលដ្ឋាន​ដោយ​​​​ផ្ដល់​ជា​បណ្ដាញ​ទូរស័ព្ទ"
+      container_features_point_four: "កាលវិភាគ Verboice ធ្វើ​ការ​ហៅ​ដោយ​អនុលោម​តាម​ពេលវេលា​របស់​អ្នក"
+      container_features_point_five: "ចុះ​កំណត់​ហេតុ​​សេចក្ដី​លម្អិត​នៃ​ការ​ចុច​ប៊ូតុង​​រាល់ពេល​ហៅ"
+      container_features_point_six: "រួម​បញ្ចូល​ជា​មួយ​កម្មវិធី​កូដ​ចំហរ​សម្រាប់​ផ្ញើ​សារ/PBX ដូច​ជា Asterisk និង Freeswitch"
+      container_features_point_senven: "អាច​គាំទ្រ​ VoIP កម្រិត​ខ្ពស់ និង​ switches ផ្ទាល់​ខ្លួន។"
+      container_second_title: "តើ​វា​ដំណើរ​ការ​យ៉ាង​ដូចម្ដេច?"
+      container_second_desc: "ដើម្បី​ចាប់ផ្ដើម ដំបូង​រៀបចំ​លេខ​ទូរស័ព្ទ​សម្រាប់​ប្រើ​ក្នុង Verboice ។ បន្ទាប់​មក ថត​សារ​​​​សម្រាប់​ប្រើ​ ផ្ទុកឡើង ឬ​ប្រើ​កម្មវិធី​តាម​ប​ណ្ដាញ​ Verboice ដោយ​ផ្ទាល់។ ពេល​អ្នក​បាន​ថត​សារ​​របស់​អ្នក​រួច​ហើយ បង្កើត​លំដាប់​រុករក​នៃ​កម្មវិធី​របស់​អ្នក ដោយ​ប្រើ​ឧបករណ៍​ងាយស្រួល​ប្រើ​ប្រាស់​របស់ Verboice ហើយ​ត្រួតពិនិត្យ​វា​ដោយ​ប្រើគំនូស​តាង​លំហូរ​លើ​អេក្រង់។ បន្ទាប់​មក​សមាជិក​សហគមន៍​អាច​ចូល​កម្មវិធី​អន្តរកម្ម​របស់​អ្នក​តាម​ទូរស័ព្ទ។  អ្នក​ហៅ​នឹង​ស្ដាប់​ឮ​ឯកសារ​សំឡេង​របស់​អ្នក ដែល​​តាម ធម្មតា​សួរ​​​ពួក​គេ ការ​ឆ្លើយ​សំណួរ​នោះ​អាច​ធ្វើ​​តាម​សំឡេង ឬ​ប្រើ​​​ការ​ចុច​ប៊ូតុង ហើយ​បន្ទាប់​មក​នឹង​ស្ដាប់​ឮ​ឯកសារ​សំឡេង​បន្ទាប់​ ដែល​​អ្នក​បាន​បញ្ជាក់​ដើម្បី​ឲ្យ​ដំណើរការ​​ ដោយ​ផ្អែក​លើ​ការ​ឆ្លើយត​របស់​អ្នក​ហៅ​ចំពោះ​សំណួរ​មុន។  ចម្លើយត្រូវ​បាន​ប្រមូល​ដោយ​ស្វ័យ​ប្រវត្តិ ហើយ​អ្នក​អាច​ចុះ​កំណត់​ហេតុ​ក្នុង​គណនី​ Verboice របស់​អ្នក​ ដើម្បី​​ត្រួតពិនិត្យ​ពួកវា​​ពេល​ក្រោយ។"
+      container_third_title: "តើ​អ្នក​ណា​បាន​ប្រើ​វា?"
+      container_third_desc: ""
+      container_third_panel_first_title: "សង្គ្រោះ​ជីវិត​នៅ​ពេល​កើត"
+      container_third_panel_first_desc: "ការ​តាមដាន​ទារក​នឹង​​ត្រួតពិនិត្យ​យ៉ាង​ល្អិតល្អន់​ដោយ​ផ្ទាល់​ចំពោះ​ស្ត្រី​ក្នុង​រយៈ​ពេល​វិភាគ​មុន និង​ក្រោយ​​ពេល​កើត។ កម្មវិធី​ទូរស័ព្ទចល័ត​នេះ ត្រូវ​បាន​អភិវឌ្ឍន៍​ជា​មួយ​ដៃ​គូ​នៅ Pop Council នឹង​ប្រើ​បច្ចេកវិទ្យា​ឆ្លើយតប​ជា​សំឡេង​អន្តរកម្ម​ ដើម្បី​ដឹង​អំពី​បញ្ហា​ផ្សេង និង​មាន​វិធានការ។ ស្ត្រី​នឹង​ស្ដាប់​សំណួរ​ជ្រើសរើស​ជា​ភាសា​ផ្ទាល់​ខ្លួន​របស់​ពួក​គេ ហើយ​ឆ្លើយតប​តាមរយៈ​ការ​ចុច​ប៊ូតុង។ ការ​តាមដាន​ទារក​នឹង​វាយតម្លៃ​ការ​ឆ្លើយតប ហើយ​ប្រសិន​បើ​ចាំបាច់​ផ្ញើ​ព័ត៌មាន ផ្ដល់​អនុសាសន៍ និង​បញ្ជូន​ទៅ​បុគ្គលិក​សុខាភិបាល​សហគមន៍។"
+      container_third_panel_second_title: "កាកបាទ​ក្រហម"
+      container_third_panel_second_desc: "InSTEDD បាន​រចនា អភិវឌ្ឍន៍ និង​សាកល្បង​កម្មវិធី (Watchfire) ដើម្បី​ជួយ​កាកបាទ​ក្រហម​អាមេរិកាំង​ (ARC) ក្នុង​ការ​លើក​កម្ពស់​សហគមន៍​របស់​ពួក​គេ ឆ្លើយ​តប​នឹង​​កម្រិត​គ្រោះ​មហន្តរាយ​​ក្នុង​តំបន់​ឈូង​សមុទ្រ San Francisco ។ បន្ទាប់​ពី​ធ្វើការ​យ៉ាង​ជិតស្និទ្ធ​ជា​មួយ​ ARC ស្ដី​អំពី​ការ​វាយតម្លៃ​តម្រូវការ យើង​ដឹង​ថា អាទិភាព​ខ្ពស់​បំផុត​របស់​យើង​គឺ​បង្កើន​ល្បឿន និង​ការ​សម្របសម្រួល​ក្រុម​សកម្មភាព​គ្រោះមហន្តរាយ​ (DATs) របស់​កាកបាទ​ក្រហម​អាមេរិកាំង។ Watchfire ហៅ​ទូរស័ព្ទ និង​ផ្ញើ​សារ SMS ទៅ​អ្នក​ស្ម័គ្រចិត្ត​ ដើម្បី​សួរ​ពួកគេ​ថាតើ ពួកគេ​អាច​ឆ្លើយតប​នឹង​​បញ្ហា​បន្ទាន់ ឬ​ផ្ដល់​អ្នក​ឆ្លើយត​បដែល​មាន​សមត្ថភាព​​ជា​មួយ​នឹង​ព័ត៌មាន​ដែល​គ្រប់គ្រាន់​ដល់​កន្លែង​​​មាន​គ្រោះ​មហន្តរាយ។ "
+      container_fouth_title: "តើ​ខ្ញុំ​អាច​ជួយ​ដោយ​របៀប​ណា?"
+      container_fourth_suggestion_features_request: "ទទួល​សំណើ ឬ​ស្នើ​លក្ខណៈ​ផ្សេងៗ? ចូល​រួម​ពិភាក្សា។"
+      container_fourth_join_our_discussion_list: "ចូល​រួម​បញ្ជី​ពិភាក្សា​របស់​យើង"
+      container_fourth_get_code_as_developer: "ចាប់ផ្ដើម​ជា​មួយ​កូដ? ជួយ​យើង​អភិវឌ្ឍន៍​កម្មវិធី (ធ្វើ​ឲ្យ​ពិភពលោក​ក្លាយ​ជា​កន្លែង​កាន់​តែ​ប្រសើរ​នៅ​ពេល​តែ​មួយ)។"
+      container_fourth_our_backlog: "មើល​តារាង​ការងារ​របស់​យើង"
+
+    layouts:
+      action:
+        home: "ទំព័រដើម"
+        projects: "គម្រោង"
+        channels: "ឆានែល"
+        calls: "ការហៅ"
+        settings: "ការ​កំណត់"
+        report_bug: "រាយការណ៍​កំហុស"
+        sign_out: "ចេញ"
+        create_account: "បង្កើត​គណនី"
+        log_in: "ចូល"
+        help: "ជំនួយ"
+
+    projects:
+      call_logs:
+        index:
+          title: "នៅ​ទីនេះ​អ្នក​អាច​ឃើញ​សេចក្ដី​លម្អិត​នៃ​ការ​ហៅ​ចូល និង​ចេញ។"
+          label:
+            desc: "មើលពត័មានលម្អិតអំពីការហៅចូល និង ការហៅចេញ"
+            select_call_flow: "សូមជ្រើសរើសលំហូរការហៅចូលដើម្បីបង្ហាញ"
+            id: "លេខ​សម្គាល់"
+            started: "បាន​ចាប់ផ្ដើម"
+            finished: "បាន​បញ្ចប់"
+            duration_in_second: "រយៈពេលជាវិនាទី"
+            caller_id: "លេខ​សម្គាល់​អ្នក​ហៅ"
+            direction: "ទិសដៅ"
+            number_retried: "ព្យាយាម(ចំនួន)"
+            channel: "ឆានែល"
+            queue: "ជួរ"
+            project: "គម្រោង"
+            call_flow: "លំហូរ​ការ​ហៅ"
+            status: "ស្ថានភាព"
+            interaction: "អន្តរកម្ម"
+            call_log: "កំណត់​ហេតុ​ហៅ"
+            all_call_flow: "លំហូរនៃការហៅទាំងអស់"
+            after: "បន្ទាប់ពី"
+            before: "មុនពេល"
+            phone_number: "លេខទូរស័ព្ទ"
+            advanced_search: "ស្វែងរកកម្រិតខ្ពស់"
+            date: "កាលបរិច្ឆេទ"
+          action:
+            view_details: "មើល​សេចក្ដី​លម្អិត"
+            cancel: "បោះបង់"
+            search: "ស្វែងរក"
+
+      _enqueue_new_call:
+        title: "ដាក់​ការ​ហៅ​ថ្មី​ជា​ជួរ"
+        desc: "បន្ថែម​ការ​ហៅ​ថ្មី​ទៅ​ជួរ​គម្រោង​នេះ"
+        label:
+          call_flow: "លំហូរ​ការ​ហៅ"
+          select_call_flow: "ជ្រើស​លំហូរ​ការ​ហៅ..."
+          channel: "ឆានែល"
+          language: "ភាសា"
+          variables: "អថេរ"
+          select_channel: "ជ្រើស​ឆានែល..."
+          schedule: "កាលវិភាគ"
+          select_schedule: "ជ្រើស​កាលវិភាគ..."
+          not_before: "មិនមែន​មុន"
+          on_time_zone: "នៅ​តំបន់​ពេលវេលា"
+          phone_numbers: "លេខ​ទូរស័ព្ទ"
+          desc: "បញ្ចូល​លេខ​ទូរស័ព្ទ​នីមួយៗ​​ក្នុង​បន្ទាត់​ផ្សេង​"
+        action:
+          enqueue_calls: "ដាក់​ការ​ហៅ​ជា​ជួរ"
+
+      _form:
+        errors:
+          prohibited:
+            one: "មានកំហុស ១ ដែលបាន​ការ​ពារ​មិន​ឲ្យ​រក្សាទុក​​គម្រោងនេះ"
+            other: "មានកំហុស %{count} ដែលបាន​ការ​ពារ​មិន​ឲ្យ​រក្សាទុក​​គម្រោងនេះ"          
+        label:
+          name: "ឈ្មោះ"
+          time_zone: "ល្វែងម៉ោង"
+          properties: "លក្ខណសម្បត្តិ"
+          languages: "ភាសា"
+          default_language: "ភាសាចម្បង"
+          supported_languages: "ភាសា​ដែល​អ្នកនឹង​គាំទ្រ​ក្នុង​គម្រោង"
+          add_new_language: "បន្ថែម​ភាសា​ថ្មី"
+          text_to_speech_engine: "Text-to-speech Engine"
+          status_callback: "ស្ថានភាព​ហៅ​ទៅ​វិញ"
+          url: "URL"
+          user: "អ្នក​ប្រើ"
+          password: ពាក្យ​សម្ងាត់
+        action:
+          save: រក្សាទុក
+          cancel: បោះបង់
+          update: ធ្វើ​បច្ចុប្បន្នភាព
+
+      edit:
+      index:
+        title: "គម្រោង"
+        label:
+          my_projects: គម្រោង​ខ្ញុំ
+          no_projects: អ្នក​មិន​​ទាន់មាន​គម្រោង​ទេ។
+        action:
+          create_project: បង្កើត​គម្រោង
+
+      new:
+        title: គម្រោង​ថ្មី
+
+      show:
+        title: ហៅ
+        concurrent_call: ចំនួនកំពុងហៅចេញចូល
+        concurrent_call_detail: ចំនួនកំពុងហៅចេញចូល
+        desc: ចំនួន​ការ​ហៅ​ចេញ និង​ទទួល​សរុប
+        label:
+          call: ហៅ
+          calls: ហៅ
+          registered: បាន​ចុះ​ឈ្មោះ
+          properties: លក្ខណសម្បត្តិ
+          in_this_project: ក្នុង​គម្រោង​នេះ
+          active_call: ការ​ហៅ​សកម្ម
+        action:
+          download_csv: ទាញយកជា​ឯកសារ​ CSV
+          edit_call_flows: កែ​លំហូរ​ការ​ហៅ
+          manage_channels: គ្រប់គ្រង​ឆានែល
+          view_calls: មើល​ការ​ហៅ
+          edit_settings: កែ​ការ​កំណត់
+          delete_this_project: លុប​គម្រោង​នេះ
+          confirm_delete: តើ​អ្នក​ប្រាកដ​ជា​ចង់​លុប​គម្រោង
+
+    queued_calls:
+      index:
+        label:
+          queued_calls_for_channel: ការ​ហៅ​បាន​ដាក់​ជា​ជួរ​សម្រាប់​ឆានែល
+          active_calls: ការ​ហៅ​សកម្ម
+          no_queued_calls_found: រក​មិន​ឃើញ​ការ​ហៅ​បាន​ដាក់​ជា​ជួរ។
+          queued_call: ការ​ហៅ​បាន​ដាក់​ជា​ជួរ
+          queued_at: បាន​ដាក់​ជាជួរ​នៅ
+          phone_number: លេខ​ទូរស័ព្ទ
+        action:
+          refresh: ផ្ទុក​ឡើង​វិញ
+
+    resources:
+      _localized_resource_selector_template:
+      _record_localized_resource_template:
+        label:
+          placeholder: "នៅ​ទីនេះ​សរសេរ​ការ​ពណ៌នា​សម្រាប់​ការ​ថត ឬ​ជា​កម្មវិធី​រំលឹក​សម្រាប់​អ្នក ឬ​ជា​ឯកសារ​យោង​សម្រាប់​មនុស្ស​ដែល​នឹង​ថត​សារ។"
+
+      _resource_template:
+        label:
+          placeholder: បញ្ចូល​ឈ្មោះ​ធនធាន
+        action:
+          save: រក្សាទុក
+          cancel: បោះបង់
+          remove_this_resource: លុប​ធនធាន​នេះ
+
+      _text_localized_resource_template:
+        label:
+          placeholder: 
+
+      _undefined_localized_resource_template:
+        label:
+          missing_translation: បាត់​ការ​បកប្រែ
+
+      _upload_localized_resource_template:
+        label:
+          no_file_uploaded_yet: មិន​ទាន់​មាន​ឯកសារ​បាន​ផ្ទុក​ឡើ​ងទេ
+          placeholder: 'នៅ​ទីនេះ​សរសេរ​ការ​ពណ៌នា​សម្រាប់​ការ​ថត ឬ​ជា​កម្មវិធី​រំលឹក​សម្រាប់​អ្នក ឬ​ជា​ឯកសារ​យោង​សម្រាប់​មនុស្ស​ដែល​នឹង​ថត​សារ។'
+        action:
+          upload: ផ្ទុក​ឡើង
+          replace: ជំនួស
+
+      _url_localized_resource_template:
+        label:
+          placeholder: 'នៅ​ទីនេះ​សរសេរ​ URL ដែល​មាន​ឯកសារ​សំឡេង ដែល​អ្នក​ចង់​ឲ្យ​អ្នក​ស្ដាប់​ឮ'
+
+      index:
+        title: ធនធាន
+        desc: អ្នក​អាច​​បកប្រែ​ខ្លឹមសារ​នៃ​លំហូរ​ការ​ហៅ​របស់​អ្នក​ជា​ភាសា​ផ្សេង
+        label:
+          name: ឈ្មោះ
+        action:
+          create_resource: បង្កើត​ធនធាន
+
+    schedules:
+      _box:
+      _box_content:
+        errors:
+          prohibited:
+            one: "មានកំហុស ១ ដែលបាន​ការ​ពារ​មិន​ឲ្យ​រក្សាទុក​​កាលវិភាគ​នេះ"
+            other: "មានកំហុស %{count} ដែលបាន​ការ​ពារ​មិន​ឲ្យ​រក្សាទុក​​កាលវិភាគ​នេះ"
+        action:
+          confirm_delete: តើ​អ្នក​ប្រាកដ​ឬ?
+
+      _form:
+        label:
+          name: ឈ្មោះ
+          days: ថ្ងៃ
+          from: ពី
+          to: "ទៅ"
+          retries: ព្យាយាម​ម្ដង​ទៀត
+          retries_desc: បញ្ចូល​ការ​ពន្យារ​បំបែក​ដោយ​សញ្ញា​ក្បៀស​គិត​ជា​ម៉ោង
+          sun: "អាទិត្យ"
+          mon: "ចន្ទ"
+          tue: "អង្គារ"
+          wed: "ពុធ"
+          thu: "ព្រហស្បតិ៍"
+          fri: "សុក្រ"
+          sat: "សៅរ៍"
+        action:
+          save: រក្សាទុក
+          update: ធ្វើ​បច្ចុប្បន្នភាព
+          cancel: បោះបង់
+
+      _summary:
+        action:
+          edit: កែសម្រួល
+
+      index:
+        title: កាលវិភាគ
+        action:
+          add_schedule: បន្ថែម​កាលវិភាគ
+
+    shared:
+      _project_tabs_and_title:
+        action:
+          overview: ទិដ្ឋភាព​ទូទៅ
+          calls: ហៅ
+          call_flows: លំហូរ​ការ​ហៅ
+          resources: ធនធាន
+          schedules: កាលវិភាគ
+          phone_book: សៀវភៅ​ទូរស័ព្ទ
+          external_services: សេវា​ខាង​ក្រៅ
+          settings: ការ​កំណត់

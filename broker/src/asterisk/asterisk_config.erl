@@ -27,6 +27,8 @@ generate_config([Channel | Rest], RegFile, ChannelsFile, ResolvCache, ChannelInd
   Username = channel:username(Channel),
   Password = channel:password(Channel),
   Domain = channel:domain(Channel),
+  SipPort = channel:port(Channel),
+  Protocol = channel:protocol(Channel),
   Number = channel:number(Channel),
 
   file:write(ChannelsFile, ["[", Section, "](!)\n"]),
@@ -44,6 +46,19 @@ generate_config([Channel | Rest], RegFile, ChannelsFile, ResolvCache, ChannelInd
 
   file:write(ChannelsFile, "insecure=invite,port\n"),
   file:write(ChannelsFile, "context=verboice\n"),
+
+  if length(SipPort) > 0 ->
+    file:write(ChannelsFile, ["port=", SipPort, "\n"]);
+    true -> ok
+  end,
+
+  case Protocol of
+    <<"tcp">> ->
+      file:write(ChannelsFile, "transport=tcp\n"),
+      file:write(ChannelsFile, "tcpenable=yes\n");
+    _ -> ok
+  end,
+
   file:write(ChannelsFile, "\n"),
 
   case channel:is_outbound(Channel) of

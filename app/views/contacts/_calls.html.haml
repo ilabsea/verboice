@@ -1,0 +1,48 @@
+%h2 Call logs
+
+%table.GralTable
+  %tr
+    %th= t('views.call_logs.index.label.duration')
+    %th= t('views.call_logs.index.label.started')
+    %th= t('views.call_logs.index.label.finished')
+    %th= t('views.call_logs.index.label.direction')
+    %th= t('views.call_logs.index.label.channel')
+    %th= t('views.call_logs.index.label.call_flow')
+    %th= t('views.call_logs.index.label.status')
+    - @project_variables.each do |variable|
+      %th= variable.name
+    %th &nbsp;
+
+  - @logs.each do |log|
+    - answers = Hash[log.call_log_answers.map {|c| [c.project_variable_id, c.value] }]
+    - recorded_audios = Hash[log.call_log_recorded_audios.map {|r| [r.project_variable_id, r.key] }]
+
+    %tr
+      %td= log.duration if log.duration && log.duration > 0
+      %td= datetime_format log.created_at, log.project_time_zone
+      %td= datetime_format log.finished_at, log.project_time_zone
+      %td= log.direction
+      %td= log.channel.try(:name)
+      %td= log.call_flow.try(:name)
+      %td
+        - if log.state == CallLog::STATE_COMPLETED
+          = log.state
+        - else
+          = CallLog::FAIL_REASONS[log.fail_reason]
+
+      - @project_variables.each do |variable|
+        - if answers.has_key? variable.id
+          %td= answers[variable.id]
+
+        - elsif recorded_audios.has_key? variable.id
+          %td= link_to '', result_call_log_path(log, key: recorded_audios[variable.id]), :class => 'fimport'
+
+        - else
+          %td &nbsp;
+
+      %td= link_to t('views.call_logs.index.action.view_details'), call_log_path(log)
+
+%br/
+
+%div= page_entries_info @logs, :entry_name => t('views.call_logs.index.label.call_log')
+= will_paginate @logs, :param_name => 'page'

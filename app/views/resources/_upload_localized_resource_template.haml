@@ -1,7 +1,7 @@
 %script{type: "text/html", id: "upload_localized_resource_template"}
   %div{ko(visible: '$parent.editing')}
     / ko ifnot: hasAudio()
-    %span.alert-orange-b No file uploaded yet
+    %span.alert-orange-b= t('views.resources._upload_localized_resource_template.label.no_file_uploaded_yet')
     / /ko
     / ko if: hasAudio()
     %span.clickable{'data-bind' => 'text: filename, click: download'}
@@ -10,15 +10,15 @@
     .right
       .upload-file.fexport
         %input{:type => 'file', 'data-bind' => 'fileupload: url, fileuploadSubmit: submit, fileuploadDone: done, fileuploadAdd: add'}
-      Upload
+      = t('views.resources._upload_localized_resource_template.action.upload')
     / /ko
     / ko if: hasAudio()
     .right
       .upload-file.fsync
         %input{:type => 'file', 'data-bind' => 'fileupload: url, fileuploadSubmit: submit, fileuploadDone: done, fileuploadAdd: add'}
-      Replace
+      = t('views.resources._upload_localized_resource_template.action.replace')
     / /ko
   .w100
-    %textarea{:rows => 6, :placeholder => 'Write here a description of the recording, either as a reminder for you or as a reference for the person that will record the message.', 'data-bind' => 'value: description, visible: $parent.editing'}
+    %textarea{:rows => 6, :placeholder => "#{t('views.resources._upload_localized_resource_template.label.placeholder')}", 'data-bind' => 'value: description, visible: $parent.editing'}
   %span.i18b-file{ko(visible: '! $parent.editing()')}
   %span{ko(text: 'description', visible: '! $parent.editing()')}

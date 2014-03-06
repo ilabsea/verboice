@@ -34,6 +34,8 @@ onWorkflow ->
       @default = ko.observable( new DefaultOption(attrs.default, @))
 
       # Validations
+      @is_explanation_resource_invalid = ko.computed () =>
+        if @resources.explanation.name() and not @resources.explanation.is_valid() then true else false
       @is_options_resource_invalid = ko.computed () =>
         not @resources.options.is_valid()
 
@@ -41,7 +43,7 @@ onWorkflow ->
         (@options().length < 1)
 
       @is_invalid = ko.computed () =>
-        @is_name_invalid() or @are_options_invalid() or @is_options_resource_invalid()
+        @is_name_invalid() or @are_options_invalid() or @is_options_resource_invalid() or @is_explanation_resource_invalid()
 
 
     @initialize: (hash) ->
@@ -78,7 +80,8 @@ onWorkflow ->
 
     to_hash: () =>
       $.extend(super,
-        store: (if @defines_store() then @store() else null)
+        # store: (if @defines_store() then @store() else null)
+        store: (if @store() then @store() else null)
         options: (option.to_hash() for option in @options())
         invalid_resource: @resources.invalid.to_hash()
         explanation_resource: @resources.explanation.to_hash()

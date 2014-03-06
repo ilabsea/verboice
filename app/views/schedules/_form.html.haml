@@ -1,28 +1,28 @@
 = form_for [project, schedule], :remote => true do |f|
   .toptitle
-    %span Name
+    %span= t('views.schedules._form.label.name')
   .middle
     = f.text_field :name, :class => 'w30'
-    %p Days
+    %p= t('views.schedules._form.label.days')
     %ul.days
       = f.hidden_field :weekdays
-      - %w(Sun Mon Tue Wed Thu Fri Sat).each_with_index do |day_name, i|
+      - [t('views.schedules._form.label.sun'), t('views.schedules._form.label.mon'), t('views.schedules._form.label.tue'), t('views.schedules._form.label.wed'), t('views.schedules._form.label.thu'), t('views.schedules._form.label.fri'), t('views.schedules._form.label.sat')].each_with_index do |day_name, i|
         %li{:class => schedule.includes_day?(i) ? '' : 'no'}
           = day_name
     %p
-      From
+      = t('views.schedules._form.label.from')
       = f.text_field :time_from_str, :size => 4
-      to
+      = t('views.schedules._form.label.to')
       = f.text_field :time_to_str, :size => 4
 
-    %p Retries
-    %p.desc Enter comma separated delays in hours
+    %p= t('views.schedules._form.label.retries')
+    %p.desc= t('views.schedules._form.label.retries_desc')
     = f.text_field :retries, :class => 'ux-text w30'
     %br
     %br
   %hr
   - if schedule.new_record?
-    %button.white{:type => "submit"} Save
+    %button.white{:type => "submit"}= t('views.schedules._form.action.save')
   - else
-    %button.white{:type => "submit"} Update
-  = link_to 'Cancel', '#', :class => "tgrey #{schedule.new_record? ? 'remove_unsaved_element' : 'collapse_trigger'}", :style => 'top: 1px;'
+    %button.white{:type => "submit"}= t('views.schedules._form.action.update')
+  = link_to t('views.schedules._form.action.cancel'), '#', :class => "button white cancel #{schedule.new_record? ? 'remove_unsaved_element' : 'collapse_trigger'}", :style => 'top: 1px;'

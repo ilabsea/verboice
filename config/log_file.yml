@@ -1,0 +1,3 @@
+log_dir: /tmp/log/ # /tmp/log/ dir must be existed
+s3_log_dir: /tmp/log/s3/
+reminder_schedule_log_dir: /tmp/log/reminder_schedule/

@@ -159,4 +159,29 @@ describe ContactsController do
     end
   end
 
+  describe "GET invitable" do
+    before(:each) do
+      contact.addresses.destroy_all # clear the default faker one for addresses in contact
+      contact.addresses.build(address: "1000").save
+    end
+
+    it "should contact has first address is '1000'" do
+      contact.first_address.should == "1000"
+    end
+
+    it "should response 200 and assign all the contacts in project that matches to term to @contacts" do
+      get :invitable, :project_id => @project.id, term: "100"
+
+      response.should be_success
+      assigns(:contacts).should eq([contact])
+    end
+
+    it "should response 200 and assigns array of empty when there's no any contacts match the term to @contacts" do
+      get :invitable, :project_id => @project.id, term: "999"
+
+      response.should be_success
+      assigns(:contacts).should be_empty
+    end
+  end
+
 end

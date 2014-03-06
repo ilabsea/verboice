@@ -1,5 +1,8 @@
 = render 'shared/project_tabs_and_title', :project => @project
 
-%h2 Contact
+%h2= t('views.contacts.edit.label.title')
 
-= render 'form'
+%table
+  %tr
+    %td{ valign: 'top', width: '30%' }= render 'form'
+    %td{ valign: 'top' }= render 'calls'

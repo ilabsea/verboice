@@ -101,9 +101,9 @@ module Parsers
           conditions = @valid_values.split(/\s*[,;]\s*/).map do |clause|
             items = clause.split(/\s*-\s*/)
             if items.length == 1
-              "(digits == #{items.first})"
+              "(digits == '#{items.first}')"
             else
-              "(digits >= #{items.first} && digits <= #{items.last})"
+              "(digits >= '#{items.first}' && digits <= '#{items.last}')"
             end
           end
           conditions << '(digits == null)' if @min_input_length == 0

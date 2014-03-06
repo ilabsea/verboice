@@ -2,6 +2,8 @@
 
 onWorkflow ->
   class window.UploadLocalizedResource extends LocalizedResource
+    AUDIO_UPLOAD = {NO_SELECTED: -1, INVALID: 0, VALID: 1}
+    INVALID_AUDIO_UPLOAD_MSG = "Invalid audio file"
 
     constructor: (hash = {}) ->
       super(hash)
@@ -11,6 +13,7 @@ onWorkflow ->
 
       @description = ko.observable hash.description
       @has_audio = ko.observable hash.has_uploaded_audio
+      @uploaded_status = ko.observable hash.uploaded_status ? AUDIO_UPLOAD.NO_SELECTED
       @filename = ko.observable hash.filename
       @url = ko.computed =>
         if @is_saved()
@@ -35,7 +38,12 @@ onWorkflow ->
 
     # fileupload callbacks
     add: (e, data) =>
-      @filename(data.files[0].name)
+      if data.files[0].type in ["audio/mp3", "audio/mpeg", "audio/x-wav", "audio/wav"]
+        @uploaded_status(AUDIO_UPLOAD.VALID)
+        @filename(data.files[0].name)
+      else
+        @uploaded_status(AUDIO_UPLOAD.INVALID)
+        @filename(INVALID_AUDIO_UPLOAD_MSG)
       data.url = @url()
 
     submit: () =>

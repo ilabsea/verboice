@@ -31,6 +31,8 @@ module Parsers
         @call_flow = call_flow
         @next = params['next']
         @root_index = params['root']
+        @old_persisted_variable_name = params['old_store']
+        @persisted_variable_name = params['store']
       end
 
       def is_root?
@@ -48,7 +50,7 @@ module Parsers
           compiler.AssignValue "current_step_name", "#{@name}"
           compiler.Trace context_for %("Record message. Download link: " + record_url(#{@id}))
           compiler.append @explanation_resource.equivalent_flow
-          compiler.Record @id, @name, {:stop_keys => @stop_key, :timeout => @timeout}
+          compiler.Record @id, @name, {:stop_keys => @stop_key, :timeout => @timeout, :old_var_name => @old_persisted_variable_name, :var_name => @persisted_variable_name}
           compiler.append @confirmation_resource.equivalent_flow
           compiler.append @next.equivalent_flow if @next
         end

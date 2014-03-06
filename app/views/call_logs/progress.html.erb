@@ -1,11 +1,11 @@
-<p>Call with <%= @log.address %> from channel <%= @log.channel.name %> (<%= @log.state %>)</p>
+<p><%= t('views.call_logs.index.label.call_with') %> <%= @log.address %> <%= t('views.call_logs.index.label.from_channel') %> <%= @log.channel.name %> (<%= @log.state %>)</p>
 <br />
 
 <table class="GralTable">
   <tr>
-    <th>Severity</th>
-    <th>When</th>
-    <th>Text</th>
+    <th><%= t('views.call_logs.index.label.severity') %></th>
+    <th><%= t('views.call_logs.index.label.when') %></th>
+    <th><%= t('views.call_logs.index.label.text') %></th>
   </tr>
   <% @log.structured_details.reverse.each do |detail| %>
     <tr class="<%= detail[:severity] %>">

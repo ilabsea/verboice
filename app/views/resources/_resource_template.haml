@@ -2,7 +2,7 @@
   %tr{ko(click: 'edit', css: '{ clickable: !editing() }')}
     %td
       %span.name{'data-bind' => 'visible: !editing(), text: name'}
-      = text_field_tag :name, '', :class => '', 'data-bind' => 'visible: editing, value: name', :placeholder => 'Enter resource name'
+      = text_field_tag :name, '', :class => '', 'data-bind' => 'visible: editing, value: name', :placeholder => t('views.resources._resource_template.label.placeholder')
     / ko with: firstResource
     %td{ko(template: '{name: template}')}
     / /ko
@@ -11,8 +11,8 @@
     / /ko
   %tr{ko(visible: 'editing')}
     %td
-      %button.white{ko(click: 'save')} Save
-      %a.cancel{ko(click: 'cancel', visible: 'editing'), href: '#'} Cancel
+      %button.white{ko(click: 'save')}= t('views.resources._resource_template.action.save')
+      %a.button.white.cancel{ko(click: 'cancel', visible: 'editing'), href: '#'}= t('views.resources._resource_template.action.cancel')
     %td
     %td.text-right
-      %button.fdelete{ 'data-bind' => 'click: removeWithConfirm' } Remove this resource
+      %button.fdelete{ 'data-bind' => 'click: removeWithConfirm' }= t('views.resources._resource_template.action.remove_this_resource')

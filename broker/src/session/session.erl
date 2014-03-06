@@ -153,10 +153,15 @@ ready({dial, RealBroker, Channel, QueuedCall}, _From, State = #state{session_id 
       {reply, ok, dialing, State#state{session = NewSession}, timer:minutes(2)}
   end.
 
-dialing({answer, Pbx}, State = #state{session_id = SessionId, session = Session, resume_ptr = Ptr}) ->
+dialing({answer, Pbx}, State = #state{session_id = SessionId, session = Session = #session{call_log = CallLog}, resume_ptr = Ptr}) ->
+  NewQueuedCall = Session#session.queued_call#queued_call{answered_at = {datetime, calendar:universal_time()}},
+  NewQueuedCallSession = Session#session{queued_call = NewQueuedCall},
+
   error_logger:info_msg("Session (~p) answer", [SessionId]),
+  CallLog:update([{started_at, calendar:universal_time()}]),
+
   monitor(process, Pbx:pid()),
-  NewSession = Session#session{pbx = Pbx},
+  NewSession = NewQueuedCallSession#session{pbx = Pbx},
   notify_status('in-progress', NewSession),
   FlowPid = spawn_run(NewSession, Ptr),
 
@@ -247,29 +252,66 @@ push_results(#session{call_flow = #call_flow{id = CallFlowId, store_in_fusion_ta
   delayed_job:enqueue(Task);
 push_results(_) -> ok.
 
-finalize(completed, State = #state{session = #session{call_log = CallLog}}) ->
-  CallLog:update([{state, "completed"}, {finished_at, calendar:universal_time()}]),
+finalize(completed, State = #state{session = Session =  #session{call_log = CallLog}}) ->
+  Retries = case Session#session.queued_call of
+    undefined -> 0;
+    QueuedCall -> QueuedCall#queued_call.retries
+  end,
+
+  Call = call_log:find(CallLog:id()),
+  % accumulative duration
+  Duration = Call:duration() + answer_duration(Session),
+  CallLog:end_step_interaction(),
+  CallLog:update([{state, "completed"}, {finished_at, calendar:universal_time()}, {duration, Duration}, {retries, Retries}]),
   {stop, normal, State};
 
 finalize({failed, Reason}, State = #state{session = Session = #session{call_log = CallLog}}) ->
-  NewState = case Session#session.queued_call of
-    undefined -> "failed";
-    QueuedCall ->
-      case QueuedCall:reschedule() of
-        no_schedule -> failed;
-        max_retries ->
-          CallLog:error("Max retries exceeded", []),
-          "failed";
-        #queued_call{not_before = {datetime, NotBefore}} ->
-          CallLog:info(["Call rescheduled to start at ", httpd_util:rfc1123_date(calendar:universal_time_to_local_time(NotBefore))], []),
-          "queued"
-      end
-  end,
-  CallLog:update([{state, NewState}, {fail_reason, io_lib:format("~p", [Reason])}, {finished_at, calendar:universal_time()}]),
   StopReason = case Reason of
     {error, Error} -> Error;
-    _ -> normal
+    _ ->
+      {Retries, NewState} = case Session#session.queued_call of
+        undefined -> {0, "failed"};
+        QueuedCall ->
+          % reset answered_at for reschedule
+          NewQueuedCall = QueuedCall#queued_call{answered_at = undefined},
+          NewRetries = case NewQueuedCall#queued_call.retries of
+            undefined -> 0;
+            Value -> Value
+          end,
+
+          case should_reschedule(Reason) of
+            true -> 
+              case NewQueuedCall:reschedule() of
+                no_schedule -> {NewRetries, failed};
+                max_retries ->
+                  CallLog:error("Max retries exceeded", []),
+                  {NewRetries, "failed"};
+                #queued_call{not_before = {datetime, NotBefore}} ->
+                  CallLog:info(["Call rescheduled to start at ", httpd_util:rfc1123_date(calendar:universal_time_to_local_time(NotBefore))], []),
+                  {NewRetries, "queued"}
+              end;
+            false -> {NewRetries, "failed"}
+          end
+      end,
+
+      Call = call_log:find(CallLog:id()),
+      
+      % accumulative duration
+      Duration = Call:duration() + answer_duration(Session),
+      
+      % end step interaction
+      if
+        Reason =:= hangup; Reason =:= error -> CallLog:end_step_interaction();
+        true -> ok
+      end,
+
+      if
+        NewState == failed; NewState == "failed" -> CallLog:update([{state, NewState}, {fail_reason, io_lib:format("~p", [Reason])}, {finished_at, calendar:universal_time()}, {retries, Retries}, {duration, Duration}]);
+        true -> CallLog:update([{state, NewState}, {fail_reason, io_lib:format("~p", [Reason])}, {retries, Retries}, {duration, Duration}])
+      end,
+      normal
   end,
+
   {stop, StopReason, State}.
 
 spawn_run(Session = #session{project = Project}, undefined) ->
@@ -283,9 +325,17 @@ spawn_run(Session = #session{pbx = Pbx}, Ptr) ->
     try run(Session, Ptr) of
       {suspend, NewSession, NewPtr} ->
         gen_fsm:sync_send_event(SessionPid, {suspend, NewSession, NewPtr});
-      {Result, #session{js_context = JsContext}} ->
+      {{error, _}, NewSession} ->
+        finalize({failed, error}, #state{session = NewSession});
+      {Result, NewSession = #session{js_context = JsContext}} ->
         Status = erjs_context:get(status, JsContext),
-        gen_fsm:send_event(SessionPid, {completed, flow_result(Result, Status)})
+        FlowResult = flow_result(Result, Status),
+        case FlowResult of
+          {error, "marked as failed"} ->
+            notify_status(marked_as_failed, NewSession),
+            finalize({failed, marked_as_failed}, #state{session = NewSession});
+          _ -> gen_fsm:send_event(SessionPid, {completed, flow_result(Result, Status)})
+        end
     after
       Pbx:terminate()
     end
@@ -321,7 +371,7 @@ initialize_context(Context, #queued_call{variables = Vars}) ->
         VarName = binary_to_atom(iolist_to_binary(["var_", Name]), utf8),
         erjs_context:set(VarName, Value, C)
     end
-  end, Context, Vars);
+  end, Context, yaml_serializer:load(Vars));
 initialize_context(Context, _) -> Context.
 
 default_variables(Context, _ProjectVars, []) -> Context;
@@ -377,3 +427,27 @@ has_ended(Flow, Ptr) -> lists:nth(Ptr, Flow) =:= stop.
 eval(stop, Session) -> {finish, Session};
 eval([Command, Args], Session) -> Command:run(Args, Session);
 eval(Command, Session) -> Command:run(Session).
+
+answer_duration(#session{call_log = CallLog, queued_call = QueuedCall}) ->
+  AnsweredAt = case QueuedCall of
+    undefined ->
+      Call = call_log:find(CallLog:id()),
+      {_, StartedAt} = Call#call_log.started_at,
+      StartedAt;
+    _ ->
+      % reject and no_answer has no answered_at
+      case QueuedCall#queued_call.answered_at of
+        undefined -> undefined;
+        {_, NewAnsweredAt} -> NewAnsweredAt
+      end
+  end,
+
+  Now = calendar:universal_time(),
+  case AnsweredAt of
+    undefined -> 0;
+    _ -> calendar:datetime_to_gregorian_seconds(Now) - calendar:datetime_to_gregorian_seconds(AnsweredAt)
+  end.
+
+should_reschedule(marked_as_failed) -> false;
+should_reschedule(hangup) -> false;
+should_reschedule(_) -> true.

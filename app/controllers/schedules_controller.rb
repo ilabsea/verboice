@@ -19,7 +19,7 @@ class SchedulesController < ApplicationController
 
   respond_to :html
   expose(:project)
-  expose(:schedules) { project.schedules }
+  expose(:schedules) { project.schedules.enabled }
   expose(:schedule)
 
   def create
@@ -34,6 +34,6 @@ class SchedulesController < ApplicationController
 
   def destroy
     schedule.destroy
-    redirect_to project_schedules_path(project), :notice => "Schedule #{schedule.name} successfully deleted."
+    redirect_to project_schedules_path(project), :notice => I18n.t("controllers.schedules_controller.schedule_succesfully_deleted", :schedule_name => schedule.name)
   end
 end

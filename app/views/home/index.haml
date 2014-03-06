@@ -2,10 +2,10 @@
   .right
     .illustration
     %a.button.fpdf.right{:href => "/docs/instedd-verboice.pdf", :target=>"_blank"}
-      Download brochure (480 KB)
-  %h1.home Listen and respond
-  %p.sub to the voice of your community.
-  %p Voice is the most universal and inclusive means of communication, and it's an ideal way to expand the reach and impact of health and humanitarian technologies. Verboice is a free and open-source tool that makes it easy for anyone to create and run projects that interact via voice, allowing your users to listen and record messages in their own language and dialect or answer questions with a phone keypad. Verboice projects can start small and scale up, making it possible to improve lives even in communities previously closed off by literacy and technological barriers.
+      = "#{t('views.home.download_brochure')} (480 KB)"
+  %h1.home= t('views.home.listen_and_response')
+  %p.sub= t('views.home.listen_and_response_sub')
+  %p= t('views.home.listen_and_response_body')
 
   %br/
   %br/
@@ -14,17 +14,17 @@
   %br/
   - if current_account
     %p
-      Get started:
-      =link_button_to 'View your projects', projects_path, :class => "orange"
+      = "#{t('views.home.get_started')}:"
+      =link_button_to t('views.home.view_your_project'), projects_path, :class => "orange"
     %p
   - else
     %p
-      Get started:
-      = link_button_to 'Create an account', new_account_registration_path, :class => "orange"
+      = "#{t('views.home.get_started')}:"
+      = link_button_to t('views.home.create_an_account'), new_account_registration_path, :class => "orange"
     %p
     %p
-      Already a member?
-      = link_to 'Log in', new_account_session_path
+      = t('views.home.already_a_member')
+      = link_to t('views.home.log_in'), new_account_session_path
   .clear
   / #container
   .home-middle-bar
@@ -32,111 +32,111 @@
       %ul#benefits-container
         %li
           %span.i48grad-language.left
-          %h3 Overcome
-          %p literacy barriers with verbal communication
+          %h3= t('views.home.overcome')
+          %p= t('views.home.literacy_barriers_with_verbal_communication')
           %br{:clear => "all"}/
         %li
           %span.i48grad-sound.left
-          %h3 Create
-          %p voice-based programs without coding
+          %h3= t('views.home.create')
+          %p= t('views.home.voice_based_programs_without_coding')
           %br{:clear => "all"}/
         %li
           %span.i48grad-scale.left
-          %h3 Scales
-          %p to suit your needs
+          %h3= t('views.home.scales')
+          %p= t('views.home.to_suit_your_needs')
           %br{:clear => "all"}/
         %li
           %span.i48grad-computer.left
-          %h3 Generate
-          %p projects using any computer with Internet access
+          %h3= t('views.home.generate')
+          %p= t('views.home.project_using_any_computer_with_internet_access')
           %br{:clear => "all"}/
         %li
           %span.i48grad-users.left
-          %h3 Reach
-          %p out to any community, anywhere there's access to basic phones
+          %h3= t('views.home.reach')
+          %p= t('views.home.out_to_any_community_anywhere_there_access_to_basic_phones')
           %br{:clear => "all"}/
         %li
           %span.i48grad-shred.left
-          %h3 API
-          %p based on standards
+          %h3= t('views.home.api')
+          %p= t('views.home.based_on_standards')
           %br{:clear => "all"}/
         %li
           %span.i48grad-free.left
-          %h3 Free
-          %p for anyone to use to help increase their social impact
+          %h3= t('views.home.free')
+          %p= t('views.home.for_anyone_to_use_to_help_increase_their_social_impact')
           %br{:clear => "all"}/
         %li
           %span.i48grad-openSource.left
-          %h3 Open Source
-          %p code for developers to use to improve its design and functionality
+          %h3= t('views.home.open_source')
+          %p= t('views.home.code_for_developers_to_use_to_improve_its_design_and_functionality')
           %br{:clear => "all"}/
       / #benefits-container
     / #benefits
   / #home-middle-bar
   #container
-    %h1 What can I use it for?
+    %h1= t('views.home.container_first_title')
     %p.desc
-      Verboice is an ideal solution for reaching out to communities whatever their level of literacy or technological sophistication. Here are a few of the ways Verboice can help you inform, educate, and improve the lives of any audience with access to basic phone services:
+      = t('views.home.container_first_desc')
     .left.w45
-      %h2 Healthier Pregnancies and Happier Babies
+      %h2= t('views.home.container_first_panel_first_title')
       .icon-container.left
         %span.i96grad-medicine
-      %p Healthy babies and mothers form the foundation of a thriving community. With Verboice, mother/child health advocates can extend their educational outreach campaigns to communities with previously minimal access to prenatal and maternal health education. From month-by-month updates on what to expect during pregnancy to checkup reminders and newborn care advice, Verboice interactive voice campaigns can make a positive difference that will be felt for generations to come.
+      %p= t('views.home.container_first_panel_first_desc')
     / #left w45
     .right.w45
-      %h2 Researching Human Rights Conditions
+      %h2= t('views.home.container_first_panel_second_title')
       .icon-container.left
         %span.i96grad-pieChart
-      %p There's no better authority on the state of human rights in a community than community members themselves. Verboice allows human rights investigators to survey anonymous callers and get an accurate picture of the ground-level conditions in a community. When abuses are noted, human rights organizations can use Verboice to point the way toward supportive/protective resources, supply legal information, and give the most oppressed a voice that carries beyond the confines of their communities.
+      %p= t('views.home.container_first_panel_second_desc')
     / #left w45
     .clear
     / #clear
     %br/
     .left.w45
-      %h2 Coordinating First Responders
+      %h2= t('views.home.container_first_panel_third_title')
       .icon-container.left
         %span.i96grad-fire
-      %p Effectively coordinating first response efforts can mean the difference between a relatively minor misfortune and a disaster. Using Verboice, first responders quickly get a firsthand look at the conditions in even widely separated communities, without having to spend precious time travelling from place to place. Triage efforts are based on voice reports gathered directly from victims, helping disaster response teams to better deal with often rapidly changing circumstances and deliver the best care possible.
+      %p= t('views.home.container_first_panel_third_desc')
     / #left w45
     .right.w45
-      %h2 Organizing Campaign Activists
+      %h2= t('views.home.container_first_panel_fourth_title')
       .icon-container.left
         %span.i96grad-tree
-      %p With Verboice, activists can organize their members from anywhere in the world, using only basic phone equipment. From information about how to participate to inspirational messages from community leaders, outgoing communications can be easily recorded and made instantly available to fellow activists. To keep everyone on track, activists can share ideas about priorities and new initiatives from any cellular or landline-based phone. Whatever the cause, Verboice makes change just a little easier to achieve.
+      %p= t('views.home.container_first_panel_fourth_desc')
     / #left w45
     .clear
     / #clear
     %br/
     .box.plain.grey.features
 
-      %h2 Features
+      %h2= t('views.home.container_features_title')
       %br
       .left.w45
         %div
           %span.r-arrow>
-          Simple Web interface for creating interactive voice response systems
+          = t('views.home.container_features_point_one')
         %div
           %span.r-arrow>
-          Integrates easily with your existing projects using industry standards.
+          = t('views.home.container_features_point_two')
         %div
           %span.r-arrow>
-          Works with almost any VoIP line or can be installed on a local server with a dedicated phone line
+          = t('views.home.container_features_point_three')
 
 
       / #left w45
       .right.w45
         %div
           %span.r-arrow>
-          Verboice scheduler places calls according to your timeline
+          = t('views.home.container_features_point_four')
         %div
           %span.r-arrow>
-          Automatic logs capture key details of every call
+          = t('views.home.container_features_point_five')
         %div
           %span.r-arrow>
-          Integrates with open-source messaging/PBX solutions, such as Asterisk and Freeswitch
+          = t('views.home.container_features_point_six')
         %div
           %span.r-arrow>
-          Extensible to support high-scale VoIP and custom switches
+          = t('views.home.container_features_point_senven')
       / #right w45
       .clear
       / #clear
@@ -144,9 +144,9 @@
     %br/
     %br/
     .w45.left
-      %h1 How does it work?
+      %h1= t('views.home.container_second_title')
 
-      %p To get started, first set up a phone number dedicated to Verboice. Next, record outgoing messages offline, for later upload, or directly, using the Verboice Web application. Once you've recorded your outgoing messages, create your program's navigation sequence using Verboice's easy-to-use tools and review it using the onscreen flowchart. Community members can then access your interactive program from any phone. The caller will hear your audio file, which will usually ask them a question, respond either by voice or keypad entry and then hear the next audio file that you’ve specified to play based on the caller’s response to the previous question.  Responses are collected automatically, and you can log into your Verboice account to review them at your convenience.
+      %p= t('views.home.container_second_desc')
     / #w45 left
     .w45.right
       = image_tag 'infographic.png', :localized => true
@@ -156,21 +156,21 @@
     %br/
     %br/
     #container
-    %h1 Who has used it?
+    %h1= t('views.home.container_third_title')
 
     .left.w45
-      %h2 Saving Lives at Birth
+      %h2= t('views.home.container_third_panel_first_title')
       .icon-container.left
         %span.i96-council
       %p
-        Baby Monitor will take clinical screening directly to women in the critical period before and after birth. This mobile phone application, to be developed with partners at the Pop Council, will use interactive voice response technology to detect complications and take action. Women will listen to screening questions in their local language and respond via pressing a key. Baby Monitor will assess responses and, if necessary, send information, make referrals, and dispatch community health workers. - from
+        = t('views.home.container_third_panel_first_desc')
         = link_to "http://www.babymonitor.co/", "http://www.babymonitor.co/"
     / #left w45
     .right.w45
-      %h2 Red Cross
+      %h2= t('views.home.container_third_panel_second_title')
       .icon-container.left
         %span.i96-cross
-      %p InSTEDD designed, developed, and pilot tested a tool (Watchfire) to help the American Red Cross (ARC) improve their community- level disaster response in the San Francisco Bay Area. After working closely with the ARC on a needs assessment, we learned that their highest priority was improving the speed and coordination of ARC's Disaster Action Teams (DATs). Watchfire makes phone calls and sends SMS text messages to volunteers to ask them if they can respond to an emergency and provides these potential responders with sufficient information to arrive at the event site.
+      %p= t('views.home.container_third_panel_second_desc')
     / #left w45
     .clear
     / #clear
@@ -179,20 +179,20 @@
     %hr/
     %div.w45.support
       %h2
-        How can I help?
+        = t('views.home.container_fouth_title')
       %span
       %p
-        Got suggestions or feature requests? Join the discussion.
+        = t('views.home.container_fourth_suggestion_features_request')
         %br
         %a.button.black.fchat{:href=>"https://groups.google.com/group/instedd-tech"}
-          %span Join our discussion list
+          %span= t('views.home.container_fourth_join_our_discussion_list')
 
 
       %p
-        Got a way with code? Help us develop our tools (and make the world a better place at the same time).
+        = t('views.home.container_fourth_get_code_as_developer')
         %br
         %a.button.black.fbulb{:href=>"https://bitbucket.org/instedd/verboice/issues?status=new"}
-          %span Visit our backlog
+          %span= t('views.home.container_fourth_our_backlog')
 
 
 

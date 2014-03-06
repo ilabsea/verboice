@@ -105,7 +105,7 @@ describe Api::ChannelsController do
 
       response = JSON.parse(@response.body).with_indifferent_access
       response[:summary].should == "There were problems creating the Channel"
-      response[:properties].should == ["name" => "can't be blank"]
+      response[:properties].should == ["name" => "Can't be blank"]
     end
   end
 
@@ -146,7 +146,7 @@ describe Api::ChannelsController do
 
       response = JSON.parse(@response.body).with_indifferent_access
       response[:summary].should == "There were problems updating the Channel"
-      response[:properties].should == ["name" => "can't be blank"]
+      response[:properties].should == ["name" => "Can't be blank"]
 
       chan.reload.name.should eq('the_channel')
     end

@@ -1,0 +1,138 @@
+
+# Bug in 1.4.0-rc2
+  + [#76] Error while viewing project call log 
+  + [#77] Fix online resource audio play
+
+1.5.0-rc1 (2014-01-02 kakada <kakada@instedd.org)
+  + Features:
+    * [#65] Log caller interation
+    * [#39] show project name in channel list
+    * [#79] Problem of resource refference while imporing
+  + Bugs:
+    * [#44] fix version display to follow release version
+    * [#66] import call flow from another project does not work (cross project and domain)
+    * [#104] Error voice recording with 2 variables
+    * [#107] Advance search is not accurate
+
+
+1.4.0-rc2 (2013-12-20 kakada <kakada@instedd.org)
+  + Bugs:
+    * [#64] refactoring AWS backup/restore, reminder schedule task and write it to log file
+    * [#] set caller id for originate outgoing call
+    * [#67] fix error on queued call view when not_before is nil
+
+1.4.0-rc1 (2013-12-16 kakada <kakada@instedd.org)
+  + Features:
+    * [#43] Show calls start and finish time according to project time zone
+    * [#33] Add text annotation for recorded audio
+    * [#47] Cron Job reminder schedule filter by prefix
+    * [#40] Possibility to select many channel in reminder schedule. continue to [#59]
+    * [#59] Migration data from single channel to multi channel
+  + Bugs:
+    * [#48] improve call log status
+    * [#46] fix SMS step in erlang
+    * [#45] show number of retries in call logs
+    * [#50] remove column id and queued call from call logs
+    * [#23] fix problem on call duration calculation
+
+1.3.6 (2013-12-12 kakada <kakada@instedd.org)
+  + Bugs:
+    * fix properly expand SIP domains for custom sip channels
+
+1.3.5 (2013-11-14 kakada <kakada@instedd.org)
+  + Bugs:
+    * [#56] re-fix previous migration and check existing binary and integer address to register 
+            reminder in erlang
+
+1.3.4 (2013-11-13 kakada <kakada@instedd.org)
+  + Bugs:
+    * [#56] fix reminder group contacts serialize/deserialize Ruby and Erlang to be consistence and
+            restore and migrate reminder group contacts with backup database
+
+1.3.3 (2013-11-05 kakada <kakada@instedd.org)
+  + Bugs:
+    * [#37] Log fusion table datetime field in project timezone
+
+1.3.2 (2013-11-04 kakada <kakada@instedd.org)
+  + Bugs:
+    * [Bug 38] fix view channel detail when it's belongs to nil call flow
+
+1.3.1 (2013-11-04 kakada <kakada@instedd.org)
+  + Bugs:
+    * [Bug 35] fix call log recorded audio in record step
+
+1.3.0-rc (2013-11-04 kakada <kakada@instedd.org)
+  + Features:
+    * [Feature 28] move backend to new broker
+    * [Feature 32] add protocol and port to SIP channel
+    * [Feature 27] create template javascript for phone number field
+    * [Feature 25] allow user to search in phone books by phone number
+    * [Feature 22] session variables call log
+    * [Feature 21] store result of record step
+    * [Feature 20] handle date step
+    * [Feature 19] handle register step
+    * [Feature 18] handle deregister step
+    
+  + Bugs:
+    * [Bug 31] fix phone number field in reminder group view to allow user input only phone number format
+    * [Bug 30] fix retries schedule after pull update from InSTEDD's repo
+    * [Bug 26] fix retries schedule on enqueue outgoing call
+
+1.2.2 (2013-09-30 Kakada <kakada@instedd.org)
+  + Bugs:
+    * [Bug 18] fix bug reminder group's deserialized array
+    * [Bug 17] allow reminder group's address UI enter only phone number pattern ([+][0-9])
+
+1.2.0 (2013-09-27 Kakada <kakada@instedd.org)
+  + Features:
+    * add retries schedule into reminder schedule
+    * allow register step to register other phone number
+    * add help link to navigation menu
+    * import CSV to reminder group
+    * allow deregister step to deregister caller from all reminder groups in project
+
+  + Bugs:
+    * always show 'Download as CSV' and 'View in Fusion Table' when channel bind to fusion table call flow
+    * update condition description in reminder schedule UI
+    * re-generate resource guid to remove references to existing resources for import call flow
+    * do not allow user to save duplicated reminder group in UI
+    * change data type reminder group's addresses to blob to store many contacts
+    * change cancel and back link to button
+
+1.1.2 (2013-08-23 Kakada <kakada@instedd.org)
+  + Bugs:
+    * fix evaluate condition in reminder schedule to lookup project variables in project
+
+1.1.1 (2013-08-22 Kakada <kakada@instedd.org)
+  + Bugs:
+    * fix apply condition in reminder schedule when project variable has same name in difference projects
+
+  + Features:
+    * Add schedule full and incremental backup to run automatically
+    * Backup full and incremental to Amazon S3
+    * Restore backup from Amazon S3
+
+1.1.0 (2013-08-15  Mann  <chanmann@instedd.org>)
+
+  + Features:
+    * SMS feature integration
+    * Add multi-stage deployment
+    * Optimize CSV download using raw sql query
+    * Project call logs filtering by date (eg. "after:2013-08-01 before:2013-08-05")
+    * Upgrade to Rails 3.2.14 - http://weblog.rubyonrails.org/2013/7/23/Rails-3-2-14-has-been-released/
+
+  + Bugs:
+    * Restrict and replace space( ), dash(-) to underscore for fusion table name
+    * Auto increasement index of fusion table file name
+    * fix validation domain in channel spec
+
+1.0.0 (2013-07-23  Kakada Chheang  <kakada@instedd.org>)
+
+  + Features:
+    * Support multiple addresses of contact
+    * Add Detect Language step
+    * Add Callback step
+    * Destroy contact do not delete contact when it has any addresses (API)
+    
+  + Bugs:
+    * fix reminder schedule weekdays repeat

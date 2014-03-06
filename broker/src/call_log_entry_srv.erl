@@ -21,7 +21,7 @@ init({}) ->
   {ok, DbName} = application:get_env(db_name),
   {ok, DbUser} = application:get_env(db_user),
   {ok, DbPass} = application:get_env(db_pass),
-  mysql:connect(log, "localhost", undefined, DbUser, DbPass, DbName, true),
+  mysql:connect(log, "localhost", undefined, DbUser, DbPass, DbName, utf8, true),
   db:set_db(log),
   {ok, undefined}.
 

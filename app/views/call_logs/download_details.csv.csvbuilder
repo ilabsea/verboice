@@ -1,4 +1,4 @@
-csv << ['Call ID', 'Phone Number', 'Time', 'Severity', 'Step name', 'Step ID', 'Command', 'Action', 'Detail']
+csv << [t('views.call_logs.download_details_csv.label.call_id'), t('views.call_logs.download_details_csv.label.phone_number'), t('views.call_logs.download_details_csv.label.time'), t('views.call_logs.download_details_csv.label.severity'), t('views.call_logs.download_details_csv.label.step_name'), t('views.call_logs.download_details_csv.label.step_id'), t('views.call_logs.download_details_csv.label.command'), t('views.call_logs.download_details_csv.label.action'), t('views.call_logs.download_details_csv.label.detail')]
 @log.entries.find_each do |entry|
-  csv << [@log.id, @log.address, entry.created_at, entry.severity, entry.step_name, entry.step_id, entry.command, entry.action, entry.description]
+  csv << [@log.id, @log.address, datetime_format(entry.created_at, @log.project_time_zone), entry.severity, entry.step_name, entry.step_id, entry.command, entry.action, entry.description]
 end

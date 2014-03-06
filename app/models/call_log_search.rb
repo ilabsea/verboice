@@ -21,11 +21,12 @@ module CallLogSearch
   module ClassMethods
     def search(search, options = {})
       result = where '1 = 1'
-
       search = Search.new search
 
       if search.search
-        result = result.where "call_logs.id = :search OR call_logs.address = :search OR call_logs.state = :search OR call_logs.direction = :search", :search => search.search
+        result = result.where "call_logs.id = :search OR call_logs.address LIKE :address OR call_logs.state = :search OR call_logs.direction = :search", 
+                              :search => search.search,
+                              :address => "%#{search.search}"
       end
 
       if search[:id]
@@ -37,17 +38,25 @@ module CallLogSearch
       result = result.where "state = ?", search[:state] if search[:state]
 
       [:address, :caller, :caller_id].each do |sym|
-        result = result.where "address = ?", search[sym] if search[sym]
+        result = result.where "address LIKE ?", "%"+search[sym] if search[sym]
       end
+
+      # if search[:after] && search[:before]
+      #   after = Time.smart_parse search[:after]
+      #   before = Time.smart_parse search[:before]
+      #   result = result.where(["created_at BETWEEN :after AND :before", after: after.beginning_of_day, before: before.end_of_day])  if before && after
+      # end
 
       if search[:after]
         after = Time.smart_parse search[:after]
-        result = result.where "started_at >= ?", after if after
+        result = result.where "created_at >= ?", after.beginning_of_day if after
       end
+
       if search[:before]
         before = Time.smart_parse search[:before]
-        result = result.where "started_at <= ?", before if before
+        result = result.where "created_at <= ?", before.end_of_day if before
       end
+
 
       if search[:channel]
         if options[:account]
@@ -62,19 +71,27 @@ module CallLogSearch
         end
       end
       if search[:project_id]
-        result = result.where 'project_id = ?', search[:project_id]
+        result = result.where 'call_logs.project_id = ?', search[:project_id]
       end
       if search[:project]
         if options[:account]
           app = options[:account].projects.select(:id).find_by_name search[:project]
           if app
-            result = result.where 'project_id = ?', app.id
+            result = result.where 'call_logs.project_id = ?', app.id
           else
             result = result.where '1 = 2'
           end
         else
           result = result.joins(:project).where 'projects.name = ?', search[:project]
         end
+      end
+
+      if search[:call_flow_id]
+        result = result.where 'call_logs.call_flow_id = ?', search[:call_flow_id]
+      end
+
+      if search[:phone_number]
+        result = result.where 'address like ?', "%#{search[:phone_number]}%"
       end
 
       result

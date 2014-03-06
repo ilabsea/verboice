@@ -1,0 +1,3 @@
+data_path: spec/data
+channel:
+  validate_domain: false

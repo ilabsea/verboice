@@ -1,20 +1,20 @@
-%h2 Channels
+%h2= t('views.channels.title')
 = render partial: '/shared/channels_tabs'
 
 %br
 .tablewrapp.w60
   %table.GralTable.TwoColumn.CleanTable.ItemsTable{:class => ('empty' if @channels.empty?)}
     %tr
-      %th My Channels
+      %th= t('views.channels.index.title')
       %th
-        = select_tag('new_channel', options_for_select(@channel_kinds), onchange: 'create_channel(this)', prompt: 'Create new...')
+        = select_tag('new_channel', options_for_select(@channel_kinds), onchange: 'create_channel(this)', prompt: t("views.channels.index.label.create_new"))
     - if @channels.empty?
       %tr
         %td.EmptyFolder{:colspan => 100}
           %br
-          You have no voice channels yet.
+          = t('views.channels.index.label.you_have_no_channel_yet')
           %br
-          = select_tag('new_channel', options_for_select(@channel_kinds), onchange: 'create_channel(this)', prompt: 'Create new...')
+          = select_tag('new_channel', options_for_select(@channel_kinds), onchange: 'create_channel(this)', prompt: t("views.channels.index.label.create_new"))
     - else
       - @channels.each do |channel|
         %tr.link{'data-url' => channel_path(channel)}
@@ -23,6 +23,12 @@
             - status_ok = status.nil? || status[:ok]
             %span{style: "display: inline-block; width: 10px; height: 10px; background-color: #{ status ? (status_ok ? '#6BD346' : '#FF642A') : '#D0D0D0' }"}
             = channel.name
+            = "("
+            = channel.active_calls
+            = "active call )"
+            - if channel.project
+              = " - "
+              = channel.try(:project).try(:name)
             - unless status_ok
               %br
               - status[:messages].each do |message|

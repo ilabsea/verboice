@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<verboice-service>
+  <name>Pregnancy</name>
+  <global-settings>
+    <variable name="service_domain" display-name="Service Domain" type="string"/>
+  </global-settings>
+  <steps>
+    <step name="reminder"
+      display-name="Reminder Registration"
+      icon="medicalkit"
+      type="callback"
+      callback-url="http://{service_domain}/ext/services/pregnancies/register">
+      <settings>
+        <variable name="status" display-name="status" type="string"/>
+      </settings>
+      <response type="flow"/>
+    </step>
+    <step name="week"
+      display-name="Week of Pregnancy"
+      icon="medicalkit"
+      type="callback"
+      callback-url="http://{service_domain}/ext/services/pregnancies/progress">
+      <settings>
+        <variable name="type" display-name="type" type="numeric"/>
+        <variable name="duration" display-name="duration" type="numeric"/>
+      </settings>
+      <response type="none"/>
+    </step>
+    <step name="month"
+      display-name="Month of Pregnancy"
+      icon="medicalkit"
+      type="callback"
+      callback-url="http://{service_domain}/ext/services/pregnancies/progress">
+      <settings>
+        <variable name="type" display-name="type" type="numeric"/>
+        <variable name="duration" display-name="duration" type="numeric"/>
+      </settings>
+      <response type="none"/>
+    </step>
+  </steps>
+</verboice-service>

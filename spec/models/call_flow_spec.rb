@@ -165,6 +165,204 @@ describe CallFlow do
     call_flow.external_services.pluck(:guid).should eq([service.guid])
   end
 
+  describe 'include_resource_name' do
+    before(:each) do
+
+      @resource1 = Resource.make(name: 'resource1') 
+      @resource2 = Resource.make(name: 'resource2') 
+      @resource3 = Resource.make(name: 'resource3') 
+      
+      @resource4 = Resource.make(name: 'resource4') 
+      @resource5 = Resource.make(name: 'resource5') 
+      @resource6 = Resource.make(name: 'resource6') 
+
+      @resource7 = Resource.make(name: 'resource7') 
+      @resource8 = Resource.make(name: 'resource8')
+      @resource9 = Resource.make(name: 'resource9')
+       
+      @resources = [@resource1, @resource2,@resource3,@resource4,@resource5,@resource6]
+
+      @n_flow = [ { "id"=>1386731109410, 
+                    "name"=>"Play", 
+                    "type"=>"play", 
+                    "root"=>true, 
+                    "next"=>1386734799251, 
+                    "resource"=>{"guid"=> @resource1.guid, "name" => 'resource1' } }, 
+
+                  { "id"=>1386734799251, 
+                    "name"=>"Register", 
+                    "type"=>"register", 
+                    "root"=>false, 
+                    "next"=>1386929670099, 
+                    "store"=>"registered_dated_now", 
+                    "reminder_group"=>"pregnancy", 
+                    "confirmation_resource"=>{"guid"=> @resource2.guid, "name" => 'resource2' }, 
+                    "option"=>{"step"=>nil, "variable"=>nil, "value"=>nil, "response"=>nil, "current_caller"=>"current_caller"} },
+
+                  { "id"=>1386929670099, 
+                    "name"=>"Menu", 
+                    "type"=>"menu", 
+                    "root"=>false, 
+                    "next"=>nil, 
+                    "store"=>nil, 
+                    "options"=>[
+                        {"next"=>1386929684632, "is_default"=>false, "number"=>"1"}, 
+                        {"next"=>1386929691798, "is_default"=>false, "number"=>"2"}, 
+                        {"next"=>1386929714293, "is_default"=>false, "number"=>"3"} ], 
+                    "invalid_resource"=>{}, 
+                    "explanation_resource"=>{"guid" => @resource3.guid, "name" => 'resource3'}, 
+                    "options_resource"=>{"guid"=> @resource4.guid, "name" => 'resource4' }, 
+                    "timeout"=>5, 
+                    "number_of_attempts"=>3 },
+
+                  { "id"=>1386929684632, 
+                    "name"=>"Play", 
+                    "type"=>"play", 
+                    "root"=>false, 
+                    "next"=>nil, 
+                    "resource"=>{"guid"=> @resource5.guid, 'name' => 'resource5' } }, 
+
+                  { "id"=>1386929691798, 
+                    "name"=>"Menu", 
+                    "type"=>"menu", 
+                    "root"=>false, 
+                    "next"=>nil, 
+                    "store"=>"ddd", 
+                    "options"=>[
+                        {"next"=>1386929730446, "is_default"=>false, "number"=>"1"}, 
+                        {"next"=>1386929791288, "is_default"=>false, "number"=>"2"},
+                        {"next"=>1386929818588, "is_default"=>false, "number"=>"3"},
+                        {"next"=>1386930145577, "is_default"=>false, "number"=>"4"}], 
+                    "invalid_resource"=>{}, 
+                    "explanation_resource"=>{}, 
+                    "options_resource"=>{"guid"=> @resource6.guid, 'name' => 'resource6' }, 
+                    "timeout"=>5, 
+                    "number_of_attempts"=>3 },
+
+                  { "id"=>1386929714293, 
+                    "name"=>"Send SMS", 
+                    "type"=>"nuntium", 
+                    "root"=>false, 
+                    "next"=>nil, 
+                    "resource"=>{"guid"=> @resource7.guid, 'name' => 'resource7' }, 
+                    "recipient"=>{"step"=>nil, "variable"=>nil, "value"=>nil, "response"=>nil, "caller"=>true} }, 
+
+                  { "id"=>1386929730446, 
+                    "name"=>"Play", 
+                    "type"=>"play", 
+                    "root"=>false, 
+                    "next"=>nil, 
+                    "resource"=>{"guid"=> @resource8.guid, 'name' => 'resource8' } }, 
+
+                  { "id"=>1386929791288, 
+                    "name"=>"Date", 
+                    "type"=>"datetime", 
+                    "root"=>false, 
+                    "next"=>nil, 
+                    "store"=>nil, 
+                    "invalid_resource"=>{}, 
+                    "instructions_resource"=>{"guid"=> @resource9.guid, 'name' => 'resource9'}, 
+                    "min_input_length"=>1, 
+                    "max_input_length"=>1, 
+                    "finish_on_key"=>"#", 
+                    "timeout"=>5, 
+                    "number_of_attempts"=>3, 
+                    "unit"=>"Day" }
+                ] 
+
+      @u_flow = [ { "id"=>1386731109410, 
+                    "name"=>"Play", 
+                    "type"=>"play", 
+                    "root"=>true, 
+                    "next"=>1386734799251, 
+                    "resource"=>{"guid"=> @resource1.guid } }, 
+
+                  { "id"=>1386734799251, 
+                    "name"=>"Register", 
+                    "type"=>"register", 
+                    "root"=>false, 
+                    "next"=>1386929670099, 
+                    "store"=>"registered_dated_now", 
+                    "reminder_group"=>"pregnancy", 
+                    "confirmation_resource"=>{"guid"=> @resource2.guid }, 
+                    "option"=>{"step"=>nil, "variable"=>nil, "value"=>nil, "response"=>nil, "current_caller"=>"current_caller"} },
+
+                  { "id"=>1386929670099, 
+                    "name"=>"Menu", 
+                    "type"=>"menu", 
+                    "root"=>false, 
+                    "next"=>nil, 
+                    "store"=>nil, 
+                    "options"=>[
+                        {"next"=>1386929684632, "is_default"=>false, "number"=>"1"}, 
+                        {"next"=>1386929691798, "is_default"=>false, "number"=>"2"}, 
+                        {"next"=>1386929714293, "is_default"=>false, "number"=>"3"} ], 
+                    "invalid_resource"=>{}, 
+                    "explanation_resource"=>{"guid" => @resource3.guid}, 
+                    "options_resource"=>{"guid"=> @resource4.guid }, 
+                    "timeout"=>5, 
+                    "number_of_attempts"=>3 },
+
+                  { "id"=>1386929684632, 
+                    "name"=>"Play", 
+                    "type"=>"play", 
+                    "root"=>false, 
+                    "next"=>nil, 
+                    "resource"=>{"guid"=> @resource5.guid } }, 
+
+                  { "id"=>1386929691798, 
+                    "name"=>"Menu", 
+                    "type"=>"menu", 
+                    "root"=>false, 
+                    "next"=>nil, 
+                    "store"=>"ddd", 
+                    "options"=>[
+                        {"next"=>1386929730446, "is_default"=>false, "number"=>"1"}, 
+                        {"next"=>1386929791288, "is_default"=>false, "number"=>"2"},
+                        {"next"=>1386929818588, "is_default"=>false, "number"=>"3"},
+                        {"next"=>1386930145577, "is_default"=>false, "number"=>"4"}], 
+                    "invalid_resource"=>{}, 
+                    "explanation_resource"=>{}, 
+                    "options_resource"=>{"guid"=> @resource6.guid }, 
+                    "timeout"=>5, 
+                    "number_of_attempts"=>3 },
+
+                  { "id"=>1386929714293, 
+                    "name"=>"Send SMS", 
+                    "type"=>"nuntium", 
+                    "root"=>false, 
+                    "next"=>nil, 
+                    "resource"=>{"guid"=> @resource7.guid }, 
+                    "recipient"=>{"step"=>nil, "variable"=>nil, "value"=>nil, "response"=>nil, "caller"=>true} }, 
+
+                  { "id"=>1386929730446, 
+                    "name"=>"Play", 
+                    "type"=>"play", 
+                    "root"=>false, 
+                    "next"=>nil, 
+                    "resource"=>{"guid"=> @resource8.guid} }, 
+
+                  { "id"=>1386929791288, 
+                    "name"=>"Date", 
+                    "type"=>"datetime", 
+                    "root"=>false, 
+                    "next"=>nil, 
+                    "store"=>nil, 
+                    "invalid_resource"=>{}, 
+                    "instructions_resource"=>{"guid"=> @resource9.guid}, 
+                    "min_input_length"=>1, 
+                    "max_input_length"=>1, 
+                    "finish_on_key"=>"#", 
+                    "timeout"=>5, 
+                    "number_of_attempts"=>3, 
+                    "unit"=>"Day" }
+      ]  
+    end 
+    it 'should return user flow with resource name' do
+      CallFlow.include_resource_name(@u_flow).should eq @n_flow
+    end           
+  end
+
   describe "clean external service" do
     let!(:call_flow) { CallFlow.make }
     let!(:external_service) { ExternalService.make project: call_flow.project }

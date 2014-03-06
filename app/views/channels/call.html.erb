@@ -1,10 +1,10 @@
 <div id="call_progress">
-  <p>Call channel <%= @channel.name %>.</p>
+  <p><%= t('views.channels.call.label.call_channel') %> <%= @channel.name %>.</p>
 
   <form onsubmit="call_channel(); return false">
-    Number: <input type="text" name="number" id="number" />
+    <%= t('views.channels.call.label.number') %>: <input type="text" name="number" id="number" />
 
-    <input type="submit" value="Call">
+    <input type="submit" value="<%= t('views.channels.call.action.call') %>">
   </form>
 
   <script type="text/javascript">

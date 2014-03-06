@@ -23,7 +23,7 @@ describe Schedule do
 
     it { should belong_to(:project) }
     it { should validate_presence_of(:account) }
-    it { should validate_presence_of(:name) }
+    # it { should validate_presence_of(:name) }
     it { should_not allow_value("ABC").for(:retries) }
     it { should allow_value("5").for(:retries) }
     it { should allow_value("1,2,3").for(:retries) }

@@ -17,5 +17,14 @@
 
 class UserMailer < Devise::Mailer
   add_template_helper InsteddRails::MailerHelper
+  
+  default from: 'verboice@instedd.org'
   layout 'mail'
+
+  def generating_zip project_id, filename
+    @project = Project.find project_id
+    @filename = filename
+
+    mail to: @project.account.email, subject: 'Your call logs is ready to be download'
+  end
 end

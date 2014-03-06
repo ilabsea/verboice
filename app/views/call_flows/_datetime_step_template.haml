@@ -1,0 +1,56 @@
+%script{type: "text/html", id: "datetime_step_template"}
+  .feditor-sidebar.right.box.w28.iblock.h65
+
+    %div{ko(:if => "is_editing_resource()")}
+      %div{ko(template: "{name: 'resource_editor_template', data: current_editing_resource}")}
+
+    .tableheader
+      %span.left.i48grad-date{ ko(css: '{ "orange": is_invalid }') }
+      %input.ux-text.w20.right{ ko(value: 'name', valueUpdate: '"afterkeydown"', css: '{ "error": is_name_invalid }')}
+
+    %table.GralTable.TwoColumn.CleanTable.NoHead
+      %tr
+        %th= t('views.call_flows._capture_step_template.label.messages')
+        %th
+        %tr
+          %td{ko(css: "{ orange: is_instructions_resource_invalid }")}
+            = t('views.call_flows._capture_step_template.label.instructions')
+            %span{ko(css: "{ alert: is_instructions_resource_invalid }")}
+            %span{ko(text: "resource('instructions').display_name()")}
+          %td
+            %button.farrow{ :type => "button", 'data-bind' => 'click: show_instructions_resource' }
+
+    .content{ko('instedd_init' => true)}
+      %hr
+      = t('views.call_flows._datetime_step_template.label.unit') + ":"
+      %select{ko(options: 'types', value: 'unit')}
+
+      %hr
+      = t('views.call_flows._capture_step_template.label.input_length')
+      %br/
+      %br/
+
+      %div{style: "margin-left:10px;"}
+        = t('views.call_flows._capture_step_template.label.from')
+        .ux-nstep.w06
+          %input{'type' => 'number', 'size' => 2, 'data-min' => 1, 'data-bind' => 'value: min_input_length'}
+        = t('views.call_flows._capture_step_template.label.to')
+        .ux-nstep.w06
+          %input{'type' => 'number', 'size' => 2, 'data-min' => 1, 'data-bind' => 'value: max_input_length'}
+        %br/
+
+      %br/
+
+      %span.validation
+        = t('views.call_flows._capture_step_template.label.finish_on_key')
+      %input.w06{'type' => 'text', 'size' => 1, 'data-bind' => 'value: finish_on_key'}
+      %br/
+
+      %hr
+      = store_value_tags_without_checkbox
+      / = store_value_tags
+      %br/
+
+      %hr
+      .bottom-actions
+        %button.fdelete{ 'data-bind' => 'click: remove_with_confirm' }= t('views.call_flows._capture_step_template.action.remove_this_step')

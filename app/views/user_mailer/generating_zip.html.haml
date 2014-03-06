@@ -1,0 +1,21 @@
+%p
+  Hi there,
+
+%p
+  Thank you for your patience.
+
+%p
+  Your call logs file is ready to be downloaded
+  = link_to 'here', download_zip_project_call_logs_url(@project, filename: @filename)
+  &#46;
+
+%p
+  Please note that we keep this file for only 7 days, make sure you download it before
+  = (Time.now + 7.days).strftime '%d/%m/%Y'
+  &#46;
+
+%p
+  Have a nice day,
+
+%p
+  Verboice team.

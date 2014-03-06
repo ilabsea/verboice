@@ -138,3 +138,163 @@ span.language {
 .pointer {
   cursor: pointer;
 }
+.to_right{
+  float: right;
+}
+.ui-datepicker{
+  z-index : 100;
+}
+
+.name{
+  font-size: 14px;
+}
+.description{
+  color : #aaa;
+  font-size : 12px;
+}
+
+div.tabsline{
+  z-index: 1 !important ;
+}
+ul.tabs.top li a{
+  z-index: 1 !important ;
+}
+.item{
+  padding: 6px;
+  margin: 6px;
+  background: #ddd;
+}
+.round{
+  border-radius : 5px;
+}
+
+.field-required{
+  color :red;
+  font-weight: bold;
+  margin : 5px;
+}
+.datetimepicker{
+  background-image: url("calendar.png");
+  background-position: 99% 2px;
+  background-repeat: no-repeat;
+  padding-right: 25px;
+}
+.field_with_errors{
+  display: inline;
+}
+
+.pagination a {
+    color: #777777;
+    margin-left: 10px;
+    text-decoration: none;
+}
+
+.pagination em {
+    color: BLACK;
+    margin-left: 10px;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.div_right{
+    float: right;
+    padding-top: 3px;
+}
+
+.div_left{
+    float: left;
+    padding-top : 3px;
+}
+
+.div_content_variable{
+  width: 92px;
+}
+
+a.audio_tool{
+  padding-top: 4px !important;
+  vertical-align: middle;
+}
+
+.audio_tool{
+  background-color: transparent;
+  background-position: left top;
+  background-repeat: no-repeat;
+  height: 24px;
+  min-width: 24px;
+  margin: 4px 2px;
+  cursor: pointer;
+  border: none;
+  display: inline-block;
+  background-repeat: no-repeat;
+  background-position: 0px 0px;
+}
+
+.play{
+  background-image: url("../assets/play.png");
+}
+
+.pause{
+  background-image: url("../assets/pause.png");
+}
+
+.nopadding{
+  padding: 0px;
+}
+
+.audio_tool:hover{
+  background-position: 0 -30px;
+}
+
+.control_step{  
+  background-color: transparent;
+  background-position: left top;
+  background-repeat: no-repeat;  
+  min-width: 24px;
+  margin: 4px 2px;
+  cursor: pointer;
+  border: none;  
+  display: inline-block;
+  background-repeat: no-repeat;
+  background-position: 0px 0px;
+}
+
+.register{
+  background-image: url("../assets/register.png");
+  height: 59px;
+  width: 59px;
+}
+
+
+.deregister{
+  background-image: url("../assets/unregister.png");
+  height: 59px;
+  width: 59px;
+}
+
+.to-left{
+  align: left;
+}
+
+.control_step:hover{
+  background-position: 0 -60px;
+}
+
+.control_step:active{
+  background-position: 0 -120px;
+}
+
+.i48grad-register {
+    background: url("../assets/call_flow_register.png") no-repeat scroll center top transparent;
+    display: inline-block;
+    height: 48px;
+    vertical-align: middle;
+    width: 48px;
+}
+
+.i48grad-deregister {
+    background: url("../assets/call_flow_unregister.png") no-repeat scroll center top transparent;
+    display: inline-block;
+    height: 48px;
+    vertical-align: middle;
+    width: 48px;
+}

@@ -3,19 +3,19 @@
   %tr
     %td
       %b Not Before:
-    %td= @log.not_before
+    %td= datetime_format @log.not_before, @log.project.time_zone
   %tr
     %td
       %b Started:
-    %td= @log.created_at
+    %td= datetime_format @log.created_at, @log.project_time_zone
   %tr
     %td
       %b Finished:
-    %td= @log.finished_at
+    %td= datetime_format @log.finished_at, @log.project_time_zone
   %tr
     %td
       %b Duration:
-    %td= distance_of_time_in_words(@log.finished_at, @log.created_at, true) if @log.finished_at
+    %td= @log.duration if @log.duration && @log.duration > 0
   %tr
     %td
       %b Caller ID:
@@ -55,7 +55,7 @@
   - @log.structured_details.each do |detail|
     %tr{:class => detail[:severity]}
       %td= detail[:severity]
-      %td= detail[:time]
+      %td= datetime_format detail[:time], @log.project_time_zone
       %td= short_html detail[:text], 40
 %br/
 

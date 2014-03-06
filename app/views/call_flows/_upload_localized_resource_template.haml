@@ -1,22 +1,25 @@
 %script{type: "text/html", id: "upload_localized_resource_template"}
   .file-name
-    / ko ifnot: has_audio()
-    %span.alert-orange-b No file uploaded yet
+    / ko if: uploaded_status() == -1
+    %span.alert-orange-b= t('views.call_flows._upload_localized_resource_template.label.no_file_uploaded_yet')
     / /ko
-    / ko if: has_audio()
-    %span.clickable{'data-bind' => 'text: filename, click: download'}
+    / ko if: uploaded_status() == 0
+    %span.alert-orange-b{'data-bind' => "text: filename, visible: uploaded_status() == 0"}
+    / /ko
+    / ko if: uploaded_status() == 1
+    %span.clickable{'data-bind' => "text: filename, click: download, visible: uploaded_status() == 1"}
     / /ko
     %span.fade
   / ko ifnot: has_audio()
   .upload-file.fexport
     %input{:type => 'file', 'data-bind' => 'fileupload: url, fileuploadSubmit: submit, fileuploadDone: done, fileuploadAdd: add'}
-  Upload
+  = t('views.call_flows._upload_localized_resource_template.action.upload')
   / /ko
   / ko if: has_audio()
   .upload-file.fsync
     %input{:type => 'file', 'data-bind' => 'fileupload: url, fileuploadSubmit: submit, fileuploadDone: done, fileuploadAdd: add'}
-  Replace
+  = t('views.call_flows._upload_localized_resource_template.action.replace')
   / /ko
   %br{clear: 'all'}
   .w22
-    %textarea{:rows => 6, :placeholder => 'Write here a description of the recording, either as a reminder for you or as a reference for the person that will record the message.', 'data-bind' => 'value: description'}
+    %textarea{:rows => 6, :placeholder => "#{t('views.call_flows._upload_localized_resource_template.label.placeholder')}", 'data-bind' => 'value: description'}

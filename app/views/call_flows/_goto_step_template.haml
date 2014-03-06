@@ -7,12 +7,12 @@
     %table.GralTable.TwoColumn.CleanTable.NoHead
       %tr
         %th{ko(css: "{ orange: is_jump_id_invalid }")}
-          Go to step
+          = t('views.call_flows._goto_step_template.label.go_to_step')
           %span{ko(css: "{ alert: is_jump_id_invalid }")}
         %th
       %tr
         %td{:colspan => 2}
-          %select.w100{'data-bind' => "value: jump_id, options: available_steps(), optionsText: 'name', optionsValue: 'id', optionsCaption: 'Select one...'"}
+          %select.w100{'data-bind' => "value: jump_id, options: available_steps(), optionsText: 'name', optionsValue: 'id', optionsCaption: '#{t('views.call_flows._goto_step_template.label.select_one')}'"}
     .content
       .bottom-actions
-        %button.fdelete{ 'data-bind' => 'click: remove_with_confirm' } Remove this step
+        %button.fdelete{ 'data-bind' => 'click: remove_with_confirm' }= t('views.call_flows._goto_step_template.action.remove_this_step')

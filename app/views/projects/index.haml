@@ -1,18 +1,18 @@
-%h2 Projects
+%h2= t('views.projects.index.title')
 
 %br
 .tablewrapp.w60
   %table.GralTable.TwoColumn.CleanTable.ItemsTable{:class => ('empty' if @projects.empty?)}
     %tr
-      %th My Projects
+      %th= t('views.projects.index.label.my_projects')
       %th
     - if @projects.empty?
       %tr
         %td.EmptyFolder{:colspan => 100}
           %br
-          You have no projects yet.
+          = t('views.projects.index.label.no_projects')
           %br
-          = link_button_to ('Create Project'), new_project_path, :class => 'EmptyAddButton button cadd'
+          = link_button_to t('views.projects.index.action.create_project'), new_project_path, :class => 'EmptyAddButton button cadd'
     - else
       - @projects.each do |project|
         %tr.link{'data-url' => project_path(project)}
@@ -20,6 +20,6 @@
           %td
             %button.farrow{:type => :button}
       %tr.link{'data-url' => new_project_path}
-        %td Create Project
+        %td= t('views.projects.index.action.create_project')
         %td
           %button.cadd

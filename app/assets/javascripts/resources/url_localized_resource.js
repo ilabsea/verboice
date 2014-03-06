@@ -5,7 +5,7 @@ onResources(function(){
     LocalizedResource.call( this, hash, resource );
     this.label = 'Online resource';
     this.template = 'url_localized_resource_template';
-    this.url = ko.observable(hash.url);
+    this.url = ko.observable(decodeURI(hash.url || ''));
     this.isValid = ko.computed(function(){
       return this.url() && this.url().length > 0
     }, this);

@@ -1,0 +1,4 @@
+%li{ :class =>"#{"active" if controller_name == "reminder_groups"}" }
+    = link_to t('views.ext.shared._project_tabs.action.reminder_group'), ext_project_reminder_groups_path(project)
+%li{ :class =>"#{"active" if controller_name == "reminder_schedules" }" }
+    = link_to t('views.ext.shared._project_tabs.action.reminder_schedule'), ext_project_reminder_schedules_path(project)

@@ -3,9 +3,9 @@
     .courtain
     .box.popupmessage
       %div
-        Fill
+        = t('views.call_flows._external_setting_template.label.fill')
         %span{ko(text: 'display_name')}
-        with
+        = t('views.call_flows._external_setting_template.label.with')
       %hr
       %div
         %select.w22{'data-bind' => "value: content_kind, options: content_kinds(), optionsText: 'text', optionsValue: 'value'"}
@@ -15,5 +15,5 @@
         %select.w22{'data-bind' => 'value: step_id, visible: content_kind() == "step", options: available_steps(), optionsText: "name", optionsValue: "value"'}
         %select.w22{'data-bind' => 'value: response, visible: content_kind() == "response", options: available_responses(), optionsText: "name", optionsValue: "value"'}
       %hr
-      %button.white{ko(click: 'save')} Save
-      %a.cancel{ko(click: 'cancel').merge(href: '#')} Cancel
+      %button.white{ko(click: 'save')}= t('views.call_flows._external_setting_template.action.save')
+      %a.cancel{ko(click: 'cancel').merge(href: '#')}= t('views.call_flows._external_setting_template.action.cancel')

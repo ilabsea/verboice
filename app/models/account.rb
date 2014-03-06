@@ -22,7 +22,7 @@ class Account < ActiveRecord::Base
          :recoverable, :rememberable, :trackable, :validatable, :confirmable
 
   # Setup accessible (or protected) attributes for your model
-  attr_accessible :email, :password, :password_confirmation, :remember_me
+  attr_accessible :email, :password, :password_confirmation, :remember_me, :locale
 
   has_many :projects, :dependent => :destroy
   has_many :call_flows, :through => :projects
@@ -30,6 +30,7 @@ class Account < ActiveRecord::Base
   has_many :contacts, :through => :projects
   has_many :persisted_variables, :through => :contacts
   has_many :recorded_audios, :through => :contacts
+  has_many :ext_reminder_groups, :through => :projects
 
   has_many :call_logs
 
@@ -42,6 +43,12 @@ class Account < ActiveRecord::Base
   def call(options = {})
     channel = channels.find_by_name! options[:channel]
     channel.call options[:address], options
+  end
+
+  def clear_downloads
+    Dir[File.join RecordingManager.for(self).path_for('downloads'), '*.zip'].each do |file|
+      File.delete file if (Time.now - File.ctime(file)).to_i > 7.days
+    end
   end
 
 end

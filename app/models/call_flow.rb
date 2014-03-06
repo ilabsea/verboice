@@ -67,8 +67,26 @@ class CallFlow < ActiveRecord::Base
     (Parsers::UserFlow.new self, user_flow).step_names
   end
 
+  def self.include_resource_name user_flow
+    user_flow_with_name = user_flow.clone
+
+    user_flow_with_name.each do |step|
+      step.each do |key, value|
+        if key.match /resource/
+          resource = Resource.find_by_guid(value["guid"])
+          value["name"] = resource.name if resource
+        end
+      end
+    end
+  end
+
   def error_flow
     Commands::TraceCommand.new call_flow_id: id, step_id: 'current_step', step_name: '', store: '"User hung up."'
+  end
+
+  def get_fusion_table_url
+    fusion_table = self.get_fusion_table
+    fusion_table ? "#{CallFlow::FusionTablesPush::Pusher::FUSION_TABLE_URL}?docid=#{fusion_table[:table_id]}" : nil
   end
 
   def push_results(call_log)

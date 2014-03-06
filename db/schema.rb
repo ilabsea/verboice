@@ -30,6 +30,7 @@ ActiveRecord::Schema.define(:version => 20140115210510) do
     t.string   "confirmation_token"
     t.datetime "confirmed_at"
     t.datetime "confirmation_sent_at"
+    t.string   "locale"
   end
 
   add_index "accounts", ["confirmation_token"], :name => "index_accounts_on_confirmation_token", :unique => true
@@ -66,6 +67,16 @@ ActiveRecord::Schema.define(:version => 20140115210510) do
 
   add_index "call_flows", ["project_id"], :name => "index_call_flows_on_project_id"
 
+  create_table "call_log_answers", :force => true do |t|
+    t.integer  "project_variable_id"
+    t.string   "value"
+    t.integer  "call_log_id"
+    t.datetime "created_at",          :null => false
+    t.datetime "updated_at",          :null => false
+  end
+
+  add_index "call_log_answers", ["call_log_id"], :name => "index_call_log_answers_on_call_log_id"
+
   create_table "call_log_entries", :force => true do |t|
     t.integer  "call_id"
     t.string   "severity"
@@ -76,22 +87,40 @@ ActiveRecord::Schema.define(:version => 20140115210510) do
 
   add_index "call_log_entries", ["call_id"], :name => "index_call_log_entries_on_call_id"
 
+  create_table "call_log_recorded_audios", :force => true do |t|
+    t.integer  "call_log_id"
+    t.integer  "project_variable_id"
+    t.string   "key"
+    t.string   "description"
+    t.datetime "created_at",          :null => false
+    t.datetime "updated_at",          :null => false
+    t.string   "annotation"
+  end
+
+  add_index "call_log_recorded_audios", ["call_log_id"], :name => "index_call_log_recorded_audios_on_call_log_id"
+  add_index "call_log_recorded_audios", ["project_variable_id"], :name => "index_call_log_recorded_audios_on_project_variable_id"
+
   create_table "call_logs", :force => true do |t|
     t.integer  "account_id"
     t.integer  "project_id"
     t.datetime "finished_at"
     t.string   "direction"
     t.string   "address"
-    t.string   "state",         :default => "active"
-    t.datetime "created_at",                          :null => false
-    t.datetime "updated_at",                          :null => false
+    t.string   "state",                :default => "active"
+    t.datetime "created_at",                                 :null => false
+    t.datetime "updated_at",                                 :null => false
     t.integer  "channel_id"
     t.datetime "started_at"
     t.integer  "schedule_id"
     t.datetime "not_before"
     t.integer  "call_flow_id"
     t.string   "fail_reason"
+    t.integer  "contact_id"
     t.string   "pbx_logs_guid"
+    t.integer  "duration",             :default => 0
+    t.integer  "retries",              :default => 0
+    t.text     "step_interaction"
+    t.string   "prefix_called_number"
   end
 
   add_index "call_logs", ["account_id", "id"], :name => "index_call_logs_on_account_id_and_id"
@@ -145,6 +174,79 @@ ActiveRecord::Schema.define(:version => 20140115210510) do
   end
 
   add_index "delayed_jobs", ["priority", "run_at"], :name => "delayed_jobs_priority"
+
+  create_table "ext_pregnancy_reminders", :force => true do |t|
+    t.string   "name"
+    t.string   "description"
+    t.integer  "week"
+    t.string   "queued_call_ids"
+    t.integer  "call_flow_id"
+    t.integer  "project_id"
+    t.integer  "channel_id"
+    t.integer  "schedule_id"
+    t.datetime "created_at",      :null => false
+    t.datetime "updated_at",      :null => false
+    t.string   "timezone"
+    t.datetime "started_at"
+  end
+
+  add_index "ext_pregnancy_reminders", ["call_flow_id"], :name => "index_ext_pregnancy_reminders_on_call_flow_id"
+  add_index "ext_pregnancy_reminders", ["channel_id"], :name => "index_ext_pregnancy_reminders_on_channel_id"
+  add_index "ext_pregnancy_reminders", ["project_id"], :name => "index_ext_pregnancy_reminders_on_project_id"
+  add_index "ext_pregnancy_reminders", ["schedule_id"], :name => "index_ext_pregnancy_reminders_on_schedule_id"
+
+  create_table "ext_reminder_channels", :force => true do |t|
+    t.integer  "reminder_schedule_id"
+    t.integer  "channel_id"
+    t.datetime "created_at",           :null => false
+    t.datetime "updated_at",           :null => false
+  end
+
+  create_table "ext_reminder_groups", :force => true do |t|
+    t.string   "name"
+    t.integer  "project_id"
+    t.binary   "addresses"
+    t.datetime "created_at", :null => false
+    t.datetime "updated_at", :null => false
+  end
+
+  add_index "ext_reminder_groups", ["project_id"], :name => "index_ext_reminder_groups_on_project_id"
+
+  create_table "ext_reminder_phone_book_types", :force => true do |t|
+    t.string   "name"
+    t.string   "description"
+    t.integer  "project_id"
+    t.datetime "created_at",  :null => false
+    t.datetime "updated_at",  :null => false
+  end
+
+  add_index "ext_reminder_phone_book_types", ["project_id"], :name => "index_ext_reminder_phone_book_types_on_project_id"
+
+  create_table "ext_reminder_phone_books", :force => true do |t|
+    t.integer "project_id"
+    t.string  "phone_number"
+    t.integer "type_id"
+  end
+
+  create_table "ext_reminder_schedules", :force => true do |t|
+    t.string  "name"
+    t.date    "start_date"
+    t.integer "schedule_type",       :default => 0
+    t.integer "recursion"
+    t.string  "days"
+    t.integer "call_flow_id"
+    t.integer "project_id"
+    t.integer "channel_id"
+    t.string  "queue_call_id"
+    t.string  "time_from"
+    t.string  "time_to"
+    t.string  "conditions"
+    t.integer "reminder_group_id"
+    t.text    "schedule"
+    t.boolean "retries",             :default => false
+    t.integer "retries_schedule_id"
+    t.string  "retries_in_hours"
+  end
 
   create_table "external_service_steps", :force => true do |t|
     t.string   "name"
@@ -230,6 +332,15 @@ ActiveRecord::Schema.define(:version => 20140115210510) do
     t.datetime "updated_at",    :null => false
   end
 
+  create_table "patients", :force => true do |t|
+    t.date     "pregnancy_date"
+    t.integer  "reminder_phone_book_id"
+    t.datetime "created_at",             :null => false
+    t.datetime "updated_at",             :null => false
+  end
+
+  add_index "patients", ["reminder_phone_book_id"], :name => "index_patients_on_reminder_phone_book_id"
+
   create_table "pbx_logs", :force => true do |t|
     t.string   "guid"
     t.text     "details"
@@ -290,6 +401,7 @@ ActiveRecord::Schema.define(:version => 20140115210510) do
     t.text     "variables"
     t.string   "session_id"
     t.text     "callback_params"
+    t.datetime "answered_at"
   end
 
   add_index "queued_calls", ["call_flow_id"], :name => "index_queued_calls_on_call_flow_id"
@@ -327,9 +439,10 @@ ActiveRecord::Schema.define(:version => 20140115210510) do
     t.time     "time_from"
     t.time     "time_to"
     t.string   "weekdays"
-    t.datetime "created_at", :null => false
-    t.datetime "updated_at", :null => false
+    t.datetime "created_at",                    :null => false
+    t.datetime "updated_at",                    :null => false
     t.integer  "project_id"
+    t.boolean  "disabled",   :default => false
   end
 
   add_index "schedules", ["project_id"], :name => "index_schedules_on_project_id"

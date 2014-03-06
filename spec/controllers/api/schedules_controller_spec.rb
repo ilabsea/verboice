@@ -64,7 +64,7 @@ describe Api::SchedulesController do
 
     response = JSON.parse(@response.body).with_indifferent_access
     response[:summary].should == "There were problems creating the Schedule"
-    response[:properties].should == [{"name" => "can't be blank"}, {"time_from"=>"can't be blank"}, {"time_to"=>"can't be blank"}]
+    response[:properties].should == [{"name" => "Can't be blank"}, {"time_from"=>"Can't be blank"}, {"time_to"=>"Can't be blank"}]
   end
 
   it "should delete an schedule" do

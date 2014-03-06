@@ -3,14 +3,1189 @@
 
 en:
   activerecord:
+    models:
+      channel: "Channel"
+      project: "Project"
+      call_flow: "CallFlow"
+      schedule: "Schedule"
+      contact: "Contact"
+      ext/reminder_schedule: "ReminderSchedule"
     attributes:
+      channel:
+        name: "Name"
+        account: "Account"
+        call_flow: "Call flow"
+      project:
+        name: "Name"
+      call_flow:
+        name: "Name"
+      schedule:
+        name: "Name"
+        time_from: "From time"
+        time_to: "To time"
+      contact:
+        addresses: Phone numbers
+      addresses:
+        address: Phone number
+      ext/reminder_schedule:
+        name: "Name"
+        call_flow_id: "Call flow"
+        channel_id: "Channel"
+        start_date: "Start date"
       application:
         callback_url_user: "User"
         callback_url_password: "Password"
         status_callback_url_user: "User"
         status_callback_url_password: "Password"
-      contact:
-        addresses: Phone numbers
-      addresses:
-        address: Phone number
 
+    errors:
+      models:
+        project:
+          attributes:
+            name:
+              blank: Can't be blank
+        call_flow:
+          attributes:
+            name:
+              blank: Can't be blank
+        channel:
+          domain_not_found: "Domain not found"
+          attributes:
+            name:
+              blank: Can't be blank
+        schedule:
+          attributes:
+            name:
+              blank: Can't be blank
+            time_from:
+              blank: Can't be blank
+            time_to:
+              blank: Can't be blank
+        contact:
+          attributes:
+            address:
+              blank: Can't be blank
+        external_service:
+          attributes:
+            url:
+              blank: Can't be blank
+        resource:
+          attributes:
+            name:
+              blank: Can't be blank
+        ext/reminder_schedule:
+          attributes:
+            name:
+              blank: Can't be blank
+            call_flow_id:
+              blank: Can't be blank
+            channel_id:
+              blank: Can't be blank
+        ext/date_time_validator:
+          attributes:
+            date:
+              incorrect_format: "incorrect format"
+              require: "require date_time_format options for date time"
+
+  support:
+    array:
+      words_connector: ", "
+      last_word_connector: ", and "
+
+  datetime:
+    distance_in_words:
+      about_x_hours:
+        one: about 1 hour
+        other: about %{count} hours
+      about_x_months:
+        one: about 1 month
+        other: about %{count} months
+      about_x_years:
+        one: about 1 year
+        other: about %{count} years
+      almost_x_years:
+        one: almost 1 year
+        other: almost %{count} years
+      half_a_minute: half a minute
+      less_than_x_minutes:
+        one: less than a minute
+        other: less than %{count} minutes
+      less_than_x_seconds:
+        one: less than 1 second
+        other: less than %{count} seconds
+      over_x_years:
+        one: over 1 year
+        other: over %{count} years
+      x_days:
+        one: 1 day
+        other: ! '%{count} days'
+      x_minutes:
+        one: 1 minute
+        other: ! '%{count} minutes'
+      x_months:
+        one: 1 month
+        other: ! '%{count} months'
+      x_seconds:
+        one: 1 second
+        other: ! '%{count} seconds'
+
+  will_paginate:
+    previous_label: "&#8592; Previous"
+    next_label: "Next &#8594;"
+    page_gap: "&hellip;"
+    page_entries_info:
+      single_page:
+        zero:  "No %{model} found"
+        one:   "Displaying 1 %{model}"
+        other: "Displaying all %{count} %{model}"
+      single_page_html:
+        zero:  "No %{model} found"
+        one:   "Displaying <b>1</b> %{model}"
+        other: "Displaying <b>all&nbsp;%{count}</b> %{model}"
+      multi_page: "Displaying %{model} %{from} - %{to} of %{count} in total"
+      multi_page_html: "Displaying %{model} <b>%{from}&nbsp;-&nbsp;%{to}</b> of <b>%{count}</b> in total"
+
+    models:
+      line_item:
+        zero:  line items
+        one:   line item
+        few:   line items
+        other: line items
+
+  errors: &errors
+    format: ! '%{attribute} %{message}'
+    messages:
+      accepted: "must be acceptable"
+      blank: "can not be blank"
+      confirmation: "Values ​​do not match with the confirmation"
+      empty: "can not be empty"
+      equal_to: "must be equal to %{count}"
+      even: "must be even"
+      exclusion: "is a reserve keyword"
+      greater_than: "must be greater than %{count}"
+      greater_than_or_equal_to: "must be greater than or equal to %{count}"
+      inclusion: "not include in the list"
+      invalid: "is invalid"
+      less_than: "is less than %{count}"
+      less_than_or_equal_to: "is less than or equal to %{count}"
+      not_a_number: "is not a number"
+      not_an_integer: "is not an integer"
+      odd: "must be odd"
+      record_invalid: ! 'record: %{errors}'
+      taken: "taken"
+      too_long: "Too long (up to %{count} characters)"
+      too_short: "Too short (the shortest %{count} characters)"
+      wrong_length: "Illegal length (must %{count} characters)"
+    template:
+      body: "The following fields error:"
+      header:
+        one: "an error occurred lead to %{model} can not be saved."
+        other: "%{count} error occurred %{model} can not be saved."
+
+  controllers:
+    api_controller:
+      problem_action: "There were problems %{action} the %{model_name}"
+    call_flows_controller:	
+      call_flow_successfully_updated: "Call Flow %{call_flow_name} successfully updated."
+      no_file_found: "No file found"
+      invalide_extension: "Invalid extension"
+      invalide_file: "Invalid file: %{ex}"
+    channels_controller:
+      create_new: "Create new..."
+      channel_type_invalid: "Channel type invalid."
+      channel_successfully_created: "Channel %{channel_name} successfully created."
+      channel_successfully_updated: "Channel %{channel_name} successfully updated."
+      channel_successfully_deleted: "Channel %{channel_name} successfully deleted."
+    contacts_controller:
+      contact_was_successfully_created: "Contact was successfully created."
+      contact_was_successfully_updated: "Contact was successfully updated."
+    external_services_controller:
+      manifest_successfully_update: "Manifest successfully updated"
+      error_updating_manifest: "Error updating manifest"
+    localized_resources_controller:
+      invalid_audio_file: "Invalid audio file"
+    oauth_controller:
+      access_fusion_tables_successfully: "Access for fusion tables was successfully set up"
+      error_retrieving_access_token_from_google: "Error retrieving access token from google: %{ex}"
+      could_not_obtain_access_to_your_fusion_tables_account: "Could not obtain access to your fusion tables account"
+    projects_controller:
+      project_successfully_created: "Project %{project_name} successfully created."
+      project_successfully_updated: "Project %{project_name} successfully updated."
+      you_need_to_select_call_flow: "You need to select a Call Flow"
+      you_need_to_select_channel: You need to select a channel
+      enter_valid_date: "Enter a valid date"
+      enqueued_call_to_on_channel: "Enqueued calls to %{pluralize} on channel %{channel_name}"
+      project_successfully_deleted: "Project %{project_name} successfully deleted."
+      columns_successfully_updated: "Columns successfully updated."
+      error_updating_columns: "Error updating columns."
+    queued_calls_controller:
+      call_successfully_canceled: "Call %{call_address} successfully canceled."
+    schedules_controller:
+      schedule_succesfully_deleted: "Schedule %{schedule_name} successfully deleted."
+    call_logs_controller:
+      csv_is_too_big: "Sorry, too many records to download. The system can only handle %{max} records. You have %{count} numbers of records."
+    ext:
+      reminder_groups_controller:
+        successfully_updated: "Reminder group %{reminder_group_name} successfully updated."
+        no_file_found: "No file found"
+        invalid_extension: "Invalid extension"
+        invalid_file: "Invalid file: %{ex}"
+
+  views:
+    form:
+      close: "Close"
+      cancel: "Cancel"
+      save: "Save"
+    browser:
+      compatibility:
+        audio: "Your browser does not support the audio element"  
+
+    devise:
+      registrations:
+        edit:
+          title: "Edit settings"
+          label:
+            confirm_password_change: "we need your current password to confirm your changes"
+            language: "Language"
+            change_my_password: "Change my password"
+            current_password: "Current password"
+            new_password: "New password"
+            leave_blank_no_change: "leave blank if you don't want to change it"
+            confirm_new_password: "Confirm new password"
+          action:
+            update: "Update"
+            back: "Back"
+            delete_my_account: "Delete my account"
+            confirm_delete: "Are you sure?"
+
+    api:
+      logs:
+        list_csv:
+          label:
+            entry_id: "Entry ID"
+            time: "Time"
+            step_name: "Step name"
+            command: "Command"
+            action: "Action"
+            detail: "Detail"
+
+    call_flows:
+      _box:
+      _box_content:
+        errors:
+          prohibited:
+            one: "1 error prohibited this call flow from being saved"
+            other: "%{count} errors prohibited this call flow from being saved"
+        action:
+          confirm_delete: "Are you sure?"
+      _branch_option_template:
+        action:
+          add_condition: "Add condition"
+          save: "Save"
+          cancel: "Cancel"
+      _branch_step_template:
+        label:
+          branches: "Branches"
+          if_none_the_above_conditions: "If none of the above conditions match"
+          default: "Default"
+        action:
+          add_branch: "Add branch"
+          remove_this_step: "Remove this step"
+      _capture_step_template:
+        label:
+          message: "Messages"
+          instructions: "Instructions:"
+          invalid: "Invalid:"
+          attempts: "Attempts"
+          second_before_repeating_options: "secs. before repeating options"
+          after_final_attempt_fails: "After final attempt fails:"
+          validation: "Validation"
+          input_length: "Input length"
+          from: "from"
+          to: "to"
+          input_length_from: "Input length from"
+          valid_values: "Valid values"
+          finish_on_key: "Finish on key"
+        action:
+          remove_this_step: "Remove this step"
+      _command_selector_template:
+        label:
+          add_step: "Add step"
+          choose_one_option_to_insert: "Choose one of the options below to insert a new step in the app"
+        action:
+          manage_external_services: "Manage external services"
+      _external_setting_template:
+        label:
+          fill: "Fill"
+          with: "with"
+        action:
+          save: "Save"
+          cancel: "Cancel"
+      _external_step_template:
+        label:
+          parameters: "Parameters"
+          desc: "These will be sent to the external service"
+          response: "Response"
+          will_returned_by_external_service: "These will be returned by the external service"
+          store_the_address_book: "Store to the address book as:"
+          placeholder: 'Enter a name for the value'
+        action:
+          remove_this_step: "Remove this step"
+      _form:
+        label:
+          name: "Name"
+          choose_external_app_or_build_on_verboice: "Choose whether you will use an external app or build one using Verboice"
+          use_external_application: "Use an external application"
+          design_app_in_verboice: "Design your app in Verboice"
+          url: "URL"
+          user: "User"
+          password: "Password"
+          fusion_tables_title: "Fusion Tables"
+          fusion_tables_desc: "Enter a fusion table name and Verboice will create the table and store call results in real-time to it. Note that in case that the flow definition changes, Verboice might need to generate a fresh table with the new structure to store new results; in such case, Verboice will generate new tables using the name you provided and revision number."
+          store_results_call_flow: "Store results of this call flow"
+          fusion_table_name: "Fusion Table name"
+        action:
+          go_to_designer: "Go to Designer"
+          download_call_result_as_csv: "Download call results as CSV"
+          set_google_account: "Set your Google Account"
+          change_google_account: "Change your Google Account"
+          save: "Save"
+          update: "Update"
+          cancel: "Cancel"
+      _goto_step_template:
+        label:
+          go_to_step: "Go to step"
+          select_one: "Select one..."
+        action:
+          remove_this_step: "Remove this step"
+      _hang_up_step_template:
+        label:
+          end_call: "End call"
+          hang_up_here: "Call will be hung up here"
+        action:
+          remove_this_step: "Remove this step"
+      _language_step_template:
+        label:
+          record_message_support_language: "Record one message for each supported language. Callers will hear each message and will be asked to type the number associated with the language. Make sure you include a reference to that number, for example: 'For english, press 2'."
+          languages: "Languages"
+        action:
+          remove_this_step: "Remove this step"
+      _menu_step_template:
+        label:
+          messages: "Messages"
+          explanation: "Explanation"
+          options: "Options:"
+          invalid: "Invalid:"
+          attempts: "Attempts"
+          seconds_before_repeat_options: "secs. before repeating options"
+          after_final_attempt_fails: "After final attempt fails:"
+        action:
+          add_an_option: "Add an option"
+          remove_this_step: "Remove this step"
+      _play_step_template:
+        label:
+          message: "Message:"
+        action:
+          remove_this_step: "Remove this step"
+      _record_localized_resource_template:
+        label:
+          placeholder: "Write here a description of the recording, either as a reminder for you or as a reference for the person that will record the message."
+      _record_step_template:
+        label:
+          messages: "Messages"
+          explanation: "Explanation:"
+          confirmation: "Confirmation:"
+          time: "Time"
+          maximum_recording_time_in_second: "Maximum recording time in secs."
+          properties: "Properties"
+          stop_recording_audio_with_key: "Stop recording audio with key:"
+          store_this_result_as: "Store this result as: "
+        action:
+          remove_this_step: "Remove this step"
+      _register_step_template:
+        label:
+          messages: "Messages"
+          confirmation: "Confirmation:"
+          phone_book_type: "Phone book type"
+          reminder_group: "Reminder group"
+          to: "To"
+          store_registered_date: 'Store registered date as'
+          select: "--- Select ---"
+        action:
+          remove_this_step: "Remove this step"
+      _register_option_template:
+        label:
+          number: "Number"
+      _deregister_step_template:
+        label:
+          messages: "Messages"
+          confirmation: "Confirmation:"
+          phone_book_type: "Phone book type"
+          reminder_group: "Reminder group"
+          select: "--- Select ---"
+        action:
+          remove_this_step: "Remove this step"
+      _datetime_step_template:
+        label:
+          messages: "Messages"
+          explanation: "Explanation:"
+          unit: "Unit"
+        action:
+          remove_this_step: "Remove this step"
+      _resource_editor_template:
+        label:
+          message: "Message"
+          create_new_message: "Create new message"
+          enter_message_name: "Enter message name"
+          select_existing_one: "Select an existing one"
+          name: "Name"
+        languages: "Languages"
+        action:
+          next: "Next"
+          cancel: "Cancel"
+          save: "Save"
+          replace: "Replace"
+      _summary:
+        action:
+          edit: "Edit"
+          download_call_result_as_csv: "Download call results as CSV"
+          goto_designer: "Go to Designer"
+      _text_localized_resource_template:
+        label:
+          placeholder: "Write here the text you want the user to hear"
+      _transfer_step_template:
+        label:
+          forward_to: "Forward to"
+          phone_number: "Phone number:"
+          channel: "Channel:"
+          use_current_channel: "Use current channel"
+        action:
+          remove_this_step: "Remove this step"
+      _upload_localized_resource_template:
+        label:
+          no_file_uploaded_yet: "No file uploaded yet"
+          placeholder: "Write here a description of the recording, either as a reminder for you or as a reference for the person that will record the message."
+        action:
+          upload: "Upload"
+          replace: "Replace"
+      _url_localized_resource_template:
+        label:
+          placeholder: "Write here the URL that holds the audio file you want the user to hear"
+      _workflow_step_template:
+        label:
+          insert_before: "Insert new step before"
+          insert_after: "Insert new step after"
+      download_result_csv:
+        label:
+          call_id: "Call ID"
+          phone_number: "Phone Number"
+          start_time: "Start Time"
+          end_time: "End Time"
+      edit_workflow:
+        label:
+          desc: "Use the following tool to define the application's call flow"
+          include_audio_recording: "include audio recordings"
+        action:
+          export_call_flow: "Export Call flow"
+          import_new_call_flow: "Import a new Call Flow"
+          create_new_sub_flow: "Create new sub flow"
+          browse: "Browse"
+          upload: "Upload"
+          save: "Save"
+          back: "Back"
+      index:
+        title: "Call flows"
+        desc: "Use the following tool to define your application's call flows"
+        action:
+          add_call_flow: "Add Call flow"
+
+    call_logs:
+      _tabs:
+        action:
+          calls_log: "Calls log"
+          queued_calls: "Queued calls"
+      download_csv:
+        label:
+          call_id: "Call ID"
+          phone_number: "Phone Number"
+          time: "Time"
+          severity: "Severity"
+          step_name: "Step name"
+          step_id: "Step ID"
+          command: "Command"
+          action: "Action"
+          detail: "Detail"
+      download_details_csv:
+        label:
+          call_id: "Call ID"
+          phone_number: "Phone Number"
+          time: "Time"
+          severity: "Severity"
+          step_name: "Step name"
+          step_id: "Step ID"
+          command: "Command"
+          action: "Action"
+          detail: "Detail"
+      index:
+        label:
+          desc: "Here you can see the details of incoming and outgoing calls."
+          search: "Search"
+          id: "ID"
+          started: "Started"
+          finished: "Finished"
+          duration_in_second: "Duration(second)"
+          duration: "Duration"
+          caller_id: "Caller ID"
+          direction: "Direction"
+          number_retried: "Retried(time)"
+          channel: "Channel"
+          queue: "Queue"
+          project: "Project"
+          call_flow: "Call Flow"
+          status: "Status"
+          call_log: "call log"
+          annotation: "Annotation"
+        action:
+          download_csv: "Download as CSV"
+          view_details: "view details"
+      progress:
+        label:
+          call_with: "Call with"
+          from_channel: "from channel"
+          severity: "Severity"
+          when: "When"
+          text: "Text"
+      queued:
+        label:
+          title: "Queued calls"
+          desc: "Here you can see the details of enqueued calls."
+          id: "ID"
+          channel: "Channel"
+          date: "Date"
+          phone_number: "Phone number"
+          queue: "Queue"
+          project: "Project"
+          state: "State"
+          queued_calls: "queued calls"
+        action:
+          view_log_details: "view log details"
+          confirm_delete: "Are you sure you want to delete the call"
+      show:
+        label:
+          title: "Call log details"
+          not_before: "Not Before"
+          started: "Started"
+          finished: "Finished"
+          duration: "Duration"
+          call_id: "Caller ID"
+          direction: "Direction"
+          channel: "Channel"
+          queue: "Queue"
+          project: "Project"
+          state: "State"
+          fail_reason: "Fail Reason"
+          severity: "Severity"
+          when: "When"
+          text: "Text"
+        action:
+          download_csv: "Download CSV"
+          back: "Back"
+      download_project_call_log:
+        label:
+          download_call_logs: "Download call logs"
+          summary: "There are %{audios} recorded voice messages in this call logs, total size %{size}."
+          do_you_want_to_download: "Do you want to download call logs along with the recorded voice messages?"
+          processing: "Processing..."
+          processing_message: "Due to the big file size, the system takes a while to process. We will email to you shortly with link to download."
+        action:
+          yes_csv_and_voice: "Yes, CSV and voice recorded"
+          no_only_csv: "No, only CSV"
+
+    channels:
+      title: "Channels"
+      _form:
+        errors:
+          prohibited:
+            one: "1 error prohibited this channel from being saved"
+            other: "%{count} errors prohibited this channel from being saved"
+        label:
+          name: "Name"
+          call_flow: "Call flow"
+        action:
+          save: "Save"
+          update: "Update"
+          cancel: "Cancel"
+      _form_custom:
+        label:
+          dial_string: "Dial string"
+        action:
+      _form_custom_sip:
+        label:
+          username: "Username"
+          password: "Password"
+          number: "Number"
+          prefix: "Prefix"
+          limit: "Limit"
+          domain: "Domain"
+          port: "Port"
+          protocol: "Protocol"
+          direction: "Direction"
+          register: "Register"
+          incoming: "Incoming"
+          outgoing: "Outgoing"
+          both_directions: 'Both directions'
+          prefix_called_number: 'Add prefix to called number'
+          udp: "UDP"
+          tcp: "TCP"
+        action:
+          remove_this_server: "Remove this server"
+          add_another_server: "Add another server..."
+      _form_template_based_sip:
+        label:
+          username: "Username"
+          password: "Password"
+          number: "Number"
+        action:
+      _form_voxeo:
+        label:
+          token: "Token"
+          url: "Url"
+        action:
+      _show_voxeo:
+        label:
+          use_this_url: "Use this URL as the 'Voice URL' in your Voxeo settings"
+        action:
+      call:
+        label:
+          call_channel: "Call channel"
+          number: "Number"
+        action:
+          call: "Call"
+      edit:
+        label:
+          settings: "Settings"
+          edit: "Edit"
+        action:
+          go_back: "Go back"
+      index:
+        title: "My Channels"
+        label:
+          you_have_no_channel_yet: "You have no channels yet."
+          name: "Name"
+          call_flow: "Call Flow"
+          kind: "Kind"
+          create_new: "Create new..."
+        action:
+          view: "view"
+          queued_calls: "queued calls"
+          call: "call"
+          edit: "edit"
+          delete: "delete"
+          confirm_delete: "Are you sure you want to delete the channel"
+      new:
+        label:
+          new: "New"
+          channel: "channel"
+        action:
+          back: "Back"
+      show:
+        title: "Calls"
+        desc: "Total number of calls made and received"
+        label:
+          registerd:
+            one: "call registered"
+            other: "calls registered"
+          properties: "Properties"
+          default_call_flow: "Default Call flow"
+          none: "None"
+          queued_call:
+            one: "queued call"
+            other: "queued calls"
+          no_errors: "No errors"
+          error:
+            one: "error"
+            other: "errors"
+        action:
+          view_in_fusion_table: "View in Fusion Table"
+          download_as_csv: "Download as CSV"
+          manage_call_flow: "Manage Call Flow"
+          view_calls: "View calls"
+          edit_settings: "Edit settings"
+          delete_this_channel: "Delete this channel"
+          confirm_delete: "Are you sure you want to delete the channel %{channel_name}?"
+
+    contacts:
+      _form:
+        errors:
+          prohibited:
+            one: "1 error prohibited this contact from being saved"
+            other: "%{count} errors prohibited this contact from being saved"
+        label:
+          phone_number: "Phone number"
+        action:
+          save: "Save"
+          cancel: "Cancel"
+      _project_variable_fields:
+        label:
+        action:
+      edit:
+        label:
+          title: "Contact"
+        action:
+      index:
+        title: "Phone book"
+        desc: "List of all the people that have made or received calls in this project"
+        label:
+          add_new_variable: "Add new variable"
+          phone_number: "Phone number"
+        action:
+          manage_phone_book_columns: "Manage Phone book's columns"
+          cancel: "Cancel"
+          confirm: "Confirm"
+          confirm_delete: "Are you sure?"
+          new_contact: "New Contact"
+      new:
+        title: "New contact"
+
+    ext:
+      pregnancy_reminders:
+        _form:
+          errors:
+            prohibited:
+              one: "1 error prohibited this pregnancy reminder from being saved"
+              other: "%{count} errors prohibited this pregnancy reminder from being saved"
+          label:
+            name: "Name"
+            select_call_flow: "Select call flow"
+            select_schedule: "Select schedule"
+            select_channel: "Select channel"
+            description: "Description"
+            remind_patients_that_have_pregnant: "Remind patients that have pregnant"
+            weeks: "weeks"
+          action:
+            save: "Save"
+            cancel: "Cancel"
+        _start:
+          label:
+            start: "Start"
+          action:
+        edit:
+          title: Pregnancy Reminder
+        index:
+          title: "Pregnancy Reminder"
+          desc: "List of all the pregnancy reminders"
+          label:
+            reminder: "Reminder"
+            call_flow: "Call Flow"
+          action:
+            confirm_delete: "Are you sure?"
+            new_pregnancy_reminder: "New pregnancy reminder"
+        new:
+          title: "New Pregnancy Reminder"
+
+      reminder_groups:
+        title: "Reminder group"
+        label:
+          name: "Name"
+          contacts: "Contacts"
+          add_contact: "Add contact"
+          successfully_created: "Reminder group is successfully created"
+          create_error: "Failed to create reminder group"
+          successfully_updated: "Reminder group is successfully updated"
+          update_error: "Failed to update reminder group"
+          successfully_deleted: "Reminder group has been deleted"
+          delete_error: "Failed to delete reminder group"
+          confirm_delete: "Are you sure you want to delete this reminder group?"
+          address_exists: "Address already exists"
+          name_exists: "Name is already exists"
+        action:
+          edit: "Edit"
+          save: "Save"
+          cancel: "Cancel"
+          new: "New reminder group"
+          import_csv: "Import reminder contact list"
+          upload: "Upload"
+
+      reminder_schedules:
+        title: "Reminder schedule"
+        desc: "List of all the reminder schedules"
+        label:
+          add_channel: "Add Channel"
+          name: "Name"
+          call_all_contacts_in: "Call all contacts in"
+          with: "with"
+          when: "When"
+          and: "and"
+          using: "using"
+          reminder_group: "Reminder group"
+          select_reminder_group: "Select contact"
+          call_flow: "Call flow"
+          select_call_flow: "Select call flow"
+          schedule: "Schedule"
+          select_schedule: "Select schedule"
+          channel: "Channel(s)"
+          select_channel: "Select channel"
+          description: "Description"
+          time_zone: "Time zone"
+          start_on: "Start on"
+          date_format: "(dd/mm/yy)"
+          time_format: "(HH:MM)"
+          call_time: "Call time"
+          from_must_be_less_than_to: "From must be less than To"
+          repeat: "Repeat"
+          yes: "Yes"
+          no: "No"
+          sun: "Sun"
+          mon: "Mon"
+          tue: "Tue"
+          wed: "Wed"
+          thu: "Thu"
+          fri: "Fri"
+          sat: "Sat"
+          every: "Every"
+          weeks: "week(s)"
+          from: "From"
+          to: "To"
+          conditions: "Conditions:"
+          variable: "Variable"
+          select_variable: "Select variable"
+          select_operator: "Select operator"
+          please_select_at_least_one_day_to_apply: "Please select at least one day to apply"
+          ago: "ago"
+          today: "Today"
+          channel_exists: "Channel already exists"
+        action:
+          save: "Save"
+          cancel: "Cancel"
+          edit: "Edit"
+          done: "Done"
+          confirm_delete: "Are you sure?"
+          new_reminder_schedule: "New reminder schedule"
+          add_condition: "Add condition"
+
+      shared:
+        _project_tabs:
+          action:
+            reminder_group: "Reminder Group"
+            reminder_phone_book: "Reminder Phone Book"
+            reminder_schedule: "Reminder Schedule"
+            pregnancy_reminder: "Pregnancy Reminder"
+
+    external_services:
+      _box:
+      _box_content:
+        errors:
+          prohibited:
+            one: "1 error prohibited this external service from being saved"
+            other: "%{count} errors prohibited this external service from being saved"
+      _form:
+        label:
+          url: "URL"
+          settings: "Settings"
+          steps: "Steps"
+        action:
+          update_manifest: "Update Manifest"
+          save: "Save"
+          update: "Update"
+          cancel: "Cancel"
+      _summary:
+        action:
+          edit: "Edit"
+          update_manifest: "Update Manifest"
+      index:
+        title: "External services"
+        desc: "Use the following tool to define your application's external services"
+        action:
+          download_sample_manifest: "Download a sample manifest"
+          add_external_service: "Add External service"
+      show:
+        label:
+          name: "Name"
+          url: "Url"
+          xml: "Xml"
+        action:
+          edit: "Edit"
+          back: "Back"
+
+    home:
+      download_brochure: Download brochure
+      listen_and_response: Listen and response
+      listen_and_response_sub: to the voice of your community.
+      listen_and_response_body: "Voice is the most universal and inclusive means of communication, and it's an ideal way to expand the reach and impact of health and humanitarian technologies. Verboice is a free and open-source tool that makes it easy for anyone to create and run projects that interact via voice, allowing your users to listen and record messages in their own language and dialect or answer questions with a phone keypad. Verboice projects can start small and scale up, making it possible to improve lives even in communities previously closed off by literacy and technological barriers."
+      get_started: Get started
+      view_your_project: View your projects
+      create_an_account: Create an account
+      already_a_member: Already a member?
+      log_in: Log in
+      overcome: Overcome
+      literacy_barriers_with_verbal_communication: literacy barriers with verbal communication
+      create: Create
+      voice_based_programs_without_coding: voice-based programs without coding
+      scales: Scales
+      to_suit_your_needs: to suit your needs
+      generate: Generate
+      project_using_any_computer_with_internet_access: projects using any computer with Internet access
+      reach: Reach
+      out_to_any_community_anywhere_there_access_to_basic_phones: "out to any community, anywhere there's access to basic phones"
+      api: API
+      based_on_standards: based on standards
+      free: Free
+      for_anyone_to_use_to_help_increase_their_social_impact: for anyone to use to help increase their social impact
+      open_source: Open Source
+      code_for_developers_to_use_to_improve_its_design_and_functionality: "code for developers to use to improve its design and functionality"
+      container_first_title: "What can I use it for?"
+      container_first_desc: "Verboice is an ideal solution for reaching out to communities whatever their level of literacy or technological sophistication. Here are a few of the ways Verboice can help you inform, educate, and improve the lives of any audience with access to basic phone services:"
+      container_first_panel_first_title: "Healthier Pregnancies and Happier Babies"
+      container_first_panel_first_desc: "Healthy babies and mothers form the foundation of a thriving community. With Verboice, mother/child health advocates can extend their educational outreach campaigns to communities with previously minimal access to prenatal and maternal health education. From month-by-month updates on what to expect during pregnancy to checkup reminders and newborn care advice, Verboice interactive voice campaigns can make a positive difference that will be felt for generations to come." 
+      container_first_panel_second_title: "Researching Human Rights Conditions"
+      container_first_panel_second_desc: "There's no better authority on the state of human rights in a community than community members themselves. Verboice allows human rights investigators to survey anonymous callers and get an accurate picture of the ground-level conditions in a community. When abuses are noted, human rights organizations can use Verboice to point the way toward supportive/protective resources, supply legal information, and give the most oppressed a voice that carries beyond the confines of their communities."
+      container_first_panel_third_title: "Coordinating First Responders"
+      container_first_panel_third_desc: "Effectively coordinating first response efforts can mean the difference between a relatively minor misfortune and a disaster. Using Verboice, first responders quickly get a firsthand look at the conditions in even widely separated communities, without having to spend precious time travelling from place to place. Triage efforts are based on voice reports gathered directly from victims, helping disaster response teams to better deal with often rapidly changing circumstances and deliver the best care possible."
+      container_first_panel_fourth_title: "Organizing Campaign Activists"
+      container_first_panel_fourth_desc: "With Verboice, activists can organize their members from anywhere in the world, using only basic phone equipment. From information about how to participate to inspirational messages from community leaders, outgoing communications can be easily recorded and made instantly available to fellow activists. To keep everyone on track, activists can share ideas about priorities and new initiatives from any cellular or landline-based phone. Whatever the cause, Verboice makes change just a little easier to achieve."
+      container_features_title: "Features"
+      container_features_point_one: "Simple Web interface for creating interactive voice response systems"
+      container_features_point_two: "Integrates easily with your existing projects using industry standards."
+      container_features_point_three: "Works with almost any VoIP line or can be installed on a local server with a dedicated phone line"
+      container_features_point_four: "Verboice scheduler places calls according to your timeline"
+      container_features_point_five: "Automatic logs capture key details of every call"
+      container_features_point_six: "Integrates with open-source messaging/PBX solutions, such as Asterisk and Freeswitch"
+      container_features_point_senven: "Extensible to support high-scale VoIP and custom switches"
+      container_second_title: "How does it work?"
+      container_second_desc: "To get started, first set up a phone number dedicated to Verboice. Next, record outgoing messages offline, for later upload, or directly, using the Verboice Web application. Once you've recorded your outgoing messages, create your program's navigation sequence using Verboice's easy-to-use tools and review it using the onscreen flowchart. Community members can then access your interactive program from any phone. The caller will hear your audio file, which will usually ask them a question, respond either by voice or keypad entry and then hear the next audio file that you’ve specified to play based on the caller’s response to the previous question.  Responses are collected automatically, and you can log into your Verboice account to review them at your convenience."
+      container_third_title: "Who has used it?"
+      container_third_desc: ""
+      container_third_panel_first_title: "Saving Lives at Birth"
+      container_third_panel_first_desc: "Baby Monitor will take clinical screening directly to women in the critical period before and after birth. This mobile phone application, to be developed with partners at the Pop Council, will use interactive voice response technology to detect complications and take action. Women will listen to screening questions in their local language and respond via pressing a key. Baby Monitor will assess responses and, if necessary, send information, make referrals, and dispatch community health workers. - from"
+      container_third_panel_second_title: "Red Cross"
+      container_third_panel_second_desc: "InSTEDD designed, developed, and pilot tested a tool (Watchfire) to help the American Red Cross (ARC) improve their community- level disaster response in the San Francisco Bay Area. After working closely with the ARC on a needs assessment, we learned that their highest priority was improving the speed and coordination of ARC's Disaster Action Teams (DATs). Watchfire makes phone calls and sends SMS text messages to volunteers to ask them if they can respond to an emergency and provides these potential responders with sufficient information to arrive at the event site."
+      container_fouth_title: "How can I help?"
+      container_fourth_suggestion_features_request: "Got suggestions or feature requests? Join the discussion."
+      container_fourth_join_our_discussion_list: "Join our discussion list"
+      container_fourth_get_code_as_developer: "Got a way with code? Help us develop our tools (and make the world a better place at the same time)."
+      container_fourth_our_backlog: "Visit our backlog"
+
+    layouts:
+      action:
+        home: "Home"
+        projects: "Projects"
+        channels: "Channels"
+        calls: "Calls"
+        settings: "Settings"
+        report_bug: "Report a bug"
+        sign_out: "Sign Out"
+        create_account: "Create account"
+        log_in: "Log in"
+        help: "Help"
+
+    projects:
+      call_logs:
+        index:
+          title: "Here you can see the details of incoming and outgoing calls."
+          label:
+            desc: "Here you can see the details of incoming and outgoing calls."
+            select_call_flow: "Please select call flow to filter your call log."
+            id: "ID"
+            started: "Started"
+            finished: "Finished"
+            duration_in_second: "Duration(second)"
+            caller_id: "Caller ID"
+            direction: "Direction"
+            number_retried: "Retried(time)"
+            channel: "Channel"
+            queue: "Queue"
+            project: "Project"
+            call_flow: "Call Flow"
+            status: "Status"
+            interaction: "Caller interaction"
+            call_log: "call log"
+            all_call_flow: "All call flows"
+            after: "After"
+            before: "Before"
+            phone_number: "Phone Number"
+            advanced_search: "Advanced search"
+            date: "Date"
+          action:
+            view_details: "view details"
+            cancel: "Cancel"
+            search: "Search"
+
+      _enqueue_new_call:
+        title: "Enqueue new calls"
+        desc: "Add new calls to this project queue"
+        label:
+          call_flow: "Call Flow"
+          select_call_flow: "Select a Call Flow..."
+          channel: "Channel"
+          language: "Language"
+          variables: "Variables"
+          select_channel: "Select a Channel..."
+          schedule: "Schedule"
+          select_schedule: "Select a Schedule..."
+          not_before: "Not before"
+          on_time_zone: "On time zone"
+          phone_numbers: "Phone numbers"
+          desc: "Enter each phone number in a separate line"
+        action:
+          enqueue_calls: "Enqueue calls"
+
+      _form:
+        errors:
+          prohibited:
+            one: "1 error prohibited this project from being saved"
+            other: "%{count} errors prohibited this project from being saved"
+        label:
+          name: "Name"
+          time_zone: "Time zone"
+          properties: "Properties"
+          languages: "Languages"
+          default_language: "Default language"
+          supported_languages: "Languages you will support in this project"
+          add_new_language: "Add a new language"
+          text_to_speech_engine: "Text-to-speech Engine"
+          status_callback: "Status callback"
+          url: "URL"
+          user: "User"
+          password: Password
+        action:
+          save: Save
+          cancel: Cancel
+          update: Update
+
+      edit:
+      index:
+        title: Projects
+        label:
+          my_projects: My Projects
+          no_projects: You have no projects yet.
+        action:
+          create_project: Create Project
+
+      new:
+        title: New project
+
+      show:
+        title: Calls
+        concurrent_call: Concurrent call
+        concurrent_call_detail: Total number of concurrent calls made and received
+        desc: Total number of calls made and received
+        label:
+          call: call
+          calls: calls
+          registered: registered
+          properties: Properties
+          in_this_project: in this project
+          active_call: "active call"
+        action:
+          download_csv: Download as CSV
+          edit_call_flows: Edit Call Flows
+          manage_channels: Manage channels
+          view_calls: View calls
+          edit_settings: Edit settings
+          delete_this_project: Delete this project
+          confirm_delete: Are you sure you want to delete the project
+
+    queued_calls:
+      index:
+        label:
+          queued_calls_for_channel: Queued calls for channel
+          active_calls: Active calls
+          no_queued_calls_found: No queued calls found.
+          queued_call: queued call
+          queued_at: Queued at
+          phone_number: Phone number
+        action:
+          refresh: refresh
+
+    resources:
+      _localized_resource_selector_template:
+      _record_localized_resource_template:
+        label:
+          placeholder: "Write here a description of the recording, either as a reminder for you or as a reference for the person that will record the message."
+
+      _resource_template:
+        label:
+          placeholder: Enter resource name
+        action:
+          save: Save
+          cancel: Cancel
+          remove_this_resource: Remove this resource
+
+      _text_localized_resource_template:
+        label:
+          placeholder: 
+
+      _undefined_localized_resource_template:
+        label:
+          missing_translation: Missing translation
+
+      _upload_localized_resource_template:
+        label:
+          no_file_uploaded_yet: No file uploaded yet
+          placeholder: 'Write here a description of the recording, either as a reminder for you or as a reference for the person that will record the message.'
+        action:
+          upload: Upload
+          replace: Replace
+
+      _url_localized_resource_template:
+        label:
+          placeholder: 'Write here the URL that holds the audio file you want the user to hear'
+
+      index:
+        title: resources
+        desc: You can translate the content of your call flows to other languages
+        label:
+          name: Name
+        action:
+          create_resource: Create Resource
+
+    schedules:
+      _box:
+      _box_content:
+        errors:
+          prohibited:
+            one: "1 error prohibited this schedule from being saved"
+            other: "%{count} errors prohibited this schedule from being saved"
+        action:
+          confirm_delete: Are you sure?
+
+      _form:
+        label:
+          name: Name
+          days: Days
+          from: From
+          to: "to"
+          retries: Retries
+          retries_desc: Enter comma separated delays in hours
+          sun: "Sun"
+          mon: "Mon"
+          tue: "Tue"
+          wed: "Wed"
+          thu: "Thu"
+          fri: "Fri"
+          sat: "Sat"
+        action:
+          save: Save
+          update: Update
+          cancel: Cancel
+
+      _summary:
+        action:
+          edit: Edit
+
+      index:
+        title: Schedules
+        action:
+          add_schedule: Add Schedule
+
+    shared:
+      _project_tabs_and_title:
+        action:
+          overview: Overview
+          calls: Calls
+          call_flows: Call Flows
+          resources: Resources
+          schedules: Schedules
+          phone_book: Phone Book
+          external_services: External Services
+          settings: Settings

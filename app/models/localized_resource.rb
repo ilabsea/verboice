@@ -27,6 +27,9 @@ class LocalizedResource < ActiveRecord::Base
 
   broker_cached
 
+  AUDIO_UPLOAD = {:NO_SELECTED => -1, :INVALID => 0, :VALID => 1}
+  INVALID_AUDIO_UPLOAD_MSG = "Invalid audio file"
+
   after_initialize do
     self.guid ||= Guid.new.to_s
   end
@@ -39,8 +42,14 @@ class LocalizedResource < ActiveRecord::Base
     self.uploaded_audio.present?
   end
 
+  def uploaded_status
+    return AUDIO_UPLOAD[:NO_SELECTED] if self.filename.nil?
+    return AUDIO_UPLOAD[:INVALID] if self.filename == INVALID_AUDIO_UPLOAD_MSG
+    AUDIO_UPLOAD[:VALID]
+  end
+
   def as_json options = {}
-    super options.merge(:methods => [:type, :has_recorded_audio, :has_uploaded_audio, :duration, :description, :filename],
+    super options.merge(:methods => [:type, :has_recorded_audio, :has_uploaded_audio, :uploaded_status, :duration, :description, :filename],
       :except => [:recorded_audio, :uploaded_audio, :extras])
   end
 

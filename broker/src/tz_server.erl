@@ -10,7 +10,11 @@ start_link() ->
   gen_server:start_link({local, ?SERVER}, ?MODULE, {}, []).
 
 get_timezone_offset(TimeZone) when is_binary(TimeZone) ->
-  gen_server:call(?SERVER, {get_offset, TimeZone});
+  NewTimeZone = case TimeZone of
+    <<"Phnom Penh">> -> <<"Bangkok">>;
+    _ -> TimeZone
+  end,
+  gen_server:call(?SERVER, {get_offset, NewTimeZone});
 
 get_timezone_offset(TimeZone) when is_list(TimeZone) ->
   get_timezone_offset(list_to_binary(TimeZone)).

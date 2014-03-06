@@ -1,0 +1,8 @@
+development:
+  allow_prefix_called_number: true
+
+test:
+  allow_prefix_called_number: false
+
+production:
+  allow_prefix_called_number: false

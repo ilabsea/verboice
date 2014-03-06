@@ -2,6 +2,7 @@
   :javascript
     var distinct_variables = #{ @variables.to_json };
     var call_flow = #{ raw (@call_flow.user_flow || []).to_json };
+    var reminder_groups = #{ @reminder_groups.to_json }
     var external_steps = #{ @external_steps.to_json };
     var languages = #{ project_languages_json(@project) };
     var project_id = #{ @project.id };
@@ -29,29 +30,29 @@
         iframe.src = url;
     }
 
-  - %W(external_step hang_up_step workflow_step capture_step menu_step play_step mark_as_failed_step mark_as_successful_step transfer_step goto_step branch_step record_step language_step text_localized_resource url_localized_resource record_localized_resource upload_localized_resource command_selector call_simulator branch_option external_setting resource_editor hang_up_and_call_back nuntium_step impersonate_step).each do |template|
+  - %W(external_step hang_up_step workflow_step capture_step menu_step play_step mark_as_failed_step mark_as_successful_step transfer_step goto_step branch_step record_step language_step text_localized_resource url_localized_resource record_localized_resource upload_localized_resource command_selector call_simulator branch_option external_setting resource_editor hang_up_and_call_back nuntium_step impersonate_step register_step register_option deregister_step datetime_step).each do |template|
     = render "call_flows/#{template}_template"
 
 = render 'shared/project_tabs_and_title', :project => @project
 
 %h2= @call_flow.name
-%p Use the following tool to define the application's call flow
+%p= t('views.call_flows.edit_workflow.label.desc')
 
 = form_tag export_call_flow_path(@call_flow), :method => :get do
-  %button.fimport Export Call flow
+  %button.fimport= t('views.call_flows.edit_workflow.action.export_call_flow')
   = check_box_tag :export_audios
-  include audio recordings
+  = t('views.call_flows.edit_workflow.label.include_audio_recording')
 
 .ux-collapsible.collapsed.w40.file_upload{"data-on-expanded" => "box grey"}
   %span
-    %a.button.fexport{:href => "#"} Import a new Call Flow:
+    %a.button.fexport{:href => "#"}= t('views.call_flows.edit_workflow.action.import_new_call_flow')
   .ux-content
     = form_tag({:action => :import}, :multipart => true) do
       %hr
-      = file_field_tag 'vrb', :label => 'Browse', :class =>'button white'
+      = file_field_tag 'vrb', :label => t('views.call_flows.edit_workflow.action.browse'), :class =>'button white'
       %hr
       .right
-        %button.grey{:type => "submit"} Upload
+        %button.grey{:type => "submit"}= t('views.call_flows.edit_workflow.action.upload')
       .clear
 
 %hr
@@ -60,13 +61,13 @@
   #wami
   #workflow
     #workflow-page
-      %p.left.title.clickable{ 'data-bind' => 'click: show_new_step_selector' } Create new sub flow
+      %p.left.title.clickable{ 'data-bind' => 'click: show_new_step_selector' }= t('views.call_flows.edit_workflow.action.create_new_sub_flow')
       -# %p.left.title &nbsp; |
       -# %p.left.title.clickable{ 'data-bind' => 'click: call_from_browser' } | Try it now!
       %div.right
         = hidden_field_tag 'flow', (@call_flow.user_flow || []).to_json
-        %button.grey{:type => "submit"} Save
-        = link_to 'Back', project_call_flows_path(@project), :class => "button white cancel", :style => 'top: 1px; margin-right: 15px'
+        %button.grey{:type => "submit"}= t('views.call_flows.edit_workflow.action.save')
+        = link_to t('views.call_flows.edit_workflow.action.back'), project_call_flows_path(@project), :class => "button white cancel", :style => 'top: 1px; margin-right: 15px'
       .clear
       .left
         .box.lightgrey.workflow

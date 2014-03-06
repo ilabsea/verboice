@@ -1,11 +1,16 @@
+:javascript
+  $(function(){
+    allowKeyInput($("#search"), /[0-9\+]/);
+  });
+
 = render 'shared/project_tabs_and_title', :project => @project
 
-%h2 Phone book
-%p.desc List of all the people that have made or received calls in this project
+%h2= t('views.contacts.index.title')
+%p.desc= t('views.contacts.index.desc')
 
 .ux-collapsible.collapsed.w40.file_upload{"data-on-expanded" => "box grey"}
   %span
-    %a.button.fconfiguration{:href => "#"} Manage Phone book's columns
+    %a.button.fconfiguration{:href => "#"}= t('views.contacts.index.action.manage_phone_book_columns')
   .ux-content
     = form_for(@project, :url => update_variables_project_path(@project)) do |f|
       %hr
@@ -14,43 +19,51 @@
           = render 'project_variable_fields', :f => builder
         .add_project_variable
           .ux-optext{class: 'w30', style: 'display: inline-block;'}
-            Add new variable
+            = t('views.contacts.index.label.add_new_variable')
           = link_to_add_fields '', f, :project_variables, :class => 'button clist-add'
       %hr
       .right
-        %a.button.ux-collapse-trigger Cancel
-        %button.white{:type => "submit"} Confirm
+        %button.white{:type => "submit"}= t('views.contacts.index.action.confirm')
+        %a.button.white.cancel.ux-collapse-trigger= t('views.contacts.index.action.cancel')
       .clear
 
 %br
 %br
 
+%div= page_entries_info @contacts
+= will_paginate @contacts, :param_name => 'page'
+
+%form
+  %p
+    = t('views.call_logs.index.label.search')
+    = text_field_tag :search, @search, :size => 80, placeholder: "#{t('views.contacts.index.label.phone_number')}", :class => (@search.present? ? 'highlighted' : '')
+  %p
+
 .tablewrapp.no-wrap.scroll
   %table.GralTable
     %tr
-      %th{colspan: 2} Phone numbers
+      %th{colspan: 2} Phone number
       - @implicit_variables.each do |variable|
         %th=variable.key
       - @project_variables.each do |variable|
         %th=variable.name
-      - @recorded_audio_descriptions.each do |audio_description|
-        %th=audio_description
 
     - @contacts.each do |contact|
       %tr.link{'data-url' => edit_contact_path(contact)}
         %td= addresses_for_contact(contact)
-        %td.right= link_to '', contact, :confirm => 'Are you sure?', :method => :delete, :class => 'button premove'
+        %td.right= link_to '', contact, :confirm => t('views.contacts.index.action.confirm_delete'), :method => :delete, :class => 'button premove'
         - @implicit_variables.each do |implicit_variable|
           - variable = contact.persisted_variables.detect{|v| v.implicit_key == implicit_variable.key}
           %td= variable.try(:value)
         - @project_variables.each do |project_variable|
-          - variable = contact.persisted_variables.detect do |variable|
-            - variable.project_variable == project_variable
-          %td= variable.try(:value)
-        - @recorded_audio_descriptions.each do |audio_description|
-          - audios = contact.recorded_audios.collect do |audio|
-            - audio.description == audio_description
-          %td= audios.size
+          - value = nil
+          - contact.persisted_variables.each do |variable|
+            - if variable.project_variable == project_variable
+              - value = variable.try(:value)
+          %td= value
 %br
 
-= link_to 'New Contact', new_project_contact_path(@project), :class => 'cadd'
+%div= page_entries_info @contacts
+= will_paginate @contacts, :param_name => 'page'
+
+= link_to t('views.contacts.index.action.new_contact'), new_project_contact_path(@project), :class => 'cadd'

@@ -24,6 +24,8 @@ class LocalizedResourcesController < ApplicationController
 
   skip_before_filter :verify_authenticity_token, :only => [:save_recording, :save_file]
 
+  include AudioUtils
+
   def save_recording
     localized_resource.recorded_audio = request.body.read
     localized_resource.save
@@ -35,10 +37,14 @@ class LocalizedResourcesController < ApplicationController
   end
 
   def save_file
-    localized_resource.filename = params[:filename] if params[:filename].present?
-    localized_resource.uploaded_audio = request.body.read
+    localized_resource.filename = "#{params[:filename]}.wav" if params[:filename].present?
+    localized_resource.uploaded_audio = save_tempororay_file_as_wav(request.body.read, params[:filename], request.content_type)
     localized_resource.save
-    head :ok
+    if params[:filename].present? && request.content_type.audio_mime_type?
+      render :text => "OK"
+    else
+      render :text => I18n.t("controllers.localized_resources_controller.invalid_audio_file")
+    end
   end
 
   def play_file

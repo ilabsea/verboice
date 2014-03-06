@@ -1,10 +1,19 @@
 <% content_for :navigation do %>
-  <%= section "Home", home_path, :home %>
+  <%= section t('views.layouts.action.home'), home_path, :home %>
   <% if account_signed_in? %>
-    <%= section "Projects", projects_path, :projects, [:projects, :call_flows, :resources, :schedules, :contacts, :external_services] %>
-    <%= section "Channels", channels_path, :channels, [:channels, :nuntium_channels] %>
-    <%= section "Calls", call_logs_path, :call_logs %>
+    <% if params[:project_id].nil? %>
+      <%= section t('views.layouts.action.projects'), projects_path, :projects, [:projects, :call_flows, :schedules, :resources, :external_services, :contacts, :reminder_groups, :reminder_schedules, :pregnancy_reminders] %>
+    <% else %>
+      <%= section t('views.layouts.action.projects'), projects_path, :projects, [:projects, :call_flows, :schedules, :resources, :external_services, :contacts, :reminder_groups, :reminder_schedules, :pregnancy_reminders, :call_logs] %>
+    <% end %>
+    <%= section t('views.layouts.action.channels'), channels_path, :channels, [:channels, :nuntium_channels] %>
+    <% if params[:project_id].nil? %>
+      <%= section t('views.layouts.action.calls'), call_logs_path, :call_logs %>
+    <% else %>
+      <%= section t('views.layouts.action.calls'), call_logs_path, nil %>
+    <% end %>
   <% end %>
+  <%= section t('views.layouts.action.help'), '/help', :help %>
 <% end %>
 <% content_for :right_menu do %>
   <ul class="RightMenu">
@@ -14,12 +23,12 @@
           <%=current_account.email%><br><br>
           <div class="container">
             <ul>
-              <li><%= link_to 'Settings', edit_account_registration_path %></li>
+              <li><%= link_to t('views.layouts.action.settings'), edit_account_registration_path %></li>
             </ul>
             <hr/>
             <ul>
-              <li><a href="mailto:support@instedd.org?subject=[<%= application_name.underscore %>-bug]">Report a bug</a></li>
-              <li><%= link_to "Sign Out", destroy_account_session_path %></li>
+              <li><a href="mailto:support@instedd.org?subject=[<%= application_name.underscore %>-bug]"><%=t('views.layouts.action.report_bug') %></a></li>
+              <li><%= link_to t('views.layouts.action.sign_out'), destroy_account_session_path %></li>
             </ul>
           </div>
         </div>
@@ -29,15 +38,15 @@
         </li>
         <% else %>
         <li>
-          <%= link_to "Create account", new_account_registration_path, :class => 'fedit' %>
+          <%= link_to t('views.layouts.action.create_account'), new_account_registration_path, :class => 'fedit' %>
         </li>
         <li>
-          <%= link_to "Log in", new_account_session_path, :class => 'fuser' %>
+          <%= link_to t('views.layouts.action.log_in'), new_account_session_path, :class => 'fuser' %>
         </li>
         <% end %>
       </ul>
 <% end %>
 <% content_for :footer_links do %>
-  <a href="<%= root_path %>">Home</a>
+  <a href="<%= root_path %>"><%= t('views.layouts.action.home') %></a>
 <% end %>
 <%= render :file => 'layouts/instedd_application' %>

@@ -1,0 +1,19 @@
+.audio-annotation {
+  display: none;
+}
+
+.modal {
+  width: 400px;
+  
+  audio {
+    width: 100%;
+  }
+
+  textarea {
+    width: 98%;
+  }
+}
+
+.fedit-blue {
+  background-image: url(/assets/edit-blue.png);
+}

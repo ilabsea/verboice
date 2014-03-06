@@ -12,11 +12,11 @@
       %tr
         %tr
           %td{ko(css: "{ orange: is_resource_invalid }")}
-            Message:
+            = t('views.call_flows._play_step_template.label.message')
             %span{ko(css: "{ alert: is_resource_invalid }")}
             %span{ko(text: "resource.display_name")}
           %td
             %button.farrow{ :type => "button", 'data-bind' => 'click: show_resource' }
     .content
       .bottom-actions
-        %button.fdelete{ 'data-bind' => 'click: remove_with_confirm' } Remove this step
+        %button.fdelete{ 'data-bind' => 'click: remove_with_confirm' }= t('views.call_flows._play_step_template.action.remove_this_step')
