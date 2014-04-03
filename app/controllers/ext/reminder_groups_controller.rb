@@ -29,7 +29,7 @@ module Ext
           when '.csv'
             CSV.parse params[:file_name].read do |row|
               next if !row[0].strip.is_contact?
-              @reminder.register_address row[0] 
+              @reminder.register_address row[0].to_number
             end
           else
             raise I18n.t("controllers.ext.reminder_groups_controller.invalid_extension")
