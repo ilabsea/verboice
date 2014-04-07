@@ -1,7 +1,7 @@
 [
   {verboice, [
-    {asterisk_config_dir, "/etc/asterisk/"},
-    {asterisk_sounds_dir, "/usr/share/asterisk/sounds"},
+    {asterisk_config_dir, "/usr/local/asterisk/etc/asterisk"},
+    {asterisk_sounds_dir, "/usr/local/asterisk/var/lib/asterisk/sounds"},
     {asterisk_agi_use_pipe_separator, false},
 
     {broker_port, 19000},
