@@ -56,6 +56,7 @@ module Parsers
         @accuracy3 = params['accuracy3']
 
         @number_of_attempts    = params['number_of_attempts'] || self.class.default_number_of_attempts
+        @number_of_attempts    = @number_of_attempts.to_i
         @min_confidence        = params['min_confidence'] || self.class.default_min_confidence
 
         @invalid_resource      = Resource.new params['invalid_resource']
@@ -124,7 +125,8 @@ module Parsers
                                            }
 
             compiler.If valid_min_confidence do |compiler|
-              compiler.Goto "end#{@id}" 
+              # compiler.Goto "end#{@id}" 
+              compiler.AssignValue "attempt_number#{@id}", @number_of_attempts+2
             end
 
             compiler.Else do |compiler|
