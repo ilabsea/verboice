@@ -15,7 +15,8 @@ run(Args, Session) ->
     not_before = {datetime, NotBefore},
     session_id = Session#session.session_id,
     channel_id = Session#session.channel#channel.id,
-    address = dial_address(Session#session.address, Prefix)
+    address = dial_address(Session#session.address, Prefix),
+    state = list_to_binary("queued")
   }),
 
   {suspend, Session}.

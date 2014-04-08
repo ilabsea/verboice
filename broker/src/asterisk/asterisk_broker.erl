@@ -32,7 +32,7 @@ dial_address(#channel{type = <<"Channels::Custom">>, config = Config}, Address) 
   end);
 
 dial_address(#channel{id = Id}, Address) ->
-  ["SIP/verboice_", integer_to_list(Id), "-outbound/", Address].
+  ["SIP/verboice_", integer_to_list(Id), "-outbound/", util:to_string(Address)].
 
 dispatch(#session{session_id = SessionId, channel = Channel, address = Address}) ->
   CallerId = channel:number(Channel),

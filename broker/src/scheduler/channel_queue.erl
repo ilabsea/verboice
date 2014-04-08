@@ -114,30 +114,32 @@ do_dispatch(State = #state{current_calls = C, queued_calls = Q, sessions = S}) -
   case queue:out(Q) of
     {empty, _} -> State;
     {{value, Call}, Q2} ->
-      ReloadQueuedCall = queued_call:find(Call#queued_call.id),
-      case ReloadQueuedCall:should_trigger() of
+      case Call#queued_call.id =:= undefined orelse Call:exists() of
         true ->
-          case Call#queued_call.id =:= undefined orelse Call:exists() of
-            true ->
-              case broker:dispatch(State#state.channel, Call) of
-                {ok, SessionPid} ->
-                  Call:delete(),
-                  monitor(process, SessionPid),
-                  NewSessions = ordsets:add_element(SessionPid, S),
-                  do_dispatch(State#state{current_calls = C + 1, queued_calls = Q2, sessions = NewSessions});
-                error ->
-                  Call:delete(),
-                  do_dispatch(State#state{queued_calls = Q2});
-                unavailable ->
-                  State#state{active = false}
-              end;
-            false ->
-              error_logger:info_msg("Ignoring queued call ~p which seems has been deleted", [Call#queued_call.id]),
-              do_dispatch(State#state{queued_calls = Q2})
-          end;
-        _ ->
-          error_logger:info_msg("Ignoring queued call ~p which seems has been paused", [Call#queued_call.id]),
+          ReloadQueuedCall = queued_call:find([{id, Call#queued_call.id}]),
+            case is_queueing(ReloadQueuedCall) of
+              true ->
+                case broker:dispatch(State#state.channel, Call) of
+                  {ok, SessionPid} ->
+                    Call:delete(),
+                    monitor(process, SessionPid),
+                    NewSessions = ordsets:add_element(SessionPid, S),
+                    do_dispatch(State#state{current_calls = C + 1, queued_calls = Q2, sessions = NewSessions});
+                  error ->
+                    Call:delete(),
+                    do_dispatch(State#state{queued_calls = Q2});
+                  unavailable ->
+                    State#state{active = false}
+                end;
+              _ ->
+                error_logger:info_msg("Ignoring queued call ~p which seems has been paused", [Call#queued_call.id]),
+                do_dispatch(State#state{queued_calls = Q2})
+            end;
+        false ->
+          error_logger:info_msg("Ignoring queued call ~p which seems has been deleted", [Call#queued_call.id]),
           do_dispatch(State#state{queued_calls = Q2})
       end
   end.
 
+is_queueing(undefined) -> true;
+is_queueing(Call) -> Call:should_trigger().

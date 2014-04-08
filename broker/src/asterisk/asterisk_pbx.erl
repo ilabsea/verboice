@@ -81,7 +81,7 @@ record(FileName, StopKeys, Timeout, SilenceDetection, {?MODULE, Pid}) ->
   end.
 
 dial(Channel, Address, undefined, {?MODULE, Pid}) ->
-  DialAddress = asterisk_broker:dial_address(Channel, Address),
+  DialAddress = util:to_string(asterisk_broker:dial_address(Channel, Address)),
   agi_session:dial(Pid, [DialAddress, "60", "m"]),
   case agi_session:get_variable(Pid, "DIALSTATUS") of
     hangup -> throw(hangup);
@@ -93,6 +93,7 @@ dial(Channel, Address, undefined, {?MODULE, Pid}) ->
       _ -> failed
     end
   end;
+  
 dial(Channel, Address, CallerId, Pbx = {?MODULE, Pid}) ->
   agi_session:set_callerid(Pid, CallerId),
   dial(Channel, Address, undefined, Pbx).
