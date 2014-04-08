@@ -69,7 +69,7 @@ class Commands::SpeechRecognitionCommand < Command
   end
 
   def self.default_min_confidence
-    60
+    "60"
   end
 
   def self.default_number_of_attempts

@@ -101,7 +101,7 @@ module Parsers
                                              :stop_keys      => @stop_key,
                                              :timeout        => @timeout,
                                              :silence_detection => @silence_detection,
-                                             :min_confidence => @min_confidence,
+                                             :min_confidence => @min_confidence.to_s,
                                        
                                              :old_store     => @old_store,
                                              :store         => @store, 
