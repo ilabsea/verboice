@@ -95,8 +95,9 @@ module Parsers
           compiler.Trace context_for %("Speech recognition audio link: " + record_url(#{@id}))
           compiler.AssignValue "attempt_number#{@id}", 1
           compiler.append @instructions_resource.equivalent_flow
+          n = @number_of_attempts.to_i + 1
 
-          compiler.While "attempt_number#{@id} <= #{@number_of_attempts}" do |compiler|
+          compiler.While "attempt_number#{@id} <= #{n} " do |compiler|
             compiler.SpeechRecognition @id, @name,{ 
                                              :stop_keys      => @stop_key,
                                              :timeout        => @timeout,
@@ -129,7 +130,7 @@ module Parsers
             end
 
             compiler.Else do |compiler|
-              compiler.If "attempt_number#{@id} < #{@number_of_attempts}" do |compiler|
+              compiler.If "attempt_number#{@id} < #{n}" do |compiler|
                 compiler.append @invalid_resource.equivalent_flow
               end
             end
