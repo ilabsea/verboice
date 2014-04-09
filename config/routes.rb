@@ -160,6 +160,8 @@ Verboice::Application.routes.draw do
           delete :unregistration, on: :collection
         end
       end
+
+      resources :call_logs, only: [:show]
     end
 
     scope module: :v1 do
