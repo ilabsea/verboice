@@ -152,14 +152,23 @@ Verboice::Application.routes.draw do
   end
 
   namespace :api, defaults: {format: 'json'} do
-    scope module: :v1, constraints: ApiConstraints.new(version: 1, default: true) do
+    scope module: :v2, constraints: ApiConstraints.new(version: 2, default: true) do
       resources :projects, only: [:index] do
         resources :reminder_groups, only: [:index, :create, :update, :destroy], shallow: true
         
         resources :contacts, only: [:index, :create], shallow: true do
           delete :unregistration, on: :collection
         end
+      end
+    end
 
+    scope module: :v1 do
+      resources :projects, only: [:index] do
+        resources :reminder_groups, only: [:index, :create, :update, :destroy], shallow: true
+        
+        resources :contacts, only: [:index, :create], shallow: true do
+          delete :unregistration, on: :collection
+        end
       end
     end
 
