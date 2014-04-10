@@ -71,6 +71,7 @@ CallLog.blueprint do
   call_flow { channel.call_flow }
   project { call_flow.project }
   account { project.try(:account) || channel.try(:account) || account }
+  address { Sham.password }
 end
 
 Channels::Custom.blueprint do

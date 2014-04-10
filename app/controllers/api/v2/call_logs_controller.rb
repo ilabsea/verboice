@@ -14,26 +14,31 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with Verboice.  If not, see <http://www.gnu.org/licenses/>.
-module Api
-  module V2
-    class CallLogsController < ApiController
-      before_filter :verify_request
+module API::V2
+  class CallLogsController < ApiController
+    before_filter :verify_request, :except => [:index]
 
-      # GET /call_logs/:id
-      def show
-        render json: @call_log
+    # GET /contacts/:address/call_logs
+    # GET /call_logs
+    def index
+      @call_logs = current_account.call_logs
+      @call_logs = @call_logs.where(address: params[:address]) if params[:address]
+      render json: @call_logs, root: false
+    end
+
+    # GET /call_logs/:id
+    def show
+      render json: @call_log
+    end
+
+    private
+    def verify_request
+      begin
+        @call_log = current_account.call_logs(true).find(params[:id])
+      rescue
+        render json: "The call log is not found".to_json, status: :not_found
+        return
       end
-
-      private
-      def verify_request
-        begin
-          @call_log = current_account.call_logs(true).find(params[:id])
-        rescue
-          render json: "The call log is not found".to_json, status: :not_found
-          return
-        end
-      end
-
     end
   end
 end

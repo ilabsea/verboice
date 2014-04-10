@@ -161,7 +161,9 @@ Verboice::Application.routes.draw do
         end
       end
 
-      resources :call_logs, only: [:show]
+      resources :call_logs, only: [:index, :show]
+
+      get '/contacts/:address/call_logs', controller: :call_logs, action: :index
     end
 
     scope module: :v1 do
