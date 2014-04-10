@@ -59,7 +59,10 @@ group :development, :test do
   gem 'pry-debugger', '~> 0.2.2'
   gem 'syntax'
   gem 'timecop'
-  
+
+  gem 'capybara'
+  gem 'database_cleaner'
+
   gem 'rspec_api_documentation', github: 'zipmark/rspec_api_documentation'
   gem 'apitome'
 end
