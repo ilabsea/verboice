@@ -188,11 +188,12 @@ Verboice::Application.routes.draw do
       end
     end
     resources :projects, only: [:index] do
-      resources :contacts do
+      resources :contacts, only: [:index, :create] do
         collection do
           get 'by_address/:address', :action => "show_by_address"
           put 'by_address/:address', :action => "update_by_address"
           put 'all', :action => "update_all"
+          delete :unregistration
         end
       end
       resources :schedules, only: [:index, :create] do
