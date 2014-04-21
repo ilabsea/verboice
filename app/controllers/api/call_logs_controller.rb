@@ -14,7 +14,7 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with Verboice.  If not, see <http://www.gnu.org/licenses/>.
-module API::V2
+module API
   class CallLogsController < ApiController
     before_filter :verify_request, :except => [:index]
 

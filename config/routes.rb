@@ -160,10 +160,6 @@ Verboice::Application.routes.draw do
           delete :unregistration, on: :collection
         end
       end
-
-      resources :call_logs, only: [:index, :show]
-
-      get '/contacts/:address/call_logs', controller: :call_logs, action: :index
     end
 
     scope module: :v1 do
@@ -207,6 +203,10 @@ Verboice::Application.routes.draw do
         end
       end
     end
+
+    get '/contacts/:address/call_logs', controller: :call_logs, action: :index
+    resources :call_logs, only: [:index, :show]
+
     resources :logs, only: [] do
       collection do
         get ':call_id', action: :list
