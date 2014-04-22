@@ -203,16 +203,18 @@ Verboice::Application.routes.draw do
           delete ':name', :action => "destroy"
         end
       end
-    end
 
-    get '/contacts/:address/call_logs', controller: :call_logs, action: :index
-    resources :call_logs, only: [:index, :show]
+      resources :reminder_groups, only: [:index, :create, :update, :destroy], shallow: true
+    end
 
     resources :logs, only: [] do
       collection do
         get ':call_id', action: :list
       end
     end
+
+    get '/contacts/:address/call_logs', controller: :call_logs, action: :index
+    resources :call_logs, only: [:index, :show]
   end
 
   post 'call_simulator/start'
