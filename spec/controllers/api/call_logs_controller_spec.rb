@@ -17,7 +17,7 @@
 
 require 'spec_helper'
 
-describe API::CallLogsController do
+describe Api::CallLogsController do
   include Devise::TestHelpers
 
   let(:account) { Account.make }

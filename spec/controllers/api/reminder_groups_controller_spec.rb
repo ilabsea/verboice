@@ -17,7 +17,7 @@
 
 require 'spec_helper'
 
-describe API::ReminderGroupsController do
+describe Api::ReminderGroupsController do
   include Devise::TestHelpers
 
   let!(:account_one) { Account.make }
