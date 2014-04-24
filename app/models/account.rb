@@ -22,7 +22,7 @@ class Account < ActiveRecord::Base
          :recoverable, :rememberable, :trackable, :validatable, :confirmable
 
   # Setup accessible (or protected) attributes for your model
-  attr_accessible :email, :password, :password_confirmation, :remember_me, :locale
+  attr_accessible :email, :password, :password_confirmation, :remember_me, :locale, :role
 
   has_many :projects, :dependent => :destroy
   has_many :call_flows, :through => :projects
@@ -39,6 +39,10 @@ class Account < ActiveRecord::Base
   has_many :nuntium_channels, :dependent => :destroy
 
   has_one :google_oauth_token, :class_name => 'OAuthToken', :conditions => {:service => :google}, :dependent => :destroy
+
+  # CONSTANT ROLE
+  ADMIN = 1
+  USER = 2
 
   def call(options = {})
     channel = channels.find_by_name! options[:channel]
