@@ -15,7 +15,6 @@ onReminderSchedules ->
         Operator.GREATER_THAN
       ])
       @data_types = ko.observableArray([
-        DataType.NUMBER
         DataType.DAY
         DataType.WEEK
         DataType.MONTH

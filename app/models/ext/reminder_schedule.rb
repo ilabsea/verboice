@@ -31,7 +31,10 @@ module Ext
 
 		belongs_to :retries_schedule, :class_name => "Schedule", :foreign_key => :retries_schedule_id
 		belongs_to :project
-		assign_has_many_to "Project", :ext_reminder_schedules, :class_name => "Ext::ReminderSchedule"
+
+		assign_has_many_to "Project", :ext_reminder_schedules, :class_name => "Ext::ReminderSchedule", :dependent => :destroy
+		assign_has_many_to "CallFlow", :ext_reminder_schedules, :class_name => "Ext::ReminderSchedule", :dependent => :nullify
+
 
 		has_many :reminder_channels, :class_name => "Ext::ReminderChannel", :inverse_of => :reminder_schedule, :dependent => :destroy
 		has_many :channels, :through => :reminder_channels
@@ -157,18 +160,22 @@ module Ext
 		end
 
 		def enqueued_call addresses, at_time
-			options = call_options at_time
-			queues = []
-			addresses.each do |address|
-				suggested_channel = suggested_channel_for address
-				call_log = suggested_channel.call(address, options)
-				raise call_log.fail_reason if call_log.fail_reason
-				queue =  QueuedCall.find_by_call_log_id(call_log.id) 
-				queues << queue.id if queue
+			if call_flow
+				options = call_options at_time
+				queues = []
+				addresses.each do |address|
+					suggested_channel = suggested_channel_for address
+					if suggested_channel
+						call_log = suggested_channel.call(address, options)
+						raise call_log.fail_reason if call_log.fail_reason
+						queue =  QueuedCall.find_by_call_log_id(call_log.id) 
+						queues << queue.id if queue
+					end
+				end
+				self.queue_call_id = queues
+				self.save
+				queues
 			end
-			self.queue_call_id = queues
-			self.save
-			queues
 		end
 
 		def suggested_channel_for address
