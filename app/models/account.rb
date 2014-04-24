@@ -55,4 +55,12 @@ class Account < ActiveRecord::Base
     end
   end
 
+  def admin?
+    role == ADMIN
+  end
+
+  def user?
+    role == USER
+  end
+
 end
