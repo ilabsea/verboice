@@ -1,3 +1,7 @@
+1.5.8 (2014-04-28 kakada <kakada@instedd.org)
+  + Bugs:
+    * #44: store registration date of register before playing confirmation resource
+
 1.5.7 (2014-04-26 kakada <kakada@instedd.org)
   + Bugs:
     * #43: register step remove zero prefix of previous addresses
