@@ -1,3 +1,7 @@
+1.5.7 (2014-04-26 kakada <kakada@instedd.org)
+  + Bugs:
+    * #43: register step remove zero prefix of previous addresses
+
 1.5.6 (2014-03-017 kakada <kakada@instedd.org>)
   + Bugs:
     * fixed record step when old is same as the new store
