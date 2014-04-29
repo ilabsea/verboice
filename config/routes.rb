@@ -195,6 +195,8 @@ Verboice::Application.routes.draw do
 
     get '/contacts/:address/call_logs', controller: :call_logs, action: :index
     resources :call_logs, only: [:index, :show]
+
+    get "call_flows" => "call_flows#list"
   end
 
   post 'call_simulator/start'
