@@ -1,8 +1,8 @@
 module Api
   class AccountsController < ApiController
     def index
-      if current_account.admin?
-        render json: Account.all, each_serializer: CustomAccountSerializer if current_account.admin?  
+      if !params[:api_key].blank? && current_account.admin?(params[:api_key])
+        render json: Account.all, each_serializer: CustomAccountSerializer
       else
         head :not_found
       end

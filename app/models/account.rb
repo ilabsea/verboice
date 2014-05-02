@@ -55,8 +55,8 @@ class Account < ActiveRecord::Base
     end
   end
 
-  def admin?
-    role == ADMIN
+  def admin?(api_key)
+    Billing.configured? ? ((role == ADMIN) && (Billing.api_key == api_key)) : false
   end
 
   def user?

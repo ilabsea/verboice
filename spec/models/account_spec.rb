@@ -18,8 +18,27 @@
 require 'spec_helper'
 
 describe Account do
+  let(:super_user) { Account.make role: Account::ADMIN }
+
   it { should have_many(:projects) }
   it { should have_many(:channels) }
   it { should have_many(:call_logs) }
   it { should have_many(:ext_reminder_groups) }
+
+  describe "admin?" do
+    it "should true when it is an admin and api_key is valid" do
+      Billing.should_receive(:configured?).and_return(true)
+      Billing.should_receive(:api_key).and_return("VALID_KEY")
+      
+      super_user.admin?("VALID_KEY").should be_true
+    end
+
+    it "should false when it is an admin but api_key is not valid" do
+      Billing.should_receive(:configured?).and_return(true)
+      Billing.should_receive(:api_key).and_return("hacking")
+
+      super_user.admin?("INVALID_KEY").should be_false
+    end
+
+  end
 end

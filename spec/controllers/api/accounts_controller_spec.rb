@@ -32,7 +32,10 @@ describe Api::AccountsController do
       end
 
       it "should response json array of accounts" do
-        get :index
+        Billing.should_receive(:configured?).and_return(true)
+        Billing.should_receive(:api_key).and_return("VALID_KEY")
+
+        get :index, api_key: "VALID_KEY"
 
         assert_response :success
         accounts = ActiveSupport::JSON.decode(@response.body)
@@ -46,7 +49,7 @@ describe Api::AccountsController do
       end
 
       it "should not found" do
-        get :index
+        get :index, api_key: "VALID_KEY"
           
         assert_response :not_found
       end
