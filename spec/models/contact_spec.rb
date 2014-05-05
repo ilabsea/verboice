@@ -1,41 +1,11 @@
 require 'spec_helper'
 
 describe Contact do
-  describe "#evaluate?" do
-    let(:project) { Project.make }
-    let(:contact) { Contact.make project: project }
-    let(:project_var1) { project.project_variables.make :name => "var1" }
-    let(:project_var2) { project.project_variables.make :name => "var2" }
-
-    it "should return true when all the project variables do not exists" do
-      conditions = [Ext::Condition.new("var_undefined", "=", "5", "number")]
-
-      contact.evaluate?(conditions).should be true
-    end
-
-    it "should return true when it's match all conditions" do
-      PersistedVariable.make(contact_id: contact.id, project_variable_id: project_var1.id, value: "5")
-      PersistedVariable.make(contact_id: contact.id, project_variable_id: project_var2.id, value: "10")
-      conditions = [Ext::Condition.new("var1", "=", "5", "number"), Ext::Condition.new("var2", ">", "5", "number")]
-
-      contact.evaluate?(conditions).should be true
-    end
-
-    it "should return false when it's not match at least one condition" do
-      PersistedVariable.make(contact_id: contact.id, project_variable_id: project_var1.id, value: "5")
-      PersistedVariable.make(contact_id: contact.id, project_variable_id: project_var2.id, value: "10")
-      conditions = [Ext::Condition.new("var1", "=", "5", "number"), Ext::Condition.new("var2", ">", "10", "number")]
-
-      contact.evaluate?(conditions).should be false
-    end
-
-    it "should return true when some project variables do not exists and the rest of the project variables are matches condition" do 
-      PersistedVariable.make(contact_id: contact.id, project_variable_id: project_var1.id, value: "5")
-      conditions = [Ext::Condition.new("var1", "=", "5", "number"), Ext::Condition.new("var_undefined", "=", "10", "number")]
-
-      contact.evaluate?(conditions).should be true
-    end
-  end
+  
+  let(:project) { Project.make }
+  let(:contact) { Contact.make project: project }
+  let(:project_var1) { project.project_variables.make :name => "var1" }
+  let(:project_var2) { project.project_variables.make :name => "var2" }
 
   describe ".register" do
     before(:each) do
