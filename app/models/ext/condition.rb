@@ -25,10 +25,7 @@ module Ext
       if project_variable
         persisted_variables.each do |persisted_variable|
           if persisted_variable.project_variable_id == project_variable.id
-            if data_type == "number"
-              left_value = persisted_variable.value.try(:number?) ? persisted_variable.value.to_i : nil
-              right_value = value.to_i
-            else
+            if data_type != "number"
               left_value = Date.today - eval("#{value}.#{data_type}")
               right_value = persisted_variable.value.try(:date_format?) ? Date.strptime(persisted_variable.value, Date::DEFAULT_FORMAT) : nil
             end
