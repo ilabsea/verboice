@@ -208,7 +208,7 @@ module Ext
 			unless repeat?
 				self.start_date = Ext::Parser::DateParser.parse(self.client_start_date) if client_start_date
 			else
-				self.start_date = DateTime.now.utc.in_time_zone(project.time_zone).to_date
+				self.start_date = DateTime.now.utc.in_time_zone(project.time_zone).to_date if self.start_date.nil?
 			end
 		end
 
