@@ -285,6 +285,27 @@ module Ext
 			Ext::Parser::TimeParser.parse(date_time_string, DateTime::DEFAULT_FORMAT_WITHOUT_TIMEZONE, project.time_zone)
 		end
 
+		def reset_repeat_everyday_to_one_time!
+			if self.repeat? && self.conditions.empty?
+				self.client_start_date = self.start_date.to_string
+				self.schedule_type = TYPE_ONE_TIME
+				self.save
+			end
+		end
+
+		def reset_one_time_with_condition_to_condition!
+			if !self.repeat? && !self.conditions.empty?
+				self.schedule_type = TYPE_DAILY
+				self.save
+			end
+		end
+
+		def reset_repeat_on_specific_day_with_condition_to_condition!
+			if self.repeat? && !self.conditions.empty?
+				self.save
+			end
+		end
+
 	end
 
 end

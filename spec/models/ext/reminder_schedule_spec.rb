@@ -603,7 +603,41 @@ describe Ext::ReminderSchedule  do
 			phone_numbers = reminder_schedule.callers_matches_conditions @addresses
 			phone_numbers.size.should be 1
 		end
-    		
 	end
+
+  describe "#reset_repeat_everyday_to_one_time" do
+    before(:each) do
+      @now = DateTime.new(2012,10,25, 9,0,0, "+7") # use the same timezone as reminder schedule
+      DateTime.stub!(:now).and_return(@now)
+
+      @attr = {
+        :schedule_type => Ext::ReminderSchedule::TYPE_DAILY,
+        :project_id => @project.id,
+        :call_flow_id => @call_flow.id,
+
+        :reminder_group_id => @reminder_group.id,
+        :recursion => 1,
+        :conditions => [Ext::Condition.build({"0" => {variable: 'testing', operator: '=', value: '5', data_type: 'number'} })],
+        # :client_start_date => "25/10/2012",
+        :time_from => "08:00",
+        :time_to => "17:00"
+      }
+
+      @reminder_schedule = Ext::ReminderSchedule.make(@attr)
+    end
+
+    it "should reset repeat every wday to one time schedule" do
+      # before
+      @reminder_schedule.in_schedule_date?(Date.new(2012,10,25)).should be_true
+      @reminder_schedule.in_schedule_date?(Date.new(2012,10,26)).should be_true
+
+      @reminder_schedule.reset_repeat_everyday_to_one_time!
+
+      # after
+      @reminder_schedule.schedule_type.should eq(Ext::ReminderSchedule::TYPE_ONE_TIME)
+      @reminder_schedule.in_schedule_date?(Date.new(2012,10,25)).should be_true
+      @reminder_schedule.in_schedule_date?(Date.new(2012,10,26)).should be_false
+    end
+  end
 
 end
