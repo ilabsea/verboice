@@ -235,7 +235,7 @@ module Ext
 			if has_conditions?
 				addresses.each do |address|
 					contact = project.contacts.joins(:addresses).where(:contact_addresses => {:address => address}).last
-					phone_numbers.push address if contact and contact.evaluate? conditions
+					phone_numbers.push address if contact and contact.evaluate? conditions.first
 				end
 			else
 				phone_numbers = addresses

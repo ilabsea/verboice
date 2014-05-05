@@ -30,7 +30,7 @@ module Ext
               right_value = persisted_variable.value.try(:date_format?) ? Date.strptime(persisted_variable.value, Date::DEFAULT_FORMAT) : nil
             end
 
-            match = Ext::Comparison.compare(left_value, operator, right_value) if left_value and right_value
+            match = Ext::Comparison.compare(left_value, operator, right_value) if left_value && right_value
             break if match
           end
         end
