@@ -18,7 +18,7 @@
 module Api
   class AccountsController < ApiController
     def index
-      if !params[:api_key].blank? && current_account.admin?(params[:api_key])
+      if current_account.admin?(request.remote_ip)
         render json: Account.all, each_serializer: CustomAccountSerializer
       else
         head :not_found

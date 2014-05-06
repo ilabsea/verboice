@@ -33,9 +33,11 @@ describe Api::AccountsController do
 
       it "should response json array of accounts" do
         Billing.should_receive(:configured?).and_return(true)
-        Billing.should_receive(:api_key).and_return("VALID_KEY")
+        Billing.should_receive(:api_key).and_return("127.0.0.1")
 
-        get :index, api_key: "VALID_KEY"
+        request.stub(:remote_ip).and_return('127.0.0.1')
+
+        get :index
 
         assert_response :success
         accounts = ActiveSupport::JSON.decode(@response.body)
@@ -49,7 +51,9 @@ describe Api::AccountsController do
       end
 
       it "should not found" do
-        get :index, api_key: "VALID_KEY"
+        request.stub(:remote_ip).and_return('127.0.0.1')
+
+        get :index
           
         assert_response :not_found
       end
