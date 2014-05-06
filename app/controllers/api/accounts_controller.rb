@@ -24,5 +24,13 @@ module Api
         head :not_found
       end
     end
+
+    def ping
+      if current_account.admin?(request.remote_ip)
+        head :ok
+      else
+        head :not_found
+      end
+    end
   end
 end
