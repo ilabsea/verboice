@@ -24,20 +24,24 @@ describe Account do
   it { should have_many(:channels) }
   it { should have_many(:call_logs) }
   it { should have_many(:ext_reminder_groups) }
-
+  
   describe "admin?" do
-    it "should true when it is an admin and api_key is valid" do
-      Billing.should_receive(:configured?).and_return(true)
-      Billing.should_receive(:api_key).and_return("VALID_KEY")
+    it "should false when it is an admin but there is no host available" do
+      Billing.should_receive(:hosts).and_return([])
       
-      super_user.admin?("VALID_KEY").should be_true
+      super_user.admin?("127.0.0.1").should be_false
     end
 
-    it "should false when it is an admin but api_key is not valid" do
-      Billing.should_receive(:configured?).and_return(true)
-      Billing.should_receive(:api_key).and_return("hacking")
+    it "should false when it is an admin but host doesn't match" do
+      Billing.should_receive(:hosts).and_return(["127.0.0.1"])
 
-      super_user.admin?("INVALID_KEY").should be_false
+      super_user.admin?("192.192.192.192").should be_false
+    end
+
+    it "should true when it is an admin and host is valid" do
+      Billing.should_receive(:hosts).and_return(["127.0.0.1"])
+      
+      super_user.admin?("127.0.0.1").should be_true
     end
 
   end

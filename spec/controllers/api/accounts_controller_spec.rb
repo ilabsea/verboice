@@ -31,9 +31,28 @@ describe Api::AccountsController do
         sign_in admin
       end
 
+      it "should not found when there is no hosts available" do
+        Billing.should_receive(:hosts).and_return([])
+
+        request.stub(:remote_ip).and_return('127.0.0.1')
+
+        get :index
+
+        assert_response :not_found
+      end
+
+      it "should not found when there is no hosts match" do
+        Billing.should_receive(:hosts).and_return([])
+
+        request.stub(:remote_ip).and_return(['192.192.192.192'])
+
+        get :index
+
+        assert_response :not_found
+      end
+
       it "should response json array of accounts" do
-        Billing.should_receive(:configured?).and_return(true)
-        Billing.should_receive(:api_key).and_return("127.0.0.1")
+        Billing.should_receive(:hosts).and_return(["127.0.0.1"])
 
         request.stub(:remote_ip).and_return('127.0.0.1')
 

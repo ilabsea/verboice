@@ -17,15 +17,10 @@
 
 class Billing
   path = "#{Rails.root}/config/billing.yml"
-  @@data = File.exists?(path) ? YAML::load(File.open(path)) : {}
+  @@config = File.exists?(path) ? YAML::load(File.open(path)) : {}
 
-  def self.api_key
-    raise "Billing: Service not supported." if not configured?
-    @@data['api_key']
-  end
-
-  def self.configured?
-    !@@data['api_key'].blank?
+  def self.hosts
+    !@@config['hosts'].nil? && !@@config['hosts'].empty? ? @@config['hosts'] : []
   end
 
 end
