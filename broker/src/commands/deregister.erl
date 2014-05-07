@@ -4,8 +4,10 @@
 -include("session.hrl").
 -include("db.hrl").
 
-run(Args, Session = #session{project = Project, address = Address, call_log = CallLog, js_context = JsContext}) ->
+run(Args, Session = #session{project = Project, call_log = CallLog, js_context = JsContext}) ->
   GroupName = proplists:get_value(reminder_group, Args),
+  Call = call_log:find(CallLog:id()),
+  Address = Call:address_without_prefix(),
   case GroupName of
     undefined ->
       StepName = erjs_context:get(current_step_name, JsContext),
