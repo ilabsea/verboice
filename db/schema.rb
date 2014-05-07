@@ -125,7 +125,6 @@ ActiveRecord::Schema.define(:version => 20140424081701) do
     t.boolean  "store_log_entries"
   end
 
-  add_index "call_logs", ["account_id", "id"], :name => "index_call_logs_on_account_id_and_id"
   add_index "call_logs", ["call_flow_id"], :name => "index_call_logs_on_call_flow_id"
 
   create_table "channels", :force => true do |t|
@@ -298,7 +297,7 @@ ActiveRecord::Schema.define(:version => 20140424081701) do
 
   create_table "localized_resources", :force => true do |t|
     t.string   "language"
-    t.text     "text"
+    t.string   "text"
     t.binary   "recorded_audio", :limit => 2147483647
     t.string   "url"
     t.string   "type"
@@ -349,8 +348,6 @@ ActiveRecord::Schema.define(:version => 20140424081701) do
     t.datetime "created_at", :null => false
     t.datetime "updated_at", :null => false
   end
-
-  add_index "pbx_logs", ["guid", "id"], :name => "index_pbx_logs_on_guid_and_id"
 
   create_table "persisted_variables", :force => true do |t|
     t.string   "value"
