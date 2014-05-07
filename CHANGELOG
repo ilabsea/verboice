@@ -1,3 +1,7 @@
+1.5.9 (2014-05-07 kakada <kakada@instedd.org)
+  + Bugs:
+    * #125: fix register/deregister with voip called prefix channel
+
 1.5.8 (2014-04-28 kakada <kakada@instedd.org)
   + Bugs:
     * #44: store registration date of register before playing confirmation resource
