@@ -22,8 +22,9 @@ nbproject/*
 
 config/oauth.yml
 config/verboice.yml
-
-broker/verboice.config
+config/nuntium.yml
+config/asterisk.yml
+config/api.yml
 
 broker/deps
 broker/ebin
@@ -31,9 +32,7 @@ broker/verboice.config
 broker/.eunit
 broker/*.plt
 broker/rel/verboice
-config/nuntium.yml
+
 vendor/ruby
 
-broker/verboice.config
-config/asterisk.yml
 script/sphinx3
