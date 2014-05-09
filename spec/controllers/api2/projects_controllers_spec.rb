@@ -29,12 +29,8 @@ describe Api2::ProjectsController do
   end
 
   context "sign in as admin" do
-    before(:each) do
-      sign_in @admin
-    end
-
     it "should list all projects" do
-      get :index
+      get :index, email: @admin.email, token: @admin.auth_token
 
       response = JSON.parse(@response.body)
       response.length.should eq(2)
@@ -42,12 +38,8 @@ describe Api2::ProjectsController do
   end
 
   context "sign in as normal user" do
-    before(:each) do
-      sign_in @account
-    end
-
     it "should list all projects" do
-      get :index
+      get :index, email: @account.email, token: @account.auth_token
 
       response = JSON.parse(@response.body)
       response.length.should == 1

@@ -19,8 +19,8 @@ module Api2
 
     # GET /api/projects
     def index
-      projects = Project.all if current_account.admin?
-      projects = current_account.projects if current_account.user?
+      projects = Project.all if api_current_account.admin?
+      projects = api_current_account.projects if api_current_account.user?
       render json: projects, root: false
     end
   end
