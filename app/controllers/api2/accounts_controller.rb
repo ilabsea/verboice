@@ -18,7 +18,7 @@
 module Api2
   class AccountsController < Api2Controller
     def index
-      if current_account.admin?(request.remote_ip)
+      if current_account.has_access_from?(request.remote_ip)
         render json: Account.all, each_serializer: CustomAccountSerializer
       else
         head :not_found
