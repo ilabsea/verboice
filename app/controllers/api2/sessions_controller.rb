@@ -19,21 +19,12 @@ class Api2::SessionsController < Api2Controller
   before_filter :ensure_params_exist
 
   def create
-
     account = Account.find_by_email(params[:account][:email])
-
     if account && account.valid_password?(params[:account][:password])
-
-      if account.has_access_from? origin_host
-        render :json=> {:success=>true, :auth_token=>account.auth_token, :email=> account.email}
-      else
-        response_with_not_authorized
-      end
-
+      render :json=> {:success=>true, :auth_token=>account.auth_token, :email=> account.email}
     else
       response_with_invalid_credential
     end
-
   end
 
   protected

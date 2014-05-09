@@ -22,8 +22,23 @@ describe Api2::SessionsController do
     let(:admin_user) { Account.make role: Account::ADMIN, password: 'admin_123', password_confirmation: 'admin_123'}
     let(:user) { Account.make role: Account::USER, password: 'user_123', password_confirmation: 'user_123'}
 
-    context 'with valid account' do
+    context 'missing params' do
+      it 'response 422' do
+        post :create
 
+        expect(response.status).to eq 422
+      end
+    end
+
+    context 'invalid email or password' do
+      it 'response 401' do
+        post :create, account: {email: 'test@test.com', password: 'foo'}
+
+        expect(response.status).to eq 401
+      end
+    end
+
+    context 'with valid account' do
       it 'return auth_token with email' do
         post :create, account: { email: admin_user.email , password: 'admin_123'}
         body = ActiveSupport::JSON.decode(response.body)
