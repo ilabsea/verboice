@@ -36,7 +36,7 @@ class Api2Controller < ActionController::Base
     account  = email && Account.find_by_email(email)
  
     if account && Devise.secure_compare(account.auth_token, params[:token])
-      @current_account = account if account.has_access_from?(origin_host)
+      @current_account = account
     end
     @current_account
 
