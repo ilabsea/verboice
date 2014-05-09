@@ -247,6 +247,8 @@ Verboice::Application.routes.draw do
     get "call_flows" => "call_flows#list"
 
     get "accounts" => "accounts#index"
+
+    post 'auth_token' => 'sessions#create'
   end
 
   post 'call_simulator/start'
