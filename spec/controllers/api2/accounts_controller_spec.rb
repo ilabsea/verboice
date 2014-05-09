@@ -31,18 +31,15 @@ describe Api2::AccountsController do
         sign_in admin
       end
 
-      it "should not found when there is no hosts match" do
-        request.stub(:remote_ip).and_return(['192.168.1.1'])
+      it "unauthorized when the host is not allowed" do
+        request.stub(:remote_ip).and_return('192.168.1.1')
+        get :index, email: admin.email, token: admin.auth_token
 
-        get :index
-
-        assert_response :not_found
+        assert_response :unauthorized
       end
 
-      it "should response json array of accounts" do
-        request.stub(:remote_ip).and_return('127.0.0.1')
-
-        get :index
+      it "response json array of accounts when host is allowed" do
+        get :index, email: admin.email, token: admin.auth_token
 
         assert_response :success
         accounts = ActiveSupport::JSON.decode(@response.body)
@@ -55,12 +52,10 @@ describe Api2::AccountsController do
         sign_in user
       end
 
-      it "should not found" do
-        request.stub(:remote_ip).and_return('127.0.0.1')
-
+      it "unauthorized" do
         get :index
           
-        assert_response :not_found
+        assert_response :unauthorized
       end
     end
   end
