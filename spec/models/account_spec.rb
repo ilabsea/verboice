@@ -26,6 +26,12 @@ describe Account do
   it { should have_many(:call_logs) }
   it { should have_many(:ext_reminder_groups) }
 
+  describe 'save' do
+    it 'generate auth_token for user' do
+      expect(super_user.auth_token.empty?).to be false
+    end
+  end
+
   describe "#admin?" do
     it { expect(super_user.admin?).to be true }
     it { expect(user.admin?).to be false }

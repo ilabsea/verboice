@@ -44,6 +44,14 @@ class Account < ActiveRecord::Base
   ADMIN = 1
   USER = 2
 
+  before_save :ensure_auth_token
+ 
+  def ensure_auth_token
+    if !self.auth_token
+      self.auth_token = generate_auth_token
+    end
+  end
+
   def call(options = {})
     channel = channels.find_by_name! options[:channel]
     channel.call options[:address], options
@@ -65,6 +73,15 @@ class Account < ActiveRecord::Base
 
   def has_access_from? host
     admin? && Api2.host_allowed?(host)
+  end
+
+  private
+
+  def generate_auth_token
+    loop do
+      token = Devise.friendly_token
+      break token unless Account.where(auth_token: token).first
+    end
   end
 
 end
