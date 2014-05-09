@@ -15,9 +15,8 @@
 # You should have received a copy of the GNU General Public License
 # along with Verboice.  If not, see <http://www.gnu.org/licenses/>.
 
-class Api2Controller < ApplicationController
-  before_filter :authenticate_account!
-  skip_before_filter :verify_authenticity_token
+class Api2Controller < ActionController::Base
+  before_filter :authenticate_account_from_token!
 
   def errors_to_json(model_object, action)
     attrs = {
@@ -29,4 +28,39 @@ class Api2Controller < ApplicationController
     end
     attrs
   end
+
+  def api_current_account 
+    return @current_account if @current_account 
+
+    email = params[:email].presence
+    account  = email && Account.find_by_email(email)
+ 
+    if account && Devise.secure_compare(account.auth_token, params[:token])
+      @current_account = account if account.has_access_from?(origin_host)
+    end
+    @current_account
+
+  end
+
+  def api_user_signed_in? 
+    api_current_account
+  end
+
+  def authenticate_account_from_token!
+    if !api_user_signed_in?
+      response_with_unauthorized
+      return false
+    end
+  end
+
+  protected
+
+  def response_with_unauthorized
+    render :json=> {:success=>false, :message=>"Not authorized access"}, :status=>401
+  end
+
+  def origin_host
+    request.remote_ip
+  end
+  
 end
