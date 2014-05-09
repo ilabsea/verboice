@@ -55,12 +55,16 @@ class Account < ActiveRecord::Base
     end
   end
 
-  def admin?(host)
-    (role == ADMIN) && Billing.hosts.include?(host)
+  def admin?
+    (role == ADMIN)
   end
 
   def user?
     role == USER
+  end
+
+  def has_access_from? host
+    admin? && Api2.host_allowed?(host)
   end
 
 end
