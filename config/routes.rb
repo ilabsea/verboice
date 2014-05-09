@@ -201,6 +201,56 @@ Verboice::Application.routes.draw do
     get "accounts" => "accounts#index"
   end
 
+  namespace :api2, defaults: {format: 'json'} do
+    match "call" => "calls#call"
+    resources :calls, only: [] do
+      member do
+        match :state
+        match :redirect
+      end
+    end
+    get "channels" => "channels#list"
+    resources :channels, only: [:create] do
+      collection do
+        get ":name", :action => "get"
+        put ":name", :action => "update"
+        delete ":name", :action => "destroy"
+      end
+    end
+    resources :projects, only: [:index] do
+      resources :contacts, only: [:index, :create] do
+        collection do
+          get 'by_address/:address', :action => "show_by_address"
+          put 'by_address/:address', :action => "update_by_address"
+          put 'all', :action => "update_all"
+          delete :unregistration
+        end
+      end
+      resources :schedules, only: [:index, :create] do
+        collection do
+          get ':name', :action => "show"
+          put ':name', :action => "update"
+          delete ':name', :action => "destroy"
+        end
+      end
+
+      resources :reminder_groups, only: [:index, :create, :update, :destroy], shallow: true
+    end
+
+    resources :logs, only: [] do
+      collection do
+        get ':call_id', action: :list
+      end
+    end
+
+    get '/contacts/:address/call_logs', controller: :call_logs, action: :index
+    resources :call_logs, only: [:index, :show]
+
+    get "call_flows" => "call_flows#list"
+
+    get "accounts" => "accounts#index"
+  end
+
   post 'call_simulator/start'
   post 'call_simulator/resume'
 
