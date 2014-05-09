@@ -199,7 +199,6 @@ Verboice::Application.routes.draw do
     get "call_flows" => "call_flows#list"
 
     get "accounts" => "accounts#index"
-    get "/ping" => "accounts#ping"
   end
 
   post 'call_simulator/start'
