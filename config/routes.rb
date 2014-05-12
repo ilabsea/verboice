@@ -200,6 +200,7 @@ Verboice::Application.routes.draw do
   end
 
   namespace :api2, defaults: {format: 'json'} do
+
     match "call" => "calls#call"
     resources :calls, only: [] do
       member do
@@ -248,7 +249,7 @@ Verboice::Application.routes.draw do
 
     get "accounts" => "accounts#index"
 
-    post 'auth_token' => 'sessions#create'
+    post '/auth' => 'sessions#create'
   end
 
   post 'call_simulator/start'
