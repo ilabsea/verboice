@@ -17,7 +17,7 @@
 class Api2::ContactsController < Api2Controller
   before_filter :validate_project, only: [:create, :unregistration]
 
-  expose(:project) { current_account.projects.find params[:project_id] }
+  expose(:project) { api_current_account.projects.find params[:project_id] }
 
   def index
     contacts = project.contacts.includes(:addresses).all
@@ -129,7 +129,7 @@ class Api2::ContactsController < Api2Controller
 
   def validate_project
     begin
-      current_account.projects.find(params[:project_id])
+      api_current_account.projects.find(params[:project_id])
     rescue
       render json: "The project is not found".to_json, status: :not_found
       return
