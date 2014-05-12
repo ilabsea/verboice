@@ -22,19 +22,24 @@ describe Api2::SessionsController do
     let(:admin_user) { Account.make role: Account::ADMIN, password: 'admin_123', password_confirmation: 'admin_123'}
     let(:user) { Account.make role: Account::USER, password: 'user_123', password_confirmation: 'user_123'}
 
-    context 'missing params' do
+    context 'missing params[:user_login]' do
       it 'response 422' do
         post :create
+        body = ActiveSupport::JSON.decode(response.body)
 
         expect(response.status).to eq 422
+        expect(body).to eq "success" => false, "message" => "missing user_login parameter"
+
       end
     end
 
     context 'invalid email or password' do
       it 'response 401' do
         post :create, account: {email: 'test@test.com', password: 'foo'}
+        body = ActiveSupport::JSON.decode(response.body)
 
         expect(response.status).to eq 401
+        expect(body).to eq "success" => false, "message" => "Error with your login or password"
       end
     end
 
