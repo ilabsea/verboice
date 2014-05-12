@@ -27,8 +27,6 @@ describe Api2::AccountsController do
     context "admin" do
       before(:each) do
         Account.make role: Account::USER
-
-        sign_in admin
       end
 
       it "unauthorized when the host is not allowed" do
@@ -48,13 +46,9 @@ describe Api2::AccountsController do
     end
 
     context "user" do
-      before(:each) do
-        sign_in user
-      end
-
       it "unauthorized" do
-        get :index
-          
+        get :index, email: user.email, token: user.auth_token
+        
         assert_response :unauthorized
       end
     end
