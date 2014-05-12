@@ -69,7 +69,16 @@ module Api2
     end
 
     def list
-      channels = api_current_account.channels
+      if api_current_account.admin?
+        if api_current_account.has_access_from?(origin_host)
+          channels = Channel.all
+        else
+          return head :unauthorized
+        end
+      else
+        channels = api_current_account.channels
+      end
+
       render json: channels, each_serializer: CustomChannelSerializer
     end
 

@@ -19,7 +19,8 @@ require 'spec_helper'
 
 describe Api2::ChannelsController do
 
-  let(:account) { Account.make }
+  let(:admin) { Account.make role: Account::ADMIN }
+  let(:account) { Account.make role: Account::USER }
   let(:project) { Project.make account: account }
   let(:call_flow) { CallFlow.make project: project }
 
@@ -166,14 +167,34 @@ describe Api2::ChannelsController do
   describe "list" do
     before(:each) do
       Channels::Custom.make account: account
+      Channels::Custom.make account: admin
     end
 
-    it "should list all channels" do
-      get :list, email: account.email, token: account.auth_token
+    context "sign in as admin" do
+      it "unauthorized when the host is not allowed" do
+        request.stub(:remote_ip).and_return('192.168.1.1')
+        get :list, email: admin.email, token: admin.auth_token
 
-      assert_response :ok
-      response = ActiveSupport::JSON.decode(@response.body)
-      response.length.should eq(1)
+        assert_response :unauthorized
+      end
+
+      it "list all channels when host is allowed" do
+        get :list, email: admin.email, token: admin.auth_token
+
+        assert_response :ok
+        response = JSON.parse(@response.body)
+        expect(response.length).to eq 2
+      end
+    end
+
+    context "sign in as normal user" do
+      it "list all channels those belongs to the account" do
+        get :list, email: account.email, token: account.auth_token
+
+        assert_response :ok
+        response = JSON.parse(@response.body)
+        response.length.should == 1
+      end
     end
   end
 end
