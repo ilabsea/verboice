@@ -18,7 +18,6 @@
 require 'spec_helper'
 
 describe Api2::CallLogsController do
-  include Devise::TestHelpers
 
   let(:account) { Account.make }
   let(:project) { Project.make account: account }
@@ -27,19 +26,17 @@ describe Api2::CallLogsController do
   before(:each) do
     @call_log = CallLog.make project: project, call_flow: call_flow, address: "012334455"
     @another_call_log = CallLog.make project: project, call_flow: call_flow, address: "012778899"
-
-    sign_in account
   end
 
   describe "/index" do
     it "should response 200" do
-      get :index
+      get :index, email: account.email, token: account.auth_token
 
       assert_response :ok
     end
 
     it "list all call logs" do
-      get :index
+      get :index, email: account.email, token: account.auth_token
 
       response = ActiveSupport::JSON.decode(@response.body)
       response.length.should == 2
@@ -49,13 +46,13 @@ describe Api2::CallLogsController do
   describe "Get by adderss" do
     context "when it is not exists" do
       it "response 200" do
-        get :index, address: "012999999"
+        get :index, email: account.email, token: account.auth_token, address: "012999999"
 
         assert_response :ok
       end
 
       it "list of empty call logs" do
-        get :index, address: "012999999"
+        get :index, email: account.email, token: account.auth_token, address: "012999999"
 
         response = ActiveSupport::JSON.decode(@response.body)
         response.length.should == 0
@@ -64,13 +61,13 @@ describe Api2::CallLogsController do
 
     context "when it is exists" do
       it "response 200" do
-        get :index, address: "012334455"
+        get :index, email: account.email, token: account.auth_token, address: "012334455"
 
         assert_response :ok
       end
 
       it "list all those call logs" do
-        get :index, address: "012334455"
+        get :index, email: account.email, token: account.auth_token, address: "012334455"
 
         response = ActiveSupport::JSON.decode(@response.body)
         response.length.should == 1
@@ -81,28 +78,21 @@ describe Api2::CallLogsController do
   describe "Get by ID" do
     context "when it is not found" do
       it "response 404" do
-        get :show, id: 9999
+        get :show, email: account.email, token: account.auth_token, id: 9999
         
         assert_response :not_found
-      end
-      
-      it "show the error message" do
-        get :show, id: 9999
-        
-        response = ActiveSupport::JSON.decode(@response.body)
-        response.should == "The call log is not found"
       end
     end
 
     context "when it is found" do
       it "response 200" do
-        get :show, id: @call_log.id
+        get :show, email: account.email, token: account.auth_token, id: @call_log.id
         
         assert_response :ok
       end
 
       it "show the call log" do
-        get :show, id: @call_log.id
+        get :show, email: account.email, token: account.auth_token, id: @call_log.id
 
         response = ActiveSupport::JSON.decode(@response.body)
         response.should be_kind_of(Hash)

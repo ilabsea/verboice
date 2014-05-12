@@ -21,7 +21,7 @@ module Api2
     # GET /contacts/:address/call_logs
     # GET /call_logs
     def index
-      @call_logs = current_account.call_logs
+      @call_logs = api_current_account.call_logs
       @call_logs = @call_logs.where(address: params[:address]) if params[:address]
       render json: @call_logs, root: false
     end
@@ -34,9 +34,9 @@ module Api2
     private
     def verify_request
       begin
-        @call_log = current_account.call_logs(true).find(params[:id])
+        @call_log = api_current_account.call_logs.find(params[:id])
       rescue
-        render json: "The call log is not found".to_json, status: :not_found
+        head :not_found
         return
       end
     end

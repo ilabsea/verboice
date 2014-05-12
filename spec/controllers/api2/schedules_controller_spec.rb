@@ -18,18 +18,14 @@
 require 'spec_helper'
 
 describe Api2::SchedulesController do
-  include Devise::TestHelpers
 
-  before(:each) do
-    sign_in account
-  end
   let!(:account) { Account.make }
   let!(:project) { Project.make account: account }
   let(:schedule) { Schedule.make project: project }
 
   it "should list all the schedules" do
     schedule
-    get :index, :project_id => project.id
+    get :index, email: account.email, token: account.auth_token, :project_id => project.id
 
     response = JSON.parse(@response.body)
     response.size.should == 1
@@ -37,7 +33,7 @@ describe Api2::SchedulesController do
   end
 
   it "should expose an schedule" do
-    get :show, :project_id => project.id, :name => schedule.name
+    get :show, email: account.email, token: account.auth_token, :project_id => project.id, :name => schedule.name
 
     response = JSON.parse(@response.body).with_indifferent_access
     response[:name].should == schedule.name
@@ -46,7 +42,7 @@ describe Api2::SchedulesController do
   it "create custom schedule" do
     data = {project_id: project.id, name: "foo", :time_from_str => Time.now.to_s, :time_to_str => (Time.now + 1.hour).to_s}
     @request.env['RAW_POST_DATA'] = data.to_json
-    post :create, project_id: project.id, format: :json
+    post :create, email: account.email, token: account.auth_token, project_id: project.id, format: :json
 
     assert_response :ok
     schedules = project.schedules.all
@@ -57,7 +53,7 @@ describe Api2::SchedulesController do
   it "should response with the creation errors" do
     data = { project_id: project.id }
     @request.env['RAW_POST_DATA'] = data.to_json
-    post :create, project_id: project.id, format: :json
+    post :create, email: account.email, token: account.auth_token, project_id: project.id, format: :json
     assert_response :ok
 
     project.schedules.count.should == 0
@@ -68,7 +64,7 @@ describe Api2::SchedulesController do
   end
 
   it "should delete an schedule" do
-    delete :destroy, :name => schedule.name, :project_id => project.id
+    delete :destroy, email: account.email, token: account.auth_token, :name => schedule.name, :project_id => project.id
     assert_response :ok
 
     project.schedules.count.should == 0

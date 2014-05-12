@@ -19,7 +19,7 @@ module Api2
     respond_to :csv
 
     def list
-      @log = current_account.call_logs.find_by_id params[:call_id]
+      @log = api_current_account.call_logs.find_by_id params[:call_id]
 
       if @log.present?
         @entries = @log.entries

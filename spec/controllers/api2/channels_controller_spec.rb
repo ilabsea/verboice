@@ -18,26 +18,22 @@
 require 'spec_helper'
 
 describe Api2::ChannelsController do
-  include Devise::TestHelpers
 
-  before(:each) do
-    @account = Account.make
-    sign_in @account
-  end
-
-  let(:project) { @account.projects.make }
+  let(:admin) { Account.make role: Account::ADMIN }
+  let(:account) { Account.make role: Account::USER }
+  let(:project) { Project.make account: account }
   let(:call_flow) { CallFlow.make project: project }
 
   describe "get" do
     it "should return not found for non existing channel" do
-      get :get, :name => 'non_existing'
+      get :get, email: account.email, token: account.auth_token, :name => 'non_existing'
       assert_response :not_found
     end
 
     it "should return channel" do
-      chan = Channels::CustomSip.make account: @account, call_flow: call_flow
+      chan = Channels::CustomSip.make account: account, call_flow: call_flow
 
-      get :get, :name => chan.name
+      get :get, email: account.email, token: account.auth_token, :name => chan.name
 
       assert_response :ok
       response.body.should eq(chan.to_json)
@@ -48,12 +44,12 @@ describe Api2::ChannelsController do
     it "create custom channel" do
       data = {kind: "custom", name: "foo", call_flow: call_flow.name}
       @request.env['RAW_POST_DATA'] = data.to_json
-      post :create, format: :json
+      post :create, email: account.email, token: account.auth_token, format: :json
       assert_response :ok
 
-      channels = @account.channels.all
+      channels = account.channels.all
       channels.length.should == 1
-      channels[0].account.should == @account
+      channels[0].account.should == account
       channels[0].call_flow_id.should == call_flow.id
       channels[0].name.should == data[:name]
       channels[0].class.should == Channels::Custom
@@ -76,13 +72,13 @@ describe Api2::ChannelsController do
       }
 
       @request.env['RAW_POST_DATA'] = data.to_json
-      post :create, format: :json
+      post :create, email: account.email, token: account.auth_token, format: :json
 
       assert_response :ok
 
-      channels = @account.channels.all
+      channels = account.channels.all
       channels.length.should == 1
-      channels[0].account.should == @account
+      channels[0].account.should == account
       channels[0].call_flow_id.should == call_flow.id
       channels[0].name.should == data[:name]
       channels[0].username.should == data[:config][:username]
@@ -98,10 +94,10 @@ describe Api2::ChannelsController do
     it "create custom channel errors" do
       data = {kind: "custom", call_flow: call_flow.name}
       @request.env['RAW_POST_DATA'] = data.to_json
-      post :create, format: :json
+      post :create, email: account.email, token: account.auth_token, format: :json
       assert_response :ok
 
-      @account.channels.count.should == 0
+      account.channels.count.should == 0
 
       response = JSON.parse(@response.body).with_indifferent_access
       response[:summary].should == "There were problems creating the Channel"
@@ -111,12 +107,12 @@ describe Api2::ChannelsController do
 
   describe "update" do
     it "should return not found for non existing channel" do
-      put :update, :name => 'non_existing'
+      put :update, email: account.email, token: account.auth_token, :name => 'non_existing'
       assert_response :not_found
     end
 
     it "should update channel" do
-      chan = Channels::CustomSip.make account: @account, call_flow: call_flow
+      chan = Channels::CustomSip.make account: account, call_flow: call_flow
 
       data = {
         name: 'updated name',
@@ -126,7 +122,7 @@ describe Api2::ChannelsController do
         }
       }
       @request.env['RAW_POST_DATA'] = data.to_json
-      put :update, name: chan.name, format: :json
+      put :update, email: account.email, token: account.auth_token, name: chan.name, format: :json
       assert_response :ok
 
       chan = chan.reload
@@ -136,11 +132,11 @@ describe Api2::ChannelsController do
     end
 
     it "should tell erros" do
-      chan = Channels::Custom.make account: @account, call_flow: call_flow, name: 'the_channel'
+      chan = Channels::Custom.make account: account, call_flow: call_flow, name: 'the_channel'
 
       data = {:name => ''}
       @request.env['RAW_POST_DATA'] = data.to_json
-      put :update, name: chan.name, format: :json
+      put :update, email: account.email, token: account.auth_token, name: chan.name, format: :json
 
       assert_response :ok
 
@@ -154,31 +150,51 @@ describe Api2::ChannelsController do
 
   describe "delete" do
     it "should return not found for non existing channel" do
-      delete :destroy, :name => 'non_existing'
+      delete :destroy, email: account.email, token: account.auth_token, :name => 'non_existing'
       assert_response :not_found
     end
 
     it "delete channel" do
-      chan = Channel.all_leaf_subclasses.sample.make :call_flow => call_flow, :name => 'foo', :account => @account
+      chan = Channel.all_leaf_subclasses.sample.make :call_flow => call_flow, :name => 'foo', :account => account
 
-      delete :destroy, :name => chan.name
+      delete :destroy, email: account.email, token: account.auth_token, :name => chan.name
       assert_response :ok
 
-      @account.channels.count.should == 0
+      account.channels.count.should == 0
     end
   end
 
   describe "list" do
     before(:each) do
-      Channels::Custom.make account: @account
+      Channels::Custom.make account: account
+      Channels::Custom.make account: admin
     end
 
-    it "should list all channels" do
-      get :list
+    context "sign in as admin" do
+      it "unauthorized when the host is not allowed" do
+        request.stub(:remote_ip).and_return('192.168.1.1')
+        get :list, email: admin.email, token: admin.auth_token
 
-      assert_response :ok
-      response = ActiveSupport::JSON.decode(@response.body)
-      response.length.should eq(1)
+        assert_response :unauthorized
+      end
+
+      it "list all channels when host is allowed" do
+        get :list, email: admin.email, token: admin.auth_token
+
+        assert_response :ok
+        response = JSON.parse(@response.body)
+        expect(response.length).to eq 2
+      end
+    end
+
+    context "sign in as normal user" do
+      it "list all channels those belongs to the account" do
+        get :list, email: account.email, token: account.auth_token
+
+        assert_response :ok
+        response = JSON.parse(@response.body)
+        response.length.should == 1
+      end
     end
   end
 end

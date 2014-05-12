@@ -18,7 +18,7 @@
 module Api2
   class CallFlowsController < Api2Controller
     def list
-      call_flows = current_account.call_flows
+      call_flows = api_current_account.call_flows
       render json: call_flows, each_serializer: CustomCallFlowSerializer
     end
   end

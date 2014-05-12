@@ -18,7 +18,6 @@
 require 'spec_helper'
 
 describe Api2::ContactsController do
-  include Devise::TestHelpers
 
   let!(:account) { Account.make }
   let!(:account_two) { Account.make }
@@ -29,8 +28,6 @@ describe Api2::ContactsController do
   let!(:other_contact) { Contact.make :project => other_project }
 
   before(:each) do
-    sign_in account
-
     ContactAddress.make contact_id: contact.id
 
     @project_var = project.project_variables.make name: "var1"
@@ -38,7 +35,7 @@ describe Api2::ContactsController do
   end
 
   it "gets all contacts" do
-    get :index, project_id: project.id
+    get :index, email: account.email, token: account.auth_token, project_id: project.id
 
     response.should be_ok
 
@@ -52,7 +49,7 @@ describe Api2::ContactsController do
   end
 
   it "gets contact by address" do
-    get :show_by_address, project_id: project.id, address: contact.addresses.first.address
+    get :show_by_address, email: account.email, token: account.auth_token, project_id: project.id, address: contact.addresses.first.address
 
     response.should be_ok
 
@@ -63,7 +60,7 @@ describe Api2::ContactsController do
   end
 
   it "updates a contact's var by address" do
-    put :update_by_address, project_id: project.id, address: contact.addresses.first.address, vars: {var1: "bar"}
+    put :update_by_address, email: account.email, token: account.auth_token, project_id: project.id, address: contact.addresses.first.address, vars: {var1: "bar"}
 
     @contact_var.reload
     @contact_var.value.should eq("bar")
@@ -77,7 +74,7 @@ describe Api2::ContactsController do
   end
 
   it "updates all contacts vars" do
-    put :update_all, project_id: project.id, vars: {var1: "bar"}
+    put :update_all, email: account.email, token: account.auth_token, project_id: project.id, vars: {var1: "bar"}
 
     @contact_var.reload
     @contact_var.value.should eq("bar")
@@ -98,7 +95,7 @@ describe Api2::ContactsController do
 
     it "should response 404 when project doesn't exists" do
       expect{
-        post :create, project_id: 9999
+        post :create, email: account.email, token: account.auth_token, project_id: 9999
 
         assert_response :not_found
         response = ActiveSupport::JSON.decode(@response.body)
@@ -108,7 +105,7 @@ describe Api2::ContactsController do
 
     it "should response 400 when addresses is missing" do
       expect{
-        post :create, project_id: project.id
+        post :create, email: account.email, token: account.auth_token, project_id: project.id
 
         assert_response :bad_request
         response = ActiveSupport::JSON.decode(@response.body)
@@ -118,7 +115,7 @@ describe Api2::ContactsController do
 
     it "should response 400 when addresses is string" do
       expect {
-        post :create, {:project_id => project.id, :addresses => "1000"}
+        post :create, email: account.email, token: account.auth_token, :project_id => project.id, :addresses => "1000"
 
         assert_response :bad_request
         response = ActiveSupport::JSON.decode(@response.body)
@@ -128,7 +125,7 @@ describe Api2::ContactsController do
 
     it "should response 400 when addresses is numeric" do
       expect {
-        post :create, {:project_id => project.id, :addresses => 1000}
+        post :create, email: account.email, token: account.auth_token, :project_id => project.id, :addresses => 1000
 
         assert_response :bad_request
         response = ActiveSupport::JSON.decode(@response.body)
@@ -138,7 +135,7 @@ describe Api2::ContactsController do
 
     it "should response 200 when addresses is empty" do
       expect {
-        post :create, {:project_id => project.id, :addresses => []}
+        post :create, email: account.email, token: account.auth_token, :project_id => project.id, :addresses => []
 
         assert_response :success
       }.to change(project.contacts, :count).by(0)
@@ -146,19 +143,19 @@ describe Api2::ContactsController do
 
     it "should ignore existing addresses" do
       expect {
-        post :create, {:project_id => project.id, :addresses => ["1000"]}
+        post :create, email: account.email, token: account.auth_token, :project_id => project.id, :addresses => ["1000"]
       }.to change(project.contacts, :count).by(0)
     end
 
     it "should create non-existing addresses" do
       expect {
-        post :create, :project_id => project.id, :addresses => ["01236475", "0243332343", "0186354633"]
+        post :create, email: account.email, token: account.auth_token, :project_id => project.id, :addresses => ["01236475", "0243332343", "0186354633"]
       }.to change(project.contacts, :count).by(3)
     end
 
     it "should create non-existing and ignore existing addresses" do
       expect {
-        post :create, :project_id => project.id, :addresses => ["2000", 2000, "3000"]
+        post :create, email: account.email, token: account.auth_token, :project_id => project.id, :addresses => ["2000", 2000, "3000"]
       }.to change(project.contacts, :count).by(2)
     end
   end
@@ -175,7 +172,7 @@ describe Api2::ContactsController do
 
     it "should response 404 when project doesn't exists" do
       expect{
-        delete :unregistration, project_id: 9999
+        delete :unregistration, email: account.email, token: account.auth_token, project_id: 9999
 
         assert_response :not_found
         response = ActiveSupport::JSON.decode(@response.body)
@@ -185,7 +182,7 @@ describe Api2::ContactsController do
 
     it "should response 400 when addresses is missing" do
       expect{
-        delete :unregistration, project_id: project.id
+        delete :unregistration, email: account.email, token: account.auth_token, project_id: project.id
 
         assert_response :bad_request
         response = ActiveSupport::JSON.decode(@response.body)
@@ -195,7 +192,7 @@ describe Api2::ContactsController do
 
     it "should response 400 when addresses is string" do
       expect {
-        delete :unregistration, {:project_id => project.id, :addresses => "1000"}
+        delete :unregistration, email: account.email, token: account.auth_token, :project_id => project.id, :addresses => "1000"
 
         assert_response :bad_request
         response = ActiveSupport::JSON.decode(@response.body)
@@ -205,7 +202,7 @@ describe Api2::ContactsController do
 
     it "should response 400 when addresses is numeric" do
       expect {
-        delete :unregistration, {:project_id => project.id, :addresses => 1000}
+        delete :unregistration, email: account.email, token: account.auth_token, :project_id => project.id, :addresses => 1000
 
         assert_response :bad_request
         response = ActiveSupport::JSON.decode(@response.body)
@@ -215,7 +212,7 @@ describe Api2::ContactsController do
 
     it "should response 200 when addresses is empty" do
       expect {
-        delete :unregistration, {:project_id => project.id, :addresses => []}
+        delete :unregistration, email: account.email, token: account.auth_token, :project_id => project.id, :addresses => []
 
         assert_response :success
       }.to change(project.contacts, :count).by(0)
@@ -223,7 +220,7 @@ describe Api2::ContactsController do
 
     it "should ignore non-existing addresses" do
       expect {
-        delete :unregistration, {:project_id => project.id, :addresses => ["9999"]}
+        delete :unregistration, email: account.email, token: account.auth_token, :project_id => project.id, :addresses => ["9999"]
       }.to_not change(project.contacts, :count).by(1)
     end
 
@@ -231,27 +228,27 @@ describe Api2::ContactsController do
       expect {
         contact.addresses.count.should == 1
         contact.first_address.should == "1000"
-        delete :unregistration, {:project_id => project.id, :addresses => ["1000"]}
+        delete :unregistration, email: account.email, token: account.auth_token, :project_id => project.id, :addresses => ["1000"]
       }.to change(project.contacts, :count).from(2).to(1)
     end
 
     it "should destroy only contact adderss when contact has many addresses" do
       expect {
         contact_two.addresses.count.should == 2
-        delete :unregistration, {:project_id => project.id, :addresses => ["2000"]}
+        delete :unregistration, email: account.email, token: account.auth_token, :project_id => project.id, :addresses => ["2000"]
         contact_two.addresses.count.should == 1
       }.to_not change(project.contacts, :count).by(1)
     end
 
     it "should destroy existing and ignore non-existing addresses" do
       expect {
-        delete :unregistration, {:project_id => project.id, :addresses => ["1000", "9999"]}
+        delete :unregistration, email: account.email, token: account.auth_token, :project_id => project.id, :addresses => ["1000", "9999"]
       }.to change(project.contacts, :count).from(2).to(1)
     end
 
     it "should destroy only contact/contact addresses when it's has only one/many addresses" do
       expect {
-        delete :unregistration, {:project_id => project.id, :addresses => ["1000", "2000"]}
+        delete :unregistration, email: account.email, token: account.auth_token, :project_id => project.id, :addresses => ["1000", "2000"]
       }.to change(project.contacts, :count).from(2).to(1)
     end
   end

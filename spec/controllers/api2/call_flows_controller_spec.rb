@@ -23,17 +23,13 @@ describe Api2::CallFlowsController do
   let!(:account) { Account.make }
   let!(:project) { account.projects.make }
 
-  before(:each) do
-    sign_in account
-  end
-
   describe "list" do
     before(:each) do
       CallFlow.make project: project
     end
 
     it "should list all call flows" do
-      get :list
+      get :list, email: account.email, token: account.auth_token
 
       assert_response :ok
       response = ActiveSupport::JSON.decode(@response.body)

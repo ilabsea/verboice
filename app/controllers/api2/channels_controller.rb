@@ -18,7 +18,7 @@ module Api2
   class ChannelsController < Api2Controller
 
     def get
-      channel = current_account.channels.find_by_name params[:name]
+      channel = api_current_account.channels.find_by_name params[:name]
 
       if channel.present?
         render :json => channel
@@ -31,8 +31,8 @@ module Api2
       data = request.raw_post
       data = JSON.parse(data).with_indifferent_access
       channel = Channel.from_json data
-      channel.account = current_account
-      channel.call_flow = current_account.call_flows.find_by_name(data[:call_flow])
+      channel.account = api_current_account
+      channel.call_flow = api_current_account.call_flows.find_by_name(data[:call_flow])
       if channel.save
         render :json => channel
       else
@@ -41,7 +41,7 @@ module Api2
     end
 
     def update
-      channel = current_account.channels.find_by_name params[:name]
+      channel = api_current_account.channels.find_by_name params[:name]
 
       if channel.present?
         data = request.raw_post
@@ -58,7 +58,7 @@ module Api2
     end
 
     def destroy
-      channel = current_account.channels.find_by_name params[:name]
+      channel = api_current_account.channels.find_by_name params[:name]
 
       if channel.present?
         channel.destroy
@@ -69,7 +69,16 @@ module Api2
     end
 
     def list
-      channels = current_account.channels
+      if api_current_account.admin?
+        if api_current_account.has_access_from?(origin_host)
+          channels = Channel.all
+        else
+          return head :unauthorized
+        end
+      else
+        channels = api_current_account.channels
+      end
+
       render json: channels, each_serializer: CustomChannelSerializer
     end
 

@@ -17,7 +17,7 @@
 module Api2
   class SchedulesController < Api2Controller
 
-    expose(:project) { current_account.projects.includes(:schedules).find(params[:project_id]) }
+    expose(:project) { api_current_account.projects.includes(:schedules).find(params[:project_id]) }
     expose(:schedules) { project.schedules }
     expose(:schedule) { project.schedules.find_by_name(params[:name]) }
 
@@ -32,7 +32,7 @@ module Api2
     def create
       data = JSON.parse(request.raw_post).with_indifferent_access
       schedule = Schedule.from_json data
-      schedule.account = current_account
+      schedule.account = api_current_account
       if schedule.save
         render :json => schedule
       else
