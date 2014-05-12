@@ -18,7 +18,6 @@
 require 'spec_helper'
 
 describe Api2::ReminderGroupsController do
-  include Devise::TestHelpers
 
   let!(:account_one) { Account.make }
   let!(:account_two) { Account.make }
@@ -27,13 +26,9 @@ describe Api2::ReminderGroupsController do
   let!(:reminder_group) { Ext::ReminderGroup.make project: project, addresses: [] }
   let!(:another_reminder_group) { Ext::ReminderGroup.make project: another_project, addresses: [] }
 
-  before(:each) do
-    sign_in account_one
-  end
-
   describe "get index" do
     it "should response 404 when project doesn't exists" do
-      get :index, project_id: 9999
+      get :index, email: account_one.email, token: account_one.auth_token, project_id: 9999
       
       assert_response :not_found
       response = ActiveSupport::JSON.decode(@response.body)
@@ -41,7 +36,7 @@ describe Api2::ReminderGroupsController do
     end
 
     it "should response 200" do
-      get :index, project_id: project.id
+      get :index, email: account_one.email, token: account_one.auth_token, project_id: project.id
 
       assert_response :success
     end
@@ -50,7 +45,7 @@ describe Api2::ReminderGroupsController do
   describe "post create" do
     it "should response 404 when project doesn't exists" do
       expect{
-        post :create, project_id: 9999
+        post :create, email: account_one.email, token: account_one.auth_token, project_id: 9999
       
         assert_response :not_found
         response = ActiveSupport::JSON.decode(@response.body)
@@ -60,7 +55,7 @@ describe Api2::ReminderGroupsController do
 
     it "should response 400 when parameter is invalid" do
       expect {
-        post :create, project_id: project.id
+        post :create, email: account_one.email, token: account_one.auth_token, project_id: project.id
         assert_response :bad_request
 
         response = JSON.parse(@response.body).with_indifferent_access
@@ -71,7 +66,7 @@ describe Api2::ReminderGroupsController do
 
     it "should response 400 when addresses passing is not an array" do
       expect {
-        post :create, project_id: project.id, reminder_group: {name: "foo", addresses: "1000"}
+        post :create, email: account_one.email, token: account_one.auth_token, project_id: project.id, reminder_group: {name: "foo", addresses: "1000"}
         assert_response :bad_request
 
         response = JSON.parse(@response.body).with_indifferent_access
@@ -82,7 +77,7 @@ describe Api2::ReminderGroupsController do
 
     it "should response 201 with params only name" do
       expect {
-        post :create, project_id: project.id, reminder_group: {name: "foo"}
+        post :create, email: account_one.email, token: account_one.auth_token, project_id: project.id, reminder_group: {name: "foo"}
 
         assert_response :created
       }.to change(project.ext_reminder_groups, :count).by(1)
@@ -90,7 +85,7 @@ describe Api2::ReminderGroupsController do
 
     it "should response 201" do
       expect {
-        post :create, project_id: project.id, reminder_group: {name: "foo", addresses: ["1000"]}
+        post :create, email: account_one.email, token: account_one.auth_token, project_id: project.id, reminder_group: {name: "foo", addresses: ["1000"]}
 
         assert_response :created
       }.to change(project.ext_reminder_groups, :count).by(1)
@@ -99,7 +94,7 @@ describe Api2::ReminderGroupsController do
 
   describe "put update" do
     it "should response 404 when it doesn't exists" do
-      put :update, id: 9999
+      put :update, email: account_one.email, token: account_one.auth_token, id: 9999
 
       assert_response :not_found
       response = ActiveSupport::JSON.decode(@response.body)
@@ -107,7 +102,7 @@ describe Api2::ReminderGroupsController do
     end
 
     it "should response 400 when addresses is string" do
-      put :update, id: reminder_group.id, reminder_group: { addresses: "1000" }
+      put :update, email: account_one.email, token: account_one.auth_token, id: reminder_group.id, reminder_group: { addresses: "1000" }
 
       assert_response :bad_request
       response = JSON.parse(@response.body).with_indifferent_access
@@ -116,7 +111,7 @@ describe Api2::ReminderGroupsController do
     end
 
     it "should response 400 when addresses is numeric" do
-      put :update, id: reminder_group.id, reminder_group: { addresses: 1000 }
+      put :update, email: account_one.email, token: account_one.auth_token, id: reminder_group.id, reminder_group: { addresses: 1000 }
 
       assert_response :bad_request
       response = JSON.parse(@response.body).with_indifferent_access
@@ -125,7 +120,7 @@ describe Api2::ReminderGroupsController do
     end
 
     it "should response 200 when addresses is empty" do
-      put :update, id: reminder_group.id, reminder_group: { addresses: [] }
+      put :update, email: account_one.email, token: account_one.auth_token, id: reminder_group.id, reminder_group: { addresses: [] }
 
       assert_response :success
       reminder_group.reload.addresses.count.should == 0
@@ -133,7 +128,7 @@ describe Api2::ReminderGroupsController do
 
     it "should response 200" do
       # expect{
-        put :update, id: reminder_group.id, reminder_group: { addresses: [1000, 1001, "1000", "1001"] }
+        put :update, email: account_one.email, token: account_one.auth_token, id: reminder_group.id, reminder_group: { addresses: [1000, 1001, "1000", "1001"] }
 
         assert_response :success
         reminder_group.reload.addresses.count.should == 2
@@ -144,7 +139,7 @@ describe Api2::ReminderGroupsController do
   describe "delete destroy" do
     it "should response 404 when it doesn't exists" do
       expect{
-        delete :destroy, id: 9999
+        delete :destroy, email: account_one.email, token: account_one.auth_token, id: 9999
 
         assert_response :not_found
         response = ActiveSupport::JSON.decode(@response.body)
@@ -154,7 +149,7 @@ describe Api2::ReminderGroupsController do
 
     it "should response 200" do
       expect{
-        delete :destroy, id: reminder_group.id
+        delete :destroy, email: account_one.email, token: account_one.auth_token, id: reminder_group.id
 
         assert_response :success
       }.to change(project.ext_reminder_groups, :count).from(1).to(0)
