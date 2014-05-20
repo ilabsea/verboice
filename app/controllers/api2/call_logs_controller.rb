@@ -24,12 +24,12 @@ module Api2
     def index
       @call_logs = api_current_account.call_logs
       @call_logs = @call_logs.where(address: params[:address]) if params[:address]
-      render json: @call_logs, root: false
+      render json: @call_logs, each_serializer: CustomCallLogSerializer
     end
 
     # GET /call_logs/:id
     def show
-      render json: @call_log
+      render json: @call_log, serializer: CustomCallLogSerializer
     end
 
     # GET /channels/:channel_id/call_logs

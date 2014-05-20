@@ -16,6 +16,6 @@
 # along with Verboice.  If not, see <http://www.gnu.org/licenses/>.
 
 class CustomCallLogSerializer < ActiveModel::Serializer
-  attributes :id, :address, :duration, :channel_id
+  attributes :id, :prefix_called_number, :address, :duration, :direction, :channel_id, :call_flow_id, :project_id, :state, :fail_reason, :not_before, :finished_at
 
 end
