@@ -69,6 +69,8 @@ module Api2
     end
 
     def list
+      p "------"
+      p api_current_account
       if api_current_account.admin?
         if api_current_account.has_access_from?(origin_host)
           channels = Channel.all

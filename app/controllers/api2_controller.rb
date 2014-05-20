@@ -35,7 +35,7 @@ class Api2Controller < ActionController::Base
     email = params[:email].presence
     account  = email && Account.find_by_email(email)
  
-    if account && Devise.secure_compare(account.auth_token, params[:token])
+    if account && account.auth_token == params[:token]
       @current_account = account
     end
     @current_account
