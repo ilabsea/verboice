@@ -185,6 +185,14 @@ describe Api2::ChannelsController do
         response = JSON.parse(@response.body)
         expect(response.length).to eq 2
       end
+
+      it "list only channels that belongs to the account" do
+        get :list, email: admin.email, token: admin.auth_token, account_id: admin.id
+
+        assert_response :ok
+        response = JSON.parse(@response.body)
+        expect(response.length).to eq 1
+      end
     end
 
     context "sign in as normal user" do
