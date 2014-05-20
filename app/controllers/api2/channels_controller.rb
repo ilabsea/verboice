@@ -72,6 +72,7 @@ module Api2
       if api_current_account.admin?
         if api_current_account.has_access_from?(origin_host)
           channels = Channel.all
+          channels = Channel.where(account_id: params[:account_id]) if params[:account_id].present?
         else
           return head :unauthorized
         end
