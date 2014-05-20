@@ -19,7 +19,8 @@ require 'spec_helper'
 
 describe Api2::CallLogsController do
 
-  let(:account) { Account.make }
+  let(:admin) { Account.make role: Account::ADMIN}
+  let(:account) { Account.make role: Account::USER }
   let(:project) { Project.make account: account }
   let(:call_flow) { CallFlow.make project: project }
 
@@ -43,7 +44,7 @@ describe Api2::CallLogsController do
     end
   end
 
-  describe "Get by adderss" do
+  describe "get by adderss" do
     context "when it is not exists" do
       it "response 200" do
         get :index, email: account.email, token: account.auth_token, address: "012999999"
@@ -75,7 +76,61 @@ describe Api2::CallLogsController do
     end
   end
 
-  describe "Get by ID" do
+  describe "get by channel" do
+    before(:each) do
+      @channel_user = Channels::Custom.make account: account
+      @channel_admin = Channels::Custom.make account: admin
+
+      CallLog.make channel_id: @channel_user.id
+      CallLog.make channel_id: @channel_user.id
+
+      CallLog.make channel_id: @channel_admin.id
+    end
+
+    it "response 404 when it doesn't exists" do
+      get :list_by_channel, email: admin.email, token: admin.auth_token, channel_id: 9999
+
+      assert_response :not_found
+    end
+
+    context "super admin" do
+      it "response 200 when it is exists" do
+        get :list_by_channel, email: admin.email, token: admin.auth_token, channel_id: @channel_admin.id
+
+        assert_response :ok
+      end
+
+      it "list all call logs belongs to channel" do
+        get :list_by_channel, email: admin.email, token: admin.auth_token, channel_id: @channel_admin.id
+
+        response = ActiveSupport::JSON.decode(@response.body)
+        expect(response.length).to eq(1)
+      end
+    end
+
+    context "normal user" do
+      it "response 401 when it is belongs to other user" do
+        get :list_by_channel, email: account.email, token: account.auth_token, channel_id: @channel_admin.id
+
+        assert_response :unauthorized
+      end
+
+      it "response 200 when it is exists" do
+        get :list_by_channel, email: account.email, token: account.auth_token, channel_id: @channel_user.id
+
+        assert_response :ok
+      end
+
+      it "list all call logs belongs to channel" do
+        get :list_by_channel, email: account.email, token: account.auth_token, channel_id: @channel_user.id
+
+        response = ActiveSupport::JSON.decode(@response.body)
+        expect(response.length).to eq(2)
+      end
+    end
+  end
+
+  describe "get by ID" do
     context "when it is not found" do
       it "response 404" do
         get :show, email: account.email, token: account.auth_token, id: 9999

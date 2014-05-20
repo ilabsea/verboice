@@ -241,6 +241,7 @@ Verboice::Application.routes.draw do
       end
     end
 
+    get '/channels/:channel_id/call_logs' => "call_logs#list_by_channel"
     get '/contacts/:address/call_logs', controller: :call_logs, action: :index
     resources :call_logs, only: [:index, :show]
 
