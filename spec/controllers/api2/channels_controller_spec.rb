@@ -164,7 +164,7 @@ describe Api2::ChannelsController do
     end
   end
 
-  describe "list" do
+  describe "index" do
     before(:each) do
       Channels::Custom.make account: account
       Channels::Custom.make account: admin
@@ -173,13 +173,13 @@ describe Api2::ChannelsController do
     context "sign in as admin" do
       it "unauthorized when the host is not allowed" do
         request.stub(:remote_ip).and_return('192.168.1.1')
-        get :list, email: admin.email, token: admin.auth_token
+        get :index, email: admin.email, token: admin.auth_token
 
         assert_response :unauthorized
       end
 
       it "list all channels when host is allowed" do
-        get :list, email: admin.email, token: admin.auth_token
+        get :index, email: admin.email, token: admin.auth_token
 
         assert_response :ok
         response = JSON.parse(@response.body)
@@ -187,7 +187,7 @@ describe Api2::ChannelsController do
       end
 
       it "list only channels that belongs to the account" do
-        get :list, email: admin.email, token: admin.auth_token, account_id: admin.id
+        get :index, email: admin.email, token: admin.auth_token, account_id: admin.id
 
         assert_response :ok
         response = JSON.parse(@response.body)
@@ -197,7 +197,7 @@ describe Api2::ChannelsController do
 
     context "sign in as normal user" do
       it "list all channels those belongs to the account" do
-        get :list, email: account.email, token: account.auth_token
+        get :index, email: account.email, token: account.auth_token
 
         assert_response :ok
         response = JSON.parse(@response.body)
