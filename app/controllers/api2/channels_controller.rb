@@ -68,13 +68,10 @@ module Api2
       end
     end
 
-    def list
-      p "------"
-      p api_current_account
+    def index
       if api_current_account.admin?
         if api_current_account.has_access_from?(origin_host)
-          channels = Channel.all
-          channels = Channel.where(account_id: params[:account_id]) if params[:account_id].present?
+          channels = params[:account_id] ? Channel.by_account_id(params[:account_id]) : Channel.where("1=1") 
         else
           return head :unauthorized
         end

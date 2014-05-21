@@ -208,8 +208,8 @@ Verboice::Application.routes.draw do
         match :redirect
       end
     end
-    get "channels" => "channels#list"
-    resources :channels, only: [:create] do
+
+    resources :channels, only: [:create, :index] do
       collection do
         get ":name", :action => "get"
         put ":name", :action => "update"
