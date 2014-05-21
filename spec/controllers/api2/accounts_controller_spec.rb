@@ -36,12 +36,12 @@ describe Api2::AccountsController do
         assert_response :unauthorized
       end
 
-      it "response json array of accounts when host is allowed" do
+      it "response json array of normal user accounts when host is allowed" do
         get :index, email: admin.email, token: admin.auth_token
 
         assert_response :success
         accounts = ActiveSupport::JSON.decode(@response.body)
-        accounts.length.should eq(2)
+        accounts.length.should eq(1)
       end
     end
 
