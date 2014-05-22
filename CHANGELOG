@@ -1,3 +1,7 @@
+1.6.1 (2014-05-22 kakada <kakada@instedd.org)
+  + Features:
+    * #48: add setting to enable/disable speech_recognition step
+
 1.5.9 (2014-05-07 kakada <kakada@instedd.org)
   + Bugs:
     * #125: fix register/deregister with voip called prefix channel
