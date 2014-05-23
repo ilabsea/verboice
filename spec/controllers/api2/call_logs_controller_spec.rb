@@ -25,53 +25,88 @@ describe Api2::CallLogsController do
   let(:call_flow) { CallFlow.make project: project }
 
   before(:each) do
-    @call_log = CallLog.make project: project, call_flow: call_flow, address: "012334455"
-    @another_call_log = CallLog.make project: project, call_flow: call_flow, address: "012778899"
+    @call_log = CallLog.make project: project, call_flow: call_flow, address: "012334455", account: account
+    @another_call_log = CallLog.make project: project, call_flow: call_flow, address: "012778899", account: account
   end
 
-  describe "/index" do
-    it "should response 200" do
-      get :index, email: account.email, token: account.auth_token
-
-      assert_response :ok
+  describe "index" do
+    before(:each) do
+      CallLog.make account: admin
     end
 
-    it "list all call logs" do
-      get :index, email: account.email, token: account.auth_token
+    context "admin" do
+      context "host is not allowed" do
+        it "unauthorized" do
+          request.stub(:remote_ip).and_return('192.168.1.1')
+          get :index, email: admin.email, token: admin.auth_token
 
-      response = ActiveSupport::JSON.decode(@response.body)
-      response.length.should == 2
+          assert_response :unauthorized
+        end
+      end
+
+      context "host is allowed" do
+        it "list all call logs when host is allowed" do
+          get :index, email: admin.email, token: admin.auth_token
+
+          assert_response :ok
+          response = JSON.parse(@response.body)
+          expect(response.length).to eq 3
+        end
+
+        it "list only call logs that belongs to the account" do
+          get :index, email: admin.email, token: admin.auth_token, account_id: account.id
+
+          assert_response :ok
+          response = JSON.parse(@response.body)
+          expect(response.length).to eq 2
+        end
+      end
     end
-  end
 
-  describe "get by adderss" do
-    context "when it is not exists" do
-      it "response 200" do
-        get :index, email: account.email, token: account.auth_token, address: "012999999"
+    context "normal user" do
+      it "should response 200" do
+        get :index, email: account.email, token: account.auth_token
 
         assert_response :ok
       end
 
-      it "list of empty call logs" do
-        get :index, email: account.email, token: account.auth_token, address: "012999999"
+      it "list all call logs" do
+        get :index, email: account.email, token: account.auth_token
 
         response = ActiveSupport::JSON.decode(@response.body)
-        response.length.should == 0
-      end
-    end
-
-    context "when it is exists" do
-      it "response 200" do
-        get :index, email: account.email, token: account.auth_token, address: "012334455"
-
-        assert_response :ok
+        response.length.should == 2
       end
 
-      it "list all those call logs" do
-        get :index, email: account.email, token: account.auth_token, address: "012334455"
+      context "by address" do
+        context "it is not exists" do
+          it "response 200" do
+            get :index, email: account.email, token: account.auth_token, address: "012999999"
 
-        response = ActiveSupport::JSON.decode(@response.body)
-        response.length.should == 1
+            assert_response :ok
+          end
+
+          it "list of empty call logs" do
+            get :index, email: account.email, token: account.auth_token, address: "012999999"
+
+            response = ActiveSupport::JSON.decode(@response.body)
+            response.length.should == 0
+          end
+        end
+
+        context "it is exists" do
+          it "response 200" do
+            get :index, email: account.email, token: account.auth_token, address: "012334455"
+
+            assert_response :ok
+          end
+
+          it "list all those call logs" do
+            get :index, email: account.email, token: account.auth_token, address: "012334455"
+
+            response = ActiveSupport::JSON.decode(@response.body)
+            response.length.should == 1
+          end
+        end
       end
     end
   end

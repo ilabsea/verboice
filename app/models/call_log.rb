@@ -163,6 +163,10 @@ class CallLog < ActiveRecord::Base
     end
   end
 
+  def self.by_account_id account_id
+    where(account_id: account_id)
+  end
+
   private
 
   def set_account_to_project_account

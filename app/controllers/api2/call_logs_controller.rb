@@ -22,8 +22,17 @@ module Api2
     # GET /contacts/:address/call_logs
     # GET /call_logs
     def index
-      @call_logs = api_current_account.call_logs
-      @call_logs = @call_logs.where(address: params[:address]) if params[:address]
+      if api_current_account.admin?
+        if api_current_account.has_access_from?(origin_host)
+          @call_logs = params[:account_id] ? CallLog.by_account_id(params[:account_id]) : CallLog.where("1=1")
+        else
+          return head :unauthorized
+        end
+      else
+        @call_logs = api_current_account.call_logs
+        @call_logs = @call_logs.where(address: params[:address]) if params[:address]
+      end
+      
       render json: @call_logs, each_serializer: CustomCallLogSerializer
     end
 
