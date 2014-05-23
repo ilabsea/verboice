@@ -50,6 +50,9 @@ describe Api2::CallLogsController do
 
           assert_response :ok
           response = JSON.parse(@response.body)
+          p "---------"
+          p response
+
           expect(response.length).to eq 3
         end
 

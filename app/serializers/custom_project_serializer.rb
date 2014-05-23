@@ -15,12 +15,6 @@
 # You should have received a copy of the GNU General Public License
 # along with Verboice.  If not, see <http://www.gnu.org/licenses/>.
 
-class CustomCallLogSerializer < ActiveModel::Serializer
-  attributes :id, :prefix_called_number, :address, :duration, :direction,
-             :call_flow_id, :state, :fail_reason, :not_before, :finished_at
-
-  has_one :account, serializer: CustomAccountSerializer
-  has_one :project, serializer: CustomProjectSerializer
-  has_one :channel, serializer: CustomChannelSerializer
-
+class CustomProjectSerializer < ActiveModel::Serializer
+  attributes :id, :name
 end

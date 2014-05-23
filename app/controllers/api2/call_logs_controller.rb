@@ -32,7 +32,9 @@ module Api2
         @call_logs = api_current_account.call_logs
         @call_logs = @call_logs.where(address: params[:address]) if params[:address]
       end
-      
+
+      @call_logs = @call_logs.includes([:account, :channel, :project])
+
       render json: @call_logs, each_serializer: CustomCallLogSerializer
     end
 
