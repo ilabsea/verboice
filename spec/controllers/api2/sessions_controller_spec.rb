@@ -49,7 +49,7 @@ describe Api2::SessionsController do
         body = ActiveSupport::JSON.decode(response.body)
 
         expect(response.status).to eq 200
-        expect(body).to eq({"success" => true, "auth_token" => admin_user.auth_token, "email" => admin_user.email})
+        expect(body).to eq({"success" => true, "auth_token" => admin_user.auth_token, "email" => admin_user.email, "role" => admin_user.role})
       end
     end
   end
