@@ -49,15 +49,15 @@ describe Api2::TrafficController do
         end
 
         context "pass start_date and end_date" do
-          context "invalid date format(dd/mm/yyyy)" do
+          context "invalid date format" do
             it "response 422 when start date is invalid" do
-              get :index, email: admin.email, token: admin.auth_token, start_date: '05-05-2014', end_date: '05/05/2014'
+              get :index, email: admin.email, token: admin.auth_token, start_date: '0505/2014', end_date: '05/05/2014'
 
               assert_response :unprocessable_entity
             end
 
             it "response 422 when end date is invalid" do
-              get :index, email: admin.email, token: admin.auth_token, start_date: '05/05/2014', end_date: '05-05-2014'
+              get :index, email: admin.email, token: admin.auth_token, start_date: '05/05/2014', end_date: '0505/2014'
 
               assert_response :unprocessable_entity
             end
@@ -66,6 +66,12 @@ describe Api2::TrafficController do
           context "valid date format" do
             it "response 200" do
               get :index, email: admin.email, token: admin.auth_token, start_date: '05/05/2014', end_date: '05/05/2014'
+
+              assert_response :ok
+            end
+
+            it "response 200" do
+              get :index, email: admin.email, token: admin.auth_token, start_date: '05-05-2014', end_date: '05-05-2014'
 
               assert_response :ok
             end

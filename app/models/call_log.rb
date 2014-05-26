@@ -167,6 +167,10 @@ class CallLog < ActiveRecord::Base
     where(account_id: account_id)
   end
 
+  def self.between from, to
+    where(started_at: from..to)
+  end
+
   private
 
   def set_account_to_project_account
