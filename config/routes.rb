@@ -251,6 +251,8 @@ Verboice::Application.routes.draw do
     get "accounts" => "accounts#index"
 
     post '/auth' => 'sessions#create'
+
+    get '/traffic' => 'traffic#index'
   end
 
   post 'call_simulator/start'
