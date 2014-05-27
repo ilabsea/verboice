@@ -18,8 +18,4 @@
 class CustomTrafficSerializer < ActiveModel::Serializer
   attributes :address, :total_duration, :direction, :total_call
 
-  def address
-    object.address_without_prefix
-  end
-
 end

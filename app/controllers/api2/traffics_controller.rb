@@ -21,11 +21,11 @@ module Api2
 
     def index
       traffics = CallLog.between(@start_date, @end_date).includes([:account, :channel])
-      traffics = traffics.select("channel_id, prefix_called_number, address, direction, sum(duration) as total_duration, count(*) as total_call").group(:channel_id, :prefix_called_number, :address, :direction).having("sum(duration) > 0").order(account_id: :asc)
+      traffics = traffics.select("channel_id, address, direction, sum(duration) as total_duration, count(*) as total_call").group(:channel_id, :address, :direction).having("sum(duration) > 0").order(account_id: :asc)
 
       channels = Channels::Sip.order(account_id: :asc)
 
-      render json: channels, each_serializer: CustomChannelSerializer, traffics: traffics, account: true
+      render json: channels, each_serializer: CustomChannelSerializer, traffics: traffics, account: true, prefix_called_number: true
     end
 
     private
