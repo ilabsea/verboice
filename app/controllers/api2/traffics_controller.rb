@@ -16,7 +16,7 @@
 # along with Verboice.  If not, see <http://www.gnu.org/licenses/>.
 
 module Api2
-  class TrafficController < Api2Controller
+  class TrafficsController < Api2Controller
     before_filter :verify_authorized, :validate_params, only: [:index]
 
     def index

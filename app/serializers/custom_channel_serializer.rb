@@ -16,7 +16,7 @@
 # along with Verboice.  If not, see <http://www.gnu.org/licenses/>.
 
 class CustomChannelSerializer < ActiveModel::Serializer
-  attributes :id, :name, :traffic
+  attributes :id, :name, :traffics
 
   has_one :account, serializer: CustomAccountSerializer
 
@@ -24,16 +24,16 @@ class CustomChannelSerializer < ActiveModel::Serializer
     @options[:account]
   end
 
-  def include_traffic?
+  def include_traffics?
     @options[:traffics]
   end
 
-  def traffic
-    result = []
+  def traffics
+    traffics = []
     @options[:traffics].each do |traffic|
-      result.push CustomTrafficSerializer.new(traffic) if traffic.channel_id == id
+      traffics.push CustomTrafficSerializer.new(traffic) if traffic.channel_id == id
     end
-    result
+    traffics
   end
 
 end

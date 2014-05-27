@@ -17,7 +17,7 @@
 
 require 'spec_helper'
 
-describe Api2::TrafficController do
+describe Api2::TrafficsController do
 
   let(:admin) { Account.make role: Account::ADMIN }
   let(:account) { Account.make role: Account::USER }
