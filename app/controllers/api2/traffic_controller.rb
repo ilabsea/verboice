@@ -20,10 +20,12 @@ module Api2
     before_filter :verify_authorized, :validate_params, only: [:index]
 
     def index
-      call_logs = CallLog.between(@start_date, @end_date)
-      call_logs = call_logs.select("started_at, account_id, channel_id, prefix_called_number, address, direction, sum(duration) as total_duration").group(:channel_id, :address, :direction).having("sum(duration) > 0")
+      traffics = CallLog.between(@start_date, @end_date).includes([:account, :channel])
+      traffics = traffics.select("channel_id, prefix_called_number, address, direction, sum(duration) as total_duration, count(*) as total_call").group(:channel_id, :prefix_called_number, :address, :direction).having("sum(duration) > 0").order(account_id: :asc)
 
-      render json: call_logs, each_serializer: CustomTrafficSerializer
+      channels = Channels::Sip.order(account_id: :asc)
+
+      render json: channels, each_serializer: CustomChannelSerializer, traffics: traffics, account: true
     end
 
     private
@@ -36,7 +38,7 @@ module Api2
     def validate_params
       return head :unprocessable_entity unless params[:start_date]
       return head :unprocessable_entity unless params[:end_date]
-      
+
       begin
         @start_date = DateTime.parse(params[:start_date])
         @end_date = DateTime.parse(params[:end_date])

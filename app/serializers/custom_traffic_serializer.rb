@@ -16,10 +16,7 @@
 # along with Verboice.  If not, see <http://www.gnu.org/licenses/>.
 
 class CustomTrafficSerializer < ActiveModel::Serializer
-  attributes :address, :total_duration, :direction
-
-  has_one :account, serializer: CustomAccountSerializer
-  has_one :channel, serializer: CustomChannelSerializer
+  attributes :address, :total_duration, :direction, :total_call
 
   def address
     object.address_without_prefix
