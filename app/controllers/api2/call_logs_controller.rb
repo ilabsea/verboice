@@ -19,12 +19,14 @@ module Api2
     before_filter :verify_request, :only => [:show]
     before_filter :filter, :only => [:list_by_channel]
 
-    # GET /contacts/:address/call_logs
     # GET /call_logs
     def index
       if api_current_account.admin?
         if api_current_account.has_access_from?(origin_host)
-          @call_logs = params[:account_id] ? CallLog.by_account_id(params[:account_id]) : CallLog.where("1=1")
+          @call_logs = CallLog.where("1=1")
+          @call_logs = @call_logs.by_account_id(params[:account_id]) if params[:account_id] 
+          @call_logs = @call_logs.by_account_id(params[:channel_id]) if params[:channel_id] 
+          @call_logs = @call_logs.between(params[:start_date], params[:end_date])
         else
           return head :unauthorized
         end
@@ -71,21 +73,12 @@ module Api2
 
       @call_logs = @channel.call_logs
 
-      @search = ""
-      %w(start_date end_date).each do |key|
-        @search << search_by_key(key)
+      if params[:start_date].present? && params[:end_date].present?
+        @call_logs = @call_logs.between(params[:start_date],params[:end_date])
       end
 
-      @call_logs = @call_logs.search @search if @search.present?
-    end
+      @call_logs
 
-    def search_by_key(key)
-      params[key].present? ? " #{search_key_of(key)}:\"#{params[key]}\"" : ""
-    end
-
-    def search_key_of(key)
-      search_keys = { 'start_date' => 'after', 'end_date' => 'before' }
-      search_keys[key]
     end
 
   end
