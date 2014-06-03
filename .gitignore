@@ -22,6 +22,7 @@ nbproject/*
 
 config/oauth.yml
 config/verboice.yml
+config/api.yml
 
 broker/verboice.config
 
