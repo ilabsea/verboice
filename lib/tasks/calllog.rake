@@ -22,7 +22,7 @@ namespace :call_log do
   task :migrate_traces => :environment do
     log("Migrating call logs traces") do
       CallLog.includes(:traces).where(step_interaction: nil).find_each do |call_log|
-        call_log.update_attributes step_interaction: call_log.interaction_details.join(';')
+        call_log.update_attribute :step_interaction, call_log.interaction_details.join(';')
         print "."
       end
     end
@@ -33,17 +33,17 @@ namespace :call_log do
 
   desc "Migrate call log duration"
   task :migrate_duration => :environment do
+    call_logs = CallLog.where(duration: 0)
+    call_logs = call_logs.where("finished_at is not null")
+    call_logs = call_logs.where("started_at is not null")
     log("Migrating call logs duration") do
-      CallLog.where(duration: 0).find_each do |call_log|
-        if call_log.finished_at && call_log.started_at
-          called_at = call_log.not_before.nil? ? call_log.started_at : call_log.not_before
-          call_log.duration = (call_log.finished_at - called_at).to_i
-          call_log.save
-        end
+      call_logs.find_each do |call_log|
+        call_log.update_attribute :duration, call_log.calculate_duration
+        print "."
       end
     end
 
-    failed_ids = CallLog.where(duration: 0).pluck(:id)
+    failed_ids = call_logs.pluck(:id)
     print "\n! - Failed to migrate ids: [#{failed_ids.join ','}]\n"
   end
 end

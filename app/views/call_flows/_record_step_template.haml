@@ -27,19 +27,21 @@
         %td
           %button.farrow{:type => "button", 'data-bind' => 'click: show_confirmation_resource'}
 
-    .content
+    .content{ko('instedd_init' => true)}
       %hr
-      %label= t('views.call_flows._record_step_template.label.time')
-      %br
       .ux-nstep.w06
         %input{:type => 'number', :size => '2', 'data-bind' => 'value: timeout'}
       %span= t('views.call_flows._record_step_template.label.maximum_recording_time_in_second')
       %br
-      %hr
-      %label= t('views.call_flows._record_step_template.label.properties')
+
+      .ux-nstep.w06
+        %input{:type => 'number', :size => '2', 'data-bind' => 'value: silence_detection'}
+      %span= t('views.call_flows._record_step_template.label.silence_detection')
       %br
+
+      %select{'data-bind' => 'value: stop_key, options: available_keys()', 'style' => 'width: 60px;padding:2px;margin:2px;'}
       = t('views.call_flows._record_step_template.label.stop_recording_audio_with_key')
-      %select{'data-bind' => 'value: stop_key, options: available_keys()'}
+
       %hr
       = required_store_value_tags
       / = store_value_tags_without_checkbox

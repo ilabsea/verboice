@@ -26,6 +26,8 @@ class CallLog < ActiveRecord::Base
 
   FAIL_REASONS = {
     'failed'    => 'failed',
+    'error'     => 'failed',
+    'timeout'   => 'no_answer',
     'no_answer' => 'no_answer',
     'busy'      => 'hangup',
     'hangup'    => 'incompleted',
@@ -124,6 +126,10 @@ class CallLog < ActiveRecord::Base
     traces.inject([]) { |details, trace| details << trace.summary(created_at) }.tap do |interaction|
       traces.delete(trace) if trace.present?
     end
+  end
+
+  def calculate_duration
+    (finished_at - (not_before.nil? ? started_at : not_before)).to_i
   end
 
   CallLogEntry::Levels.each do | severity |

@@ -117,7 +117,7 @@ class VrzContainer
       # audio files
       if @export_audios
         #TODO Change this to export only the resources used in the call flow
-        @project.resources.each do |resource|
+        @call_flow.resources.each do |resource|
           resource.localized_resources.each do |localized_resource|
             zos.put_next_entry "localized_resource #{resource.guid} - #{localized_resource.language} - #{localized_resource.guid}.yml"
             zos.print(localized_resource.attributes.tap do |attributes|

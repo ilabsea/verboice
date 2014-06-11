@@ -112,6 +112,8 @@ Verboice::Application.routes.draw do
     end
     collection do
       get :queued
+      put :queued_paused
+      put :queued_resumed
       get :download
     end
   end

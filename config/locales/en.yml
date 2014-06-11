@@ -396,12 +396,25 @@ en:
           explanation: "Explanation:"
           confirmation: "Confirmation:"
           time: "Time"
-          maximum_recording_time_in_second: "Maximum recording time in secs."
+          maximum_recording_time_in_second: "Maximum recording time in secs"
+          silence_detection: "Silence detection in secs"
+          min_confidence_acceptable: 'Minimum acceptable confidence'
           properties: "Properties"
-          stop_recording_audio_with_key: "Stop recording audio with key:"
+          stop_recording_audio_with_key: "Stop recording audio with key "
           store_this_result_as: "Store this result as: "
         action:
           remove_this_step: "Remove this step"
+      _speech_recognition_step_template:
+        label:
+          store: "Store result in variables: "
+          audio: "Audio file"
+          store_result1: "Result 1"
+          store_accuracy1: "Confidence 1"
+          store_result2: "Result 2"
+          store_accuracy2: "Confidence 2"
+          store_result3: "Result 3"
+          store_accuracy3: "Confidence 3"
+
       _register_step_template:
         label:
           messages: "Messages"
@@ -830,7 +843,7 @@ en:
           start_on: "Start on"
           date_format: "(dd/mm/yy)"
           time_format: "(HH:MM)"
-          call_time: "Call time"
+          call_time: "Schedule call time"
           from_must_be_less_than_to: "From must be less than To"
           repeat: "Repeat"
           yes: "Yes"
@@ -1047,6 +1060,7 @@ en:
           url: "URL"
           user: "User"
           password: Password
+          store_call_log_details: "Store call log details"
         action:
           save: Save
           cancel: Cancel
@@ -1156,6 +1170,7 @@ en:
           from: From
           to: "to"
           retries: Retries
+          retries_no_answer: "Retries if the call was not pick up"
           retries_desc: Enter comma separated delays in hours
           sun: "Sun"
           mon: "Mon"

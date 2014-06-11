@@ -398,11 +398,25 @@ kh:
           confirmation: "បញ្ជាក់៖"
           time: "ពេលវេលា"
           maximum_recording_time_in_second: "ពេលវេលា​ថត​អតិបរមា​គិត​ជា​វិនាទី"
+          silence_detection: "Silence detection in secs"          
+          min_confidence_acceptable: 'Mininum acceptable confidence'
           properties: "លក្ខណសម្បត្តិ"
-          stop_recording_audio_with_key: "បញ្ឈប់​ការ​ថត​ដោយ​ប្រើ​ប៊ូតុង៖"
+          stop_recording_audio_with_key: "បញ្ឈប់​ការ​ថត​ដោយ​ប្រើ​ប៊ូតុង"
           store_this_result_as: "រក្សា​លទ្ធ​ផល "
         action:
           remove_this_step: "លុប​ជំហាន​នេះ"
+
+      _speech_recognition_step_template:
+        label:
+          store: "Store result in variables"
+          audio: "Audio file"
+          store_result1: "Result 1"
+          store_accuracy1: "Confidence 1"
+          store_result2: "Result 2"
+          store_accuracy2: "Confidence 2"
+          store_result3: "Result 3"
+          store_accuracy3: "Confidence 3"
+
       _register_step_template:
         label:
           messages: "សារ"
@@ -1047,6 +1061,7 @@ kh:
           url: "URL"
           user: "អ្នក​ប្រើ"
           password: ពាក្យ​សម្ងាត់
+          store_call_log_details: "រក្សា​ព័ត៌មានលម្អិតកំណត់ការហៅ"
         action:
           save: រក្សាទុក
           cancel: បោះបង់
@@ -1156,6 +1171,7 @@ kh:
           from: ពី
           to: "ទៅ"
           retries: ព្យាយាម​ម្ដង​ទៀត
+          retries_no_answer: ព្យាយាម​ម្ដង​ទៀត បើសិនការហៅមិនមានការឆ្លើយតប
           retries_desc: បញ្ចូល​ការ​ពន្យារ​បំបែក​ដោយ​សញ្ញា​ក្បៀស​គិត​ជា​ម៉ោង
           sun: "អាទិត្យ"
           mon: "ចន្ទ"

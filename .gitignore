@@ -22,6 +22,7 @@ nbproject/*
 
 config/oauth.yml
 config/verboice.yml
+config/api.yml
 
 broker/verboice.config
 
@@ -36,7 +37,4 @@ vendor/ruby
 
 broker/verboice.config
 config/asterisk.yml
-
-
-
-
+script/sphinx3

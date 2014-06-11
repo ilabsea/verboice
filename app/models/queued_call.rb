@@ -26,6 +26,27 @@ class QueuedCall < ActiveRecord::Base
   serialize :variables, Hash
   serialize :callback_params, Hash
 
+  STATE_QUEUED = "queued"
+  STATE_PAUSED = "paused"
+
+  class << self
+    def pause ids = []
+      ids.each do |id|
+        queued_call = QueuedCall.find(id)
+        queued_call.pause!
+      end
+    end
+
+    def resume ids = []
+      ids.each do |id|
+        queued_call = QueuedCall.find(id)
+        if queued_call.paused?
+          queued_call.resume!
+        end
+      end
+    end
+  end
+
   def start
     call_log.start_outgoing address
     new_session
@@ -82,4 +103,51 @@ class QueuedCall < ActiveRecord::Base
       time_zoned_schedule.next_available_time(Time.now.utc + sleep)
     end
   end
+
+  def pause!
+    self.state = STATE_PAUSED
+    self.save
+  end
+
+  def resume!
+    if self.past?
+      # clone call_log
+      old_call_log = self.call_log
+      new_call_log = CallLog.new(old_call_log.attributes)
+      new_call_log.save!
+
+      # clone queued_call
+      new_queued_call = QueuedCall.new(self.attributes.merge({call_log_id: new_call_log.id, state: STATE_QUEUED}))
+      new_queued_call.save
+      if should_trigger?
+        new_queued_call.channel.notify_call_queued new_queued_call if new_queued_call.channel
+      end
+
+      # destroy itself paused one
+      self.destroy
+      old_call_log.destroy
+    else
+      self.state = STATE_QUEUED
+      self.save
+    end
+  end
+
+  def paused?
+    self.state == STATE_PAUSED
+  end
+
+  def queued?
+    self.state == STATE_QUEUED
+  end
+
+  def past?
+    return true if !not_before? || (not_before? && self.not_before.less_or_equal?(DateTime.now))
+  end
+
+  def should_trigger?
+    trigger = false
+    trigger = true if past? && queued?
+    trigger
+  end
+
 end

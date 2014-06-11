@@ -60,9 +60,11 @@ handle_cast(create, State = #state{call_log = CallLog}) ->
   NewCallLog = CallLog:create(),
   {noreply, State#state{call_log = NewCallLog}};
 
-handle_cast({log, Level, Message, Details}, State = #state{call_log = CallLog}) ->
-  % CallLog:Level(Message, Details),
+handle_cast({log, Level, Message, Details}, State = #state{call_log = CallLog}) when CallLog#call_log.store_log_entries == 1 ->
   call_log_entry_srv:log(CallLog#call_log.id, Level, Message, Details),
+  {noreply, State};
+
+handle_cast({log, _, _, _}, State) ->
   {noreply, State};
 
 handle_cast({update, Fields}, State = #state{call_log = CallLog}) ->

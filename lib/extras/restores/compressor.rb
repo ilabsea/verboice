@@ -22,12 +22,12 @@ module Restores
     end
 
     def extract_to! path
-      Log.info(:s3_log_dir, "extracting compress file to #{path}")
+      Log.info(:s3_log_dir, "restore: extracting compress file to #{path}")
       system "tar -xf #{@file_name} -C #{path}"
     end
 
     def remove_extract_from! path
-      Log.info(:s3_log_dir, "removing extract files")
+      Log.info(:s3_log_dir, "restore: removing extract files #{path}")
       extraction_path = File.join(path, Backup::TEMP_DIR) # extraction path
       FileUtils.rm_rf extraction_path if File.exists? extraction_path
     end

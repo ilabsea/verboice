@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20140114024814) do
+ActiveRecord::Schema.define(:version => 20140213085033) do
 
   create_table "accounts", :force => true do |t|
     t.string   "email",                               :default => "", :null => false
@@ -121,6 +121,7 @@ ActiveRecord::Schema.define(:version => 20140114024814) do
     t.integer  "retries",              :default => 0
     t.text     "step_interaction"
     t.string   "prefix_called_number"
+    t.boolean  "store_log_entries"
   end
 
   add_index "call_logs", ["call_flow_id"], :name => "index_call_logs_on_call_flow_id"
@@ -370,14 +371,15 @@ ActiveRecord::Schema.define(:version => 20140114024814) do
 
   create_table "projects", :force => true do |t|
     t.string   "name"
-    t.datetime "created_at",                             :null => false
-    t.datetime "updated_at",                             :null => false
+    t.datetime "created_at",                                :null => false
+    t.datetime "updated_at",                                :null => false
     t.integer  "account_id"
     t.string   "status_callback_url"
     t.text     "encrypted_config"
-    t.string   "time_zone",           :default => "UTC"
+    t.string   "time_zone",              :default => "UTC"
     t.text     "languages"
     t.string   "default_language"
+    t.boolean  "store_call_log_entries", :default => true
   end
 
   create_table "queued_calls", :force => true do |t|

@@ -53,6 +53,7 @@ class Restore
   def restore! year, month
     download! year, month
     process!
+    remove_download_files!
   end
 
   def download! year, month
@@ -60,7 +61,7 @@ class Restore
     objects = Amazon::S3.restore year, month, self.type
 
     objects.each do |object|
-      file_name = File.join(@current_dir, object.key)
+      file_name = File.join(current_dir, object.key)
       File.open(file_name, 'wb') do |file|
         object.read do |chunk|
          file.write(chunk)
@@ -101,6 +102,13 @@ class Restore
           end
         end
       end
+    end
+  end
+
+  def remove_download_files!
+    @file_names.each do |file_name|
+      Log.info(:s3_log_dir, "restore: removing #{file_name}")
+      FileUtils.rm_rf file_name
     end
   end
 

@@ -29,9 +29,10 @@ set :rvm_ruby_string, '1.9.3'
 set :rvm_type, :system
 
 set :application, "verboice"
+set :use_sudo , false
 
-set :repository, "https://bitbucket.org/ilab/verboice"
-set :scm, :mercurial
+set :repository, "https://bitbucket.org/ilab/verboice-git"
+set :scm, :git
 set :deploy_via, :remote_cache
 
 default_environment['TERM'] = ENV['TERM']
@@ -56,7 +57,7 @@ namespace :deploy do
   end
 
   task :symlink_configs, :roles => :app do
-    %W(asterisk credentials freeswitch verboice voxeo newrelic oauth nuntium aws log_file app_config).each do |file|
+    %W(asterisk credentials freeswitch verboice voxeo newrelic oauth nuntium aws log_file app_config step_config).each do |file|
       run "ln -nfs #{shared_path}/#{file}.yml #{release_path}/config/"
     end
   end

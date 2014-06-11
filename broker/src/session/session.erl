@@ -92,7 +92,8 @@ ready({answer, Pbx, ChannelId, CallerId}, State = #state{session_id = SessionId}
         channel_id = ChannelId,
         address = CallerId,
         started_at = calendar:universal_time(),
-        call_flow_id = CallFlow#call_flow.id
+        call_flow_id = CallFlow#call_flow.id,
+        store_log_entries = Project#project.store_call_log_entries
       }),
       Contact = get_contact(CallFlow#call_flow.project_id, CallerId, 1),
       Flow = call_flow:flow(CallFlow),
@@ -177,6 +178,14 @@ dialing(timeout, State = #state{session = Session}) ->
   notify_status(busy, Session),
   finalize({failed, timeout}, State).
 
+total_call_duraction(Call,Session) ->
+   Call:duration() + answer_duration(Session).
+
+duration_from_now(StartedAt) ->
+  {_, StartedAtTime} = StartedAt,
+  Now = calendar:universal_time(),
+  calendar:datetime_to_gregorian_seconds(Now) - calendar:datetime_to_gregorian_seconds(StartedAtTime).  
+
 in_progress({completed, ok}, State = #state{session = Session}) ->
   notify_status(completed, Session),
   finalize(completed, State);
@@ -184,9 +193,14 @@ in_progress({completed, ok}, State = #state{session = Session}) ->
 in_progress({completed, Failure}, State = #state{session = Session}) ->
   notify_status(failed, Session),
   finalize({failed, Failure}, State).
+in_progress({suspend, NewSession, Ptr}, _From, State = #state{session = Session = #session{session_id = SessionId, call_log = CallLog}}) ->
 
-in_progress({suspend, NewSession, Ptr}, _From, State = #state{session = Session = #session{session_id = SessionId}}) ->
   error_logger:info_msg("Session (~p) suspended", [SessionId]),
+
+  Call = call_log:find(CallLog:id()), 
+  Duration = duration_from_now(Call#call_log.started_at),
+  CallLog:update([{duration, Duration}]),
+
   channel_queue:unmonitor_session(Session#session.channel#channel.id, self()),
   {reply, ok, ready, State#state{pbx_pid = undefined, flow_pid = undefined, resume_ptr = Ptr, session = NewSession}}.
 
@@ -257,11 +271,11 @@ finalize(completed, State = #state{session = Session =  #session{call_log = Call
     undefined -> 0;
     QueuedCall -> QueuedCall#queued_call.retries
   end,
-
-  Call = call_log:find(CallLog:id()),
-  % accumulative duration
-  Duration = Call:duration() + answer_duration(Session),
   CallLog:end_step_interaction(),
+  
+  Call = call_log:find(CallLog:id()),
+  Duration = total_call_duraction(Call,Session),
+
   CallLog:update([{state, "completed"}, {finished_at, calendar:universal_time()}, {duration, Duration}, {retries, Retries}]),
   {stop, normal, State};
 
@@ -293,21 +307,21 @@ finalize({failed, Reason}, State = #state{session = Session = #session{call_log 
             false -> {NewRetries, "failed"}
           end
       end,
-
-      Call = call_log:find(CallLog:id()),
-      
-      % accumulative duration
-      Duration = Call:duration() + answer_duration(Session),
-      
+    
       % end step interaction
       if
         Reason =:= hangup; Reason =:= error -> CallLog:end_step_interaction();
         true -> ok
       end,
 
+      Call = call_log:find(CallLog:id()),
+      Duration = total_call_duraction(Call,Session),
+
       if
-        NewState == failed; NewState == "failed" -> CallLog:update([{state, NewState}, {fail_reason, io_lib:format("~p", [Reason])}, {finished_at, calendar:universal_time()}, {retries, Retries}, {duration, Duration}]);
-        true -> CallLog:update([{state, NewState}, {fail_reason, io_lib:format("~p", [Reason])}, {retries, Retries}, {duration, Duration}])
+        NewState == failed; NewState == "failed" -> 
+          CallLog:update([{state, NewState}, {fail_reason, io_lib:format("~p", [Reason])}, {finished_at, calendar:universal_time()}, {retries, Retries}, {duration, Duration}]);
+        true -> 
+          CallLog:update([{state, NewState}, {fail_reason, io_lib:format("~p", [Reason])}, {retries, Retries}, {duration, Duration}])
       end,
       normal
   end,

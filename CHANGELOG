@@ -1,3 +1,51 @@
+1.6.1 (2014-05-22 kakada <kakada@instedd.org)
+  + Features:
+    * #48: add setting to enable/disable speech_recognition step
+
+1.5.9 (2014-05-07 kakada <kakada@instedd.org)
+  + Bugs:
+    * #125: fix register/deregister with voip called prefix channel
+
+1.5.8 (2014-04-28 kakada <kakada@instedd.org)
+  + Bugs:
+    * #44: store registration date of register before playing confirmation resource
+
+1.5.7 (2014-04-26 kakada <kakada@instedd.org)
+  + Bugs:
+    * #43: register step remove zero prefix of previous addresses
+
+1.5.6 (2014-03-017 kakada <kakada@instedd.org>)
+  + Bugs:
+    * fixed record step when old is same as the new store
+
+1.5.5 (2014-03-03 kakada <kakada@instedd.org>)
+  + Bugs:
+    * fixed store result initialize in record step
+
+1.5.4 (2014-03-03 kakada <kakada@instedd.org>)
+  + Bugs:
+    * enable call log id to show in view
+    * fixed notify_status for enqueued new call
+    * fixed input step validation
+    * fixed import reminder group by rejecting invalid contact number
+
+1.5.3 (2014-02-24 kakada <kakada@instedd.org>)
+  + Bugs:
+    * reminder schedule do not allow duplicate channel
+
+1.5.2 (2014-02-20 kakada <kakada@instedd.org>)
+  + Bugs:
+    * fix forward call step
+    * fix call log display for status 'timeout'
+    * fix reminder schedule's enqueue calls on the wrong day selected
+    * fix render csv download dialog
+
+1.5.1 (2014-02-19 kakada <kakada@instedd.org>)
+  + Bugs:
+    * fix call log duration/interaction migration to skip validation
+
+1.5.0 (2014-02-11 channa <channa@instedd.org>)
+  see 1.5.0-rc
 
 # Bug in 1.4.0-rc2
   + [#76] Error while viewing project call log 

@@ -39,7 +39,7 @@ handle_call(_Request, _From, State) ->
 
 %% @private
 handle_cast(load, State = #state{last_id = LastId}) ->
-  LoadedCalls = queued_call:find_all([{call_log_id, '>', LastId}], [{order_by, not_before}]),
+  LoadedCalls = queued_call:find_all([{call_log_id, '>', LastId}, {state, <<"queued">>}], [{order_by, not_before}]),
   NewState = lists:foldl(fun process_call/2, State, LoadedCalls),
 
   {noreply, NewState};
@@ -67,7 +67,7 @@ code_change(_OldVsn, State, _Extra) ->
   {ok, State}.
 
 process_call(Call, State = #state{last_id = LastId, waiting_calls = WaitingCalls}) ->
-  NewWaitingCalls = case should_trigger(Call) of
+  NewWaitingCalls = case Call:should_trigger() of
     true ->
       channel_queue:enqueue(Call),
       WaitingCalls;
@@ -82,15 +82,10 @@ enqueue(Call, WaitingCalls) ->
 
 dispatch([]) -> [];
 dispatch(Queue = [{_, Call} | Rest]) ->
-  case should_trigger(Call) of
+  case Call:should_trigger() of
     true ->
       channel_queue:enqueue(Call),
       dispatch(Rest);
     false ->
       Queue
   end.
-
-should_trigger(#queued_call{not_before = undefined}) -> true;
-should_trigger(#queued_call{not_before = {datetime, NotBefore}}) ->
-  NotBefore =< calendar:universal_time();
-should_trigger(_) -> false.

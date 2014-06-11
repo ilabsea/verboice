@@ -28,7 +28,8 @@ module Ext
           case extension
           when '.csv'
             CSV.parse params[:file_name].read do |row|
-              @reminder.register_address row[0] if row[0].present?
+              next if !row[0].strip.is_contact?
+              @reminder.register_address row[0].to_number
             end
           else
             raise I18n.t("controllers.ext.reminder_groups_controller.invalid_extension")

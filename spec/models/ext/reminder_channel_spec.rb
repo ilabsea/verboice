@@ -1,5 +1,7 @@
 require 'spec_helper'
 
 describe Ext::ReminderChannel do
-  pending "add some examples to (or delete) #{__FILE__}"
+
+  it { should validate_uniqueness_of(:channel_id).scoped_to(:reminder_schedule_id) }
+
 end

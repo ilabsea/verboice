@@ -43,7 +43,6 @@
       %br/
       %select.w30{ko(css: {error: :reminder_group_error}, options: '$root.reminder_groups', optionsText: "'name'", value: :reminder_group, optionsCaption: "'#{t('views.ext.reminder_schedules.label.select_reminder_group')}'")}
 
-
     .w30
       %label{ko(css: {error: :channel_error}), :for => :channel}= t('views.ext.reminder_schedules.label.channel')
     %ul.w30.list_item{ko(css: { :'list_item_border' => 'has_channel()==true' } ,  foreach: 'reminder_channels()' ) } 
@@ -68,15 +67,46 @@
       %br/
       %select.w30{ko(css: {error: :call_flow_error}, options: '$root.call_flows', optionsText: "'name'", value: :call_flow, optionsCaption: "'#{t('views.ext.reminder_schedules.label.select_call_flow')}'")}
 
-    %p
-      %label{ko(css: {error: :start_date_error}), :for => :start_date}= t('views.ext.reminder_schedules.label.start_on')
+    %hr{style:"width:60%"}
+    %br/
+
+    %div
+      %label{:for => :start_date}= t('views.ext.reminder_schedules.label.start_on')
       = t('views.ext.reminder_schedules.label.date_format')
-      %br/
-      %input.ux-datepicker.w20{ko(datePicker: :start_date, css: {error: :start_date_error}), html: {readonly: "readonly"}}
+
+    %br/
+
+    .condition
+      %input{ko(checked: :repeat), :type=>"radio", :name=>"type", :value=>"0"}
+      %input.ux-datepicker.w20{ko(datePicker: :start_date, css: {error: :start_date_error}, attr: {disabled: 'is_repeat()==true'}, valueUpdate: 'afterkeydown'), placeholder: "#{t('views.ext.reminder_schedules.label.date_format')}", type: 'text', html: {readonly: "readonly"}}
+
+    <!-- ko with: condition -->
+    .condition
+      .left-side
+        %input{ko(checked: '$parent.repeat'), :type=>"radio", :name=>"type", :value=>"1", style:"float:left;"}
+        = ko_number_field_tag :value, css: {error: '$parent.condition_value_error()'}, html: {class: "w10", style: "float:left;margin-left:4px;"}, attr: {disabled: '$parent.is_repeat()==false'}
+        %select.w10.select{ko(options: '$root.data_types', optionsText: "'name'", value: :data_type, css: {error: '$parent.condition_data_type_error()'}, attr: {disabled: '$parent.is_repeat()==false'}), style: "float:left;margin-left:6px;"}
+        .left-side{style:"margin-left:6px;"}=t('view.ext.reminder_schedules.label.after')
+
+      .clear
+    
+      %div
+        %select.w20{ko(options: '$root.variables', optionsText: "'name'", value: :variable, css: {error: '$parent.condition_variable_error()'}, attr: {disabled: '$parent.is_repeat()==false'}), style: "margin-left:25px;"}
+    <!-- /ko -->
+
+    .clear
+
+    %br/
+    %hr{style: "width:60%"}
+    %br/
 
     %div
       %label= t('views.ext.reminder_schedules.label.call_time')
       = t('views.ext.reminder_schedules.label.time_format')
+
+    %br/
+
+    %div
       <!-- ko if: call_time_error() -->
       %br/
       %label{ko(css: {error: :call_time_error})}= t('views.ext.reminder_schedules.label.from_must_be_less_than_to')
@@ -88,94 +118,17 @@
           %label{ko(css: {error: :to_time_error}), :for => :to_time}= t('views.ext.reminder_schedules.label.to')
           = ko_text_field_tag :to_time, css: {error: :to_time_error}, html: {class: 'ux-nstep w06', maxlength: '5'}
 
-    %p
-      %p.switch
-        %label.repeat-field{:for => :repeat}= t('views.ext.reminder_schedules.label.repeat')
-        %label{ko(click: 'repeat_enable', attr: { class: :repeat_enable_css })}
-          %span
-        %label{ko(click: 'repeat_disable', attr: { class: :repeat_disable_css })}
-          %span
-    .clear
-
-    <!-- ko if: is_repeat() -->
-    .condition
-      <!-- ko if: days_error() -->
-      %label.error= t('views.ext.reminder_schedules.label.please_select_at_least_one_day_to_apply')
-      <!-- /ko -->
-      %ul.days
-        <!-- ko foreach: weekdays -->
-        %li{ko(click: '$parent.day_selected', css: {no: '!selected()'})}
-          %span{ko(text: :name)}
-        <!-- /ko -->
-      %br/
-      %label{ko(css: {error: :recur_error}), for: :recur}= t('views.ext.reminder_schedules.label.every')
-      = ko_number_field_tag :recur, css: {error: :recur_error}, html: {class: 'ux-nstep w06', maxlength: '2'}
-      = t('views.ext.reminder_schedules.label.weeks')
-    <!-- /ko -->
-
     %br/
 
-    %label.w10= t('views.ext.reminder_schedules.label.conditions')
-    <!-- ko foreach: conditions -->
-    .w30.condition
-      %table
-        %tbody
-          %tr.condition
-            %td.w30.clickable{ko(click: '$parent.show_condition')}
-              <!-- ko if: is_date_time() -->
-              %span= t("views.ext.reminder_schedules.label.today")
-              %span -
-              <!-- /ko -->
-              %span{ko(text: 'variable_name()')}
-              %span{ko(text: 'operator_code()')}
-              %span{ko(text: 'value_text()')}
-              %span{ko(text: 'data_type_name()')}
-            %td
-              %button.clist-remove{ko(click: '$parent.remove_condition')}
-    <!-- ko if: $data == $parent.current_condition() -->
     .condition
-      .box.grey.noshadow.w30
-        %p
-          .w10{ko(css: {error: 'variable_error()'}), style: 'float:left;'}= t('views.ext.reminder_schedules.label.variable')
-          %select.w20{ko(options: '$root.variables', optionsText: "'name'", value: :variable, css: {error: 'variable_error()'})}
-          %br/
-          %br/
-          %select.w30{ko(options: '$root.operators', optionsText: "'name'", value: :operator, css: {error: 'operator_error()'})}
-          %br/
-          %br/
-          = ko_number_field_tag :value, css: {error: 'value_error()'}, html: {class: 'ux-nstep w10'}
-          %select.w10{ko(options: '$root.data_types', optionsText: "'name'", value: :data_type, css: {error: 'data_type_error()'})}
-          %button.faccept{ko(visible: '!$parent.current_condition().error()', click: '$parent.close_condition_edition')}= t('views.ext.reminder_schedules.action.done')
-    <!-- /ko -->
-    <!-- /ko -->
-
-    .w30.condition{ko(visible: '!current_condition()')}
-      %table
-        %tbody
-          %tr.condition
-            %td.w30
-              %label= t('views.call_flows._branch_option_template.action.add_condition')
-            %td
-              %button.clist-add{ko(click: 'add_condition')}
-
-    %p
-      %p.switch
-        %label.repeat-field{:for => :retries}= t('views.schedules._form.label.retries')
-        %label{ko(click: 'retries_enable', attr: { class: :retries_enable_css })}
-          %span
-        %label{ko(click: 'retries_disable', attr: { class: :retries_disable_css })}
-          %span
-    .clear
-
-    <!-- ko if: is_retries() -->
-    .condition
-      %label{ko(css: {error: :retries_error})}= t('views.schedules._form.label.retries_desc')
-      %br/
-      = ko_text_field_tag :retries_in_hours, css: {error: :retries_error}, html: {class: 'ux-nstep w30'}
-    <!-- /ko -->
+      %div{ko(css: {warning: :retries_error})}
+        = t('views.schedules._form.label.retries_no_answer')
+        %br/
+        = t('views.schedules._form.label.retries_desc')
+        %br/
+        = ko_text_field_tag :retries_in_hours, css: {error: :retries_error}, html: {class: 'ux-nstep w30'}
 
     %br/
-
     %hr
 
     %p

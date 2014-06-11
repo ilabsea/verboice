@@ -51,4 +51,28 @@ describe QueuedCall do
     qcall.cancel_call!
     call_log.reload.state.should eq(:cancelled)
   end
+
+  it "should pause call log" do
+    queued_call = QueuedCall.make state: QueuedCall::STATE_QUEUED
+    queued_call.pause!
+    queued_call.reload.state = QueuedCall::STATE_PAUSED
+  end
+
+  it "should reschedule call log when it's resumed" do
+    queued_call = QueuedCall.make state: QueuedCall::STATE_PAUSED
+
+    queued_call.resume!
+    QueuedCall.count.should eq 1
+    QueuedCall.last.state.should eq QueuedCall::STATE_QUEUED
+  end
+
+  it "should not trigger queued call when it's in the future" do
+    queued_call = QueuedCall.make not_before: DateTime.now + 1.minute
+    queued_call.should_trigger?.should eq false
+  end
+
+  it "should trigger queued call when it's in the past" do
+    queued_call = QueuedCall.make not_before: DateTime.now - 1.minute
+    queued_call.should_trigger?.should eq true
+  end
 end

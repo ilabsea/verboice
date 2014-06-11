@@ -33,17 +33,8 @@ class Contact < ActiveRecord::Base
   validate :at_least_one_address
 
   #TODO refactoring to remove coupling
-  def evaluate? conditions
-    match = false
-    conditions.each do |condition|
-      if !condition.evaluate? project, persisted_variables
-        match = false
-        break
-      else
-        match = true
-      end
-    end if conditions
-    match
+  def evaluate? condition
+    (condition && condition.evaluate?(project, persisted_variables)) ? true : false
   end
 
   def self.get address, project

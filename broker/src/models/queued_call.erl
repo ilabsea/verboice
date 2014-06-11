@@ -1,14 +1,15 @@
 -module(queued_call).
--export([reschedule/1, start_session/1]).
+-export([reschedule/1, start_session/1, should_trigger/1]).
 -define(TABLE_NAME, "queued_calls").
 -include("session.hrl").
--include_lib("erl_dbmodel/include/model.hrl").
 
 -define(MAP, [
   {flow, flow_serializer},
   {callback_params, yaml_serializer},
   {variables, yaml_serializer}
 ]).
+
+-include_lib("erl_dbmodel/include/model.hrl").
 
 reschedule(#queued_call{schedule_id = undefined}) -> no_schedule;
 reschedule(QueuedCall = #queued_call{schedule_id = ScheduleId}) ->
@@ -53,3 +54,8 @@ start_session(Session, QueuedCall) ->
     queued_call = QueuedCall,
     project = Project
   }.
+
+should_trigger(#queued_call{not_before = undefined, state = <<"queued">>}) -> true;
+should_trigger(#queued_call{not_before = {datetime, NotBefore}, state = <<"queued">>}) ->
+  NotBefore =< calendar:universal_time();
+should_trigger(_) -> false.

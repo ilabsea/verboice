@@ -43,6 +43,16 @@ class CallLogsController < ApplicationController
     @calls = @calls.paginate :page => @page, :per_page => @per_page
   end
 
+  def queued_paused
+    QueuedCall.pause(params[:queued_call_ids]) if params[:queued_call_ids]
+    redirect_to queued_call_logs_path
+  end
+
+  def queued_resumed
+    QueuedCall.resume(params[:queued_call_ids]) if params[:queued_call_ids]
+    redirect_to queued_call_logs_path
+  end
+
   def play_result
     @log = current_account.call_logs.find params[:id]
     send_file RecordingManager.for(@log).result_path_for(params[:key]), :type => "audio/x-wav"
