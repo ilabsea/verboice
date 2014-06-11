@@ -5,7 +5,11 @@ $(function(){
 
 function bindPerPageChange(){
   $(".page_counter").on('change', function(){
-    console.log('change');
+     $this = $(this);
+     value = $this.val();
+
+     url = replaceParam('per_page', value);
+     window.location.href = url;
   })
 }
 
@@ -15,10 +19,7 @@ function replaceParam(key, value){
   params[key] = value;
 
   return pathname + "?" + jQuery.param(params)
-
 }
-
-
 
 function toParams(searchUrl) {
   var result = {}

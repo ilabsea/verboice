@@ -340,3 +340,22 @@ div.label-block {
   width: 120px !important;
 }
 
+.paginator_container{
+  text-align: center;
+}
+
+.paginator_container .pagination{
+  float: right !important;
+  margin: 10px !important;
+}
+.paginator_container .counter {
+  margin-top: 8px;
+  float: right;
+}
+
+.paginator_container .entry {
+  float:left;
+  margin: 10px;
+}
+
+

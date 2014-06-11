@@ -11,7 +11,6 @@
     - else
       = link_to t('views.call_logs.index.action.download_csv'), download_project_call_logs_path(search: @search), :class => %w(button fimport download-call_logs)
 %br/
-%div= page_entries_info @logs, :entry_name => t('views.projects.call_logs.index.label.call_log')
 = paginate_for @logs
 - if @logs.present?
   %br/
@@ -86,7 +85,6 @@
             %td
         %td= link_to(t('views.projects.call_logs.index.action.view_details'), call_log_path(log)) if log.store_log_entries
   %br/
-  %div= page_entries_info @logs, :entry_name => t('views.projects.call_logs.index.label.call_log')
-  = will_paginate @logs
+  = paginate_for @logs
 %br/
 
