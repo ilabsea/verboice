@@ -558,16 +558,19 @@ describe Ext::ReminderSchedule  do
 
 	describe "#callers_matches_conditions" do
 		before(:each) do
-			@attr = {
-	  		:schedule_type => Ext::ReminderSchedule::TYPE_DAILY,
-	  		:project_id => @project.id,
-	  		:call_flow_id => @call_flow.id,
+      @today = Date.new(2012, 10, 25)
+      Date.stub!(:today).and_return(@today)
 
-	  		:reminder_group_id => @reminder_group.id,
-	  		:schedule => nil,
-	  		:client_start_date => "25/10/2012",
-	  		:time_from => "08:00",
-	  		:time_to => "17:00"
+			@attr = {
+        :schedule_type => Ext::ReminderSchedule::TYPE_ONE_TIME,
+        :project_id => @project.id,
+        :call_flow_id => @call_flow.id,
+
+        :reminder_group_id => @reminder_group.id,
+        :schedule => nil,
+        :client_start_date => "25/10/2012",
+        :time_from => "08:00",
+        :time_to => "17:00"
 	  	}
 
 			@contact_one = @project.contacts.build
@@ -582,28 +585,75 @@ describe Ext::ReminderSchedule  do
 			@project_var2 = ProjectVariable.make :name => "var2"
 			PersistedVariable.make contact_id: @contact_one.id, project_variable_id: @project_var1.id, value: "5"
 			PersistedVariable.make contact_id: @contact_one.id, project_variable_id: @project_var2.id, value: "10"
-			PersistedVariable.make contact_id: @contact_two.id, project_variable_id: @project_var1.id, value: "15"
+      PersistedVariable.make contact_id: @contact_two.id, project_variable_id: @project_var1.id, value: "24/10/2012"
 			PersistedVariable.make contact_id: @contact_two.id, project_variable_id: @project_var2.id, value: "20"
 
 			@addresses = ["1000", "1001"]
 		end
 
-		it "should return an empty array when any contacts are not matches conditions" do
-			conditions = [Ext::Condition.new("var1", "=", "99", "number")]
-			reminder_schedule = Ext::ReminderSchedule.make @attr.merge(:conditions => conditions)
+    it "should return an empty array when any contacts are not matches conditions" do
+      conditions = [Ext::Condition.new("var1", "=", "99", "number")]
+      reminder_schedule = Ext::ReminderSchedule.make @attr.merge(:schedule_type => Ext::ReminderSchedule::TYPE_DAILY, :conditions => conditions)
 
-			phone_numbers = reminder_schedule.callers_matches_conditions @addresses
-			phone_numbers.empty?.should be true
-		end
+      phone_numbers = reminder_schedule.callers_matches_conditions @addresses
+      phone_numbers.empty?.should be true
+    end
 
-		it "should return array of first contact phone number when only the first contact is matches conditions" do
-			conditions = [Ext::Condition.new("var1", "=", "5", "number")]
-			reminder_schedule = Ext::ReminderSchedule.make @attr.merge(:conditions => conditions)
+    it "should ignore all contacts when the first condition is number data type" do
+      conditions = [Ext::Condition.new("var1", "=", "5", "number")]
+      reminder_schedule = Ext::ReminderSchedule.make @attr.merge(:schedule_type => Ext::ReminderSchedule::TYPE_DAILY, :conditions => conditions)
 
-			phone_numbers = reminder_schedule.callers_matches_conditions @addresses
-			phone_numbers.size.should be 1
-		end
-    		
+      phone_numbers = reminder_schedule.callers_matches_conditions @addresses
+      phone_numbers.size.should be 0
+    end
+
+    it "should return array of first contact phone number when only the first contact is matches conditions" do
+      conditions = [Ext::Condition.new("var1", "=", "1", "day")]
+      reminder_schedule = Ext::ReminderSchedule.make @attr.merge(:schedule_type => Ext::ReminderSchedule::TYPE_DAILY, :conditions => conditions)
+
+      phone_numbers = reminder_schedule.callers_matches_conditions @addresses
+      phone_numbers.size.should be 1
+    end
+
+    it "should return array of all contacts phone number when conditions are not setting up" do
+      reminder_schedule = Ext::ReminderSchedule.make @attr
+
+      phone_numbers = reminder_schedule.callers_matches_conditions @addresses
+      phone_numbers.size.should be @addresses.size
+    end
 	end
+
+  describe "#reset_repeat_everyday_to_one_time" do
+    before(:each) do
+      @now = DateTime.new(2012,10,25, 9,0,0, "+7") # use the same timezone as reminder schedule
+      DateTime.stub!(:now).and_return(@now)
+
+      @attr = {
+        :schedule_type => Ext::ReminderSchedule::TYPE_DAILY,
+        :project_id => @project.id,
+        :call_flow_id => @call_flow.id,
+        :reminder_group_id => @reminder_group.id,
+        :recursion => 1,
+        :time_from => "08:00",
+        :time_to => "17:00"
+      }
+
+      @reminder_schedule = Ext::ReminderSchedule.new(@attr)
+      @reminder_schedule.save(validate: false)
+    end
+
+    it "should reset repeat every wday to one time schedule" do
+      # before
+      @reminder_schedule.in_schedule_date?(Date.new(2012,10,25)).should be_true
+      @reminder_schedule.in_schedule_date?(Date.new(2012,10,26)).should be_true
+
+      @reminder_schedule.reset_repeat_everyday_to_one_time!
+
+      # after
+      @reminder_schedule.schedule_type.should eq(Ext::ReminderSchedule::TYPE_ONE_TIME)
+      @reminder_schedule.in_schedule_date?(Date.new(2012,10,25)).should be_true
+      @reminder_schedule.in_schedule_date?(Date.new(2012,10,26)).should be_false
+    end
+  end
 
 end

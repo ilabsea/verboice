@@ -1,0 +1,8 @@
+development:
+  speech_recognition: true
+
+test:
+  speech_recognition: false
+
+production:
+  speech_recognition: false

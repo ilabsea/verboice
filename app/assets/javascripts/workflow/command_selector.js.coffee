@@ -23,10 +23,15 @@ onWorkflow ->
       return @
 
     enabled_command_types: () ->
-      if nuntium_configured
+      steps = if nuntium_configured
         step_types
       else
         klass for klass in step_types when klass isnt Nuntium
+
+      if steps_configured
+        steps
+      else
+        klass for klass in steps when klass isnt SpeechRecognition
 
   class window.AddRootRequestor
     command_selected: (cmd_type) =>

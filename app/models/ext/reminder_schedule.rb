@@ -208,7 +208,7 @@ module Ext
 			unless repeat?
 				self.start_date = Ext::Parser::DateParser.parse(self.client_start_date) if client_start_date
 			else
-				self.start_date = DateTime.now.utc.in_time_zone(project.time_zone).to_date
+				self.start_date = DateTime.now.utc.in_time_zone(project.time_zone).to_date if self.start_date.nil?
 			end
 		end
 
@@ -235,7 +235,7 @@ module Ext
 			if has_conditions?
 				addresses.each do |address|
 					contact = project.contacts.joins(:addresses).where(:contact_addresses => {:address => address}).last
-					phone_numbers.push address if contact and contact.evaluate? conditions
+					phone_numbers.push address if contact and contact.evaluate? conditions.first
 				end
 			else
 				phone_numbers = addresses
@@ -283,6 +283,27 @@ module Ext
 		def to_date_time
 			date_time_string = "#{start_date.to_string(Date::DEFAULT_FORMAT)} #{time_to}"
 			Ext::Parser::TimeParser.parse(date_time_string, DateTime::DEFAULT_FORMAT_WITHOUT_TIMEZONE, project.time_zone)
+		end
+
+		def reset_repeat_everyday_to_one_time!
+			if self.repeat? && self.conditions.empty?
+				self.client_start_date = self.start_date.to_string
+				self.schedule_type = TYPE_ONE_TIME
+				self.save
+			end
+		end
+
+		def reset_one_time_with_condition_to_condition!
+			if !self.repeat? && !self.conditions.empty?
+				self.schedule_type = TYPE_DAILY
+				self.save
+			end
+		end
+
+		def reset_repeat_on_specific_day_with_condition_to_condition!
+			if self.repeat? && !self.conditions.empty?
+				self.save
+			end
 		end
 
 	end

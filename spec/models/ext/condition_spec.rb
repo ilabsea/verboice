@@ -42,25 +42,18 @@ describe Ext::Condition do
         end
       end
 
-      describe "exact value" do
-        it "should return true when it's match" do
-          PersistedVariable.make(contact_id: @contact.id, project_variable_id: @project_variable.id, value: "5")
-          persisted_variables = @contact.persisted_variables
+      describe "nil value" do
+        it "should return false when the value is nil" do
+          PersistedVariable.make(contact_id: @contact.id, project_variable_id: @project_variable.id, value: nil)
           condition = Ext::Condition.new "var1", "=", "5", 'number'
 
-          condition.evaluate?(@project, persisted_variables).should be true
+          condition.evaluate?(@project, @contact.persisted_variables).should be false
         end
+      end
 
-        it "should return false when it's not match" do
+      describe "exact value" do
+        it "should not validate data type number and return false even it's match" do
           PersistedVariable.make(contact_id: @contact.id, project_variable_id: @project_variable.id, value: "5")
-          persisted_variables = @contact.persisted_variables
-          condition = Ext::Condition.new "var1", ">", "5", 'number'
-
-          condition.evaluate?(@project, persisted_variables).should be false
-        end
-
-        it "should return false when persisted variable value is date time" do
-          PersistedVariable.make(contact_id: @contact.id, project_variable_id: @project_variable.id, value: "2013-03-20")
           persisted_variables = @contact.persisted_variables
           condition = Ext::Condition.new "var1", "=", "5", 'number'
 

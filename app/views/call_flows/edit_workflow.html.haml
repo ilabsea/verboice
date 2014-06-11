@@ -7,6 +7,7 @@
     var languages = #{ project_languages_json(@project) };
     var project_id = #{ @project.id };
     var nuntium_configured = #{ nuntium_configured?.to_json };
+    var steps_configured = #{steps_configured?.to_json}
 
     var menu_default_time_out_in_seconds = #{Parsers::UserFlowNode::Menu.default_time_out_in_seconds};
     var menu_default_number_of_attempts = #{Parsers::UserFlowNode::Menu.default_number_of_attempts};
