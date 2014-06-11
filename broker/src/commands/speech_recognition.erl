@@ -44,12 +44,12 @@ run(Args, Session = #session{pbx = Pbx, js_context = JS, call_log = CallLog, con
   record:create_call_log_recorded_audio(OldStore, Store, Key, Description, Project#project.id, CallLogId),
 
   CallLog:info("Speech recognition running os command", [{command, "speech_recognition"}, {action, "decoding"}]),
-  % TODO text translation
-  % Json = '{"results":[{"result":"kompong cham","confidence":85.5},{"result":"kompong chnaing","confidence":70.23},{"result":"kompong thom","confidence":40.31}],"error":""}',
-  % SpeechDecode = atom_to_list(Json),
-  SpeechDecode = decode_audio_speech(Filename, CallLogId),
 
+  SpeechDecode = decode_audio_speech(Filename, CallLogId),
   Confidence1Value = store_result_from_speech(MinConfidence, SpeechDecode, VariableList, Session),
+
+  LogInfo = "Speech recognition given confidence: " ++ float_to_list(Confidence1Value, [{decimals,2}]) ++ ", min confidence required: " ++ MinConfidence,
+  CallLog:info(LogInfo, [{command, "speech_recognition"}, {action, "comparing value"}]),
   CallLog:info("Speech recognition finished", [{command, "speech_recognition"}, {action, "finish"}]),
   CallLog:info("Recording saved", [{command, "speech_recognition"}, {action, "finish"}]),
 
@@ -58,8 +58,6 @@ run(Args, Session = #session{pbx = Pbx, js_context = JS, call_log = CallLog, con
 
 decode_audio_speech(Filename, CallLogId) ->
   Command     = resource_os_command(Filename, CallLogId),
-  % io:format(" ~n File name is : ~p ", [Filename]) ,
-  % io:format(" ~n Command is : ~p ", [Command]),
   list_to_binary(os:cmd(Command)).
 
 % resource_os_command_dev(Filename) ->
@@ -68,16 +66,11 @@ decode_audio_speech(Filename, CallLogId) ->
 %   io:format("~n File name is : ~p", [Filename] ),
 %   "php " ++ FileFullPath.
 
-
-
 resource_os_command(Filename, CallLogId) ->
   {ok, Path}   = file:get_cwd() ,
   WorkingPath  = Path  ++ "/" ++ "../" ,
   FileFullPath = Path  ++ "/" ++ Filename,
-  % Command to run Speed recognition engine
-  % /home/chenseng/projects/verboice/script/sphinx3/OPEN/decode &&  ./recognizer-nbest.csh source/m_chab_siheng_ps_22-0-speaker1.wav
   Sphinx3Path = WorkingPath ++ "script/sphinx3/OPEN/decode" ,
-
   "cd " ++  Sphinx3Path ++ " && ./recognizer-nbest.csh " ++ FileFullPath ++ " " ++ integer_to_list(CallLogId).
 
 
@@ -141,7 +134,7 @@ store_result_from_speech(MinConfidence,SpeechDecode, VariableList, Session) ->
 get_first_confidence_value(WorkingResultList) ->
   [FirstElement | _ ] = WorkingResultList,
   { [ _ , { _ , FirstConfidence }]} = FirstElement,
-  FirstConfidence.
+  FirstConfidence + 0.0 .
 
 store_element(Element, VarList, Index, Session) ->
   {ResultVar, ConfidenceVar} = element(Index, VarList), 

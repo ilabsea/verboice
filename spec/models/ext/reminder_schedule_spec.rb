@@ -486,7 +486,7 @@ describe Ext::ReminderSchedule  do
 
 	describe "#enqueued_call" do
 		before(:each) do
-		  params = {
+		  @params = {
         :schedule_type => Ext::ReminderSchedule::TYPE_ONE_TIME,
 	  		:project_id => @project.id,
 	  		:call_flow_id => @call_flow.id,
@@ -498,14 +498,33 @@ describe Ext::ReminderSchedule  do
 	  		:reminder_channels_attributes => [ {channel_id: @channel.id, reminder_schedule_id: 0, id: false }, {channel_id: @channel.id, reminder_schedule_id: 0 } ]
 		  }
 
-		  @reminder = Ext::ReminderSchedule.make params
 		  @addresses = ["1001", "1002", "1003", "1004", "1005", "1006"]
 		end
 
-		it "should enqueued call to verboice queued call" do 	
-	   	  queues = @reminder.enqueued_call @addresses, DateTime.new(2012,11,26)
-	   	  queues.size.should eq 6
+		it "should enqueued call to verboice queued call" do
+      @reminder = Ext::ReminderSchedule.make @params
+
+   	  queues = @reminder.enqueued_call @addresses, DateTime.new(2012,11,26)
+      
+   	  queues.size.should eq 6
 		end
+
+    it "should ignore when there is no call flow available" do
+      @reminder = Ext::ReminderSchedule.make @params
+      @reminder.call_flow = nil
+
+      queues = @reminder.enqueued_call @addresses, DateTime.new(2012,11,26)
+
+      queues.should be nil
+    end
+
+    it "should ignore when there is no channels available" do
+      @reminder = Ext::ReminderSchedule.make @params.except(:reminder_channels_attributes)
+
+      queues = @reminder.enqueued_call @addresses, DateTime.new(2012,11,26)
+
+      queues.should be_empty
+    end
 	end
 
 	describe "#call_options" do

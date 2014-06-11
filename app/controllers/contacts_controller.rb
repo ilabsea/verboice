@@ -88,7 +88,7 @@ class ContactsController < ApplicationController
         format.html { redirect_to project_contacts_url(@project), notice: I18n.t("controllers.contacts_controller.contact_was_successfully_created")}
         format.json { render json: @contact, status: :created, location: @contact }
       else
-        format.html { render action: "new" }
+        format.html { redirect_to new_project_contact_path(@project), alert: @contact.errors.full_messages.first }
         format.json { render json: @contact.errors, status: :unprocessable_entity }
       end
     end
@@ -101,7 +101,7 @@ class ContactsController < ApplicationController
         format.html { redirect_to project_contacts_url(@project), notice: I18n.t("controllers.contacts_controller.contact_was_successfully_updated")}
         format.json { head :no_content }
       else
-        format.html { render action: "edit" }
+        format.html { redirect_to edit_project_contact_path(@project), alert: @contact.errors.full_messages.first }
         format.json { render json: @contact.errors, status: :unprocessable_entity }
       end
     end
