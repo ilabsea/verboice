@@ -27,7 +27,6 @@ config/asterisk.yml
 config/api.yml
 config/application.yml
 config/database.yml
-config/api.yml
 
 broker/verboice.config
 
