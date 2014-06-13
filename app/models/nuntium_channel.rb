@@ -30,16 +30,6 @@ class NuntiumChannel < ActiveRecord::Base
   validates_presence_of :name
   validates_uniqueness_of :name, :scope => :account_id
 
-  def kind
-    @kind ||= channel.try(:kind)
-  end
-
-  def kind=(value)
-    unless @kind.present?
-      @kind = value
-    end
-  end
-
   def channel
     @channel ||= find_or_create_channel
   end
@@ -58,7 +48,7 @@ class NuntiumChannel < ActiveRecord::Base
     if channel_name.present?
       Pigeon::NuntiumChannel.find(channel_name)
     else
-      Pigeon::NuntiumChannel.new kind: @kind 
+      Pigeon::NuntiumChannel.new kind: kind 
     end
   end
 
@@ -71,7 +61,6 @@ class NuntiumChannel < ActiveRecord::Base
   end
 
   def save_nuntium_channel
-    # restrict channel to only send messages for the current account
     channel.restrictions = [{ "name" => "account_id", "value" => account_id.to_s }]
     channel.enabled = enabled
     channel.save!

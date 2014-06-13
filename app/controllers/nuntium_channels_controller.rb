@@ -61,6 +61,7 @@ class NuntiumChannelsController < ApplicationController
   def build_channel
     @nuntium_channel = NuntiumChannel.new kind: params[:kind]
     @nuntium_channel.account = current_account
+    @nuntium_channel.kind = params[:kind]
     @channel = @nuntium_channel.channel
     not_found if @channel.schema.nil?
   end
