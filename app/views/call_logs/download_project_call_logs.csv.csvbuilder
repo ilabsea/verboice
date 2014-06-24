@@ -36,8 +36,8 @@ end
 csv << header
 @logs.each do |log|
   log_id = log.first
-  start_time = datetime_format log[1], @project.time_zone
-  end_time = datetime_format log[2], @project.time_zone
+  start_time = datetime_format_csv log[1], @project.time_zone, @date_format
+  end_time = datetime_format_csv log[2], @project.time_zone, @date_format
   duration = diff_in_second log[2], log[1]
   state = "#{log[fields.count - 2]} #{CallLog::FAIL_REASONS[log[fields.count - 1]]}"
 

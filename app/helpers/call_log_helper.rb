@@ -23,4 +23,9 @@ module CallLogHelper
 
     logs.count > CallLog::CSV_MAX_ROWS || audios.count == 0
   end
+
+  def datetime_format_csv(datetime, time_zone, format)
+    datetime = datetime.try(:in_time_zone, time_zone || 'UTC')
+    datetime.present? ? datetime.strftime(format) : ''
+  end
 end
