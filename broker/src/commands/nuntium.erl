@@ -4,22 +4,23 @@
 -include("db.hrl").
 -include("uri.hrl").
 
+-define(QST_SERVER, "qst_server").
+-define(SMTP, "smtp").
+
 run(Args, Session = #session{call_log = CallLog, project = Project}) ->
   Kind = proplists:get_value(kind, Args),
   RcptType = proplists:get_value(rcpt_type, Args),
   Expr = proplists:get_value(expr, Args),
   SubjectGuid = proplists:get_value(subject_guid, Args),
   ResourceGuid = proplists:get_value(resource_guid, Args),
-  NuntiumChannelId = proplists:get_value(nuntium_channel_id, Args),
-  NuntiumChannel = nuntium_channel:find(NuntiumChannelId),
 
   CallLog:info(["Send text message '", ResourceGuid, "'"], [{command, "nuntium"}, {action, "start"}]),
 
   {Result, Message} = case rcpt_address(Kind, RcptType, Expr, Session) of
     undefined -> {error, "Missing recipient"};
     RecipientAddress ->
-      case sender_address(Kind) of
-        undefined -> {error, "Missing kind"};
+      case sender_address(Kind, Session) of
+        undefined -> {error, "Missing sender address"};
         SenderAddress ->
           case subject_message(SubjectGuid, Session) of
             error -> {error, "Missing subject"};
@@ -28,17 +29,29 @@ run(Args, Session = #session{call_log = CallLog, project = Project}) ->
                 undefined -> {error, "Missing text to send"};
                 error -> {error, "Can't play text message"};
                 Body ->
-                  NuntiumArgs = [
-                    {from, SenderAddress},
-                    {to, RecipientAddress},
-                    {subject, Subject},
-                    {body, Body},
-                    {account_id, Project#project.account_id},
-                    {suggested_channel, NuntiumChannel#nuntium_channel.channel_name}
-                  ],
-                  case nuntium_api:send_ao(NuntiumArgs) of
-                    ok -> {info, "Sent"};
-                    {error, Reason} -> {error, Reason}
+                  case Kind of
+                    ?QST_SERVER ->
+                      NuntiumChannelId = proplists:get_value(nuntium_channel_id, Args),
+                      NuntiumChannel = nuntium_channel:find(NuntiumChannelId),
+                      
+                      NuntiumArgs = [
+                        {from, SenderAddress},
+                        {to, RecipientAddress},
+                        {subject, Subject},
+                        {body, Body},
+                        {account_id, Project#project.account_id},
+                        {suggested_channel, NuntiumChannel#nuntium_channel.channel_name}
+                      ],
+                      case nuntium_api:send_ao(NuntiumArgs) of
+                        ok -> {info, "SMS sent"};
+                        {error, Reason} -> {error, Reason}
+                      end;
+                    ?SMTP -> 
+                      case sendmail:send(util:to_string(RecipientAddress), util:to_string(SenderAddress), util:to_string(Subject), util:to_string(Body)) of
+                        {0, _} -> {info, "Email sent"};
+                        _ -> {error, "Email can't be sent"}
+                      end;
+                    _ -> {error, "Missing channel type"}
                   end
               end
           end
@@ -72,23 +85,24 @@ rcpt_address_from_session(expr, Expr, #session{js_context = JS}) ->
 
 recipient(Kind, Address) ->
   case Kind of
-    "qst_server" ->
+    ?QST_SERVER ->
       case binary:match(Address, <<"://">>) of
         nomatch -> <<"sms://", Address/binary>>;
         _ -> Address
       end;
-    "smtp" ->
-      case binary:match(Address, <<"://">>) of
-        nomatch -> <<"mailto://", Address/binary>>;
-        _ -> Address
-      end;
+    ?SMTP -> Address;
     _ -> undefined
   end.
 
-sender_address(Kind) ->
+sender_address(Kind, #session{call_log = CallLog}) ->
   case Kind of
-    "qst_server" -> <<"sms://verboice">>;
-    "smtp" -> <<"mailto://verboice">>;
+    ?QST_SERVER -> <<"sms://verboice">>;
+    ?SMTP -> 
+      Call = call_log:find(CallLog:id()),
+      case account:find(Call#call_log.account_id) of
+        undefined -> <<"noreply@verboice.org">>;
+        Account -> Account#account.email
+      end;
     _ -> undefined
   end.
 
