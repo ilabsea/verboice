@@ -68,7 +68,7 @@ class CallLogsController < ApplicationController
   end
 
   def generate_zip
-    Delayed::Job.enqueue Jobs::DownloadCallLogsJob.new current_account.id, @project.id, @search, params[:date_format]
+    Delayed::Job.enqueue Jobs::DownloadCallLogsJob.new(current_account.id, @project.id, @search, params[:date_format])
     render layout: false
   end
 
