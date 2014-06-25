@@ -31,16 +31,12 @@ run(Args, Session = #session{call_log = CallLog, project = Project}) ->
                 Body ->
                   case Kind of
                     ?QST_SERVER ->
-                      NuntiumChannelId = proplists:get_value(nuntium_channel_id, Args),
-                      NuntiumChannel = nuntium_channel:find(NuntiumChannelId),
-                      
                       NuntiumArgs = [
                         {from, SenderAddress},
                         {to, RecipientAddress},
                         {subject, Subject},
                         {body, Body},
-                        {account_id, Project#project.account_id},
-                        {suggested_channel, NuntiumChannel#nuntium_channel.channel_name}
+                        {account_id, Project#project.account_id}
                       ],
                       case nuntium_api:send_ao(NuntiumArgs) of
                         ok -> {info, "SMS sent"};
