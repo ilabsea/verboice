@@ -39,7 +39,6 @@
       %div
         %label{ko(css: {orange: "!value()"})} To:
         %input.ux-text.w22{:type => 'text', 'data-bind' => 'value: value, valueUpdate: "afterkeydown", css: { error: !value() }'}
-        / %input{ko(value: 'email_to', valueUpdate: 'afterkeydown', css: {error: "is_email_to_invalid()"}), type: "text"}
       / /ko
       / /ko
 
@@ -61,18 +60,6 @@
           %td
             %button.farrow{ :type => "button", 'data-bind' => 'click: show_resource' }
 
-    .content
-      %hr
-      %div
-        / ko if: is_sms_channel()
-        %label{ko(css: {orange: "is_sms_channel_invalid()"})} Channel:
-        %select.w22{ko(value: 'sms_channel_id', options: 'available_sms_channels()', optionsText: "'name'", optionsValue: "'id'", css: {error: "is_sms_channel_invalid()"})}
-        / /ko
-
-        / ko if: is_smtp_channel()
-        %label{ko(css: {orange: "is_smtp_channel_invalid()"})} Channel:
-        %select.w22{ko(value: 'smtp_channel_id', options: 'available_smtp_channels()', optionsText: "'name'", optionsValue: "'id'", css: {error: "is_smtp_channel_invalid()"})}
-        / /ko
 
       .bottom-actions
         %button.fdelete{ 'data-bind' => 'click: remove_with_confirm' } Remove this step

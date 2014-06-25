@@ -17,8 +17,7 @@
 
 class Commands::NuntiumCommand < Command
 
-  def initialize(nuntium_channel_id, kind, options = {})
-    @nuntium_channel_id = nuntium_channel_id
+  def initialize(kind, options = {})
     @kind = kind
     @rcpt_type = options[:rcpt_type] || nil
     @expr = options[:expr] || nil
@@ -28,7 +27,6 @@ class Commands::NuntiumCommand < Command
 
   def serialize_parameters
     {
-      nuntium_channel_id: @nuntium_channel_id,
       kind: @kind,
       rcpt_type: @rcpt_type,
       expr: @expr,

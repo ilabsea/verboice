@@ -143,7 +143,6 @@ class CallFlowsController < ApplicationController
     @call_flow = current_account.call_flows.find(params[:id])
     @project = @call_flow.project
     @reminder_groups = @project.ext_reminder_groups
-    @nuntium_channels = @project.account.nuntium_channels
   end
 
   def load_all_call_flows

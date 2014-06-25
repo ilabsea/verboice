@@ -31,7 +31,6 @@ module Parsers
         @recipient = params['recipient']
         @subject = Resource.new params['subject']
         @resource = Resource.new params['resource']
-        @nuntium_channel_id = params['nuntium_channel_id']
         @call_flow = call_flow
         @next = params['next']
         @root_index = params['root']
@@ -53,11 +52,11 @@ module Parsers
           compiler.Trace context_for '"Sent text message."'
           if @resource.guid
             if @recipient['caller']
-              compiler.Nuntium @nuntium_channel_id, @kind, rcpt_type: :caller, resource_guid: @resource.guid
+              compiler.Nuntium @kind, rcpt_type: :caller, resource_guid: @resource.guid
             else
               options = {rcpt_type: :expr, expr: InputSetting.new(@recipient).expression(), resource_guid: @resource.guid}
               options[:subject_guid] = @subject.guid if @kind == SMTP
-              compiler.Nuntium @nuntium_channel_id, @kind, options
+              compiler.Nuntium @kind, options
             end
           end
           compiler.append @next.equivalent_flow if @next
