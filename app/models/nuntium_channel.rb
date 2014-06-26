@@ -18,7 +18,7 @@
 class NuntiumChannel < ActiveRecord::Base
   belongs_to :account
 
-  attr_accessible :name, :enabled, :kind
+  attr_accessible :name, :enabled, :kind, :default
 
   before_destroy :destroy_nuntium_channel
   before_validation :configure_nuntium_channel
@@ -40,6 +40,16 @@ class NuntiumChannel < ActiveRecord::Base
     rescue Pigeon::ChannelInvalid
       false
     end
+  end
+
+  def mark_as_default
+    NuntiumChannel.all.each do |nuntium_channel|
+      nuntium_channel.default = false
+      nuntium_channel.save
+    end
+
+    self.default = true
+    self.save
   end
 
   private
