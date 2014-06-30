@@ -43,7 +43,7 @@ class NuntiumChannel < ActiveRecord::Base
   end
 
   def mark_as_default
-    NuntiumChannel.all.each do |nuntium_channel|
+    account.nuntium_channels.each do |nuntium_channel|
       nuntium_channel.default = false
       nuntium_channel.save
     end
