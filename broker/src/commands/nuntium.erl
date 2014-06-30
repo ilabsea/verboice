@@ -31,16 +31,21 @@ run(Args, Session = #session{call_log = CallLog, project = Project}) ->
                 Body ->
                   case Kind of
                     ?QST_SERVER ->
-                      NuntiumArgs = [
-                        {from, SenderAddress},
-                        {to, RecipientAddress},
-                        {subject, Subject},
-                        {body, Body},
-                        {account_id, Project#project.account_id}
-                      ],
-                      case nuntium_api:send_ao(NuntiumArgs) of
-                        ok -> {info, "SMS sent"};
-                        {error, Reason} -> {error, Reason}
+                      case nuntium_channel:find([{default, 1}, {account_id, Project#project.account_id}]) of
+                        undefined -> {error, "No default SMS channel available"};
+                        DefaultChannel -> 
+                          NuntiumArgs = [
+                            {from, SenderAddress},
+                            {to, RecipientAddress},
+                            {subject, Subject},
+                            {body, Body},
+                            {account_id, Project#project.account_id},
+                            {suggested_channel, DefaultChannel#nuntium_channel.channel_name}
+                          ],
+                          case nuntium_api:send_ao(NuntiumArgs) of
+                            ok -> {info, "SMS sent"};
+                            {error, Reason} -> {error, Reason}
+                          end
                       end;
                     ?SMTP -> 
                       case sendmail:send(util:to_string(RecipientAddress), util:to_string(SenderAddress), util:to_string(Subject), util:to_string(Body)) of
