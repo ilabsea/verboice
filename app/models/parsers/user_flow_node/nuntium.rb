@@ -27,7 +27,7 @@ module Parsers
       def initialize call_flow, params
         @id = params['id']
         @name = params['name'] || ''
-        @kind = params['kind']
+        @kind = params['kind'] || QST_SERVER
         @recipient = params['recipient']
         @subject = Resource.new params['subject']
         @resource = Resource.new params['resource']
