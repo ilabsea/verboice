@@ -10,7 +10,7 @@ onWorkflow ->
       
       @next_id = attrs.next
 
-      @resource =  new ResourceEditor(@, attrs.resource)
+      @resource =  new EmailResourceEditor(@, attrs.resource)
       @current_editing_resource = ko.observable(null)
       @is_editing_resource = ko.computed () => @current_editing_resource()?
       @is_resource_invalid = ko.computed () => not @resource.is_valid() or not @resource.is_text()
