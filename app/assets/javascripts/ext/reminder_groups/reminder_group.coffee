@@ -55,11 +55,27 @@ onReminderGroups ->
 				$form.find("#file_name").val("")
 
 		has_name: => $.trim(@name()).length > 0
+		
 		name_exists: (name) =>
 			$.map(model.reminder_groups(), (x) => x if x.id() and x.id() != @id() and x.name() == name).length > 0
+		
 		has_new_address: => $.trim(@new_address()).length > 0
+
 		address_exists: (address) =>
-			$.map(@contacts(), (x) -> x if x.address() == address).length > 0
+			ref = @address_matched
+			$.map(@contacts(), (x) -> x if ref( x.address(), address) ).length > 0
+
+		address_matched: (address, new_address) =>
+			@address_without_prefix(address) == @address_without_prefix(new_address)
+
+		address_without_prefix: (address) =>
+			prefixes = ["855", "+855", "0", "+0", "+"]
+			i = 0
+			while i < prefixes.length
+			    prefix = prefixes[i]
+			    return address.substr(prefix.length)  if address.substr(0, prefix.length) is prefix
+			    i++
+			address
 
 		add_new_contact: =>
 			if @has_new_address()
