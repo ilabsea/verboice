@@ -199,7 +199,7 @@ in_progress({suspend, NewSession, Ptr}, _From, State = #state{session = Session 
 
   Call = call_log:find(CallLog:id()), 
   Duration = duration_from_now(Call#call_log.started_at),
-  CallLog:update([{duration, Duration}]),
+  CallLog:update([{duration, Duration}, {state, <<"suspended">>}]),
 
   channel_queue:unmonitor_session(Session#session.channel#channel.id, self()),
   {reply, ok, ready, State#state{pbx_pid = undefined, flow_pid = undefined, resume_ptr = Ptr, session = NewSession}}.
