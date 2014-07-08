@@ -44,6 +44,10 @@ class String
     ["audio/mp3", "audio/mpeg"].include? self
   end
 
+  def wav_mime_type?
+    ["audio/x-wav", "audio/wav"].include? self
+  end
+
   def to_date_regex()
     "^" + self.gsub("%Y", "[0-9]{4}").gsub("%m", "[0-9]{2}").gsub("%d", "[0-9]{2}") + "$"
   end
