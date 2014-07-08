@@ -60,7 +60,7 @@ describe LocalizedResourcesController do
 
   end
 
-  describe "file" do
+  describe "Upload file" do
 
     before(:each) do
       @localized_resource = UploadLocalizedResource.make :resource => @resource
@@ -77,16 +77,21 @@ describe LocalizedResourcesController do
       end
 
       it "should save mp3 file" do
-        request.env['CONTENT_TYPE'] = "audio/mpeg"
-        request.env['RAW_POST_DATA'] = 'some file'
-        post :save_file, {:project_id => @project.id, :resource_id => @resource.id, :id => @localized_resource.id, :filename => 'filename'}
-        # @localized_resource.reload.uploaded_audio.should eq('some file')
+        request.env['CONTENT_TYPE'] = 'audio/mpeg'
+        controller.stub!(:convert_to_8000_hz_wav).with(anything(), 'audio/mpeg').and_return('mp3 content')
+
+        post :save_file, {:project_id => @project.id, :resource_id => @resource.id, :id => @localized_resource.id, :filename => 'filename.mp3'}
+        @localized_resource.reload.uploaded_audio.should eq('mp3 content')
+        @localized_resource.reload.filename.should eq('filename.mp3')
         response.body.should eq("OK")
       end
 
       it "should save wav filename" do
         request.env['CONTENT_TYPE'] = "audio/x-wav"
-        post :save_file, {:project_id => @project.id, :resource_id => @resource.id, :id => @localized_resource.id, :filename => 'filename'}
+        controller.stub!(:convert_to_8000_hz_wav).with(anything(), 'audio/x-wav').and_return('wav content')
+
+        post :save_file, {:project_id => @project.id, :resource_id => @resource.id, :id => @localized_resource.id, :filename => 'filename.wav'}
+        @localized_resource.reload.uploaded_audio.should eq('wav content')
         @localized_resource.reload.filename.should eq('filename.wav')
         response.body.should eq("OK")
         response.should be_ok
