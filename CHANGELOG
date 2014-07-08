@@ -1,16 +1,20 @@
-1.6.1 (2014-05-22 kakada <kakada@instedd.org)
+1.6.2 (2014-07-8 kakada <kakada@instedd.org>)
+  + Bugs:
+    * #65: convert upload audio file to 8000hz in order to make erlang sox converter convert it as usual
+
+1.6.1 (2014-05-22 kakada <kakada@instedd.org>)
   + Features:
     * #48: add setting to enable/disable speech_recognition step
 
-1.5.9 (2014-05-07 kakada <kakada@instedd.org)
+1.5.9 (2014-05-07 kakada <kakada@instedd.org>)
   + Bugs:
     * #125: fix register/deregister with voip called prefix channel
 
-1.5.8 (2014-04-28 kakada <kakada@instedd.org)
+1.5.8 (2014-04-28 kakada <kakada@instedd.org>)
   + Bugs:
     * #44: store registration date of register before playing confirmation resource
 
-1.5.7 (2014-04-26 kakada <kakada@instedd.org)
+1.5.7 (2014-04-26 kakada <kakada@instedd.org>)
   + Bugs:
     * #43: register step remove zero prefix of previous addresses
 
