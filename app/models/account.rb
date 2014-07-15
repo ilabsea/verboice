@@ -16,13 +16,16 @@
 # along with Verboice.  If not, see <http://www.gnu.org/licenses/>.
 
 class Account < ActiveRecord::Base
+  acts_as_easy_captcha
+  validate :valid_captcha?, :on => :create
+  
   # Include default devise modules. Others available are:
   # :token_authenticatable, :confirmable, :lockable and :timeoutable
   devise :database_authenticatable, :registerable,
          :recoverable, :rememberable, :trackable, :validatable, :confirmable
 
   # Setup accessible (or protected) attributes for your model
-  attr_accessible :email, :password, :password_confirmation, :remember_me, :locale
+  attr_accessible :email, :password, :password_confirmation, :remember_me, :locale, :captcha
 
   has_many :projects, :dependent => :destroy
   has_many :call_flows, :through => :projects

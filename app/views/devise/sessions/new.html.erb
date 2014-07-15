@@ -35,8 +35,6 @@
     <button type="submit" class="white">Log In</button>
   </div>
   
-  <hr>
-
 <!--  -->
 
 <!-- 
@@ -45,11 +43,10 @@
   </p>
  -->
 
-  <p>
-  Forgot your password? <a href="/accounts/password/new">Reset it</a>
-  </p>
-
-  <a href="/accounts/confirmation/new">Didn't receive confirmation instructions?</a><br>
+  
 
 <% end %>
+
+<%= render :partial => "devise/shared/links" %>
+
 </div>
