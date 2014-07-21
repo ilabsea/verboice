@@ -10,4 +10,4 @@ Getting Started
 
 [Verboice Help](https://bitbucket.org/ilab/verboice-git/wiki/Home)
 
-[What's coming next?](https://bitbucket.org/instedd/verboice/wiki/Roadmap)
+[What's coming next?](https://bitbucket.org/ilab/verboice-git/wiki/Roadmap)

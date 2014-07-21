@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20140213085033) do
+ActiveRecord::Schema.define(:version => 20140424081701) do
 
   create_table "accounts", :force => true do |t|
     t.string   "email",                               :default => "", :null => false
@@ -31,6 +31,7 @@ ActiveRecord::Schema.define(:version => 20140213085033) do
     t.datetime "confirmed_at"
     t.datetime "confirmation_sent_at"
     t.string   "locale"
+    t.integer  "role",                                :default => 2
   end
 
   add_index "accounts", ["confirmation_token"], :name => "index_accounts_on_confirmation_token", :unique => true
@@ -386,8 +387,8 @@ ActiveRecord::Schema.define(:version => 20140213085033) do
     t.integer  "channel_id"
     t.integer  "call_log_id"
     t.string   "address"
-    t.datetime "created_at",                         :null => false
-    t.datetime "updated_at",                         :null => false
+    t.datetime "created_at",                                :null => false
+    t.datetime "updated_at",                                :null => false
     t.string   "callback_url"
     t.binary   "flow"
     t.string   "status_callback_url"
@@ -401,6 +402,7 @@ ActiveRecord::Schema.define(:version => 20140213085033) do
     t.string   "session_id"
     t.text     "callback_params"
     t.datetime "answered_at"
+    t.string   "state",               :default => "queued"
   end
 
   add_index "queued_calls", ["call_flow_id"], :name => "index_queued_calls_on_call_flow_id"
