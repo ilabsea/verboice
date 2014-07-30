@@ -19,6 +19,9 @@ run(Args, Session = #session{project = Project, call_log = CallLog, js_context =
         X -> 
           {Value, _} = erjs:eval(X, JsContext),
           OtherNumber = list_to_binary(Value),
+
+          % take Value to store in phonebook
+          contact:create_anonymous(Project#project.id, Value),
           OtherNumber
       end,
       

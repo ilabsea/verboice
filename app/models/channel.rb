@@ -257,6 +257,10 @@ class Channel < ActiveRecord::Base
     self
   end
 
+  def self.by_account_id account_id
+    where(['account_id = :account_id', account_id: account_id])
+  end
+
   def as_json(options = {})
     options = { only: [:id, :name, :config] }.merge(options)
     super(options).merge({

@@ -167,4 +167,18 @@ describe Api::ChannelsController do
       @account.channels.count.should == 0
     end
   end
+
+  describe "list" do
+    before(:each) do
+      Channels::Custom.make account: @account
+    end
+
+    it "should list all channels" do
+      get :list
+
+      assert_response :ok
+      response = ActiveSupport::JSON.decode(@response.body)
+      response.length.should eq(1)
+    end
+  end
 end

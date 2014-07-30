@@ -39,6 +39,8 @@ gem 'aws-sdk'
 gem 'rails_config'
 gem 'awesome_print'
 
+gem "active_model_serializers"
+
 group :assets do
   gem 'sass-rails',   '~> 3.2.5'
   gem 'coffee-rails', '~> 3.2.2'
@@ -57,6 +59,12 @@ group :development, :test do
   gem 'pry-debugger', '~> 0.2.2'
   gem 'syntax'
   gem 'timecop'
+
+  gem 'capybara'
+  gem 'database_cleaner'
+
+  gem 'rspec_api_documentation', github: 'zipmark/rspec_api_documentation'
+  gem 'apitome'
 end
 
 group :development do

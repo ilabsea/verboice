@@ -47,6 +47,7 @@ Account.blueprint do
   email
   password
   confirmed_at { 2.days.ago }
+  role { Account::USER }
 end
 
 Project.blueprint do
@@ -71,6 +72,7 @@ CallLog.blueprint do
   call_flow { channel.call_flow }
   project { call_flow.project }
   account { project.try(:account) || channel.try(:account) || account }
+  address { Sham.password }
 end
 
 Channels::Custom.blueprint do

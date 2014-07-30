@@ -16,21 +16,12 @@
 # along with Verboice.  If not, see <http://www.gnu.org/licenses/>.
 module Api
   class ProjectsController < ApiController
+
+    # GET /api/projects
     def index
-      projects = current_account.projects.includes(:call_flows, :schedules).sort_by { |p| p.name.downcase }.map do |project|
-        {
-          id: project.id,
-          name: project.name,
-          call_flows: project.call_flows.sort_by { |c| c.name.downcase }.map do |call_flow|
-            {
-              id: call_flow.id,
-              name: call_flow.name,
-            }
-          end,
-          schedules: project.schedules.map(&:name).sort_by { |n| n.downcase },
-        }
-      end
-      render json: projects
+      projects = Project.all if current_account.admin?
+      projects = current_account.projects if current_account.user?
+      render json: projects, root: false
     end
   end
 end
