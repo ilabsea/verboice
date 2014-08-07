@@ -28,6 +28,7 @@ module Parsers
         nuntium = Nuntium.new call_flow, 'id' => 1,
           'type' => 'nuntium',
           'name' => 'Nuntium',
+          'kind' => 'qst_server',
           'resource' => {
             "guid" => 5
           },
@@ -35,15 +36,15 @@ module Parsers
             'caller' => true
           }
 
-        nuntium.equivalent_flow.first.should eq(
-          Compiler.parse do |c|
-            c.Label 1
-            c.AssignValue "current_step", 1
-            c.AssignValue "current_step_name", "Nuntium"
-            c.Trace call_flow_id: call_flow.id, step_id: 1, step_name: 'Nuntium', store: '"Sent text message."'
-            c.Nuntium 5, :caller
-          end.first
-        )
+        serializer = Compiler.parse do |c|
+          c.Label 1
+          c.AssignValue "current_step", 1
+          c.AssignValue "current_step_name", "Nuntium"
+          c.Trace call_flow_id: call_flow.id, step_id: 1, step_name: 'Nuntium', store: '"Sent text message."'
+          c.Nuntium('qst_server', rcpt_type: :caller, resource_guid: 5)
+        end.first
+
+        nuntium.equivalent_flow.first.should eq(serializer)
       end
 
       it "shouldn't compile the nuntium command if no resource is given" do
@@ -51,6 +52,7 @@ module Parsers
         nuntium = Nuntium.new call_flow, 'id' => 1,
           'type' => 'nuntium',
           'name' => 'Nuntium',
+          'kind' => 'qst_server',
           'resource' => {
             "guid" => nil
           },
@@ -77,6 +79,7 @@ module Parsers
           nuntium = Nuntium.new call_flow, 'id' => 1,
             'type' => 'nuntium',
             'name' => 'Nuntium',
+            'kind' => 'qst_server',
             'resource' => { "guid" => 42 },
             'recipient' => recipient
 
@@ -86,7 +89,7 @@ module Parsers
               c.AssignValue "current_step", 1
               c.AssignValue "current_step_name", "Nuntium"
               c.Trace call_flow_id: call_flow.id, step_id: 1, step_name: 'Nuntium', store: '"Sent text message."'
-              c.Nuntium 42, :expr, expr
+              c.Nuntium 'qst_server', rcpt_type: :expr, expr: expr, resource_guid: 42
             end.first
           )
         end

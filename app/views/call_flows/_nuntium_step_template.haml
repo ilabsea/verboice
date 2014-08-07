@@ -2,23 +2,22 @@
   .feditor-sidebar.right.box.w28.iblock.h65
 
     %div{ko(:if => "is_editing_resource()")}
-      %div{ko(template: "{name: 'resource_editor_template', data: current_editing_resource}")}
+      %div{ko(template: "{name: 'email_resource_editor_template', data: current_editing_resource}")}
 
     .tableheader
-      %span.left.i48grad-message{ ko(css: '{ "orange": is_invalid }') }
-      %input.ux-text.w20.right{ ko(value: 'name', valueUpdate: '"afterkeydown"', css: '{ "error": is_name_invalid }')}
+      %span.left.i48grad-message{ ko(css: { orange: 'is_invalid()' }) }
+      %input.ux-text.w20.right{ ko(value: 'name', valueUpdate: 'afterkeydown', css: { error: 'is_name_invalid()' })}
 
-    %table.GralTable.TwoColumn.CleanTable.NoHead
-      %tr
-        %tr
-          %td{ko(css: "{ orange: is_resource_invalid }")}
-            Message:
-            %span{ko(css: "{ alert: is_resource_invalid }")}
-            %span{ko(text: "resource.display_name")}
-          %td
-            %button.farrow{ :type => "button", 'data-bind' => 'click: show_resource' }
 
     .content
+      %div
+        %input{ko(checked: :kind), type: "radio", id: "kind_sms", name: "kind", value: "qst_server"}
+        %label{for: :kind_sms} SMS
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        %input{ko(checked: :kind), type: "radio", id: "kind_smtp", name: "kind", value: "smtp"}
+        %label{for: :kind_smtp} Email
+
+      / ko if: is_sms_channel()
       / ko with: recipient
       %hr
       %div
@@ -32,6 +31,35 @@
         %select.w22{'data-bind' => 'value: step_id, visible: content_kind() == "step", options: available_steps(), optionsText: "name", optionsValue: "value", css: { error: !step_id() }'}
         %select.w22{'data-bind' => 'value: response, visible: content_kind() == "response", options: available_responses(), optionsText: "name", optionsValue: "value", css: { error: !response() }'}
       / /ko
+      / /ko
+
+      / ko if: is_smtp_channel()
+      / ko with: email_to
+      %hr
+      %div
+        %label{ko(css: {orange: "!value()"})} To:
+        %input.ux-text.w22{:type => 'text', 'data-bind' => 'value: value, valueUpdate: "afterkeydown", css: { error: !value() }'}
+      / /ko
+      / /ko
+
+    %hr
+    %table.GralTable.TwoColumn.CleanTable.NoHead
+      %tr
+        %tr{ko(visible: 'is_smtp_channel()')}
+          %td{ko(css: "{ orange: is_subject_invalid }")}
+            Subject:
+            %span{ko(css: "{ alert: is_subject_invalid }")}
+            %span{ko(text: "subject.display_name")}
+          %td
+            %button.farrow{ :type => "button", 'data-bind' => 'click: show_subject' }
+        %tr
+          %td{ko(css: "{ orange: is_resource_invalid }")}
+            Message:
+            %span{ko(css: "{ alert: is_resource_invalid }")}
+            %span{ko(text: "resource.display_name")}
+          %td
+            %button.farrow{ :type => "button", 'data-bind' => 'click: show_resource' }
+
 
       .bottom-actions
         %button.fdelete{ 'data-bind' => 'click: remove_with_confirm' } Remove this step

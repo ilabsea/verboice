@@ -31,6 +31,24 @@ $(function() {
     .click(function(){ if(!$(this).is('[readonly]')) {$(this).datepicker("show");} return false; })
     .datepicker({showButtonPanel: false, dateFormat: 'dd/mm/yy'});
 
+  set_default_nuntium_channel = function(select){
+    $.ajax({
+      type: 'put',
+      url: '/nuntium_channels/' + select.value + '/mark_as_default',
+      success: function(data, statusCode){
+        if(statusCode == "success") {
+          $(".mark_as_default").each(function(){
+            $("#label_default").html(""); // reset the first loading page
+            if($(this).val() == $(select).val()){
+              $("#label_default_" + $(this).val()).html("default");
+            }else{
+              $("#label_default_" + $(this).val()).html("");
+            }
+          })
+        }
+      }
+    })
+  }
 });
 
 function create_channel(select) {
