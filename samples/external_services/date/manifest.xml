@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<verboice-service>
+  <name>Date</name>
+  <global-settings>
+    <variable name="service_domain" display-name="Service Domain" type="string"/>
+  </global-settings>
+  <steps>
+    <step name="date"
+      display-name="Date"
+      icon="medicalkit"
+      type="callback"
+      callback-url="http://{service_domain}/get_date">
+      <settings>
+        <variable name="unit" display-name="Unit" type="date_type"/>
+        <variable name="value" display-name="Value" type="numeric"/>
+      </settings>
+      <response type="variables">
+        <variable name="result" display-name="Result" type="string"/>
+      </response>
+    </step>
+  </steps>
+</verboice-service>
