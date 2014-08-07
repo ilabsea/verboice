@@ -1,0 +1,3 @@
+-module(account).
+-define(TABLE_NAME, "accounts").
+-include_lib("erl_dbmodel/include/model.hrl").

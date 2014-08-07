@@ -30,11 +30,11 @@ describe NuntiumChannel do
     nc.channel.kind.should eq('foo')
   end
 
-  it "kind should be readonly once set initially" do
-    nc = NuntiumChannel.new kind: 'foo'
-    nc.kind = 'bar'
-    nc.kind.should eq('foo')
-  end
+  # it "kind should be readonly once set initially" do
+  #   nc = NuntiumChannel.new kind: 'foo'
+  #   nc.kind = 'bar'
+  #   nc.kind.should eq('foo')
+  # end
 
   it "should set channel_name before validating the record" do
     nc = NuntiumChannel.new kind: 'foo'
@@ -88,4 +88,5 @@ describe NuntiumChannel do
     nc.channel.should_receive(:save!).and_raise(Pigeon::ChannelInvalid.new(nc.channel))
     nc.save.should be_false
   end
+
 end
