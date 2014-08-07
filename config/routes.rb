@@ -32,7 +32,7 @@ Verboice::Application.routes.draw do
 
   match '/' => 'home#index',  :as => 'home'
 
-  devise_for :accounts
+  devise_for :accounts, controllers: { registrations: 'account/registrations' }
 
   resources :feeds, controller: :feed_server do
     member do
