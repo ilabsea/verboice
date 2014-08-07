@@ -16,9 +16,6 @@
 # along with Verboice.  If not, see <http://www.gnu.org/licenses/>.
 
 class ApplicationController < ActionController::Base
-  # reset captcha code after each request for security
-  after_filter :reset_last_captcha_code!
-
   protect_from_forgery
   include ActionView::Helpers::TextHelper
   include AppConfigHelper

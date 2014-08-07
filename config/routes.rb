@@ -19,8 +19,6 @@ require 'api_constraints'
 
 Verboice::Application.routes.draw do
 
-  captcha_route
-
   resources :call_log_recorded_audios, only: [:update]
 
   resources :channels do

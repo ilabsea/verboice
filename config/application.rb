@@ -73,15 +73,5 @@ module Verboice
     # set per_page globally
     WillPaginate.per_page = 10
 
-    # Hack for devise Captcha integration
-    config.to_prepare do 
-      Devise::RegistrationsController.class_eval do
-        def build_resource(hash=nil)
-          super(hash)
-          self.resource.captcha_verification = session[:captcha]
-        end
-      end
-    end
-    
   end
 end
