@@ -6,8 +6,8 @@ class DateType
   end
 
   def days
-    @value = 7 if @type == TYPE_OPTIONS[:week]
-    @value = 30 if @type == TYPE_OPTIONS[:month]
+    @value = 7 if @type == DateType::TYPE_OPTIONS[:week]
+    @value = 30 if @type == DateType::TYPE_OPTIONS[:month]
     @value
   end
 end

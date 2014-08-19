@@ -13,6 +13,10 @@
   = f.text_field :prefix
 
 .field
+  = f.label :dtms_mode, t('views.channels._form_custom_sip.label.dtms_mode')
+  = f.select :dtms_mode, Channels::Sip::DTMS_MODE_LIST
+
+.field
   = f.label :limit, t('views.channels._form_custom_sip.label.limit')
   = f.text_field :limit
 .field

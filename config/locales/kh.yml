@@ -650,6 +650,7 @@ kh:
           outgoing: "ចេញ"
           both_directions: "ទាំង​ពីរ"
           prefix_called_number: "បុព្វបទ"
+          dtms_mode: "DTMS"
           udp: "UDP"
           tcp: "TCP"
         action:

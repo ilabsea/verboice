@@ -31,8 +31,16 @@ class Channels::Sip < Channel
   config_accessor :number
   config_accessor :prefix
   config_accessor :prefix_called_number
+  config_accessor :dtms_mode
 
   attr_accessor :ip_address
+
+  DTMS_MODE_LIST = [
+      ['auto', 'auto'],
+      ['inband', 'inband'],
+      ['rfc2833', 'rfc2833'],
+      ['info', 'info']
+  ]
 
   def register?
     register == true || register == "1"
