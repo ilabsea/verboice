@@ -651,6 +651,7 @@ kh:
           both_directions: "ទាំង​ពីរ"
           prefix_called_number: "បុព្វបទ"
           dtms_mode: "DTMS"
+          codec_type: "Codec"
           udp: "UDP"
           tcp: "TCP"
         action:
