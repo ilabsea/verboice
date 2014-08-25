@@ -159,7 +159,7 @@ class CallFlow < ActiveRecord::Base
   end
 
   def update_flow_with_user_flow
-    if user_flow.presence && user_flow_changed?
+    if user_flow_changed?
       parser  = Parsers::UserFlow.new self, user_flow
       self.broker_flow = self.flow = parser.equivalent_flow
       self.variables = parser.variables.to_a.uniq

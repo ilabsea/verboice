@@ -28,7 +28,9 @@ Verboice::Application.routes.draw do
     end
   end
 
-  resources :nuntium_channels, except: [:show]
+  resources :nuntium_channels, except: [:show] do
+    put :mark_as_default, on: :member
+  end
 
   match '/' => 'home#index',  :as => 'home'
 

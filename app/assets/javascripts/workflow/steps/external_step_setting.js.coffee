@@ -7,6 +7,7 @@ onWorkflow ->
 
       @name = attrs.name
       @display_name = attrs.display_name
+      @type = attrs.type
       @parent = parent
 
     to_hash: () =>
@@ -14,6 +15,15 @@ onWorkflow ->
         name: @name
         display_name: @display_name
       }
+
+    is_datatype_date: ->
+      if @type == "date_type" then true else false
+
+    visible_textbox_value: ->
+      if not @is_datatype_date() and @content_kind() is "value" then true else false
+
+    date_types: ->
+      ['Day', 'Week', 'Month', 'Year']
 
     content_kinds: () =>
       return [{text: 'Variable', value: 'variable'},

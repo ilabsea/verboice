@@ -29,7 +29,6 @@ onWorkflow ->
           # audio.onended =>
           #   $.post "/call_simulator/resume", {session_id: response.session_id}, @callback
         when 'capture'
-          console.log response
           @display(response.say) if response.say
           @capture = response
           @digits = ''
