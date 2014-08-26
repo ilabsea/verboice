@@ -607,6 +607,7 @@ kh:
           back: "ថយក្រោយ"
       download_project_call_log:
         label:
+          date_format: "ទម្រង់កាលបរិច្ឆេទ"
           download_call_logs: "ទាញយក​​កំណត់ហេតុ​ការហៅ"
           summary: "មាន %{audios} សារ​សំឡេងនៅក្នុង​កំណត់ហេតុ​ការហៅ​នេះ​ដែល​មានទំហំ​សរុប %{size}។"
           do_you_want_to_download: "តើអ្នកចង់ទាញយកកំណត់ហេតុការហៅរួមជាមួយសារសំឡេង​ដែរឫទេ?"

@@ -35,6 +35,12 @@ class CallLog < ActiveRecord::Base
     'marked_as_failed' => "marked_as_failed"
   }
 
+  DATE_FORMAT_EXPORT = [
+    ["D/M/Y", '%d/%m/%Y %H:%M:%S %z'],
+    ["M/D/Y", '%m/%d/%Y %H:%M:%S %z'],
+    ["Y/M/D", '%Y/%m/%d %H:%M:%S %z']
+  ]
+
   belongs_to :account
   belongs_to :project
   belongs_to :contact

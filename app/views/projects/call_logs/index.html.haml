@@ -6,10 +6,10 @@
 
 -unless @logs.empty?
   %p
-    - if render_csv_download? @project, @search
-      = link_to t('views.call_logs.index.action.download_csv'), download_project_call_logs_path(format: :csv, search: @search), :class => "button fimport"
-    - else
-      = link_to t('views.call_logs.index.action.download_csv'), download_project_call_logs_path(search: @search), :class => %w(button fimport download-call_logs)
+    / - if render_csv_download? @project, @search
+    /   = link_to t('views.call_logs.index.action.download_csv'), download_project_call_logs_path(format: :csv, search: @search), :class => "button fimport download-call_logs"
+    / - else
+    = link_to t('views.call_logs.index.action.download_csv'), download_project_call_logs_path(search: @search), :class => %w(button fimport download-call_logs)
 %br/
 = paginate_for @logs
 - if @logs.present?

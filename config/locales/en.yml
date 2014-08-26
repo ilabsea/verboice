@@ -605,6 +605,7 @@ en:
           back: "Back"
       download_project_call_log:
         label:
+          date_format: "Date Format"
           download_call_logs: "Download call logs"
           summary: "There are %{audios} recorded voice messages in this call logs, total size %{size}."
           do_you_want_to_download: "Do you want to download call logs along with the recorded voice messages?"
