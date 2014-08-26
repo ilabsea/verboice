@@ -105,4 +105,25 @@ module ApplicationHelper
     datetime = datetime.try(:in_time_zone, time_zone || 'UTC')
     datetime.present? ? datetime.strftime(Time::DEFAULT_FORMAT) : ''
   end
+
+  def paginate_for records
+    per_page = params[:per_page] || 10
+    select_options = [10, 20, 30, 50].map{|n| [n, n]}
+
+    content_tag :div , class: 'paginator_container' do
+      entry   = content_tag :div, class: 'entry' do
+                  page_entries_info(@logs, :entry_name => t('views.projects.call_logs.index.label.call_log'))
+                end
+
+      counter = content_tag :div, class: 'counter' do
+                  select_tag(:page, options_for_select(select_options, per_page), 
+                              class: 'page_counter')
+                end          
+
+      nav = will_paginate(records) 
+
+      entry + counter + nav          
+    end
+  end
+
 end
