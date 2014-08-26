@@ -38,3 +38,4 @@ broker/rel/verboice
 vendor/ruby
 
 script/sphinx3
+config/recaptcha.yml

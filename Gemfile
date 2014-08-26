@@ -40,6 +40,7 @@ gem 'rails_config'
 gem 'awesome_print'
 
 gem "active_model_serializers"
+gem "recaptcha", :require => "recaptcha/rails"
 
 gem 'devise_security_extension'
 gem 'rails_email_validator'

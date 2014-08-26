@@ -260,6 +260,7 @@ GEM
     rake (10.2.2)
     rdoc (3.12.2)
       json (~> 1.4)
+    recaptcha (0.3.6)
     rest-client (1.6.7)
       mime-types (>= 1.16)
     rspec (2.14.1)
@@ -369,6 +370,7 @@ DEPENDENCIES
   rails (= 3.2.14)
   rails_config
   rails_email_validator
+  recaptcha
   rest-client
   rkelly!
   rspec
