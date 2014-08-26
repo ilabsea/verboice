@@ -17,7 +17,7 @@
 
   <div class='field w30'>
     <%= f.label :locale, t('views.devise.registrations.edit.label.language') %>
-    <%= f.select :locale, options_for_select([['English', 'en'], ['Khmer', 'kh']], I18n.locale) %>
+    <%= f.select :locale, options_for_select([['English', 'en'], ['Khmer', 'kh']], resource.locale) %>
   </div>
 
   <div class='ux-collapsible collapsed w30' data-on-expanded='box grey'>

@@ -30,7 +30,6 @@ gem 'newrelic_rpm'
 gem 'language_list'
 gem 'bertrpc'
 gem 'whenever', :require => false
-gem 'bertrpc'
 gem 'formatted_rails_logger'
 gem 'fabrication'
 gem 'instedd-pigeon', :require => 'pigeon'
@@ -38,6 +37,8 @@ gem 'ice_cube'
 gem 'aws-sdk'
 gem 'rails_config'
 gem 'awesome_print'
+
+gem "recaptcha", :require => "recaptcha/rails"
 
 gem "active_model_serializers"
 gem "recaptcha", :require => "recaptcha/rails"
