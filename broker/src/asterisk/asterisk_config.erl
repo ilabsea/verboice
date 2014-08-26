@@ -30,12 +30,21 @@ generate_config([Channel | Rest], RegFile, ChannelsFile, ResolvCache, ChannelInd
   SipPort = channel:port(Channel),
   Protocol = channel:protocol(Channel),
   Number = channel:number(Channel),
+  DtmsMode = channel:dtms_mode(Channel),
+  CodecType = channel:codec_type(Channel),
 
   file:write(ChannelsFile, ["[", Section, "](!)\n"]),
   file:write(ChannelsFile, "type=peer\n"),
   file:write(ChannelsFile, "canreinvite=no\n"),
   file:write(ChannelsFile, "nat=yes\n"),
   file:write(ChannelsFile, "qualify=yes\n"),
+
+  file:write(ChannelsFile, ["dtmsmode=", DtmsMode, "\n"]),
+
+  if 
+    length(CodecType) > 0 -> file:write(ChannelsFile, ["allow=", CodecType, "\n"]);
+    true -> ok
+  end,
 
   if length(Username) > 0 andalso length(Password) > 0 ->
     file:write(ChannelsFile, ["fromuser=", Username, "\n"]),

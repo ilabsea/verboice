@@ -13,6 +13,14 @@
   = f.text_field :prefix
 
 .field
+  = f.label :codec_type, t('views.channels._form_custom_sip.label.codec_type')
+  = f.select :codec_type, Channels::Sip::CODECS_LIST
+
+.field
+  = f.label :dtms_mode, t('views.channels._form_custom_sip.label.dtms_mode')
+  = f.select :dtms_mode, Channels::Sip::DTMS_MODE_LIST
+
+.field
   = f.label :limit, t('views.channels._form_custom_sip.label.limit')
   = f.text_field :limit
 .field
