@@ -41,6 +41,9 @@ gem 'awesome_print'
 
 gem "active_model_serializers"
 
+gem 'devise_security_extension'
+gem 'rails_email_validator'
+
 group :assets do
   gem 'sass-rails',   '~> 3.2.5'
   gem 'coffee-rails', '~> 3.2.2'
