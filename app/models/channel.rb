@@ -24,6 +24,8 @@ class Channel < ActiveRecord::Base
   has_many :call_logs, :dependent => :nullify
   has_many :queued_calls, :dependent => :destroy
 
+  has_one :quota, class_name: "ChannelQuota", dependent: :nullify
+
   config_accessor :limit
 
   validates_presence_of :account
