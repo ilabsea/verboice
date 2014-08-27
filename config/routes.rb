@@ -220,6 +220,7 @@ Verboice::Application.routes.draw do
     end
 
     resources :channel_quotas, only: [:create]
+    post 'channel_quota' => 'channel_quotas#create'
 
     resources :projects, only: [:index] do
       resources :contacts, only: [:index, :create] do

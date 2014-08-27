@@ -18,7 +18,6 @@ module Api2
   class ChannelQuotasController < Api2Controller
     def create
       if api_current_account.admin? && api_current_account.has_access_from?(origin_host)
-        quota_params = params[:channel_quota]
         channel = Channel.find_by_id(quota_params[:channel_id])
         if channel
           channel_quota = ChannelQuota.find_by_channel_id(quota_params[:channel_id])
@@ -35,7 +34,12 @@ module Api2
         return head :unauthorized
       end
 
-      render json: 'Channel quota has been updated'
+      render json: channel_quota
+    end
+
+    private
+    def quota_params
+      params[:channel_quota] || params
     end
   end
 end

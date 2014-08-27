@@ -45,16 +45,30 @@ describe Api2::ChannelQuotasController do
         assert_response :bad_request
       end
 
-      it "create new quota when channel is exists and it doesn't have quota" do
-        @channel_account.quota.should be_nil
+      context "create new quota when channel is exists and it doesn't have quota" do
+        it "with channel_quota params " do
+          @channel_account.quota.should be_nil
 
-        request.stub(:remote_ip).and_return('127.0.0.1')
-        post :create, email: admin.email, token: admin.auth_token, channel_quota: {channel_id: @channel_account.id, enabled: true, blocked: false}
+          request.stub(:remote_ip).and_return('127.0.0.1')
+          post :create, email: admin.email, token: admin.auth_token, channel_quota: {channel_id: @channel_account.id, enabled: true, blocked: false}
 
-        @channel_account.reload.quota.should_not be_nil
-        @channel_account.quota.enabled.should eq(true)
+          @channel_account.reload.quota.should_not be_nil
+          @channel_account.quota.enabled.should eq(true)
 
-        assert_response :ok
+          assert_response :ok
+        end
+
+        it "without channel_quota params" do
+          @channel_account.quota.should be_nil
+
+          request.stub(:remote_ip).and_return('127.0.0.1')
+          post :create, email: admin.email, token: admin.auth_token, channel_id: @channel_account.id, enabled: true, blocked: false
+
+          @channel_account.reload.quota.should_not be_nil
+          @channel_account.quota.enabled.should eq(true)
+
+          assert_response :ok
+        end
       end
 
       it "update existing quota" do
