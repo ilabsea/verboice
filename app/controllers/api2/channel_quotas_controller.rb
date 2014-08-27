@@ -16,28 +16,42 @@
 # along with Verboice.  If not, see <http://www.gnu.org/licenses/>.
 module Api2
   class ChannelQuotasController < Api2Controller
+    before_filter :validate_authorization
+
     def create
-      if api_current_account.admin? && api_current_account.has_access_from?(origin_host)
-        channel = Channel.find_by_id(quota_params[:channel_id])
-        if channel
-          channel_quota = ChannelQuota.find_by_channel_id(quota_params[:channel_id])
-          if channel_quota
-            channel_quota.update_attributes(quota_params.except(:channel_id))
-          else
-            channel_quota = channel.build_quota(quota_params.except(:channel_id))
-            channel_quota.save
-          end
+      channel = Channel.find_by_id(quota_params[:channel_id])
+      if channel
+        channel_quota = ChannelQuota.find_by_channel_id(quota_params[:channel_id])
+        if channel_quota
+          channel_quota.update_attributes(quota_params.except(:channel_id))
         else
-          return head :bad_request
+          channel_quota = channel.build_quota(quota_params.except(:channel_id))
+          channel_quota.save
         end
       else
-        return head :unauthorized
+        return head :bad_request
       end
 
-      render json: channel_quota
+      render json: channel_quota, serializer: CustomChannelQuotaSerializer
+    end
+
+    def destroy
+      channel_quota = ChannelQuota.find_by_id(params[:id])
+      if channel_quota
+        channel_quota.destroy
+      else
+        return head :bad_request
+      end
+      
+      render json: 'Channel quota has been removed'
     end
 
     private
+
+    def validate_authorization
+      return head :unauthorized if !api_current_account.admin? || !api_current_account.has_access_from?(origin_host)
+    end
+
     def quota_params
       params[:channel_quota] || params
     end

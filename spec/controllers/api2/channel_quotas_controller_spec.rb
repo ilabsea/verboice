@@ -21,66 +21,79 @@ describe Api2::ChannelQuotasController do
 
   let(:admin) { Account.make role: Account::ADMIN }
   let(:account) { Account.make role: Account::USER }
-  let(:project) { Project.make account: account }
-  let(:call_flow) { CallFlow.make project: project }
 
   describe "create" do
-    before(:each) do
-      @channel_account = Channels::Custom.make account: account
-      @channel_admin = Channels::Custom.make account: admin
-    end
-
     context "sign in as admin" do
-      it "unauthorized when the host is not allowed" do
-        request.stub(:remote_ip).and_return('192.168.1.1')
-        post :create, email: admin.email, token: admin.auth_token, channel_quota: {channel_id: 9999, enabled: true, blocked: false}
-
-        assert_response :unauthorized
-      end
-
-      it "unauthorized when channel doesn't exists" do
-        request.stub(:remote_ip).and_return('127.0.0.1')
-        post :create, email: admin.email, token: admin.auth_token, channel_quota: {channel_id: 9999, enabled: true, blocked: false}
-
-        assert_response :bad_request
-      end
-
-      context "create new quota when channel is exists and it doesn't have quota" do
-        it "with channel_quota params " do
-          @channel_account.quota.should be_nil
-
-          request.stub(:remote_ip).and_return('127.0.0.1')
-          post :create, email: admin.email, token: admin.auth_token, channel_quota: {channel_id: @channel_account.id, enabled: true, blocked: false}
-
-          @channel_account.reload.quota.should_not be_nil
-          @channel_account.quota.enabled.should eq(true)
-
-          assert_response :ok
+      context 'host is not allowed' do
+        before(:each) do
+          request.stub(:remote_ip).and_return('192.168.1.1')
         end
 
-        it "without channel_quota params" do
-          @channel_account.quota.should be_nil
+        it "response with 401" do
+          post :create, email: admin.email, token: admin.auth_token, channel_quota: {channel_id: 9999, enabled: true, blocked: false}
 
-          request.stub(:remote_ip).and_return('127.0.0.1')
-          post :create, email: admin.email, token: admin.auth_token, channel_id: @channel_account.id, enabled: true, blocked: false
-
-          @channel_account.reload.quota.should_not be_nil
-          @channel_account.quota.enabled.should eq(true)
-
-          assert_response :ok
+          assert_response :unauthorized
         end
       end
 
-      it "update existing quota" do
-        @channel_account.create_quota()
-        @channel_account.quota.blocked.should eq(false)
+      context 'host is allowed' do
+        before(:each) do
+          request.stub(:remote_ip).and_return('127.0.0.1')
+        end
 
-        request.stub(:remote_ip).and_return('127.0.0.1')
-        post :create, email: admin.email, token: admin.auth_token, channel_quota: {channel_id: @channel_account.id, enabled: true, blocked: true}
+        context "channel doesn't exists" do
+          it "response with 403" do
+            post :create, email: admin.email, token: admin.auth_token, channel_quota: {channel_id: 9999, enabled: true, blocked: false}
 
-        @channel_account.reload.quota.blocked.should eq(true)
+            assert_response :bad_request
+          end
+        end
 
-        assert_response :ok
+        context 'channel is exists' do
+          before(:each) do
+            @channel_account = Channels::Custom.make account: account
+            @channel_admin = Channels::Custom.make account: admin
+          end
+
+          context "with channel quota params" do
+            it "response with 200" do
+              @channel_account.quota.should be_nil
+
+              post :create, email: admin.email, token: admin.auth_token, channel_quota: {channel_id: @channel_account.id, enabled: true, blocked: false}
+
+              @channel_account.reload.quota.should_not be_nil
+              @channel_account.quota.enabled.should eq(true)
+
+              assert_response :ok
+            end
+          end
+
+          context 'without channel_quota params' do
+            it "response with 200" do
+              @channel_account.quota.should be_nil
+
+              post :create, email: admin.email, token: admin.auth_token, channel_id: @channel_account.id, enabled: true, blocked: false
+
+              @channel_account.reload.quota.should_not be_nil
+              @channel_account.reload.quota.enabled.should eq(true)
+
+              assert_response :ok
+            end
+          end
+
+          context 'update existing quota' do
+            it "response with 200" do
+              @channel_account.create_quota()
+              @channel_account.quota.blocked.should eq(false)
+
+              post :create, email: admin.email, token: admin.auth_token, channel_quota: {channel_id: @channel_account.id, enabled: true, blocked: true}
+
+              @channel_account.reload.quota.blocked.should eq(true)
+
+              assert_response :ok
+            end
+          end
+        end
       end
     end
 
@@ -89,6 +102,53 @@ describe Api2::ChannelQuotasController do
         post :create, email: account.email, token: account.auth_token
 
         assert_response :unauthorized
+      end
+    end
+  end
+
+  describe "destroy" do
+    context "sign in as normal user" do
+      it "response with 401" do
+        post :create, email: account.email, token: account.auth_token
+
+        assert_response :unauthorized
+      end
+    end
+
+    context "sign in as admin" do
+      context "host is not allowed" do
+        before(:each) do
+          request.stub(:remote_ip).and_return('192.168.1.1')
+        end
+
+        it "response with 401" do
+          delete :destroy, email: admin.email, token: admin.auth_token, channel_quota: {channel_id: 9999, enabled: true, blocked: false}
+
+          assert_response :unauthorized
+        end
+      end
+      context "host is allowed" do
+        before(:each) do
+          request.stub(:remote_ip).and_return('127.0.0.1')
+        end
+
+        context "quota not found" do
+          it "response with 403" do
+            delete :destroy, email: admin.email, token: admin.auth_token, id: 9999
+
+            assert_response :bad_request
+          end
+        end
+
+        context "quota found" do
+          let(:channel_account) { Channels::Custom.make account: account }
+          let(:quota) { channel_account.create_quota }
+          it "response with 200" do
+            delete :destroy, email: admin.email, token: admin.auth_token, id: quota.id
+
+            assert_response :ok
+          end
+        end
       end
     end
   end

@@ -219,8 +219,9 @@ Verboice::Application.routes.draw do
       end
     end
 
-    resources :channel_quotas, only: [:create]
+    resources :channel_quotas, only: [:create, :destroy]
     post 'channel_quota' => 'channel_quotas#create'
+    delete 'channel_quota' => 'channel_quotas#destroy'
 
     resources :projects, only: [:index] do
       resources :contacts, only: [:index, :create] do
