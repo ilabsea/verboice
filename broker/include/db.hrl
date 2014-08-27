@@ -21,3 +21,4 @@
 -record(call_log_variable, {id, call_log_id, project_variable_id, value, created_at, updated_at}).
 -record(nuntium_channel, {id, account_id, name, channel_name, enabled, created_at, updated_at, kind, default}).
 -record(account, {id, email, created_at, updated_at}).
+-record(channel_quota, {id, channel_id, enabled, blocked, created_at, updated_at}).
