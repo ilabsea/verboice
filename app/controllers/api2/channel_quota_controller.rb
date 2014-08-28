@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Verboice.  If not, see <http://www.gnu.org/licenses/>.
 module Api2
-  class ChannelQuotasController < Api2Controller
+  class ChannelQuotaController < Api2Controller
     before_filter :validate_authorization
 
     def create
@@ -42,7 +42,7 @@ module Api2
       else
         return head :bad_request
       end
-      
+
       render json: 'Channel quota has been removed'
     end
 

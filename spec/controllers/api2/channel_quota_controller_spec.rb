@@ -17,7 +17,7 @@
 
 require 'spec_helper'
 
-describe Api2::ChannelQuotasController do
+describe Api2::ChannelQuotaController do
 
   let(:admin) { Account.make role: Account::ADMIN }
   let(:account) { Account.make role: Account::USER }
