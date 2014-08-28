@@ -19,13 +19,13 @@ module Api2
     before_filter :validate_authorization
 
     def create
-      channel = Channel.find_by_id(quota_params[:channel_id])
+      channel = Channel.find_by_id(filter_params[:channel_id])
       if channel
-        channel_quota = ChannelQuota.find_by_channel_id(quota_params[:channel_id])
+        channel_quota = ChannelQuota.find_by_channel_id(channel.id)
         if channel_quota
-          channel_quota.update_attributes(quota_params.except(:channel_id))
+          channel_quota.update_attributes(filter_params.except(:channel_id))
         else
-          channel_quota = channel.build_quota(quota_params.except(:channel_id))
+          channel_quota = channel.build_quota(filter_params.except(:channel_id))
           channel_quota.save
         end
       else
@@ -52,8 +52,8 @@ module Api2
       return head :unauthorized if !api_current_account.admin? || !api_current_account.has_access_from?(origin_host)
     end
 
-    def quota_params
-      params[:channel_quota] || params
+    def filter_params
+      params.slice(:channel_id, :enabled, :blocked, :total, :used)
     end
   end
 end

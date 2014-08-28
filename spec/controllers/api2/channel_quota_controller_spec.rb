@@ -21,6 +21,8 @@ describe Api2::ChannelQuotaController do
 
   let(:admin) { Account.make role: Account::ADMIN }
   let(:account) { Account.make role: Account::USER }
+  let(:project) { Project.make account: account }
+  let(:call_flow) { CallFlow.make project: project }
 
   describe "create" do
     context "sign in as admin" do
@@ -30,6 +32,7 @@ describe Api2::ChannelQuotaController do
         end
 
         it "response with 401" do
+          p admin
           post :create, email: admin.email, token: admin.auth_token, channel_quota: {channel_id: 9999, enabled: true, blocked: false}
 
           assert_response :unauthorized
@@ -55,30 +58,15 @@ describe Api2::ChannelQuotaController do
             @channel_admin = Channels::Custom.make account: admin
           end
 
-          context "with channel quota params" do
-            it "response with 200" do
-              @channel_account.quota.should be_nil
+          it "response with 200" do
+            @channel_account.quota.should be_nil
 
-              post :create, email: admin.email, token: admin.auth_token, channel_quota: {channel_id: @channel_account.id, enabled: true, blocked: false}
+            post :create, email: admin.email, token: admin.auth_token, channel_id: @channel_account.id, enabled: true, blocked: false
 
-              @channel_account.reload.quota.should_not be_nil
-              @channel_account.quota.enabled.should eq(true)
+            @channel_account.reload.quota.should_not be_nil
+            @channel_account.reload.quota.enabled.should eq(true)
 
-              assert_response :ok
-            end
-          end
-
-          context 'without channel_quota params' do
-            it "response with 200" do
-              @channel_account.quota.should be_nil
-
-              post :create, email: admin.email, token: admin.auth_token, channel_id: @channel_account.id, enabled: true, blocked: false
-
-              @channel_account.reload.quota.should_not be_nil
-              @channel_account.reload.quota.enabled.should eq(true)
-
-              assert_response :ok
-            end
+            assert_response :ok
           end
 
           context 'update existing quota' do
@@ -86,7 +74,7 @@ describe Api2::ChannelQuotaController do
               @channel_account.create_quota()
               @channel_account.quota.blocked.should eq(false)
 
-              post :create, email: admin.email, token: admin.auth_token, channel_quota: {channel_id: @channel_account.id, enabled: true, blocked: true}
+              post :create, email: admin.email, token: admin.auth_token, channel_id: @channel_account.id, enabled: true, blocked: true
 
               @channel_account.reload.quota.blocked.should eq(true)
 
@@ -122,7 +110,7 @@ describe Api2::ChannelQuotaController do
         end
 
         it "response with 401" do
-          delete :destroy, email: admin.email, token: admin.auth_token, channel_quota: {channel_id: 9999, enabled: true, blocked: false}
+          delete :destroy, email: admin.email, token: admin.auth_token, id: 9999
 
           assert_response :unauthorized
         end
