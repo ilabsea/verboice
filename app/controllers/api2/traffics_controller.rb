@@ -17,7 +17,7 @@
 
 module Api2
   class TrafficsController < Api2Controller
-    before_filter :verify_authorized, :validate_params, only: [:index]
+    before_filter :authorize_admin, :validate_params, only: [:index]
 
     def index
       traffics = CallLog.between(@start_date, @end_date).includes([:account, :channel])
@@ -29,11 +29,6 @@ module Api2
     end
 
     private
-
-    def verify_authorized
-      return head :unauthorized unless api_current_account.admin?
-      return head :unauthorized if api_current_account.admin? && !api_current_account.has_access_from?(origin_host)
-    end
 
     def validate_params
       return head :unprocessable_entity unless params[:start_date]

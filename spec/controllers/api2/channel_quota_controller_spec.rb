@@ -28,12 +28,11 @@ describe Api2::ChannelQuotaController do
     context "sign in as admin" do
       context 'host is not allowed' do
         before(:each) do
-          request.stub(:remote_ip).and_return('192.168.1.1')
+          request.stub(:remote_ip).and_return('192.192.192.192')
         end
 
         it "response with 401" do
-          p admin
-          post :create, email: admin.email, token: admin.auth_token, channel_quota: {channel_id: 9999, enabled: true, blocked: false}
+          post :create, email: admin.email, token: admin.auth_token, channel_id: 9999, enabled: true, blocked: false
 
           assert_response :unauthorized
         end
@@ -45,8 +44,8 @@ describe Api2::ChannelQuotaController do
         end
 
         context "channel doesn't exists" do
-          it "response with 403" do
-            post :create, email: admin.email, token: admin.auth_token, channel_quota: {channel_id: 9999, enabled: true, blocked: false}
+          it "response with 400" do
+            post :create, email: admin.email, token: admin.auth_token, channel_id: 9999, enabled: true, blocked: false
 
             assert_response :bad_request
           end
@@ -106,7 +105,7 @@ describe Api2::ChannelQuotaController do
     context "sign in as admin" do
       context "host is not allowed" do
         before(:each) do
-          request.stub(:remote_ip).and_return('192.168.1.1')
+          request.stub(:remote_ip).and_return('192.192.192.192')
         end
 
         it "response with 401" do
@@ -121,7 +120,7 @@ describe Api2::ChannelQuotaController do
         end
 
         context "quota not found" do
-          it "response with 403" do
+          it "response with 400" do
             delete :destroy, email: admin.email, token: admin.auth_token, id: 9999
 
             assert_response :bad_request

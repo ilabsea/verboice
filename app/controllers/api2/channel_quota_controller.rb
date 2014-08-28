@@ -16,27 +16,28 @@
 # along with Verboice.  If not, see <http://www.gnu.org/licenses/>.
 module Api2
   class ChannelQuotaController < Api2Controller
-    before_filter :validate_authorization
+    before_filter :authorize_admin
+
+    expose(:channel) { Channel.find_by_id(params[:channel_id]) }
+    expose(:channel_quota) { ChannelQuota.find_by_id(params[:id]) }
 
     def create
-      channel = Channel.find_by_id(filter_params[:channel_id])
       if channel
-        channel_quota = ChannelQuota.find_by_channel_id(channel.id)
-        if channel_quota
-          channel_quota.update_attributes(filter_params.except(:channel_id))
+        quota = ChannelQuota.find_by_channel_id(channel.id)
+        if quota
+          quota.update_attributes(filter_params.except(:channel_id))
         else
-          channel_quota = channel.build_quota(filter_params.except(:channel_id))
-          channel_quota.save
+          quota = channel.build_quota(filter_params.except(:channel_id))
+          quota.save
         end
       else
         return head :bad_request
       end
 
-      render json: channel_quota, serializer: CustomChannelQuotaSerializer
+      render json: quota, serializer: CustomChannelQuotaSerializer
     end
 
     def destroy
-      channel_quota = ChannelQuota.find_by_id(params[:id])
       if channel_quota
         channel_quota.destroy
       else
@@ -47,11 +48,6 @@ module Api2
     end
 
     private
-
-    def validate_authorization
-      return head :unauthorized if !api_current_account.admin? || !api_current_account.has_access_from?(origin_host)
-    end
-
     def filter_params
       params.slice(:channel_id, :enabled, :blocked, :total, :used)
     end

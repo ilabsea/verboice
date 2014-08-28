@@ -24,9 +24,9 @@ module Api2
       if api_current_account.admin?
         if api_current_account.has_access_from?(origin_host)
           @call_logs = CallLog.where("1=1")
-          @call_logs = @call_logs.by_account_id(params[:account_id]) if params[:account_id] 
-          @call_logs = @call_logs.by_channel_id(params[:channel_id]) if params[:channel_id] 
-          @call_logs = @call_logs.between(params[:start_date], params[:end_date])
+          @call_logs = @call_logs.by_account_id(params[:account_id]) if params[:account_id]
+          @call_logs = @call_logs.by_channel_id(params[:channel_id]) if params[:channel_id]
+          @call_logs = @call_logs.between(params[:start_date], params[:end_date]) if params[:start_date] && params[:end_date]
         else
           return head :unauthorized
         end
@@ -63,7 +63,7 @@ module Api2
 
     def filter
       status_code = nil
-      if api_current_account.admin? && api_current_account.has_access_from?(origin_host)
+      if api_admin?
         @channel = Channel.find(params[:channel_id]) rescue status_code = :not_found
       else
         @channel = api_current_account.channels.find(params[:channel_id]) rescue status_code = :unauthorized
