@@ -188,14 +188,6 @@ dialing(timeout, State = #state{session = Session}) ->
   notify_status(busy, Session),
   finalize({failed, timeout}, State).
 
-total_call_duraction(Call,Session) ->
-   Call:duration() + answer_duration(Session).
-
-duration_from_now(StartedAt) ->
-  {_, StartedAtTime} = StartedAt,
-  Now = calendar:universal_time(),
-  calendar:datetime_to_gregorian_seconds(Now) - calendar:datetime_to_gregorian_seconds(StartedAtTime).  
-
 in_progress({completed, ok}, State = #state{session = Session}) ->
   notify_status(completed, Session),
   finalize(completed, State);
@@ -207,9 +199,7 @@ in_progress({suspend, NewSession, Ptr}, _From, State = #state{session = Session 
 
   error_logger:info_msg("Session (~p) suspended", [SessionId]),
 
-  Call = call_log:find(CallLog:id()), 
-  Duration = duration_from_now(Call#call_log.started_at),
-  CallLog:update([{duration, Duration}]),
+  CallLog:update([{duration, answer_duration(Session)}]),
 
   channel_queue:unmonitor_session(Session#session.channel#channel.id, self()),
   {reply, ok, ready, State#state{pbx_pid = undefined, flow_pid = undefined, resume_ptr = Ptr, session = NewSession}}.
@@ -281,12 +271,10 @@ finalize(completed, State = #state{session = Session =  #session{call_log = Call
     undefined -> 0;
     QueuedCall -> QueuedCall#queued_call.retries
   end,
-  CallLog:end_step_interaction(),
-  
-  Call = call_log:find(CallLog:id()),
-  Duration = total_call_duraction(Call,Session),
 
-  CallLog:update([{state, "completed"}, {finished_at, calendar:universal_time()}, {duration, Duration}, {retries, Retries}]),
+  Call = call_log:find(CallLog:id()),
+  CallLog:completed(total_call_duraction(Call, Session), Retries),
+
   {stop, normal, State};
 
 finalize({failed, Reason}, State = #state{session = Session = #session{call_log = CallLog}}) ->
@@ -451,6 +439,9 @@ has_ended(Flow, Ptr) -> lists:nth(Ptr, Flow) =:= stop.
 eval(stop, Session) -> {finish, Session};
 eval([Command, Args], Session) -> Command:run(Args, Session);
 eval(Command, Session) -> Command:run(Session).
+
+total_call_duraction(Call, Session) ->
+   Call:duration() + answer_duration(Session).
 
 answer_duration(#session{call_log = CallLog, queued_call = QueuedCall}) ->
   AnsweredAt = case QueuedCall of
