@@ -1,4 +1,8 @@
 .field
+  = f.label :enabled, t('views.channels._form_custom_sip.label.enabled'), style: 'display:inline-block'
+  = f.check_box :enabled
+
+.field
   = f.label :username, t('views.channels._form_custom_sip.label.username')
   = f.text_field :username, :autocomplete => 'off'
 .field
@@ -33,6 +37,7 @@
 .field
   = f.label :direction, t('views.channels._form_custom_sip.label.direction')
   = f.select :direction, [[t('views.channels._form_custom_sip.label.incoming'), 'inbound'], [t('views.channels._form_custom_sip.label.outgoing'), 'outbound'], [t('views.channels._form_custom_sip.label.both_directions'), 'both']]
+
 .field
   = f.label :register, t('views.channels._form_custom_sip.label.register'), style: 'display:inline-block'
   = f.check_box :register

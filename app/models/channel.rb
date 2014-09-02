@@ -270,4 +270,9 @@ class Channel < ActiveRecord::Base
       call_flow: call_flow.try(:name)
     })
   end
+
+  def enabled?
+    enabled == true || enabled == "1"
+  end
+  
 end
