@@ -4,9 +4,7 @@
   
   <h2>Sign up</h2>
 
-  <div class='no-style'>
-    <%= devise_error_messages! %>
-  </div>
+  <%= devise_error_messages! :class => 'centered w30' %>
 
   <hr class="shadow">
 
@@ -15,10 +13,17 @@
     <%= f.email_field :email %>
   </div>
 
-  <div class="field w33">
+  <div class="field w33 account-form">
     <%= f.label :password %>
     <%= f.password_field :password %>
   </div>
+
+  <div class="field w33">
+    <div id='validateMeter' style='height:5px; float:left;'></div>
+    <p id='validateMessage' style='float:right;'></p>
+  </div>
+
+  <div class='clear'></div>
 
   <div class="field w33">
     <%= f.label :password_confirmation %>

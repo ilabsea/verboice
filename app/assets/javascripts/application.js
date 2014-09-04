@@ -17,3 +17,5 @@
 //= require constant
 //= require_directory ./projects
 //= require_directory ./custom_bindings
+//= require_directory ./devise
+//= require_directory ./password

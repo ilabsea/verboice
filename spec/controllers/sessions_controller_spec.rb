@@ -24,7 +24,7 @@ describe SessionsController do
     setup_controller_for_warden
     request.env['devise.mapping'] = Devise.mappings[:account]
 
-    @account = Account.make email: 'testing@instedd.org', password: 'V@lidw0rd'
+    @account = Account.make email: 'testing@example.org', password: 'ValidPassw0rd'
   end
 
   describe "GET new" do
@@ -65,7 +65,7 @@ describe SessionsController do
       end
 
       it "with an valid username and password" do
-        post :create, account: {email: 'testing@instedd.org', password: 'V@lidw0rd'}
+        post :create, account: {email: 'testing@example.org', password: 'ValidPassw0rd'}
 
         LoginTracker.count.should eq(1)
         LoginTracker.first.marked_as.should eq(LoginTracker::MARKED_AS_SUCCESS)
@@ -103,10 +103,10 @@ describe SessionsController do
       end
 
       it "with an valid captcha and valid username and password" do
-        Login::Ip.any_instance.stub(:reaches_maximum_failed_attempt?).with("testing@instedd.org").and_return(true)
+        Login::Ip.any_instance.stub(:reaches_maximum_failed_attempt?).with("testing@example.org").and_return(true)
         controller.stub(:verify_recaptcha).and_return(true)
 
-        post :create, account: {email: 'testing@instedd.org', password: 'V@lidw0rd'}, recaptcha_response_field: "123456"
+        post :create, account: {email: 'testing@example.org', password: 'ValidPassw0rd'}, recaptcha_response_field: "123456"
 
         LoginTracker.count.should eq(1)
         LoginTracker.first.marked_as.should eq(LoginTracker::MARKED_AS_SUCCESS)

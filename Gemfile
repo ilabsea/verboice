@@ -40,9 +40,7 @@ gem 'awesome_print'
 
 gem "active_model_serializers"
 gem "recaptcha", :require => "recaptcha/rails"
-
-gem 'devise_security_extension'
-gem 'rails_email_validator'
+gem "password_strength"
 
 group :assets do
   gem 'sass-rails',   '~> 3.2.5'
