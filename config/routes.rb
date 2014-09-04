@@ -218,6 +218,9 @@ Verboice::Application.routes.draw do
         delete ":name", :action => "destroy"
       end
     end
+
+    resources :channel_quota, only: [:create, :destroy]
+
     resources :projects, only: [:index] do
       resources :contacts, only: [:index, :create] do
         collection do

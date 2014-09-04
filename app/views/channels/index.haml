@@ -21,8 +21,10 @@
           %td
             - status = @channel_status[channel.id]
             - status_ok = status.nil? || status[:ok]
+            - clazz = channel.enabled? ? '' : 'lightgreytext'
             %span{style: "display: inline-block; width: 10px; height: 10px; background-color: #{ status ? (status_ok ? '#6BD346' : '#FF642A') : '#D0D0D0' }"}
-            = channel.name
+            %span{class: "#{clazz}"}
+              = channel.name
             = "("
             = channel.active_calls
             = "active call )"

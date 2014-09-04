@@ -17,8 +17,9 @@
 
 module Api2
   class CallFlowsController < Api2Controller
+    expose(:call_flows) { api_current_account.call_flows }
+
     def list
-      call_flows = api_current_account.call_flows
       render json: call_flows, each_serializer: CustomCallFlowSerializer
     end
   end

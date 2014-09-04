@@ -643,6 +643,7 @@ en:
           port: "Port"
           protocol: "Protocol"
           direction: "Direction"
+          enabled: "Enabled"
           register: "Register"
           incoming: "Incoming"
           outgoing: "Outgoing"

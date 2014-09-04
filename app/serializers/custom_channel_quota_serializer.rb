@@ -15,12 +15,9 @@
 # You should have received a copy of the GNU General Public License
 # along with Verboice.  If not, see <http://www.gnu.org/licenses/>.
 
-module Api2
-  class AccountsController < Api2Controller
-    before_filter :authorize_admin
+class CustomChannelQuotaSerializer < ActiveModel::Serializer
+  attributes :id, :enabled, :blocked, :total, :used
 
-    def index
-      render json: Account.where(role: Account::USER), each_serializer: CustomAccountSerializer
-    end
-  end
+  has_one :channel, serializer: CustomChannelSerializer
+
 end
