@@ -166,6 +166,7 @@ Devise.setup do |config|
 
   # Need 1 char of A-Z, a-z and 0-9
   # config.password_regex = /(?=.*\d)(?=.*[a-z])(?=.*[A-Z])/
+  # Need 1 special char, 1 uppercase, 1 lowercase, 1 digit(0-9) and must be length 8-12
   config.password_regex = /^(?=.*[A-Z])(?=.*[!@#$&*])(?=.*[0-9])(?=.*[a-z].*[a-z].*[a-z]).{8,12}$/
 
   # How many passwords to keep in archive
@@ -193,4 +194,5 @@ Devise.setup do |config|
   # ==> Configuration for :expirable
   # Time period for account expiry from last_activity_at
   config.expire_after = 90.days
+
 end

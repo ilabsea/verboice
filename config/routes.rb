@@ -19,13 +19,8 @@ require 'api_constraints'
 
 Verboice::Application.routes.draw do
 
-  devise_for :accounts, controllers: { registrations: 'account/registrations', sessions: 'account/sessions' } do
-    get '/accounts/sign_up' => 'account/registrations#new', as: :new_account_session
-    get '/accounts/sign_in' => 'account/sessions#new', as: :new_account_session
-    post '/accounts/sign_in' => 'account/sessions#create', as: :account_session
-    get '/accounts/sign_out' => 'account/sessions#destroy', :as => :destroy_account_session
-  end
-
+  devise_for :accounts, controllers: { registrations: 'registrations', sessions: 'sessions' }
+  
   resources :call_log_recorded_audios, only: [:update]
 
   resources :channels do

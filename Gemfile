@@ -38,8 +38,6 @@ gem 'aws-sdk'
 gem 'rails_config'
 gem 'awesome_print'
 
-gem "recaptcha", :require => "recaptcha/rails"
-
 gem "active_model_serializers"
 gem "recaptcha", :require => "recaptcha/rails"
 

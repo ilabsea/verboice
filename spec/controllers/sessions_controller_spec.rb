@@ -17,14 +17,14 @@
 
 require 'spec_helper'
 
-describe Account::SessionsController do
+describe SessionsController do
   include Devise::TestHelpers
 
   before(:each) do
     setup_controller_for_warden
     request.env['devise.mapping'] = Devise.mappings[:account]
 
-    @account = Account.make email: 'valid@example.org', password: 'validpassword'
+    @account = Account.make email: 'testing@instedd.org', password: 'V@lidw0rd'
   end
 
   describe "GET new" do
@@ -60,12 +60,12 @@ describe Account::SessionsController do
         LoginTracker.count.should eq(1)
         LoginTracker.first.marked_as.should eq(LoginTracker::MARKED_AS_FAILED)
 
-        flash[:error].should eq "Invalid username or password"
+        flash[:error].should eq "Invalid email or password"
         assert_response :redirect
       end
 
       it "with an valid username and password" do
-        post :create, account: {email: 'valid@example.org', password: 'validpassword'}
+        post :create, account: {email: 'testing@instedd.org', password: 'V@lidw0rd'}
 
         LoginTracker.count.should eq(1)
         LoginTracker.first.marked_as.should eq(LoginTracker::MARKED_AS_SUCCESS)
@@ -98,15 +98,15 @@ describe Account::SessionsController do
         LoginTracker.count.should eq(1)
         LoginTracker.first.marked_as.should eq(LoginTracker::MARKED_AS_FAILED)
 
-        flash[:error].should eq "Invalid username or password"
+        flash[:error].should eq "Invalid email or password"
         assert_response :redirect
       end
 
       it "with an valid captcha and valid username and password" do
-        Login::Ip.any_instance.stub(:reaches_maximum_failed_attempt?).with("valid@example.org").and_return(true)
+        Login::Ip.any_instance.stub(:reaches_maximum_failed_attempt?).with("testing@instedd.org").and_return(true)
         controller.stub(:verify_recaptcha).and_return(true)
 
-        post :create, account: {email: 'valid@example.org', password: 'validpassword'}, recaptcha_response_field: "123456"
+        post :create, account: {email: 'testing@instedd.org', password: 'V@lidw0rd'}, recaptcha_response_field: "123456"
 
         LoginTracker.count.should eq(1)
         LoginTracker.first.marked_as.should eq(LoginTracker::MARKED_AS_SUCCESS)

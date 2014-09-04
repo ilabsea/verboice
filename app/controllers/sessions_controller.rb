@@ -15,46 +15,48 @@
 # You should have received a copy of the GNU General Public License
 # along with Verboice.  If not, see <http://www.gnu.org/licenses/>.
 
-class Account::SessionsController < Devise::SessionsController
+class SessionsController < Devise::SessionsController
 
   def new
-    access_ip = Login::Ip.new(origin_ip)
+    ip = Login::Ip.new(origin_ip)
     email = params[:account].nil? ? nil : params[:account][:email]
-    @captcha = !email.nil? && access_ip.reaches_maximum_failed_attempt?(email) ? true : false
+    @captcha = !email.nil? && ip.reaches_maximum_failed_attempt?(email) ? true : false
     build_resource
   end
 
   def create
     allow_to_login = true
-    access_ip = Login::Ip.new(origin_ip)
-    if access_ip.reaches_maximum_failed_attempt?(params[:account][:email])
+    ip = Login::Ip.new(origin_ip)
+    if ip.reaches_maximum_failed_attempt?(params[:account][:email])
       if !verify_captcha
         allow_to_login = false
-        
-        access_ip.log(params[:account][:email], LoginTracker::MARKED_AS_FAILED)
 
-        flash[:error] = "Invalid captcha"
-        redirect_to action: :new, account: params[:account]
+        flash[:error] = I18n.t("activerecord.errors.models.login.invalid_captcha")
       end
     end
 
     if allow_to_login
       if current_account.nil?
-        access_ip.log(params[:account][:email], LoginTracker::MARKED_AS_FAILED)
+        response_with_login_failed(ip)
 
-        flash[:error] = "Invalid username or password"
-        redirect_to action: :new, account: params[:account]
+        flash[:error] = I18n.t("activerecord.errors.models.login.invalid_email_password")
       else
-        access_ip.log(params[:account][:email], LoginTracker::MARKED_AS_SUCCESS)
+        ip.log(params[:account][:email], LoginTracker::MARKED_AS_SUCCESS)
         
         super
       end
+    else
+      response_with_login_failed(ip)
     end
   end
-
+  
   private
-  def verify_captcha
-    verify_recaptcha(private_key: RECAPTCHA_CONFIG['private_key'])
+  def response_with_login_failed(ip)
+    ip.log(params[:account][:email], LoginTracker::MARKED_AS_FAILED)
+
+    sign_out current_account if current_account
+
+    redirect_to action: :new, account: params[:account].except(:password)
   end
 
 end

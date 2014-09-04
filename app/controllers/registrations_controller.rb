@@ -1,12 +1,15 @@
-class Account::RegistrationsController < Devise::RegistrationsController
+class RegistrationsController < Devise::RegistrationsController
 
   def new
     build_resource
   end
 
+  def edit
+  end
+
   def create
     if !verify_captcha
-      flash[:notice] = "Invalid captcha"
+      flash[:error] = I18n.t("activerecord.errors.models.login.invalid_captcha")
       redirect_to action: :new, account: params[:account]
     else
       super

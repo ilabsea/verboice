@@ -40,6 +40,13 @@ en:
 
     errors:
       models:
+        login:
+          invalid_captcha: Invalid captcha
+          invalid_email_password: Invalid email or password
+        account:
+          attributes:
+            password:
+              taken_in_past: Already been taken in the past
         project:
           attributes:
             name:

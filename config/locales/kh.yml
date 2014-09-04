@@ -40,6 +40,13 @@ kh:
 
     errors:
       models:
+        login:
+          invalid_captcha: Captcha មិនត្រឹមត្រូវទេ
+          invalid_email_password: អ៊ីម៉ែល រឺ ពាក្យសម្ងាត់មិនត្រឹបត្រូវទេ
+        account:
+          attributes:
+            password:
+              taken_in_past: ធ្លាប់ប្រើរួចហើយ
         project:
           attributes:
             name:
