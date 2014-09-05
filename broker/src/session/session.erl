@@ -205,8 +205,7 @@ in_progress({suspend, NewSession, Ptr}, _From, State = #state{session = Session 
 
   error_logger:info_msg("Session (~p) suspended", [SessionId]),
 
-  CallLog:update([{duration, answer_duration(Session)}]),
-  CallLog:update([{duration, Duration}, {state, <<"suspended">>}]),
+  CallLog:update([{duration, answer_duration(Session)}, {state, <<"suspended">>}]),
 
   channel_queue:unmonitor_session(Session#session.channel#channel.id, self()),
   {reply, ok, ready, State#state{pbx_pid = undefined, flow_pid = undefined, resume_ptr = Ptr, session = NewSession}}.
