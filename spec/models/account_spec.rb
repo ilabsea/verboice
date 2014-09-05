@@ -43,16 +43,7 @@ describe Account do
   end
   
   describe "#has_access_from?" do
-    context "admin" do
-      it { expect(super_user.admin?).to be true }
-      it { expect(super_user.has_access_from?("127.0.0.1")).to be true }
-      it { expect(super_user.has_access_from?("192.168.1.1")).to be false }
-    end
-
-    context "user" do
-      it { expect(user.admin?).to be false }
-      it { expect(user.has_access_from?("127.0.0.1")).to be false }
-      it { expect(user.has_access_from?("192.168.1.1")).to be false }
-    end
+    it { expect(super_user.has_access_from?("192.192.192.192")).to be false }
+    it { expect(super_user.has_access_from?("127.0.0.1")).to be true }
   end
 end

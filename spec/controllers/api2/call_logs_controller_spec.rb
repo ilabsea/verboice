@@ -36,8 +36,11 @@ describe Api2::CallLogsController do
 
     context "admin" do
       context "host is not allowed" do
-        it "unauthorized" do
-          request.stub(:remote_ip).and_return('192.168.1.1')
+        before(:each) do
+          request.stub(:remote_ip).and_return('192.192.192.192')
+        end
+
+        it "response with unauthorized" do
           get :index, email: admin.email, token: admin.auth_token
 
           assert_response :unauthorized
@@ -45,13 +48,16 @@ describe Api2::CallLogsController do
       end
 
       context "host is allowed" do
-        it "list all call logs when host is allowed" do
+        it "response with success" do
           get :index, email: admin.email, token: admin.auth_token
 
           assert_response :ok
+        end
+
+        it "list all call logs" do
+          get :index, email: admin.email, token: admin.auth_token
+
           response = JSON.parse(@response.body)
-          p "---------"
-          p response
 
           expect(response.length).to eq 3
         end
@@ -59,7 +65,6 @@ describe Api2::CallLogsController do
         it "list only call logs that belongs to the account" do
           get :index, email: admin.email, token: admin.auth_token, account_id: account.id
 
-          assert_response :ok
           response = JSON.parse(@response.body)
           expect(response.length).to eq 2
         end

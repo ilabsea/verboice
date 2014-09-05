@@ -1,6 +1,7 @@
 -module(channel).
 -export([find_all_sip/0, find_all_twilio/0, domain/1, port/1, protocol/1, number/1, limit/1, broker/1, username/1, password/1, is_outbound/1, register/1, dtms_mode/1, codec_type/1 ]).
 -export([account_sid/1, auth_token/1]).
+-export([enabled/1]).
 -define(CACHE, true).
 -define(TABLE_NAME, "channels").
 -define(MAP, [{config, yaml_serializer}]).
@@ -59,15 +60,14 @@ is_outbound(#channel{config = Config}) ->
     _ -> false
   end.
 
+enabled(#channel{enabled = Enabled}) ->
+  boolean:val(Enabled).
+
 register(#channel{type = <<"Channels::TemplateBasedSip">>}) ->
   true;
 
 register(#channel{config = Config}) ->
-  case proplists:get_value("register", Config) of
-    "true" -> true;
-    "1" -> true;
-    _ -> false
-  end.
+  boolean:val(proplists:get_value("register", Config)).
 
 limit(#channel{config = Config}) ->
   case proplists:get_value("limit", Config) of
