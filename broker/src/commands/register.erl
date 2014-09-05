@@ -6,26 +6,18 @@
 
 run(Args, Session = #session{project = Project, call_log = CallLog, js_context = JsContext}) ->
   GroupName = proplists:get_value(reminder_group, Args),
-  Number = proplists:get_value(number, Args),
+  Expr = proplists:get_value(number, Args),
   case reminder_group:find([{project_id, Project#project.id}, {name, GroupName}]) of
     undefined ->
       StepName = erjs_context:get(current_step_name, JsContext),
       throw("Step " ++ StepName ++ " is broken");
     Group ->
-      PhoneNumber = case list_to_binary(Number) of
-        <<>> -> 
+      PhoneNumber = case Expr of
+        [] -> 
           Call = call_log:find(CallLog:id()),
           Call:address_without_prefix();
         X -> 
-          {Value, _} = erjs:eval(X, JsContext),
-          
-          % take Value to store in phonebook
-          contact:create_anonymous(Project#project.id, Value),
-
-          OtherNumber = list_to_binary(Value),
-
-          % take Value to store in phonebook
-          contact:create_anonymous(Project#project.id, Value),
+          {OtherNumber, _} = erjs:eval(X, JsContext),
           OtherNumber
       end,
       

@@ -7,7 +7,6 @@
           address_with_no_prefix/2
       ]).
 
-
 -define(TABLE_NAME, "ext_reminder_groups").
 
 -include_lib("erl_dbmodel/include/model.hrl").
@@ -24,60 +23,57 @@
     "+"
   ]).
 
-
 address_exist( _ , []) -> false ;
 address_exist(Address, Addresses) ->
-  [ExistingAddress|H] = Addresses,
+  [ExistingAddress | Rest] = Addresses,
   Result = address_with_no_prefix(ExistingAddress) /= address_with_no_prefix(Address),
   if 
     Result ->
-      address_exist(Address, H);
+      address_exist(Address, Rest);
     true ->
-      true  
+      true
   end.
 
 address_with_no_prefix(Address) ->
-  % Prefixes = [ "855", "+855", "0", "+0", "+"],
   address_with_no_prefix(Address, ?PREFIXES).
 
 address_with_no_prefix(Address, []) -> Address;
 
 address_with_no_prefix(Address, Prefixes) ->
-  [Prefix|H] =  Prefixes,
+  [Prefix | Rest] =  Prefixes,
   Length = string:len(Prefix),
   AddressPrefix = string:substr(Address, 1, Length),
 
   if 
     Prefix /= AddressPrefix -> 
-      address_with_no_prefix(Address, H);
-    true ->  
-      string:substr(Address, Length+1)
-  end.  
+      address_with_no_prefix(Address, Rest);
+    true ->
+      string:substr(Address, Length + 1)
+  end.
 
-has_address(AddressBin, #reminder_group{addresses = AddrYaml}) ->
+has_address(Address, ReminderGroup) when is_binary(Address) -> has_address(binary_to_list(Address), ReminderGroup);
+has_address(Address, ReminderGroup) when is_integer(Address) -> has_address(integer_to_list(Address), ReminderGroup);
+has_address(Address, #reminder_group{addresses = AddrYaml}) -> 
   Addresses = active_record_yaml:deserialize(AddrYaml),
-  Address = binary_to_list(AddressBin),
-  Result = address_exist(Address, Addresses),
+  address_exist(Address, Addresses).
 
-  io:format("~n Addresses ~p", [Addresses]),
-  io:format("~n Address ~p", [Address]),
-
-  io:format("~n Address: ~p, Addresses: ~p is ~p ~n", [Address, Addresses, Result]),
-  %lists:member(Address, Addresses),
-  Result.
-
-register_address(AddressBin, ReminderGroup = #reminder_group{addresses = AddrYaml}) ->
-  case ReminderGroup:has_address(AddressBin) of
+register_address(Address, ReminderGroup) when is_binary(Address) -> register_address(binary_to_list(Address), ReminderGroup);
+register_address(Address, ReminderGroup) when is_integer(Address) -> register_address(integer_to_list(Address), ReminderGroup);
+register_address(Address, ReminderGroup = #reminder_group{project_id = ProjectId, addresses = AddrYaml}) -> 
+  case ReminderGroup:has_address(Address) of
     true -> ReminderGroup;
     false ->
+      % store contact in phonebook
+      contact:find_or_create_with_address_as_anonymous(ProjectId, Address),
+
       Addresses = active_record_yaml:deserialize(AddrYaml),
-      NewAddresses = lists:append(Addresses, [binary_to_list(AddressBin)]),
+      NewAddresses = lists:append(Addresses, [Address]),
       ReminderGroup#reminder_group{addresses = active_record_yaml:serialize(NewAddresses)}
   end.
 
 deregister_address(AddressBin, ReminderGroup = #reminder_group{addresses = AddrYaml}) ->
   case ReminderGroup:has_address(AddressBin) of
-    true -> 
+    true ->
       Addresses = active_record_yaml:deserialize(AddrYaml),
       ReminderGroup#reminder_group{addresses = active_record_yaml:serialize(lists:delete(binary_to_list(AddressBin), Addresses))};
     false ->
