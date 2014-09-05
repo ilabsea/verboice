@@ -74,7 +74,7 @@ class Account < ActiveRecord::Base
   end
 
   def has_access_from? host
-    admin? && Api2.host_allowed?(host)
+    Api2.host_allowed?(host)
   end
 
   private

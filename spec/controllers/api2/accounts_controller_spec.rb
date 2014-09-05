@@ -24,29 +24,41 @@ describe Api2::AccountsController do
   let(:user) { Account.make role: Account::USER }
 
   describe "GET index" do
-    context "admin" do
-      before(:each) do
-        Account.make role: Account::USER
+    context "admin user" do
+      context 'host is not allowed' do
+        before(:each) do
+          request.stub(:remote_ip).and_return('192.192.192.192')
+        end
+
+        it 'response with 401' do
+          get :index, email: admin.email, token: admin.auth_token
+
+          assert_response :unauthorized
+        end
       end
 
-      it "unauthorized when the host is not allowed" do
-        request.stub(:remote_ip).and_return('192.168.1.1')
-        get :index, email: admin.email, token: admin.auth_token
+      context 'host is allowed' do
+        before(:each) do
+          Account.make role: Account::USER
+        end
 
-        assert_response :unauthorized
-      end
+        it "response with 200" do
+          get :index, email: admin.email, token: admin.auth_token
 
-      it "response json array of normal user accounts when host is allowed" do
-        get :index, email: admin.email, token: admin.auth_token
+          assert_response :success
+        end
 
-        assert_response :success
-        accounts = ActiveSupport::JSON.decode(@response.body)
-        accounts.length.should eq(1)
+        it "response json array of normal user accounts" do
+          get :index, email: admin.email, token: admin.auth_token
+
+          accounts = ActiveSupport::JSON.decode(@response.body)
+          accounts.length.should eq(1)
+        end
       end
     end
 
-    context "user" do
-      it "unauthorized" do
+    context "normal user" do
+      it "response with 401" do
         get :index, email: user.email, token: user.auth_token
         
         assert_response :unauthorized

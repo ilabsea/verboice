@@ -653,6 +653,7 @@ kh:
           port: "ផត"
           protocol: "ប្រូតូកូ"
           direction: "ទិសដៅ"
+          enabled: "បើក"
           register: "ចុះឈ្មោះ"
           incoming: "ចូល"
           outgoing: "ចេញ"

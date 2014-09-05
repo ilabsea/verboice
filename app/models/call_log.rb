@@ -32,7 +32,9 @@ class CallLog < ActiveRecord::Base
     'no_answer' => 'no_answer',
     'busy'      => 'hangup',
     'hangup'    => 'incompleted',
-    'marked_as_failed' => "marked_as_failed"
+    'marked_as_failed' => "marked_as_failed",
+    'blocked' => "blocked",
+    'disabled' => "disabled"
   }
 
   DATE_FORMAT_EXPORT = [

@@ -53,6 +53,10 @@ class Api2Controller < ActionController::Base
     end
   end
 
+  def authorize_admin
+    return head :unauthorized if !api_admin?
+  end
+
   protected
 
   def response_with_unauthorized
@@ -61,6 +65,10 @@ class Api2Controller < ActionController::Base
 
   def origin_host
     request.remote_ip
+  end
+
+  def api_admin?
+    api_current_account.admin? && api_current_account.has_access_from?(origin_host)
   end
   
 end
