@@ -17,12 +17,10 @@
 
 module Api2
   class AccountsController < Api2Controller
+    before_filter :authorize_admin
+
     def index
-      if api_current_account.has_access_from?(request.remote_ip)
-        render json: Account.where(role: Account::USER), each_serializer: CustomAccountSerializer
-      else
-        head :unauthorized
-      end
+      render json: Account.where(role: Account::USER), each_serializer: CustomAccountSerializer
     end
   end
 end

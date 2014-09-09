@@ -1,5 +1,6 @@
 -module(call_log_srv).
 -export([new/2, error/3, info/3, trace/3, trace_record/5, update/2, id/1, associate_pbx_log/2, end_step_interaction/1]).
+-export([completed/3]).
 
 -behaviour(gen_server).
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2, terminate/2, code_change/3]).
@@ -27,6 +28,9 @@ trace_record(CallFlowId, StepId, StepName, Result, {?MODULE, Pid}) ->
 
 update(Fields, {?MODULE, Pid}) ->
   gen_server:cast(Pid, {update, Fields}).
+
+completed(Duration, Retries, {?MODULE, Pid}) ->
+  gen_server:cast(Pid, {completed, Duration, Retries}).
 
 id({?MODULE, Pid}) ->
   gen_server:call(Pid, get_id).
@@ -86,6 +90,12 @@ handle_cast({trace_record, CallFlowId, StepId, StepName, Result}, State = #state
 
 handle_cast({associate_pbx_log, PbxLogId}, State = #state{call_log = CallLog}) ->
   NewCallLog = call_log:update(CallLog#call_log{pbx_logs_guid = PbxLogId}),
+  {noreply, State#state{call_log = NewCallLog}};
+
+handle_cast({completed, Duration, Retries}, State = #state{call_log = CallLog}) ->
+  NewCallLog = CallLog:append_step_interaction("end"),
+
+  NewCallLog:update([{state, "completed"}, {finished_at, calendar:universal_time()}, {duration, Duration}, {retries, Retries}]),
   {noreply, State#state{call_log = NewCallLog}}.
 
 %% @private
