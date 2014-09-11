@@ -31,12 +31,12 @@ class Channels::Sip < Channel
   config_accessor :number
   config_accessor :prefix
   config_accessor :prefix_called_number
-  config_accessor :dtms_mode
+  config_accessor :dtmf_mode
   config_accessor :codec_type
 
   attr_accessor :ip_address
 
-  DTMS_MODE_LIST = [
+  DTMF_MODE_LIST = [
       ['auto', 'auto'],
       ['inband', 'inband'],
       ['rfc2833', 'rfc2833'],

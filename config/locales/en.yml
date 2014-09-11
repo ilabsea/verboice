@@ -657,7 +657,7 @@ en:
           outgoing: "Outgoing"
           both_directions: 'Both directions'
           prefix_called_number: 'Add prefix to called number'
-          dtms_mode: 'DTMS mode'
+          dtmf_mode: 'DTMF mode'
           codec_type: 'Codec'
           udp: "UDP"
           tcp: "TCP"

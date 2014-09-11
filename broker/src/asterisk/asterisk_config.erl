@@ -30,7 +30,7 @@ generate_config([Channel | Rest], RegFile, ChannelsFile, ResolvCache, ChannelInd
   SipPort = channel:port(Channel),
   Protocol = channel:protocol(Channel),
   Number = channel:number(Channel),
-  DtmsMode = channel:dtms_mode(Channel),
+  DtmfMode = channel:dtmf_mode(Channel),
   CodecType = channel:codec_type(Channel),
 
   file:write(ChannelsFile, ["[", Section, "](!)\n"]),
@@ -39,8 +39,11 @@ generate_config([Channel | Rest], RegFile, ChannelsFile, ResolvCache, ChannelInd
   file:write(ChannelsFile, "nat=yes\n"),
   file:write(ChannelsFile, "qualify=yes\n"),
 
-  file:write(ChannelsFile, ["dtmsmode=", DtmsMode, "\n"]),
-
+  if
+    length(DtmfMode) > 0 -> file:write(ChannelsFile, ["dtmfmode=", DtmfMode, "\n"]);
+    true -> ok
+  end,
+  
   if 
     length(CodecType) > 0 -> file:write(ChannelsFile, ["allow=", CodecType, "\n"]);
     true -> ok
