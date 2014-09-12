@@ -11,15 +11,37 @@ run(Args, Session) ->
   Prefix = proplists:get_value(dial_prefix, Args),
 
   NotBefore = calendar:gregorian_seconds_to_datetime(calendar:datetime_to_gregorian_seconds(calendar:universal_time()) + 15),
-  scheduler:enqueue(#queued_call{
-    not_before = {datetime, NotBefore},
-    session_id = Session#session.session_id,
-    channel_id = Session#session.channel#channel.id,
-    address = dial_address(Session#session.address, Prefix),
-    state = list_to_binary("queued")
+
+  NewSessionId = session:generate_id(),
+  {ok, Pid} = session:new(NewSessionId),
+
+  Channel = channel:find(Session#session.channel#channel.id),
+  CallFlow = call_flow:find(Channel#channel.call_flow_id),
+  Project = project:find(CallFlow#call_flow.project_id),
+  CallLog = call_log_srv:new(NewSessionId, #call_log{
+    account_id = Channel#channel.account_id,
+    project_id = CallFlow#call_flow.project_id,
+    state = "suspended",
+    direction = "outgoing",
+    channel_id = Channel#channel.id,
+    address = Session#session.address,
+    started_at = calendar:universal_time(),
+    call_flow_id = CallFlow#call_flow.id,
+    store_log_entries = Project#project.store_call_log_entries
   }),
 
-  {suspend, Session}.
+  scheduler:enqueue(#queued_call{
+    not_before = {datetime, NotBefore},
+    session_id = NewSessionId,
+    channel_id = Session#session.channel#channel.id,
+    address = dial_address(Session#session.address, Prefix),
+    state = list_to_binary("queued"),
+    call_log_id = CallLog:id(),
+    call_flow_id = CallFlow#call_flow.id,
+    project_id = Project#project.id
+  }),
+
+  {{suspend, Pid}, Session}.
 
 dial_address(Address, undefined) -> Address;
 dial_address(Address, []) -> Address;

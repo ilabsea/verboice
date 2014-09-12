@@ -1,6 +1,7 @@
 -module(session).
--export([start_link/1, new/0, find/1, answer/2, answer/4, dial/4, reject/2, stop/1, resume/1, default_variables/1]).
+-export([start_link/1, new/0, new/1, find/1, answer/2, answer/4, dial/4, reject/2, stop/1, resume/1, default_variables/1]).
 -export([language/1]).
+-export([generate_id/0, set_pointer/2]).
 
 % FSM Description
 % Possible states: ready, dialing, in_progress, completed
@@ -30,9 +31,15 @@ start_link(SessionId) ->
   gen_fsm:start_link({global, ?SESSION(SessionId)}, ?MODULE, SessionId, []).
 
 new() ->
-  SessionId = uuid:to_string(uuid:v4()),
+  SessionId = generate_id(),
+  new(SessionId).
+
+new(SessionId) ->
   SessionSpec = {SessionId, {session, start_link, [SessionId]}, temporary, 5000, worker, [session]},
   supervisor:start_child(session_sup, SessionSpec).
+
+generate_id() ->
+  uuid:to_string(uuid:v4()).
 
 -spec find(string()) -> undefined | pid().
 find(SessionId) ->
@@ -69,6 +76,9 @@ language(#session{js_context = JsContext, default_language = DefaultLanguage}) -
     undefined -> DefaultLanguage;
     Language -> Language
   end.
+
+set_pointer(SessionPid, Ptr) ->
+  gen_fsm:sync_send_event(SessionPid, {set_pointer, Ptr}).
 
 %% @private
 
@@ -119,6 +129,9 @@ ready({answer, Pbx, ChannelId, CallerId}, State = #state{session_id = SessionId}
   FlowPid = spawn_run(NewSession, State#state.resume_ptr),
 
   {next_state, in_progress, State#state{pbx_pid = Pbx:pid(), flow_pid = FlowPid, session = NewSession}}.
+
+ready({set_pointer, Ptr}, _From, State) ->
+  {reply, ok, ready, State#state{resume_ptr = Ptr}};
 
 ready({dial, RealBroker, Channel, QueuedCall}, _From, State = #state{session_id = SessionId}) ->
   error_logger:info_msg("Session (~p) dial", [SessionId]),
@@ -180,7 +193,12 @@ dialing({answer, Pbx}, State = #state{session_id = SessionId, session = Session 
   monitor(process, Pbx:pid()),
   NewSession = NewQueuedCallSession#session{pbx = Pbx},
   notify_status('in-progress', NewSession),
-  FlowPid = spawn_run(NewSession, Ptr),
+  FlowPid = case Ptr of
+    undefined -> spawn_run(NewSession, Ptr);
+    _ ->
+      RusumeSession = store_default_language(NewSession),
+      spawn_run(RusumeSession, Ptr)
+  end,
 
   {next_state, in_progress, State#state{pbx_pid = Pbx:pid(), flow_pid = FlowPid, session = NewSession}};
 
@@ -201,14 +219,21 @@ in_progress({completed, ok}, State = #state{session = Session}) ->
 in_progress({completed, Failure}, State = #state{session = Session}) ->
   notify_status(failed, Session),
   finalize({failed, Failure}, State).
-in_progress({suspend, NewSession, Ptr}, _From, State = #state{session = Session = #session{session_id = SessionId, call_log = CallLog}}) ->
+% in_progress({suspend, NewSessionPid, Ptr}, _From, State = #state{session = Session = #session{session_id = SessionId}}) ->
 
-  error_logger:info_msg("Session (~p) suspended", [SessionId]),
+  % error_logger:info_msg("Session (~p) suspended", [SessionId]),
 
-  CallLog:update([{duration, answer_duration(Session)}]),
+  % CallLog:update([{duration, answer_duration(Session)}, {state, <<"suspended">>}]),
 
+  % channel_queue:unmonitor_session(Session#session.channel#channel.id, self()),
+  % {reply, ok, ready, State#state{pbx_pid = undefined, flow_pid = undefined, resume_ptr = Ptr, session = NewSession}}.
+in_progress({suspend, NewSessionPid, Ptr}, _From, State = #state{session = Session}) ->
+  session:set_pointer(NewSessionPid, Ptr),
+  
   channel_queue:unmonitor_session(Session#session.channel#channel.id, self()),
-  {reply, ok, ready, State#state{pbx_pid = undefined, flow_pid = undefined, resume_ptr = Ptr, session = NewSession}}.
+  
+  notify_status(completed, Session),
+  finalize(completed, State).
 
 notify_status(Status, Session = #session{call_log = CallLog, address = Address, callback_params = CallbackParams}) ->
   case Session#session.status_callback_url of
@@ -332,17 +357,18 @@ finalize({failed, Reason}, State = #state{session = Session = #session{call_log 
 
   {stop, StopReason, State}.
 
-spawn_run(Session = #session{project = Project}, undefined) ->
-  JsContext = default_variables(Session),
-  RunSession = Session#session{js_context = JsContext, default_language = project:default_language(Project)},
+spawn_run(Session, undefined) ->
+  RunSession = store_default_language(Session),
   spawn_run(RunSession, 1);
 
 spawn_run(Session = #session{pbx = Pbx}, Ptr) ->
   SessionPid = self(),
   spawn_monitor(fun() ->
     try run(Session, Ptr) of
-      {suspend, NewSession, NewPtr} ->
-        gen_fsm:sync_send_event(SessionPid, {suspend, NewSession, NewPtr});
+      % {suspend, NewSession, NewPtr} ->
+      %   gen_fsm:sync_send_event(SessionPid, {suspend, NewSession, NewPtr});
+      {suspend, NewSessionPid, NewPtr} ->
+        gen_fsm:sync_send_event(SessionPid, {suspend, NewSessionPid, NewPtr});
       {{error, _}, NewSession} ->
         finalize({failed, error}, #state{session = NewSession});
       {Result, NewSession = #session{js_context = JsContext}} ->
@@ -421,8 +447,10 @@ run(Session = #session{flow = Flow, stack = Stack, call_log = CallLog}, Ptr) ->
           end;
         finish ->
           end_flow(NewSession);
-        suspend ->
-          {suspend, NewSession, Ptr + 1}
+        % suspend ->
+        %   {suspend, NewSession, Ptr + 1}
+        {suspend, NewSessionPid} ->
+          {suspend, NewSessionPid, Ptr + 1}
       end
   catch
     hangup ->
@@ -472,3 +500,7 @@ answer_duration(#session{call_log = CallLog, queued_call = QueuedCall}) ->
 should_reschedule(marked_as_failed) -> false;
 should_reschedule(hangup) -> false;
 should_reschedule(_) -> true.
+
+store_default_language(Session = #session{project = Project}) ->
+  JsContext = default_variables(Session),
+  Session#session{js_context = JsContext, default_language = project:default_language(Project)}.
