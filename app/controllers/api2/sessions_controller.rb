@@ -21,7 +21,11 @@ class Api2::SessionsController < Api2Controller
   def create
     account = Account.find_by_email(params[:account][:email])
     if account && account.valid_password?(params[:account][:password])
-      render :json=> {:success=>true, :auth_token => account.auth_token, :email=> account.email, role: account.role}
+      render :json=> {success: true,
+                      auth_token: account.auth_token,
+                      email: account.email, 
+                      role: account.role,
+                      id: account.id }
     else
       response_with_invalid_credential
     end

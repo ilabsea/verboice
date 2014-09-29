@@ -17,4 +17,6 @@
 
 class CustomProjectSerializer < ActiveModel::Serializer
   attributes :id, :name
+  has_many :call_flows, serializer: BasicCallFlowSerializer
+  has_many :project_variables, serializer: BasicProjectVariableSerializer
 end

@@ -15,33 +15,10 @@
 # You should have received a copy of the GNU General Public License
 # along with Verboice.  If not, see <http://www.gnu.org/licenses/>.
 
-class CustomChannelSerializer < CustomBasicChannelSerializer
-  attributes :traffics, :prefix_called_number
+class ScheduleSerializer < ActiveModel::Serializer
+  attributes :id, :project_id, :call_flow_id, :group_id, :is_repeated,
+             :start_date, :from, :to, :conditions, :retries_in_hours
 
-  has_one :account, serializer: CustomAccountSerializer
-
-  def include_account?
-    @options[:account]
-  end
-
-  def include_traffics?
-    @options[:traffics]
-  end
-
-  def include_prefix_called_number?
-    @options[:prefix_called_number]
-  end
-
-  def traffics
-    traffics = []
-    @options[:traffics].each do |traffic|
-      traffics.push CustomTrafficSerializer.new(traffic) if traffic.channel_id == id
-    end
-    traffics
-  end
-
-  def prefix_called_number
-    object.config["prefix_called_number"] if object.config
-  end
+  has_many :channels, serializer: CustomBasicChannelSerializer
 
 end

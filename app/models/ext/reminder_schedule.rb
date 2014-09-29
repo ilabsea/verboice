@@ -8,13 +8,15 @@ module Ext
 		serialize :conditions, Array
 		serialize :schedule, IceCube::Schedule
 
-		#TODO : alias attribute for :date_time
+		#TODO : alias attribute for :date_time , might not need
 		validates :client_start_date, :"ext/validator/date" => {:date_format => Date::DEFAULT_FORMAT, :field => :start_date }, :if => Proc.new { |record| !record.repeat? }
+		
 		validates :conditions, :presence => true, :if => Proc.new { |record| record.repeat? }
 
 		validates :time_from, :presence => true
 		validates :time_to, :presence => true
 
+		#TODO might not need
 		validate :time_from_is_before_time_to
 
 		validates :retries_in_hours, :presence => true, :if => Proc.new { |record| record.retries }
@@ -26,6 +28,8 @@ module Ext
 
 		belongs_to :call_flow
 		belongs_to :reminder_group
+
+		#TODO remove this field
 		belongs_to :reminder_phone_book_type
 		belongs_to :channel
 
@@ -38,11 +42,14 @@ module Ext
 
 		has_many :reminder_channels, :class_name => "Ext::ReminderChannel", :inverse_of => :reminder_schedule, :dependent => :destroy
 		has_many :channels, :through => :reminder_channels
+
+		#TODO remove
 		accepts_nested_attributes_for :reminder_channels
 
 		TYPE_ONE_TIME = 0
 		TYPE_DAILY   = 1
 
+		#TODO: might remove no need anymore
 		attr_reader :start_date_display
 		attr_accessor :client_start_date, :ext_reminder_channels_attributes
 
@@ -50,6 +57,7 @@ module Ext
 		after_create  :create_queued_calls
 		after_destroy :remove_queued_calls
 
+		#TODO: might not need
 		def time_from_is_before_time_to
 			if client_start_date
 				client_date = repeat? ? DateTime.now.utc.in_time_zone(project.time_zone).to_date : Ext::Parser::DateParser.parse("#{client_start_date}", Date::DEFAULT_FORMAT)

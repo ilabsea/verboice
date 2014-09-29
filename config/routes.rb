@@ -259,6 +259,8 @@ Verboice::Application.routes.draw do
     post '/auth' => 'sessions#create'
 
     resources :traffics, only: [:index]
+
+    resources :reminder_schedules
   end
 
   post 'call_simulator/start'

@@ -19,9 +19,12 @@ module Api2
 
     # GET /api/projects
     def index
-      projects = Project.all if api_current_account.admin?
+      projects = Project if api_current_account.admin?
       projects = api_current_account.projects if api_current_account.user?
-      render json: projects, root: false
+
+      projects = projects.includes(:call_flows, :project_variables)
+
+      render json: projects, each_serializer: CustomProjectSerializer
     end
   end
 end

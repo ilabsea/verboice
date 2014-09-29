@@ -63,6 +63,10 @@ class Api2Controller < ActionController::Base
     render :json=> {:success=>false, :message=>"Not authorized access"}, :status=>401
   end
 
+  def response_with_bad_request
+    head :bad_request
+  end
+
   def origin_host
     request.remote_ip
   end
@@ -70,5 +74,5 @@ class Api2Controller < ActionController::Base
   def api_admin?
     api_current_account.admin? && api_current_account.has_access_from?(origin_host)
   end
-  
+
 end
