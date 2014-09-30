@@ -39,6 +39,7 @@ module Api2
         @call_logs = @call_logs.where(address: params[:address]) if params[:address]
       end
 
+      @call_logs = @call_logs.where(["direction = ?", params[:direction]]) if params[:direction].present?
       @call_logs = @call_logs.order('channel_id').includes([:account, :channel, :project])
 
       render json: @call_logs, each_serializer: CustomCallLogSerializer
