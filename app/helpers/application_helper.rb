@@ -105,4 +105,8 @@ module ApplicationHelper
     datetime = datetime.try(:in_time_zone, time_zone || 'UTC')
     datetime.present? ? datetime.strftime(Time::DEFAULT_FORMAT) : ''
   end
+
+  def tip_info text
+    image_tag "info.png", class: "icon-info tooltip", title: text
+  end
 end
