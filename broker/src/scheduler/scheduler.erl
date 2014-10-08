@@ -1,10 +1,11 @@
 -module(scheduler).
--export([start_link/0, load/0, enqueue/1]).
+-export([start_link/0, load/0, enqueue/1, verify_session/0]).
 
 -behaviour(gen_server).
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2, terminate/2, code_change/3]).
 
 -define(SERVER, ?MODULE).
+-define(SESSION_CLEANUP_TIME, 60 * 60). % 1 Hour
 -record(state, {last_id, waiting_calls}).
 
 -include("db.hrl").
@@ -15,6 +16,20 @@ start_link() ->
 
 load() ->
   gen_server:cast(?SERVER, load).
+
+verify_session() ->
+  gen_server:cast(?SERVER, verify_session).
+
+clean_session() ->
+  clean_session(supervisor:which_children(session_sup)).
+
+clean_session([]) -> [];
+clean_session([{_Id, Pid, _, _} | Rest]) ->
+  terminate_session(Pid),
+  clean_session(Rest).
+
+terminate_session(SessionPid) ->
+  session:no_ack(SessionPid).
 
 enqueue(Call) ->
   gen_server:cast(?SERVER, {enqueue, Call}).
@@ -31,6 +46,9 @@ init({}) ->
   % Check every 10 seconds for due calls
   timer:send_interval(timer:seconds(10), dispatch),
 
+  % Remove stacked session that take longer than SESSION_CLEANUP_TIME
+  timer:apply_interval(timer:seconds(?SESSION_CLEANUP_TIME), ?MODULE, verify_session, []),
+
   {ok, #state{last_id = 0, waiting_calls = ordsets:new()}}.
 
 %% @private
@@ -38,6 +56,9 @@ handle_call(_Request, _From, State) ->
   {reply, {error, unknown_call}, State}.
 
 %% @private
+handle_cast(verify_session, State)->
+  clean_session(),
+  {noreply, State};
 handle_cast(load, State = #state{last_id = LastId}) ->
   LoadedCalls = queued_call:find_all([{call_log_id, '>', LastId}, {state, <<"queued">>}], [{order_by, not_before}]),
   NewState = lists:foldl(fun process_call/2, State, LoadedCalls),

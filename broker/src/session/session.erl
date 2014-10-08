@@ -20,8 +20,9 @@
 -export([ready/2, ready/3, dialing/2, in_progress/2, in_progress/3, matches/2]).
 
 -define(SESSION(Id), {session, Id}).
--define(TIMEOUT_DIALING, 60 * 1000).
--define(TIMEOUT_INPROGRESS, 30 * 60 * 1000).
+-define(TIMEOUT_DIALING, 60 * 1000). %  1 Minute
+-define(TIMEOUT_INPROGRESS, 30 * 60 * 1000). % 30 Minutes
+-define(TIMEOUT_SESSION, 30 * 60 * 1000). % 30 Minutes
 
 -include("session.hrl").
 -include("db.hrl").
@@ -146,7 +147,6 @@ ready({dial, RealBroker, Channel, QueuedCall}, _From, State = #state{session_id 
       Session#session{queued_call = QueuedCall, address = QueuedCall#queued_call.address}
   end,
 
-
   case RealBroker:dispatch(NewSession) of
     {error, unavailable} ->
       {stop, normal, unavailable, State#state{session = NewSession}};
@@ -180,9 +180,17 @@ dialing({reject, Reason}, State = #state{session = Session = #session{session_id
   notify_status('no-answer', Session),
   finalize({failed, Reason}, State);
 
-dialing(timeout, State = #state{session = Session}) ->
-  notify_status(busy, Session),
-  finalize({failed, timeout}, State).
+dialing(timeout, State = #state{session = Session = #session{call_log = CallLog}}) ->
+  IsTimeout = is_timeout(CallLog, ?TIMEOUT_DIALING),
+
+  if
+    IsTimeout -> 
+      channel_queue:unmonitor_session(Session#session.channel#channel.id, self()),
+      notify_status(busy, Session),
+      finalize({failed, timeout}, State);
+    true -> 
+      {next_state, dialing, State, ?TIMEOUT_DIALING}
+  end.
 
 total_call_duraction(Call,Session) ->
    Call:duration() + answer_duration(Session).
@@ -190,23 +198,30 @@ total_call_duraction(Call,Session) ->
 duration_from_now(StartedAt) ->
   {_, StartedAtTime} = StartedAt,
   Now = calendar:universal_time(),
-  calendar:datetime_to_gregorian_seconds(Now) - calendar:datetime_to_gregorian_seconds(StartedAtTime).  
+  calendar:datetime_to_gregorian_seconds(Now) - calendar:datetime_to_gregorian_seconds(StartedAtTime).
 
 in_progress({completed, ok}, State = #state{session = Session}) ->
   notify_status(completed, Session),
   finalize(completed, State);
+
 in_progress({completed, Failure}, State = #state{session = Session}) ->
   notify_status(failed, Session),
   finalize({failed, Failure}, State);
-in_progress(timeout, State = #state{session = Session = #session{session_id = SessionId, pbx = Pbx}}) ->
-  error_logger:info_msg("Session (~p) timeout, reason: NOACK", [SessionId]),
 
-  channel_queue:unmonitor_session(Session#session.channel#channel.id, self()),
-  try
-    notify_status(no_ack, Session),
-    finalize({failed, no_ack}, State)
-  after
-    Pbx:hangup()
+in_progress(timeout, State = #state{session = Session = #session{session_id = SessionId, pbx = Pbx, call_log = CallLog}}) ->
+  IsTimeout = is_timeout(CallLog, ?TIMEOUT_SESSION),
+
+  if
+    IsTimeout -> 
+      error_logger:info_msg("Session (~p) timeout, reason: NOACK", [SessionId]),
+      channel_queue:unmonitor_session(Session#session.channel#channel.id, self()),
+      try
+        notify_status(no_ack, Session),
+        finalize({failed, no_ack}, State)
+      after
+        Pbx:hangup()
+      end;
+    true -> {next_state, in_progress, State}
   end.
 
 in_progress({suspend, NewSession, Ptr}, _From, State = #state{session = Session = #session{session_id = SessionId, call_log = CallLog}}) ->
@@ -480,3 +495,12 @@ answer_duration(#session{call_log = CallLog, queued_call = QueuedCall}) ->
 should_reschedule(marked_as_failed) -> false;
 should_reschedule(hangup) -> false;
 should_reschedule(_) -> true.
+
+is_timeout(CallLog, TimeoutIn) ->
+  Call = call_log:find(CallLog:id()),
+
+  Now = calendar:universal_time(),
+  {_, CalledAt} = Call:called_at(),
+
+  Diff = 1000 * (calendar:datetime_to_gregorian_seconds(Now) - calendar:datetime_to_gregorian_seconds(CalledAt)),
+  Diff >= TimeoutIn.
