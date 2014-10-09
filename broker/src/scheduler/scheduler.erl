@@ -21,17 +21,6 @@ load() ->
 verify_session() ->
   gen_server:cast(?SERVER, verify_session).
 
-clean_session() ->
-  clean_session(supervisor:which_children(session_sup)).
-
-clean_session([]) -> [];
-clean_session([{_Id, Pid, _, _} | Rest]) ->
-  terminate_session(Pid),
-  clean_session(Rest).
-
-terminate_session(SessionPid) ->
-  session:no_ack(SessionPid).
-
 enqueue(Call) ->
   gen_server:cast(?SERVER, {enqueue, Call}).
 
@@ -58,7 +47,7 @@ handle_call(_Request, _From, State) ->
 
 %% @private
 handle_cast(verify_session, State)->
-  clean_session(),
+  session_sup:clean_session(),
   {noreply, State};
 handle_cast(load, State = #state{last_id = LastId}) ->
   LoadedCalls = queued_call:find_all([{call_log_id, '>', LastId}, {state, <<"queued">>}], [{order_by, not_before}]),
