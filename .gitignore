@@ -28,14 +28,13 @@ config/api.yml
 config/application.yml
 config/database.yml
 
-broker/verboice.config
-
 broker/deps
 broker/ebin
 broker/verboice.config
 broker/.eunit
 broker/*.plt
 broker/rel/verboice
+broker/erl_crash.dump
 
 vendor/ruby
 
