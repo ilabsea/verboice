@@ -1,6 +1,7 @@
 -module(call_log).
 -export([error/3, info/3, trace/3]).
--export([duration/1, started_at_or_created_at/1, append_step_interaction/2, address_without_prefix/1, called_at/1]).
+-export([duration/1, started_at_or_created_at/1, append_step_interaction/2, address_without_prefix/1]).
+-export([called_at/1]).
 -define(TABLE_NAME, "call_logs").
 -include_lib("erl_dbmodel/include/model.hrl").
 
@@ -33,15 +34,9 @@ started_at_or_created_at(#call_log{created_at = {_, CreatedAt}, started_at = Sta
     _ -> StartedAt
   end.
 
-called_at(#call_log{created_at = CreatedAt, started_at = StartedAt, not_before = NotBefore}) ->
-  case NotBefore of
-    undefined -> 
-      case StartedAt of
-        undefined -> CreatedAt;
-        _ -> StartedAt
-      end;
-    _ -> NotBefore
-  end.
+called_at(#call_log{not_before = undefined, started_at = undefined, created_at = CreatedAt}) -> CreatedAt;
+called_at(#call_log{not_before = undefined, started_at = StartedAt}) -> StartedAt;
+called_at(#call_log{not_before = NotBefore}) -> NotBefore.
 
 append_step_interaction(StepName, CallLog = #call_log{step_interaction = StepInteraction}) ->
   Time = util:time_difference_in_seconds(CallLog:started_at_or_created_at(), calendar:universal_time()),

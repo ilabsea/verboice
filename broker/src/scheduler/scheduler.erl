@@ -5,7 +5,8 @@
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2, terminate/2, code_change/3]).
 
 -define(SERVER, ?MODULE).
--define(SESSION_CLEANUP_TIME, 60 * 60). % 1 Hour
+-define(SESSION_CLEANUP_TIME, 60 * 60 * 1000).
+
 -record(state, {last_id, waiting_calls}).
 
 -include("db.hrl").
@@ -47,7 +48,7 @@ init({}) ->
   timer:send_interval(timer:seconds(10), dispatch),
 
   % Remove stacked session that take longer than SESSION_CLEANUP_TIME
-  timer:apply_interval(timer:seconds(?SESSION_CLEANUP_TIME), ?MODULE, verify_session, []),
+  timer:apply_interval(?SESSION_CLEANUP_TIME, ?MODULE, verify_session, []),
 
   {ok, #state{last_id = 0, waiting_calls = ordsets:new()}}.
 

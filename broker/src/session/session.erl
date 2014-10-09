@@ -180,8 +180,8 @@ dialing({reject, Reason}, State = #state{session = Session = #session{session_id
   notify_status('no-answer', Session),
   finalize({failed, Reason}, State);
 
-dialing(timeout, State = #state{session = Session = #session{call_log = CallLog}}) ->
-  IsTimeout = is_timeout(CallLog, ?TIMEOUT_DIALING),
+dialing(timeout, State = #state{session = Session}) ->
+  IsTimeout = is_timeout(Session, ?TIMEOUT_DIALING),
 
   if
     IsTimeout -> 
@@ -208,8 +208,8 @@ in_progress({completed, Failure}, State = #state{session = Session}) ->
   notify_status(failed, Session),
   finalize({failed, Failure}, State);
 
-in_progress(timeout, State = #state{session = Session = #session{session_id = SessionId, pbx = Pbx, call_log = CallLog}}) ->
-  IsTimeout = is_timeout(CallLog, ?TIMEOUT_SESSION),
+in_progress(timeout, State = #state{session = Session = #session{session_id = SessionId, pbx = Pbx}}) ->
+  IsTimeout = is_timeout(Session, ?TIMEOUT_SESSION),
 
   if
     IsTimeout -> 
@@ -496,9 +496,13 @@ should_reschedule(marked_as_failed) -> false;
 should_reschedule(hangup) -> false;
 should_reschedule(_) -> true.
 
-is_timeout(CallLog, TimeoutIn) ->
-  Call = call_log:find(CallLog:id()),
+%% @private
+session_call(#session{queued_call = undefined, call_log = CallLog}) ->
+  call_log:find(CallLog:id());
+session_call(#session{queued_call = QueuedCall}) -> QueuedCall.
 
+is_timeout(Session, TimeoutIn) ->
+  Call = session_call(Session),
   Now = calendar:universal_time(),
   {_, CalledAt} = Call:called_at(),
 
