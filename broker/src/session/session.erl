@@ -184,8 +184,8 @@ dialing(timeout, State = #state{session = Session}) ->
   IsTimeout = is_timeout(Session, ?TIMEOUT_DIALING),
 
   if
-    IsTimeout -> 
-      channel_queue:unmonitor_session(Session#session.channel#channel.id, self()),
+    IsTimeout ->
+      unmonitor(Session),
       notify_status(busy, Session),
       finalize({failed, timeout}, State);
     true -> 
@@ -208,13 +208,12 @@ in_progress({completed, Failure}, State = #state{session = Session}) ->
   notify_status(failed, Session),
   finalize({failed, Failure}, State);
 
-in_progress(timeout, State = #state{session = Session = #session{session_id = SessionId, pbx = Pbx}}) ->
+in_progress(timeout, State = #state{session = Session = #session{pbx = Pbx}}) ->
   IsTimeout = is_timeout(Session, ?TIMEOUT_SESSION),
 
   if
     IsTimeout -> 
-      error_logger:info_msg("Session (~p) timeout, reason: NOACK", [SessionId]),
-      channel_queue:unmonitor_session(Session#session.channel#channel.id, self()),
+      unmonitor(Session),
       try
         notify_status(no_ack, Session),
         finalize({failed, no_ack}, State)
@@ -501,6 +500,7 @@ session_call(#session{queued_call = undefined, call_log = CallLog}) ->
   call_log:find(CallLog:id());
 session_call(#session{queued_call = QueuedCall}) -> QueuedCall.
 
+%% @private
 is_timeout(Session, TimeoutIn) ->
   Call = session_call(Session),
   Now = calendar:universal_time(),
@@ -508,3 +508,9 @@ is_timeout(Session, TimeoutIn) ->
 
   Diff = 1000 * (calendar:datetime_to_gregorian_seconds(Now) - calendar:datetime_to_gregorian_seconds(CalledAt)),
   Diff >= TimeoutIn.
+
+%% @private
+unmonitor(#session{session_id = SessionId, channel = #channel{id = ChannelId}}) ->
+  error_logger:info_msg("Session (~p) timeout, reason: NOACK", [SessionId]),
+  channel_queue:unmonitor_session(ChannelId, self()),
+  admin:notify_session_cleanup().
