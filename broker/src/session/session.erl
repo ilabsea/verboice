@@ -185,7 +185,7 @@ dialing(timeout, State = #state{session = Session}) ->
 
   if
     IsTimeout ->
-      unmonitor(Session),
+      timeout(Session),
       notify_status(busy, Session),
       finalize({failed, timeout}, State);
     true -> 
@@ -213,7 +213,7 @@ in_progress(timeout, State = #state{session = Session = #session{pbx = Pbx}}) ->
 
   if
     IsTimeout -> 
-      unmonitor(Session),
+      timeout(Session),
       try
         notify_status(no_ack, Session),
         finalize({failed, no_ack}, State)
@@ -510,7 +510,7 @@ is_timeout(Session, TimeoutIn) ->
   Diff >= TimeoutIn.
 
 %% @private
-unmonitor(#session{session_id = SessionId, channel = #channel{id = ChannelId}}) ->
+timeout(Session = #session{session_id = SessionId, channel = #channel{id = ChannelId}}) ->
   error_logger:info_msg("Session (~p) timeout, reason: NOACK", [SessionId]),
   channel_queue:unmonitor_session(ChannelId, self()),
-  admin:notify_session_cleanup().
+  admin:notify_session_timeout(Session).

@@ -1,6 +1,6 @@
 -module(util).
 -export([md5hex/1, to_string/1, binary_to_lower_atom/1, strip_nl/1, binary_to_integer/1, parse_qs/1, normalize_phone_number/1, interpolate/2]).
--export([time_difference_in_seconds/2]).
+-export([time_difference_in_seconds/2, strftime/1]).
 
 md5hex(Data) ->
   Hash = crypto:hash(md5, Data),
@@ -56,3 +56,9 @@ interpolate(Text, Fun, Output) ->
 
 time_difference_in_seconds(From, To) ->
   calendar:datetime_to_gregorian_seconds(To) - calendar:datetime_to_gregorian_seconds(From).
+
+strftime(DateTime) ->
+  {datetime, {{Y, Month, D}, {H, Minute, S}}} = DateTime,
+  Date = to_string(Y) ++ "/" ++ to_string(Month) ++ "/" ++ to_string(D),
+  Time = to_string(H) ++ ":" ++ to_string(Minute) ++ ":" ++ to_string(S),
+  Date ++ " " ++ Time.
