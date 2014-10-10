@@ -17,6 +17,8 @@
 
 class Channel < ActiveRecord::Base
   PREFIX_SEPARATOR = ','
+  PREFIX_NORMALIZATIONS = ['855', '0']
+
   belongs_to :account
   belongs_to :call_flow
   has_one :project, :through => :call_flow
@@ -80,9 +82,19 @@ class Channel < ActiveRecord::Base
     "#{prefix_called_number}#{address}"
   end
 
+  def self.normalized_called_number address, prefix
+    return address if prefix.blank?
+    reg = Channel::PREFIX_NORMALIZATIONS.map{|prefix| '^\+?' + prefix }.join("|")
+    normalized_address = address.gsub(%r{#{reg}}, "")
+    prefix + normalized_address
+  end
+
   def enqueue_call_to address, options
     via = options.fetch(:via, 'API')
-    address = address_with_prefix_called_number address
+
+    prefix  = config["normalized_called_number"] 
+    address = Channel.normalized_called_number(address, prefix)
+    address = address_with_prefix_called_number(address)
 
     if options[:call_flow_id]
       current_call_flow = account.call_flows.find(options[:call_flow_id])
