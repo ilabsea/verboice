@@ -91,18 +91,19 @@ ready({answer, Pbx, ChannelId, CallerId}, State = #state{session_id = SessionId}
       Channel = channel:find(ChannelId),
       CallFlow = call_flow:find(Channel#channel.call_flow_id),
       Project = project:find(CallFlow#call_flow.project_id),
+      Contact = get_contact(CallFlow#call_flow.project_id, CallerId, 1),
+      ContactAddress = contact:find_or_create_contact_address(CallerId, Contact),
       CallLog = call_log_srv:new(SessionId, #call_log{
         account_id = Channel#channel.account_id,
         project_id = CallFlow#call_flow.project_id,
         state = "active",
         direction = "incoming",
         channel_id = ChannelId,
-        address = CallerId,
+        address = ContactAddress#contact_address.address,
         started_at = calendar:universal_time(),
         call_flow_id = CallFlow#call_flow.id,
         store_log_entries = Project#project.store_call_log_entries
       }),
-      Contact = get_contact(CallFlow#call_flow.project_id, CallerId, 1),
       Flow = call_flow:flow(CallFlow),
       {StatusUrl, StatusUser, StatusPass} = project:status_callback(Project),
 
