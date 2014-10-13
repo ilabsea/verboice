@@ -8,6 +8,10 @@ onWorkflow ->
       super(attrs)
       @dial_prefix = ko.observable attrs.dial_prefix
 
+      @call_flow_options = ko.observableArray call_flows
+      @selected_call_flow_id = ko.observable attrs.selected_call_flow_id
+      @retries = ko.observable attrs.retries
+
     button_class: =>
       'lcallback'
 
@@ -16,7 +20,9 @@ onWorkflow ->
 
     to_hash: () =>
       $.extend(super,
-        dial_prefix: @dial_prefix()
+        dial_prefix: @dial_prefix(),
+        selected_call_flow_id: @selected_call_flow_id(),
+        retries: @retries()
       )
 
     @add_to_steps: () ->

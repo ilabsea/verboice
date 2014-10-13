@@ -48,6 +48,7 @@ Verboice::Application.routes.draw do
   # - Deep routes ensure that form_for directives work as expected, so form_for([@project, @contact]) works no matter it is a creation or an update
   [true, false].each do |shallow|
     resources :projects, :shallow => shallow do
+      resources :call_flows
       member do
         post :enqueue_call
         put :update_variables

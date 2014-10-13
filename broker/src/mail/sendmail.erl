@@ -1,3 +1,4 @@
+%% coding: latin-1
 %% File   : sendmail.erl
 %% Author : Klacke <klacke@hyber.org>,
 %%          Johan Bevemyr <jb@son.bevemyr.com>,

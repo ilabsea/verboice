@@ -1,5 +1,6 @@
 -module(schedule).
 -export([next_available_time/2, load/2]).
+-export([dump/2]).
 -define(CACHE, true).
 -define(TABLE_NAME, "schedules").
 -define(MAP, [
@@ -47,6 +48,9 @@ next_weekday(AvailableDays, WDay) ->
 next_weekday([First|_], [], _) -> First;
 next_weekday(_, [D | _], WDay) when D >= WDay-> D;
 next_weekday(AvailableDays, [_ | Rest], WDay) -> next_weekday(AvailableDays, Rest, WDay).
+
+dump(Value, _Self) ->
+  Value.
 
 load(Weekdays, {schedule, weekdays}) -> parse_weekdays(Weekdays);
 load(Retries, {schedule, retries}) -> parse_retries(Retries).
