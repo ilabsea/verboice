@@ -18,7 +18,7 @@ notify_session_timeout(Session) ->
   end.
 
 subject_message() ->
-  {ok, Instance} = application:get_env(base_url),
+  {ok, Instance} = application:get_env(hostname),
   string:join(["NoACK", Instance], "-").
 
 body_message(#session{channel = Channel, call_log = CallLog}) ->

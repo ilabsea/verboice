@@ -21,6 +21,7 @@
 
     {twilio_callback_url, "http://localhost:8080/"},
 
+    {hostname, "hostname"},
     {recipient, ["admin@verboice.instedd.org"]},
     {sender, "noreply@verboice.instedd.org"}
   ]},
