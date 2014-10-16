@@ -210,4 +210,36 @@ describe Channel do
     channel.save!
     channel.guid.should_not be_nil
   end
+
+  describe "normalized called number" do
+    describe "prefix is empty" do
+      it "return the same number" do
+        address = Channel.normalized_called_number("85512220000", "")
+        expect(address).to eq "85512220000"
+      end
+    end
+
+    describe "prefix is not empty" do
+      context "address match the pattern" do
+        it "remove the 855,0 and add prefix at begining" do
+          address = Channel.normalized_called_number("85512220000", "0")
+          expect(address).to eq "012220000"
+        end
+
+        it "remove the +855, +0 and add prefix at the begining" do
+          address = Channel.normalized_called_number("+85512220000", "888")
+          expect(address).to eq "88812220000"
+        end
+      end
+
+      context "address does not match the pattern" do
+        it "return the same address with the prefix at the begining" do
+          address = Channel.normalized_called_number("12220000", "666")
+          expect(address).to eq "66612220000"
+        end
+      end
+
+    end
+
+  end
 end

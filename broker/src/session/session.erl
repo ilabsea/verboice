@@ -1,5 +1,6 @@
 -module(session).
 -export([start_link/1, new/0, find/1, answer/2, answer/4, dial/4, reject/2, stop/1, resume/1, default_variables/1]).
+-export([no_ack/1]).
 -export([language/1]).
 
 % FSM Description
@@ -19,6 +20,9 @@
 -export([ready/2, ready/3, dialing/2, in_progress/2, in_progress/3, matches/2]).
 
 -define(SESSION(Id), {session, Id}).
+-define(TIMEOUT_DIALING, 60 * 1000). %  1 Minute
+-define(TIMEOUT_INPROGRESS, 30 * 60 * 1000). % 30 Minutes
+-define(TIMEOUT_SESSION, 30 * 60 * 1000). % 30 Minutes
 
 -include("session.hrl").
 -include("db.hrl").
@@ -58,6 +62,9 @@ stop(SessionPid) ->
 resume(SessionPid) ->
   gen_fsm:send_event(SessionPid, resume).
 
+no_ack(SessionPid) ->
+  gen_fsm:send_event(SessionPid, timeout).
+
 matches(SessionPid, Criteria) ->
   try gen_fsm:sync_send_all_state_event(SessionPid, {matches, Criteria}, 100)
   catch
@@ -84,18 +91,19 @@ ready({answer, Pbx, ChannelId, CallerId}, State = #state{session_id = SessionId}
       Channel = channel:find(ChannelId),
       CallFlow = call_flow:find(Channel#channel.call_flow_id),
       Project = project:find(CallFlow#call_flow.project_id),
+      Contact = get_contact(CallFlow#call_flow.project_id, CallerId, 1),
+      ContactAddress = contact:find_or_create_contact_address(CallerId, Contact),
       CallLog = call_log_srv:new(SessionId, #call_log{
         account_id = Channel#channel.account_id,
         project_id = CallFlow#call_flow.project_id,
         state = "active",
         direction = "incoming",
         channel_id = ChannelId,
-        address = CallerId,
+        address = ContactAddress#contact_address.address,
         started_at = calendar:universal_time(),
         call_flow_id = CallFlow#call_flow.id,
         store_log_entries = Project#project.store_call_log_entries
       }),
-      Contact = get_contact(CallFlow#call_flow.project_id, CallerId, 1),
       Flow = call_flow:flow(CallFlow),
       {StatusUrl, StatusUser, StatusPass} = project:status_callback(Project),
 
@@ -118,7 +126,7 @@ ready({answer, Pbx, ChannelId, CallerId}, State = #state{session_id = SessionId}
   notify_status('in-progress', NewSession),
   FlowPid = spawn_run(NewSession, State#state.resume_ptr),
 
-  {next_state, in_progress, State#state{pbx_pid = Pbx:pid(), flow_pid = FlowPid, session = NewSession}}.
+  {next_state, in_progress, State#state{pbx_pid = Pbx:pid(), flow_pid = FlowPid, session = NewSession}, ?TIMEOUT_INPROGRESS}.
 
 ready({dial, RealBroker, Channel, QueuedCall}, _From, State = #state{session_id = SessionId}) ->
   error_logger:info_msg("Session (~p) dial", [SessionId]),
@@ -146,7 +154,6 @@ ready({dial, RealBroker, Channel, QueuedCall}, _From, State = #state{session_id 
         undefined -> false;
         ChannelQuota -> ChannelQuota:enabled() andalso ChannelQuota:blocked()
       end,
-
       case QuotaReaches of
         true ->
           {_, _, NewSession2} = finalize({failed, blocked}, State#state{session = NewSession}),
@@ -162,7 +169,7 @@ ready({dial, RealBroker, Channel, QueuedCall}, _From, State = #state{session_id 
               CallLog:info(["Dialing to ", QueuedCall#queued_call.address, " through channel ", Channel#channel.name], []),
               notify_status(ringing, NewSession),
               CallLog:update([{state, "active"}, {fail_reason, undefined}]),
-              {reply, ok, dialing, State#state{session = NewSession}, timer:minutes(1)}
+      {reply, ok, dialing, State#state{session = NewSession}, ?TIMEOUT_DIALING}
           end
       end;
     _ -> 
@@ -182,7 +189,7 @@ dialing({answer, Pbx}, State = #state{session_id = SessionId, session = Session 
   notify_status('in-progress', NewSession),
   FlowPid = spawn_run(NewSession, Ptr),
 
-  {next_state, in_progress, State#state{pbx_pid = Pbx:pid(), flow_pid = FlowPid, session = NewSession}};
+  {next_state, in_progress, State#state{pbx_pid = Pbx:pid(), flow_pid = FlowPid, session = NewSession}, ?TIMEOUT_INPROGRESS};
 
 dialing({reject, Reason}, State = #state{session = Session = #session{session_id = SessionId, call_log = CallLog}}) ->
   error_logger:info_msg("Session (~p) rejected, reason: ~p", [SessionId, Reason]),
@@ -191,8 +198,16 @@ dialing({reject, Reason}, State = #state{session = Session = #session{session_id
   finalize({failed, Reason}, State);
 
 dialing(timeout, State = #state{session = Session}) ->
-  notify_status(busy, Session),
-  finalize({failed, timeout}, State).
+  IsTimeout = is_timeout(Session, ?TIMEOUT_DIALING),
+
+  if
+    IsTimeout ->
+      timeout(Session),
+      notify_status(busy, Session),
+      finalize({failed, timeout}, State);
+    true -> 
+      {next_state, dialing, State, ?TIMEOUT_DIALING}
+  end.
 
 in_progress({completed, ok}, State = #state{session = Session}) ->
   notify_status(completed, Session),
@@ -200,9 +215,24 @@ in_progress({completed, ok}, State = #state{session = Session}) ->
 
 in_progress({completed, Failure}, State = #state{session = Session}) ->
   notify_status(failed, Session),
-  finalize({failed, Failure}, State).
-in_progress({suspend, NewSession, Ptr}, _From, State = #state{session = Session = #session{session_id = SessionId, call_log = CallLog}}) ->
+  finalize({failed, Failure}, State);
 
+in_progress(timeout, State = #state{session = Session = #session{pbx = Pbx}}) ->
+  IsTimeout = is_timeout(Session, ?TIMEOUT_SESSION),
+
+  if
+    IsTimeout -> 
+      timeout(Session),
+      try
+        notify_status(no_ack, Session),
+        finalize({failed, no_ack}, State)
+      after
+        Pbx:hangup()
+      end;
+    true -> {next_state, in_progress, State}
+  end.
+
+in_progress({suspend, NewSession, Ptr}, _From, State = #state{session = Session = #session{session_id = SessionId, call_log = CallLog}}) ->
   error_logger:info_msg("Session (~p) suspended", [SessionId]),
 
   CallLog:update([{duration, answer_duration(Session)}, {state, <<"suspended">>}]),
@@ -242,7 +272,7 @@ handle_sync_event({matches, Criteria}, _From, StateName, State = #state{session 
       Session#session.call_flow#call_flow.id == CallFlowId;
     _ -> false
   end,
-  {reply, MatchResult, StateName, State};
+  {reply, MatchResult, StateName, State, ?TIMEOUT_INPROGRESS};
 
 handle_sync_event(_Event, _From, StateName, State) ->
   {reply, ok, StateName, State}.
@@ -255,7 +285,7 @@ handle_info({'DOWN', _Ref, process, Pid, Reason}, _, State = #state{flow_pid = P
   {stop, Reason, State};
 
 handle_info(_Info, StateName, State) ->
-  {next_state, StateName, State}.
+  {next_state, StateName, State, ?TIMEOUT_INPROGRESS}.
 
 %% @private
 terminate(Reason, _, #state{session_id = Id, session = Session}) ->
@@ -472,3 +502,23 @@ answer_duration(#session{call_log = CallLog, queued_call = QueuedCall}) ->
 should_reschedule(marked_as_failed) -> false;
 should_reschedule(hangup) -> false;
 should_reschedule(_) -> true.
+
+%% @private
+session_call(#session{queued_call = undefined, call_log = CallLog}) ->
+  call_log:find(CallLog:id());
+session_call(#session{queued_call = QueuedCall}) -> QueuedCall.
+
+%% @private
+is_timeout(Session, TimeoutIn) ->
+  Call = session_call(Session),
+  Now = calendar:universal_time(),
+  {_, CalledAt} = Call:called_at(),
+
+  Diff = 1000 * (calendar:datetime_to_gregorian_seconds(Now) - calendar:datetime_to_gregorian_seconds(CalledAt)),
+  Diff >= TimeoutIn.
+
+%% @private
+timeout(Session = #session{session_id = SessionId, channel = #channel{id = ChannelId}}) ->
+  error_logger:info_msg("Session (~p) timeout, reason: NOACK", [SessionId]),
+  channel_queue:unmonitor_session(ChannelId, self()),
+  admin:notify_session_timeout(Session).

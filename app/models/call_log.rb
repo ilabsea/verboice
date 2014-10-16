@@ -33,6 +33,7 @@ class CallLog < ActiveRecord::Base
     'busy'      => 'hangup',
     'hangup'    => 'incompleted',
     'marked_as_failed' => "marked_as_failed",
+    'no_ack' => 'no_ack',
     'blocked' => "blocked",
     'disabled' => "disabled"
   }

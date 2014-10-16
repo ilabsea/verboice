@@ -63,7 +63,7 @@ onReminderGroups ->
 
 		address_exists: (address) =>
 			ref = @address_matched
-			$.map(@contacts(), (x) -> x if ref( x.address(), address) ).length > 0
+			$.map(@contacts(), (x) -> x if ref(x.address(), address)).length > 0
 
 		address_matched: (address, new_address) =>
 			@address_without_prefix(address) == @address_without_prefix(new_address)
