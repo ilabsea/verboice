@@ -31,6 +31,7 @@ class Channels::Sip < Channel
   config_accessor :number
   config_accessor :prefix
   config_accessor :prefix_called_number
+  config_accessor :normalized_called_number
 
   attr_accessor :ip_address
 

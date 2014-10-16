@@ -288,7 +288,7 @@ describe Ext::ReminderSchedule  do
 	describe "#create_queued_calls" do
 		before(:each) do
 			@now = DateTime.new(2012,10,25, 9,0,0, "+7") # use the same timezone as reminder schedule
-			DateTime.stub!(:now).and_return(@now)
+			DateTime.stub(:now).and_return(@now)
 			@addresses = ["1000", "1001"]
 			reminder_group = Ext::ReminderGroup.make addresses: @addresses
 
@@ -315,8 +315,8 @@ describe Ext::ReminderSchedule  do
 	describe "#process" do
 		before(:each) do
 			@now = DateTime.new(2012,10,25, 9,0,0, "+7") # use the same timezone as reminder schedule
-      DateTime.stub!(:now).and_return(@now)
-      
+      DateTime.stub(:now).and_return(@now)
+
 			@attr = {
 		  		:schedule_type => Ext::ReminderSchedule::TYPE_ONE_TIME,
 		  		:reminder_group_id => @reminder_group.id,
@@ -328,9 +328,9 @@ describe Ext::ReminderSchedule  do
 		  		:time_from => "08:00",
 		  		:time_to => "17:00",
 		  		:reminder_channels_attributes => [ {channel_id: @channel.id, reminder_schedule_id: 0}]
-		  	}
+		  }
 
-	  		@addresses = ["1000", "1001", "1002"]
+	  	@addresses = ["1000", "1001", "1002"]
 		end
 
 		it "should current date and time is 2012-10-25 09:00" do
@@ -537,7 +537,7 @@ describe Ext::ReminderSchedule  do
 		  		:reminder_group_id => @reminder_group.id,
 		  		:schedule => nil,
 		  		:client_start_date => "25/10/2012",
-		  		:time_from => "08:00",
+		  		:time_from => "08:30",
 		  		:time_to => "17:00",
 		  		:retries => true,
 		  		:retries_in_hours => "1,1",
@@ -546,12 +546,32 @@ describe Ext::ReminderSchedule  do
 		  	)
 		end
 
+    it "create options not_before as now if time is in the past" do
+      calling_at = Time.new(2012, 10, 25, 7, 0, 0)
+      now        = Time.new(2012, 10, 25, 10, 0, 0) # use the same timezone as reminder schedule
+      Time.stub(:now).and_return(now)
+
+      options = @reminder.call_options calling_at
+      options[:call_flow_id].should eq @reminder.call_flow_id
+      options[:project_id].should eq @reminder.project_id
+
+      options[:not_before].should eq now
+      options[:schedule_id].should eq @schedule.id
+
+    end
+
 		it "should create options for schedule enqueued call " do
-			options = @reminder.call_options DateTime.new(2012,10,22)
+      calling_at = Time.new(2012, 10, 25, 7, 0, 0)
+      now        = Time.new(2012, 10, 25, 7, 30, 0) # use the same timezone as reminder schedule
+      Time.stub(:now).and_return(now)
+
+      future_time = Time.new(2012, 10, 25, 8, 30, 0)
+
+			options = @reminder.call_options calling_at
 			options[:call_flow_id].should eq @reminder.call_flow_id
 			options[:project_id].should eq @reminder.project_id
-			# options[:time_zone].should  eq @reminder.project.time_zone
-			options[:not_before].should eq DateTime.new(2012, 10, 22, 1, 0)
+
+			options[:not_before].should eq future_time
 			options[:schedule_id].should eq @schedule.id
 		end
 	end
@@ -559,7 +579,7 @@ describe Ext::ReminderSchedule  do
 	describe "#callers_matches_conditions" do
 		before(:each) do
       @today = Date.new(2012, 10, 25)
-      Date.stub!(:today).and_return(@today)
+      Date.stub(:today).and_return(@today)
 
 			@attr = {
         :schedule_type => Ext::ReminderSchedule::TYPE_ONE_TIME,
@@ -626,7 +646,7 @@ describe Ext::ReminderSchedule  do
   describe "#reset_repeat_everyday_to_one_time" do
     before(:each) do
       @now = DateTime.new(2012,10,25, 9,0,0, "+7") # use the same timezone as reminder schedule
-      DateTime.stub!(:now).and_return(@now)
+      DateTime.stub(:now).and_return(@now)
 
       @attr = {
         :schedule_type => Ext::ReminderSchedule::TYPE_DAILY,
