@@ -19,7 +19,11 @@
     {nuntium_app, ""},
     {nuntium_app_password, ""},
 
-    {twilio_callback_url, "http://localhost:8080/"}
+    {twilio_callback_url, "http://localhost:8080/"},
+
+    {hostname, "hostname"},
+    {recipient, ["admin@verboice.instedd.org"]},
+    {sender, "noreply@verboice.instedd.org"}
   ]},
 
   {inets, [

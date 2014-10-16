@@ -633,6 +633,15 @@ en:
           dial_string: "Dial string"
         action:
       _form_custom_sip:
+        tooltip:
+          username: "User authentication of SIP channel"
+          password: "Password authentication of SIP channel"
+          prefix: "Phone number with this prefix will use this channel to call out"
+          limit: "Number of concurrent call"
+          domain: "Domain/IP address of SIP server"
+          prefix_called_number: "Add prefix to called number"
+          normalized_called_number: "Phone number with 0 leading will be added by this prefix"
+
         label:
           username: "Username"
           password: "Password"
@@ -649,6 +658,7 @@ en:
           outgoing: "Outgoing"
           both_directions: 'Both directions'
           prefix_called_number: 'Add prefix to called number'
+          normalized_called_number: 'Call out prefix'
           udp: "UDP"
           tcp: "TCP"
         action:

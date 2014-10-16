@@ -340,3 +340,17 @@ div.label-block {
   width: 120px !important;
 }
 
+.inline-c{
+  padding: 5px 0px;
+  label {
+    display: inline;
+  }
+  .icon-info {
+    vertical-align: middle;
+    display: inline-block;
+  }
+}
+
+.tooltip{
+  cursor: pointer;
+}
