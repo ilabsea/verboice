@@ -8,6 +8,7 @@
 //= require jquery_ujs
 //= require jquery.fancybox-1.3.4.pack
 //= require jquery.control-key-.1.0
+//= require jquery.tooltipster
 //= require underscore
 //= require pigeon
 //= require namespace
