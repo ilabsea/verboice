@@ -638,7 +638,7 @@ kh:
         tooltip:
           username: "User authentication of SIP channel"
           password: "Password authentication of SIP channel"
-          prefix: "Phone number with this prefix will use this channel to call out"
+          prefix: "Phone number with these prefixes will use this channel to call out"
           limit: "Number of concurrent call"
           domain: "Domain/IP address of SIP server"
           prefix_called_number: "Add prefix to called number"
@@ -648,6 +648,7 @@ kh:
           password: "ពាក្យសម្ងាត់"
           number: "លេខ"
           prefix: "បុព្វបទ"
+          prefix_preference: ការកំនត់បុព្វបទសំរាប់ការហៅចេញ
           limit: "ចំនួនកំនត់"
           domain: "ដែន"
           port: "ផត"
