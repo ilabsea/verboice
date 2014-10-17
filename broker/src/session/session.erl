@@ -119,7 +119,8 @@ ready({answer, Pbx, ChannelId, CallerId}, State = #state{session_id = SessionId}
         contact = Contact,
         status_callback_url = StatusUrl,
         status_callback_user = StatusUser,
-        status_callback_password = StatusPass
+        status_callback_password = StatusPass,
+        created_at = {datetime, calendar:universal_time()}
       };
     Session -> Session#session{pbx = Pbx}
   end,
@@ -141,7 +142,8 @@ ready({dial, RealBroker, Channel, QueuedCall}, _From, State = #state{session_id 
         session_id = SessionId,
         channel = Channel,
         call_log = CallLog,
-        contact = Contact
+        contact = Contact,
+        created_at = {datetime, calendar:universal_time()}
       };
     Session ->
       CallLog = Session#session.call_log,
@@ -497,17 +499,11 @@ should_reschedule(hangup) -> false;
 should_reschedule(_) -> true.
 
 %% @private
-session_call(#session{queued_call = undefined, call_log = CallLog}) ->
-  call_log:find(CallLog:id());
-session_call(#session{queued_call = QueuedCall}) -> QueuedCall.
-
-%% @private
-is_timeout(Session, TimeoutIn) ->
-  Call = session_call(Session),
+is_timeout(#session{created_at = CreatedAt}, TimeoutIn) ->
   Now = calendar:universal_time(),
-  {_, CalledAt} = Call:called_at(),
+  {_, StartedAt} = CreatedAt,
 
-  Diff = 1000 * (calendar:datetime_to_gregorian_seconds(Now) - calendar:datetime_to_gregorian_seconds(CalledAt)),
+  Diff = 1000 * (calendar:datetime_to_gregorian_seconds(Now) - calendar:datetime_to_gregorian_seconds(StartedAt)),
   Diff >= TimeoutIn.
 
 %% @private
