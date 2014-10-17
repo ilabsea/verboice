@@ -19,6 +19,7 @@ find_or_create_with_address(ProjectId, Address, Anonymous) ->
       Contact;
     ContactAddress -> contact:find(ContactAddress#contact_address.contact_id)
   end.
+  
 find_or_create_contact_address(Address, Contact = #contact{id = ContactId, project_id = ProjectId}) ->
   ContactAddresses = contact_address:find_all([{project_id, ProjectId}, {contact_id, ContactId}]),
   case contact_address(Address, ContactAddresses) of
