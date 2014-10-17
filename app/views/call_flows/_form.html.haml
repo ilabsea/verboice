@@ -10,7 +10,7 @@
     %p.desc= t('views.call_flows._form.label.choose_external_app_or_build_on_verboice')
     .call_flow_mode
       = f.select :mode, options_for_select([[t('views.call_flows._form.label.use_external_application'), :callback_url], [ t('views.call_flows._form.label.design_app_in_verboice'), :flow]], call_flow.mode), {}, :class => "w30"
-      = link_to t('views.call_flows._form.action.go_to_designer'), edit_workflow_call_flow_path(call_flow), :class => 'button farrow flow_settings flow_settings' unless call_flow.new_record?
+      = link_to t('views.call_flows._form.action.go_to_designer'), edit_workflow_project_call_flow_path(project, call_flow), :class => 'button farrow flow_settings flow_settings' unless call_flow.new_record?
     .flow_settings
       = link_to t('views.call_flows._form.action.download_call_result_as_csv'), download_results_call_flow_path(call_flow, :format => :csv), :class => "button fimport" unless call_flow.new_record? || call_flow.user_flow.nil?
 

@@ -1,7 +1,10 @@
 - content_for :head do
   :javascript
     var distinct_variables = #{ @variables.to_json };
+    
     var call_flow = #{ raw (@call_flow.user_flow || []).to_json };
+    var call_flows = #{ @call_flows.map{|call_flow| {id: call_flow.id, name: call_flow.name} }.to_json }
+
     var reminder_groups = #{ @reminder_groups.to_json }
     var external_steps = #{ @external_steps.to_json };
     var languages = #{ project_languages_json(@project) };

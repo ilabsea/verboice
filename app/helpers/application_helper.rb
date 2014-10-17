@@ -64,7 +64,7 @@ module ApplicationHelper
     new_object = class_name.to_s.camelize.constantize.new
     new_object.project = project
     key = new_object.class.name.split('::').last.underscore.to_sym
-    fields = render "box", key => new_object, :expanded => true
+    fields = render "box", key => new_object, project: project, :expanded => true
     link_to_function(name, "add_box(this, \"#{escape_javascript(fields)}\")", options)
   end
 

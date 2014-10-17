@@ -450,7 +450,9 @@ run(Session = #session{flow = Flow, stack = Stack, call_log = CallLog}, Ptr) ->
         % suspend ->
         %   {suspend, NewSession, Ptr + 1}
         {suspend, NewSessionPid} ->
-          {suspend, NewSessionPid, Ptr + 1}
+          {suspend, NewSessionPid, Ptr + 1};
+        {suspend_reset_ptr, NewSessionPid} ->
+          {suspend, NewSessionPid, undefined }
       end
   catch
     hangup ->

@@ -4,7 +4,7 @@
 %p= t('views.call_flows.index.desc')
 
 - @call_flows.each do |call_flow|
-  = render 'box', :call_flow => call_flow, :expanded => call_flow.errors.any?
+  = render 'box', :call_flow => call_flow, :project => @project, :expanded => call_flow.errors.any?
 
 .box.grey.w60.addqueue
   %span
