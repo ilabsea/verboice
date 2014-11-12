@@ -22,16 +22,14 @@ module Api2
     def index
       load_project
       @reminder_schedules = @project.ext_reminder_schedules
-      render json: @reminder_schedules.to_json(:methods => :start_date_display, :include => :reminder_channels)
+      render json: @reminder_schedules, each_serializer: CustomReminderScheduleSerializer
     end
 
     def create
       load_project
-      conditions = Ext::Condition.build params[:conditions]
-      attrs = params.merge(:conditions => conditions)
-      @reminder = @project.ext_reminder_schedules.build(attrs)
-      if(@reminder.save)
-        render json: @reminder
+      @reminder_schedule = @project.ext_reminder_schedules.build(params[:reminder_schedule])
+      if(@reminder_schedule.save)
+        render json: @reminder_schedule, serializer: CustomReminderScheduleSerializer, status: 201
       else
         response_with_bad_request
       end
@@ -39,11 +37,9 @@ module Api2
 
     def update
       load_project
-      conditions = Ext::Condition.build params[:conditions]
-      attrs = params.merge(:conditions => conditions)
-      @reminder = @project.ext_reminder_schedules.find(params[:id])
-      if(@reminder.update_reminder_schedule_with_queues_call(attrs))
-        render json: @reminder
+      @reminder_schedules = @project.ext_reminder_schedules.find(params[:id])
+      if(@reminder_schedules.update_reminder_schedule_with_queues_call(params[:reminder_schedule]))
+        render json: @reminder_schedules, serializer: CustomReminderScheduleSerializer
       else
         response_with_bad_request
       end
@@ -51,8 +47,8 @@ module Api2
 
     def destroy
       load_project
-      @reminder = @project.ext_reminder_schedules.find(params[:id])
-      if @reminder.destroy
+      @reminder_schedules = @project.ext_reminder_schedules.find(params[:id])
+      if @reminder_schedules.destroy
         head :ok
       else
         response_with_bad_request

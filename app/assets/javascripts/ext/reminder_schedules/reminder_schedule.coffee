@@ -178,7 +178,8 @@ onReminderSchedules ->
       time_from: @from_time()
       time_to: @to_time()
       schedule_type: @repeat()
-      conditions: $.map([@condition()], (x) -> x.toJSON() if x.valid())
+      "conditions[]": @condition().toJSON() if @condition().valid()
       retries: @has_retries()
       retries_in_hours: @retries_in_hours() if @has_retries()
+
       

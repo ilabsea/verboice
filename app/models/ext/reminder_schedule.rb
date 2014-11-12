@@ -80,6 +80,43 @@ module Ext
 			self.update_retries_schedule!
 		end
 
+		def update_schedule_type!
+			if repeat?
+				build_conditions!
+				self.start_date = DateTime.now.utc.in_time_zone(project.time_zone).to_date if self.start_date.nil?
+			else
+				self.conditions = []
+				self.start_date = Ext::Parser::DateParser.parse(self.client_start_date) if client_start_date
+			end
+		end
+
+		def create_schedule_recurrence!
+			if repeat?
+				rule = IceCube::Rule.daily
+			end
+
+			self.schedule = IceCube::Schedule.new(start = from_date_time, :duration => to_date_time.to_i - from_date_time.to_i)
+			self.schedule.add_recurrence_rule rule if rule
+		end
+
+		def update_retries_schedule!
+			if retries
+				schedule_model = self.retries_schedule.nil? ? project.schedules.build : self.retries_schedule
+				schedule_model.name = "reminder_schedule_retries_#{Guid.new.to_s}"
+				schedule_model.retries = self.retries_in_hours
+			 	schedule_model.time_from = from_date_time.to_time
+			 	schedule_model.time_to = to_date_time.to_time
+			 	schedule_model.disabled = true # disalbe from schedule list UI
+			 	schedule_model.weekdays = Ext::Weekday::DAY_NAMES.map { |x| Ext::Weekday::DAY_NAMES.index(x) }.join(",")
+
+				self.retries_schedule = schedule_model if schedule_model.save
+			else
+				self.retries_in_hours = nil
+				# remove retries schedule references
+				self.retries_schedule.destroy if self.retries_schedule
+			end
+		end
+
 		def create_with_channels params
 			params.slice()
 
@@ -212,14 +249,6 @@ module Ext
 			schedule.occurs_on? date if schedule
 		end
 
-		def create_start_date!
-			unless repeat?
-				self.start_date = Ext::Parser::DateParser.parse(self.client_start_date) if client_start_date
-			else
-				self.start_date = DateTime.now.utc.in_time_zone(project.time_zone).to_date if self.start_date.nil?
-			end
-		end
-
 		def start_date_display
 			start_date.to_string(Date::DEFAULT_FORMAT)
 		end
@@ -251,38 +280,6 @@ module Ext
 			phone_numbers
 		end
 
-		def create_schedule_recurrence!
-			if repeat?
-				rule = IceCube::Rule.daily
-			end
-
-			self.schedule = IceCube::Schedule.new(start = from_date_time, :duration => to_date_time.to_i - from_date_time.to_i)
-			self.schedule.add_recurrence_rule rule if rule
-		end
-
-		def update_schedule_type!
-			self.conditions = [] unless repeat?
-			create_start_date!
-		end
-
-		def update_retries_schedule!
-			if retries
-				schedule_model = self.retries_schedule.nil? ? project.schedules.build : self.retries_schedule
-				schedule_model.name = "reminder_schedule_retries_#{Guid.new.to_s}"
-				schedule_model.retries = self.retries_in_hours
-			 	schedule_model.time_from = from_date_time.to_time
-			 	schedule_model.time_to = to_date_time.to_time
-			 	schedule_model.disabled = true # disalbe from schedule list UI
-			 	schedule_model.weekdays = Ext::Weekday::DAY_NAMES.map { |x| Ext::Weekday::DAY_NAMES.index(x) }.join(",")
-
-				self.retries_schedule = schedule_model if schedule_model.save
-			else
-				self.retries_in_hours = nil
-				# remove retries schedule references
-				self.retries_schedule.destroy if self.retries_schedule
-			end
-		end
-
 		def from_date_time
 			date_time_string = "#{start_date.to_string(Date::DEFAULT_FORMAT)} #{time_from}"
 			Ext::Parser::TimeParser.parse(date_time_string, DateTime::DEFAULT_FORMAT_WITHOUT_TIMEZONE, project.time_zone)
@@ -312,6 +309,18 @@ module Ext
 			if self.repeat? && !self.conditions.empty?
 				self.save
 			end
+		end
+
+		private 
+
+		def build_conditions!
+			new_conditions = []
+			self.conditions.each do |condition|
+				if condition.class == Hash
+					new_conditions << Ext::Condition.new(condition[:variable], condition[:operator], condition[:value], condition[:data_type])
+				end
+			end
+			self.conditions = new_conditions if new_conditions.size > 0
 		end
 
 	end

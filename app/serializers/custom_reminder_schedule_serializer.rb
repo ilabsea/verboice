@@ -15,10 +15,15 @@
 # You should have received a copy of the GNU General Public License
 # along with Verboice.  If not, see <http://www.gnu.org/licenses/>.
 
-class ScheduleSerializer < ActiveModel::Serializer
-  attributes :id, :project_id, :call_flow_id, :group_id, :is_repeated,
-             :start_date, :from, :to, :conditions, :retries_in_hours
+class CustomReminderScheduleSerializer < ActiveModel::Serializer
+  attributes :id, :project_id, :call_flow_id,
+             :client_start_date, :time_from, :time_to, :conditions, :retries_in_hours,
+             :reminder_group_id, :schedule_type
 
   has_many :channels, serializer: CustomBasicChannelSerializer
+
+  def client_start_date
+    self.object.start_date
+  end
 
 end

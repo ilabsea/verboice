@@ -4,7 +4,7 @@ describe Ext::ReminderSchedule  do
   	
 
   before(:each) do
-	@project = Project.make(:time_zone => 'Bangkok')
+    @project = Project.make(:time_zone => 'Bangkok')
     @call_flow= CallFlow.make :project_id => @project.id
     @channel = Channels::Custom.make :call_flow => @call_flow, :config => {prefix: '070, 010'}
 
@@ -288,7 +288,7 @@ describe Ext::ReminderSchedule  do
 	describe "#create_queued_calls" do
 		before(:each) do
 			@now = DateTime.new(2012,10,25, 9,0,0, "+7") # use the same timezone as reminder schedule
-			DateTime.stub!(:now).and_return(@now)
+			DateTime.stub(:now).and_return(@now)
 			@addresses = ["1000", "1001"]
 			reminder_group = Ext::ReminderGroup.make addresses: @addresses
 
@@ -315,7 +315,7 @@ describe Ext::ReminderSchedule  do
 	describe "#process" do
 		before(:each) do
 			@now = DateTime.new(2012,10,25, 9,0,0, "+7") # use the same timezone as reminder schedule
-      DateTime.stub!(:now).and_return(@now)
+      DateTime.stub(:now).and_return(@now)
       
 			@attr = {
 		  		:schedule_type => Ext::ReminderSchedule::TYPE_ONE_TIME,
@@ -559,7 +559,7 @@ describe Ext::ReminderSchedule  do
 	describe "#callers_matches_conditions" do
 		before(:each) do
       @today = Date.new(2012, 10, 25)
-      Date.stub!(:today).and_return(@today)
+      Date.stub(:today).and_return(@today)
 
 			@attr = {
         :schedule_type => Ext::ReminderSchedule::TYPE_ONE_TIME,
@@ -626,7 +626,7 @@ describe Ext::ReminderSchedule  do
   describe "#reset_repeat_everyday_to_one_time" do
     before(:each) do
       @now = DateTime.new(2012,10,25, 9,0,0, "+7") # use the same timezone as reminder schedule
-      DateTime.stub!(:now).and_return(@now)
+      DateTime.stub(:now).and_return(@now)
 
       @attr = {
         :schedule_type => Ext::ReminderSchedule::TYPE_DAILY,
@@ -653,6 +653,87 @@ describe Ext::ReminderSchedule  do
       @reminder_schedule.schedule_type.should eq(Ext::ReminderSchedule::TYPE_ONE_TIME)
       @reminder_schedule.in_schedule_date?(Date.new(2012,10,25)).should be_true
       @reminder_schedule.in_schedule_date?(Date.new(2012,10,26)).should be_false
+    end
+  end
+
+  describe "#update_schedule_type!" do
+    context "repeat" do
+      before(:each) do
+        @now = DateTime.new(2012,10,25, 9,0,0, "+7")
+        DateTime.stub(:now).and_return(@now)
+
+        @valid = {
+          project_id: @project.id,
+          call_flow_id: @call_flow.id,
+          reminder_group_id: @reminder_group.id,
+          client_start_date: "25/10/2012",
+          time_from: "10:00",
+          time_to: "12:00",
+          schedule_type: Ext::ReminderSchedule::TYPE_DAILY,
+          conditions: [{
+            variable: "var-2",
+            operator: "=",
+            value: "12",
+            data_type: "month"
+          }]
+        }
+      end
+
+      it "should build conditions when it's repeat" do
+        schedule = Ext::ReminderSchedule.make(@valid)
+
+        schedule.update_schedule_type!
+
+        expect(schedule.conditions.first.variable).to eq "var-2"
+        expect(schedule.conditions.first.operator).to eq "="
+        expect(schedule.conditions.first.value).to eq "12"
+        expect(schedule.conditions.first.data_type).to eq "month"
+      end
+
+      it "should set start_date to now" do
+        schedule = Ext::ReminderSchedule.make(@valid)
+
+        schedule.update_schedule_type!
+
+        expect(schedule.start_date).to eq @now.to_date
+      end
+
+    end
+
+    context "non-repeat" do
+      before(:each) do
+        @valid = {
+          project_id: @project.id,
+          call_flow_id: @call_flow.id,
+          reminder_group_id: @reminder_group.id,
+          client_start_date: "25/10/2012",
+          time_from: "10:00",
+          time_to: "12:00",
+          schedule_type: Ext::ReminderSchedule::TYPE_ONE_TIME,
+          conditions: [{
+            variable: "var-2",
+            operator: "=",
+            value: "12",
+            data_type: "month"
+          }]
+        }
+      end
+
+      it "should reset conditions" do
+        schedule = Ext::ReminderSchedule.make(@valid)
+
+        schedule.update_schedule_type!
+
+        expect(schedule.conditions).to be_empty
+      end
+
+      it "should set start_date to the date selected" do
+        schedule = Ext::ReminderSchedule.make(@valid)
+
+        schedule.update_schedule_type!
+
+        expect(schedule.start_date).to eq Date.new(2012, 10, 25)
+      end
     end
   end
 

@@ -11,8 +11,7 @@ module Ext
 
 		def create
 			load_project params[:project_id]
-			conditions = Ext::Condition.build params[:ext_reminder_schedule][:conditions]
-			@reminder = @project.ext_reminder_schedules.build(params[:ext_reminder_schedule].merge(:conditions => conditions))
+			@reminder = @project.ext_reminder_schedules.build(params[:ext_reminder_schedule])
 			if(@reminder.save)
 				flash[:notice] = "Reminder has been save successfully"
 				render json: @reminder
@@ -24,9 +23,8 @@ module Ext
 		def update
 			begin
 				load_project params[:project_id]
-				conditions = Ext::Condition.build params[:ext_reminder_schedule][:conditions]
 				@reminder = @project.ext_reminder_schedules.find(params[:id])
-				if(@reminder.update_reminder_schedule_with_queues_call(params[:ext_reminder_schedule].merge(:conditions => conditions)))
+				if(@reminder.update_reminder_schedule_with_queues_call(params[:ext_reminder_schedule]))
 					flash[:notice] = "Successfuly update reminder"
 					render json: @reminder
 				end
