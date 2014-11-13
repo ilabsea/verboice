@@ -128,8 +128,8 @@ describe Ext::ReminderSchedule  do
   end
 
   describe "Create with nested attributes" do
-	before(:each) do	
-	  @attr = {
+    before(:each) do	
+	    @attr = {
 	  	    :project_id => @project.id,
 		  		:call_flow_id => @call_flow.id,
 		  		:reminder_group_id => @reminder_group.id,
@@ -142,7 +142,7 @@ describe Ext::ReminderSchedule  do
 		  		:retries_in_hours => "1,1",
 
 		    	:reminder_channels_attributes => [ {channel_id: 1, reminder_schedule_id: 0, id: false }, {channel_id: 2, reminder_schedule_id: 0 } ]
-	    	}
+	    }
     end
 
     it 'should create reminder_schedule with corresponding reminder_channel' do
@@ -258,10 +258,23 @@ describe Ext::ReminderSchedule  do
         reminder_schedule.should_receive(:create_queued_calls)
         reminder_schedule.save
       end
+
+      it "reset conditions" do
+        schedule = Ext::ReminderSchedule.make(@valid)
+        expect(schedule.conditions).to be_empty
+      end
+
+      it "set start_date to the date selected" do
+        schedule = Ext::ReminderSchedule.make(@valid)
+        expect(schedule.start_date).to eq Date.new(2012, 10, 25)
+      end
     end
 
     describe "Repeat" do 
       before(:each) do
+        @now = DateTime.new(2012,10,25, 9,0,0, "+7")
+        DateTime.stub(:now).and_return(@now)
+
         @invalid = {
           :project_id => @project.id,
           :call_flow_id => @call_flow.id,
@@ -281,6 +294,25 @@ describe Ext::ReminderSchedule  do
       it "should create reminder schedule with conditions" do
         reminder_schedule = Ext::ReminderSchedule.new @invalid.merge(:conditions => [Ext::Condition.new("foo", "=", "5", "number")])
         reminder_schedule.save.should eq true
+      end
+
+      it "build conditions when it's repeat" do
+        schedule = Ext::ReminderSchedule.new @invalid.merge(:conditions => [Ext::Condition.new("foo", "=", "5", "number")])
+        # schedule = Ext::ReminderSchedule.make(@invalid.merge(:conditions => [Ext::Condition.new("foo", "=", "5", "number")]))
+
+        schedule.save.should eq true
+        expect(schedule.conditions.first.class).to eq Ext::Condition
+        expect(schedule.conditions.first.variable).to eq "foo"
+        expect(schedule.conditions.first.operator).to eq "="
+        expect(schedule.conditions.first.value).to eq "5"
+        expect(schedule.conditions.first.data_type).to eq "number"
+      end
+
+      it "set start_date to now" do
+        schedule = Ext::ReminderSchedule.new @invalid.merge(:conditions => [Ext::Condition.new("foo", "=", "5", "number")])
+        
+        schedule.save.should eq true
+        expect(schedule.start_date).to eq @now.to_date
       end
     end
 	end
@@ -362,7 +394,7 @@ describe Ext::ReminderSchedule  do
 
 					it "should enqueue call to any contacts when it's scheduling" do
 						reminder = Ext::ReminderSchedule.make(@attr.merge(:client_start_date => "25/10/2012", :time_from => "08:00", :time_to => "08:30"))
-						reminder.should_receive(:callers_matches_conditions).with(@addresses).and_return(["1000", "1001", "1002"])
+						reminder.should_receive(:enqueued_address_match_criteria).with(@addresses).and_return(["1000", "1001", "1002"])
 						reminder.should_receive(:enqueued_call).with(["1000", "1001", "1002"], @now)
 						reminder.process @addresses, @now, true
 					end
@@ -372,7 +404,7 @@ describe Ext::ReminderSchedule  do
 					it "should enqueue call to any contacts" do
 						reminder = Ext::ReminderSchedule.make(@attr.merge(:client_start_date => "25/10/2012", :time_from => "08:00", :time_to => "17:00"))
 
-						reminder.should_receive(:callers_matches_conditions).with(@addresses).and_return(["1000", "1001", "1002"])
+						reminder.should_receive(:enqueued_address_match_criteria).with(@addresses).and_return(["1000", "1001", "1002"])
 						reminder.should_receive(:enqueued_call).with(["1000", "1001", "1002"], @now)
 						reminder.process @addresses, @now
 					end
@@ -385,7 +417,7 @@ describe Ext::ReminderSchedule  do
 						it "should enqueue call to any contacts" do
 							reminder = Ext::ReminderSchedule.make(@attr.merge(:client_start_date => "25/10/2012", :time_from => "10:00", :time_to => "17:00"))
 
-							reminder.should_receive(:callers_matches_conditions).with(@addresses).and_return(["1000", "1001", "1002"])
+							reminder.should_receive(:enqueued_address_match_criteria).with(@addresses).and_return(["1000", "1001", "1002"])
 
 							reminder.should_receive(:enqueued_call).with(["1000", "1001", "1002"], @now)
 							reminder.process @addresses, @now
@@ -398,7 +430,7 @@ describe Ext::ReminderSchedule  do
 
 							reminder = Ext::ReminderSchedule.make(@attr.merge(:client_start_date => "25/10/2012", :time_from => "10:00", :time_to => "17:00", :conditions => conditions))
 
-							reminder.should_receive(:callers_matches_conditions).with(@addresses).and_return([])
+							reminder.should_receive(:enqueued_address_match_criteria).with(@addresses).and_return([])
 							reminder.should_receive(:enqueued_call).with(@addresses, @now).never
 							reminder.process @addresses, @now
 						end
@@ -408,7 +440,7 @@ describe Ext::ReminderSchedule  do
 
 							reminder = Ext::ReminderSchedule.make(@attr.merge(:client_start_date => "25/10/2012", :time_from => "10:00", :time_to => "17:00", :conditions => conditions))
 
-							reminder.should_receive(:callers_matches_conditions).with(@addresses).and_return(["1000"])
+							reminder.should_receive(:enqueued_address_match_criteria).with(@addresses).and_return(["1000"])
 							reminder.should_receive(:enqueued_call).with(["1000"], @now)
 							reminder.process @addresses, @now
 						end
@@ -422,7 +454,7 @@ describe Ext::ReminderSchedule  do
 
               reminder = Ext::ReminderSchedule.make(@attr.merge(:schedule_type => Ext::ReminderSchedule::TYPE_DAILY,  :time_from => "10:00", :time_to => "17:00", :conditions => conditions))
 
-							reminder.should_receive(:callers_matches_conditions).with(@addresses).and_return([])
+							reminder.should_receive(:enqueued_address_match_criteria).with(@addresses).and_return([])
 				  		reminder.should_receive(:enqueued_call).with([], @now).never
 				  		reminder.process @addresses, @now
 						end
@@ -432,7 +464,7 @@ describe Ext::ReminderSchedule  do
 
               reminder = Ext::ReminderSchedule.make(@attr.merge(:schedule_type => Ext::ReminderSchedule::TYPE_DAILY, :time_from => "10:00", :time_to => "17:00", :conditions => conditions))
 
-              reminder.should_receive(:callers_matches_conditions).with(@addresses).and_return(["1000"])
+              reminder.should_receive(:enqueued_address_match_criteria).with(@addresses).and_return(["1000"])
                 reminder.should_receive(:enqueued_call).with(["1000"], @now)
                 reminder.process @addresses, @now
             end
@@ -445,7 +477,7 @@ describe Ext::ReminderSchedule  do
 			describe "is no repeat" do
 				it "should not enqueued call to any contacts" do
 					reminder = Ext::ReminderSchedule.make @attr.merge(:client_start_date => "26/10/2012", :time_from => "08:00", :time_to => "17:00")
-					reminder.should_receive(:callers_matches_conditions).with(@addresses).never
+					reminder.should_receive(:enqueued_address_match_criteria).with(@addresses).never
 			  	reminder.should_receive(:enqueued_call).with([], @now).never
 			  	reminder.process @addresses, @now
 				end
@@ -556,7 +588,7 @@ describe Ext::ReminderSchedule  do
 		end
 	end
 
-	describe "#callers_matches_conditions" do
+	describe "#enqueued_address_match_criteria" do
 		before(:each) do
       @today = Date.new(2012, 10, 25)
       Date.stub(:today).and_return(@today)
@@ -595,7 +627,7 @@ describe Ext::ReminderSchedule  do
       conditions = [Ext::Condition.new("var1", "=", "99", "number")]
       reminder_schedule = Ext::ReminderSchedule.make @attr.merge(:schedule_type => Ext::ReminderSchedule::TYPE_DAILY, :conditions => conditions)
 
-      phone_numbers = reminder_schedule.callers_matches_conditions @addresses
+      phone_numbers = reminder_schedule.enqueued_address_match_criteria @addresses
       phone_numbers.empty?.should be true
     end
 
@@ -603,7 +635,7 @@ describe Ext::ReminderSchedule  do
       conditions = [Ext::Condition.new("var1", "=", "5", "number")]
       reminder_schedule = Ext::ReminderSchedule.make @attr.merge(:schedule_type => Ext::ReminderSchedule::TYPE_DAILY, :conditions => conditions)
 
-      phone_numbers = reminder_schedule.callers_matches_conditions @addresses
+      phone_numbers = reminder_schedule.enqueued_address_match_criteria @addresses
       phone_numbers.size.should be 0
     end
 
@@ -611,14 +643,14 @@ describe Ext::ReminderSchedule  do
       conditions = [Ext::Condition.new("var1", "=", "1", "day")]
       reminder_schedule = Ext::ReminderSchedule.make @attr.merge(:schedule_type => Ext::ReminderSchedule::TYPE_DAILY, :conditions => conditions)
 
-      phone_numbers = reminder_schedule.callers_matches_conditions @addresses
+      phone_numbers = reminder_schedule.enqueued_address_match_criteria @addresses
       phone_numbers.size.should be 1
     end
 
     it "should return array of all contacts phone number when conditions are not setting up" do
       reminder_schedule = Ext::ReminderSchedule.make @attr
 
-      phone_numbers = reminder_schedule.callers_matches_conditions @addresses
+      phone_numbers = reminder_schedule.enqueued_address_match_criteria @addresses
       phone_numbers.size.should be @addresses.size
     end
 	end
@@ -653,87 +685,6 @@ describe Ext::ReminderSchedule  do
       @reminder_schedule.schedule_type.should eq(Ext::ReminderSchedule::TYPE_ONE_TIME)
       @reminder_schedule.in_schedule_date?(Date.new(2012,10,25)).should be_true
       @reminder_schedule.in_schedule_date?(Date.new(2012,10,26)).should be_false
-    end
-  end
-
-  describe "#update_schedule_type!" do
-    context "repeat" do
-      before(:each) do
-        @now = DateTime.new(2012,10,25, 9,0,0, "+7")
-        DateTime.stub(:now).and_return(@now)
-
-        @valid = {
-          project_id: @project.id,
-          call_flow_id: @call_flow.id,
-          reminder_group_id: @reminder_group.id,
-          client_start_date: "25/10/2012",
-          time_from: "10:00",
-          time_to: "12:00",
-          schedule_type: Ext::ReminderSchedule::TYPE_DAILY,
-          conditions: [{
-            variable: "var-2",
-            operator: "=",
-            value: "12",
-            data_type: "month"
-          }]
-        }
-      end
-
-      it "should build conditions when it's repeat" do
-        schedule = Ext::ReminderSchedule.make(@valid)
-
-        schedule.update_schedule_type!
-
-        expect(schedule.conditions.first.variable).to eq "var-2"
-        expect(schedule.conditions.first.operator).to eq "="
-        expect(schedule.conditions.first.value).to eq "12"
-        expect(schedule.conditions.first.data_type).to eq "month"
-      end
-
-      it "should set start_date to now" do
-        schedule = Ext::ReminderSchedule.make(@valid)
-
-        schedule.update_schedule_type!
-
-        expect(schedule.start_date).to eq @now.to_date
-      end
-
-    end
-
-    context "non-repeat" do
-      before(:each) do
-        @valid = {
-          project_id: @project.id,
-          call_flow_id: @call_flow.id,
-          reminder_group_id: @reminder_group.id,
-          client_start_date: "25/10/2012",
-          time_from: "10:00",
-          time_to: "12:00",
-          schedule_type: Ext::ReminderSchedule::TYPE_ONE_TIME,
-          conditions: [{
-            variable: "var-2",
-            operator: "=",
-            value: "12",
-            data_type: "month"
-          }]
-        }
-      end
-
-      it "should reset conditions" do
-        schedule = Ext::ReminderSchedule.make(@valid)
-
-        schedule.update_schedule_type!
-
-        expect(schedule.conditions).to be_empty
-      end
-
-      it "should set start_date to the date selected" do
-        schedule = Ext::ReminderSchedule.make(@valid)
-
-        schedule.update_schedule_type!
-
-        expect(schedule.start_date).to eq Date.new(2012, 10, 25)
-      end
     end
   end
 

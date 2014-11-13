@@ -21,34 +21,37 @@ module Api2
     # GET /api/reminder_schedules
     def index
       load_project
-      @reminder_schedules = @project.ext_reminder_schedules
-      render json: @reminder_schedules, each_serializer: CustomReminderScheduleSerializer
+      reminder_schedules = @project.ext_reminder_schedules
+      render json: reminder_schedules, each_serializer: CustomReminderScheduleSerializer
+    end
+
+    def show
+      reminder_schedule = api_current_account.ext_reminder_schedules.find(params[:id])
+      render json: reminder_schedule, serializer: CustomReminderScheduleSerializer
     end
 
     def create
       load_project
-      @reminder_schedule = @project.ext_reminder_schedules.build(params[:reminder_schedule])
-      if(@reminder_schedule.save)
-        render json: @reminder_schedule, serializer: CustomReminderScheduleSerializer, status: 201
+      reminder_schedule = @project.ext_reminder_schedules.build(params[:reminder_schedule])
+      if(reminder_schedule.save)
+        render json: reminder_schedule, serializer: CustomReminderScheduleSerializer, status: 201
       else
         response_with_bad_request
       end
     end
 
     def update
-      load_project
-      @reminder_schedules = @project.ext_reminder_schedules.find(params[:id])
-      if(@reminder_schedules.update_reminder_schedule_with_queues_call(params[:reminder_schedule]))
-        render json: @reminder_schedules, serializer: CustomReminderScheduleSerializer
+      reminder_schedule = api_current_account.ext_reminder_schedules.find(params[:id])
+      if(reminder_schedule.update_reminder_schedule_with_queues_call(params[:reminder_schedule]))
+        render json: reminder_schedule, serializer: CustomReminderScheduleSerializer
       else
         response_with_bad_request
       end
     end
 
     def destroy
-      load_project
-      @reminder_schedules = @project.ext_reminder_schedules.find(params[:id])
-      if @reminder_schedules.destroy
+      reminder_schedules = api_current_account.ext_reminder_schedules.find(params[:id])
+      if reminder_schedules.destroy
         head :ok
       else
         response_with_bad_request
@@ -58,7 +61,7 @@ module Api2
     private
 
     def load_project
-      @project = @project || Project.find(params[:project_id])
+      @project = @project || api_current_account.projects.find(params[:project_id])
     end
 
   end

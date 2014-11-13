@@ -78,22 +78,12 @@ module Api2
     end
 
     def validate_project
-      begin
-        @project = api_current_account.projects.find(params[:project_id])
-        @reminder_groups = @project.ext_reminder_groups
-      rescue
-        render json: "The project is not found".to_json, status: :not_found
-        return
-      end
+      @project = api_current_account.projects.find(params[:project_id])
+      @reminder_groups = @project.ext_reminder_groups
     end
 
     def validate_record
-      begin
-        @reminder_group = api_current_account.ext_reminder_groups.find(params[:id])
-      rescue
-        render json: "The reminder group is not found".to_json, status: :not_found
-        return
-      end
+      @reminder_group = api_current_account.ext_reminder_groups.find(params[:id])
     end
 
   end

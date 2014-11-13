@@ -165,11 +165,27 @@ module Ext
 		end
 
 		def self.schedule project_id, at_time
-			project = Project.find(project_id)
+			project = Project.includes(contacts: :addresses).find(project_id)
 			project.ext_reminder_schedules.each do |reminder_schedule|
 				addresses = reminder_schedule.reminder_group.addresses if reminder_schedule.reminder_group && reminder_schedule.reminder_group.has_addresses?
 				addresses = [] if addresses.nil?
 				reminder_schedule.process addresses, at_time.in_time_zone(project.time_zone), true unless addresses.empty?
+			end
+		end
+
+		def enqueued_address_match_criteria addresses
+			if has_conditions?
+				phone_numbers = []
+				project.contacts.each do |contact|
+					contact.addresses.each do |contact_address|
+						if addresses.include?(contact_address.address) && contact.evaluate?(self.conditions.first)
+							phone_numbers << contact_address.address
+						end
+					end
+				end
+				phone_numbers
+			else
+				addresses
 			end
 		end
 
@@ -183,7 +199,7 @@ module Ext
 			end
 
 			if should_enqueue
-				phone_numbers = callers_matches_conditions addresses
+				phone_numbers = enqueued_address_match_criteria(addresses)
 				enqueued_call(phone_numbers, running_time) unless phone_numbers.empty?
 			end
 		end
@@ -267,19 +283,6 @@ module Ext
 			exists
 		end
 
-		def callers_matches_conditions addresses
-			phone_numbers = []
-			if has_conditions?
-				addresses.each do |address|
-					contact = project.contacts.joins(:addresses).where(:contact_addresses => {:address => address}).last
-					phone_numbers.push address if contact and contact.evaluate? conditions.first
-				end
-			else
-				phone_numbers = addresses
-			end
-			phone_numbers
-		end
-
 		def from_date_time
 			date_time_string = "#{start_date.to_string(Date::DEFAULT_FORMAT)} #{time_from}"
 			Ext::Parser::TimeParser.parse(date_time_string, DateTime::DEFAULT_FORMAT_WITHOUT_TIMEZONE, project.time_zone)
@@ -316,7 +319,7 @@ module Ext
 		def build_conditions!
 			new_conditions = []
 			self.conditions.each do |condition|
-				if condition.class == Hash
+				if condition.kind_of?(Hash)
 					new_conditions << Ext::Condition.new(condition[:variable], condition[:operator], condition[:value], condition[:data_type])
 				end
 			end

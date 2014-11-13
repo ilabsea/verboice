@@ -33,6 +33,7 @@ class Account < ActiveRecord::Base
   has_many :persisted_variables, :through => :contacts
   has_many :recorded_audios, :through => :contacts
   has_many :ext_reminder_groups, :through => :projects
+  has_many :ext_reminder_schedules, :through => :projects
 
   has_many :call_logs
 
