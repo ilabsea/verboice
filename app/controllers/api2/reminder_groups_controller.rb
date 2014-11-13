@@ -16,12 +16,16 @@
 # along with Verboice.  If not, see <http://www.gnu.org/licenses/>.
 module Api2
   class ReminderGroupsController < Api2Controller
-    before_filter :validate_record, only: [:update, :destroy]
+    before_filter :validate_record, only: [:update, :show, :destroy]
     before_filter :validate_project, only: [:index, :create]
 
     # GET /api/projects/:project_id/reminder_groups
     def index
       render json: @reminder_groups, root: false
+    end
+
+    def show
+      render json: @reminder_group
     end
 
     # POST /api/projects/:project_id/reminder_groups

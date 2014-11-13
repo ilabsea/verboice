@@ -239,7 +239,7 @@ Verboice::Application.routes.draw do
         end
       end
 
-      resources :reminder_groups, only: [:index, :create, :update, :destroy], shallow: true
+      resources :reminder_groups, only: [:index, :show, :create, :update, :destroy], shallow: true
     end
 
     resources :logs, only: [] do
@@ -261,6 +261,10 @@ Verboice::Application.routes.draw do
     resources :traffics, only: [:index]
 
     resources :reminder_schedules
+
+    get '/reminder_groups' => 'reminder_groups#index'
+    post '/reminder_groups' => 'reminder_groups#create'
+    
   end
 
   post 'call_simulator/start'
