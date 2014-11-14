@@ -65,7 +65,7 @@ run(Args, Session) ->
         time_to="23:59"
       }),
 
-      QueuedCallWithSchedule = QueuedCall#queued_call{ schedule_id = RetrySchedule:id() },
+      QueuedCallWithSchedule = QueuedCall#queued_call{ session_id = undefined, schedule_id = RetrySchedule:id() },
       scheduler:enqueue(QueuedCallWithSchedule),
       {{suspend_reset_ptr, Pid}, Session}
   end.
