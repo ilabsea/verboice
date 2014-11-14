@@ -46,7 +46,8 @@ run(Args, Session) ->
                       state = list_to_binary("queued"),
                       call_log_id = CallLog:id(),
                       call_flow_id = CallFlow#call_flow.id,
-                      project_id = Project#project.id
+                      project_id = Project#project.id,
+                      retries = 0
                     },
 
   case SelectedCallFlowId of
