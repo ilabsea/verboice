@@ -23,6 +23,7 @@ class CallLog < ActiveRecord::Base
   STATE_ACTIVE = :active
   STATE_COMPLETED = :completed
   STATE_FAILED = :failed
+  STATE_SUSPENDED = :suspended
 
   FAIL_REASONS = {
     'failed'    => 'failed',
@@ -32,9 +33,16 @@ class CallLog < ActiveRecord::Base
     'busy'      => 'hangup',
     'hangup'    => 'incompleted',
     'marked_as_failed' => "marked_as_failed",
+    'no_ack' => 'no_ack',
     'blocked' => "blocked",
     'disabled' => "disabled"
   }
+
+  DATE_FORMAT_EXPORT = [
+    ["D/M/Y", '%d/%m/%Y %H:%M:%S %z'],
+    ["M/D/Y", '%m/%d/%Y %H:%M:%S %z'],
+    ["Y/M/D", '%Y/%m/%d %H:%M:%S %z']
+  ]
 
   belongs_to :account
   belongs_to :project

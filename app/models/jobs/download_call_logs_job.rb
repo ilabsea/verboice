@@ -17,7 +17,7 @@
 
 require 'csv'
 
-class Jobs::DownloadCallLogsJob < Struct.new(:account_id, :project_id, :search)
+class Jobs::DownloadCallLogsJob < Struct.new(:account_id, :project_id, :search, :date_format)
   include ActionView::Helpers
   include ApplicationHelper
 
@@ -45,9 +45,11 @@ class Jobs::DownloadCallLogsJob < Struct.new(:account_id, :project_id, :search)
     @account = Account.find account_id
     @filename = "call_logs_#{timestamp}.zip"
     @path = File.join RecordingManager.for(@account).path_for('downloads'), @filename
+
     @project = Project.includes(:project_variables).find project_id
     @logs = CallLog.where(project_id: @project).search search
     @recorded_audios = CallLogRecordedAudio.where call_log_id: @logs.pluck(:id)
+    @date_format = date_format
 
     # csv options
     @input_encoding = 'UTF-8'

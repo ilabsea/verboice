@@ -24,6 +24,8 @@ class Account < ActiveRecord::Base
   # Setup accessible (or protected) attributes for your model
   attr_accessible :email, :password, :password_confirmation, :remember_me, :locale
 
+  validates_strength_of :password, :with => :email
+
   has_many :projects, :dependent => :destroy
   has_many :call_flows, :through => :projects
 

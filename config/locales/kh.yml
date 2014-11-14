@@ -40,6 +40,13 @@ kh:
 
     errors:
       models:
+        login:
+          invalid_captcha: Captcha មិនត្រឹមត្រូវទេ
+          invalid_email_password: អ៊ីម៉ែល រឺ ពាក្យសម្ងាត់មិនត្រឹបត្រូវទេ
+        account:
+          attributes:
+            password:
+              taken_in_past: ធ្លាប់ប្រើរួចហើយ
         project:
           attributes:
             name:
@@ -607,6 +614,7 @@ kh:
           back: "ថយក្រោយ"
       download_project_call_log:
         label:
+          date_format: "ទម្រង់កាលបរិច្ឆេទ"
           download_call_logs: "ទាញយក​​កំណត់ហេតុ​ការហៅ"
           summary: "មាន %{audios} សារ​សំឡេងនៅក្នុង​កំណត់ហេតុ​ការហៅ​នេះ​ដែល​មានទំហំ​សរុប %{size}។"
           do_you_want_to_download: "តើអ្នកចង់ទាញយកកំណត់ហេតុការហៅរួមជាមួយសារសំឡេង​ដែរឫទេ?"
@@ -635,11 +643,20 @@ kh:
           dial_string: "Dial string"  
         action:
       _form_custom_sip:
+        tooltip:
+          username: "User authentication of SIP channel"
+          password: "Password authentication of SIP channel"
+          prefix: "Phone number with these prefixes will use this channel to call out"
+          limit: "Number of concurrent call"
+          domain: "Domain/IP address of SIP server"
+          prefix_called_number: "Add prefix to called number"
+          normalized_called_number: "Phone number with 0 leading will be added by this prefix"
         label:
           username: "អ្នកប្រើប្រាស់"
           password: "ពាក្យសម្ងាត់"
           number: "លេខ"
           prefix: "បុព្វបទ"
+          prefix_preference: ការកំនត់បុព្វបទសំរាប់ការហៅចេញ
           limit: "ចំនួនកំនត់"
           domain: "ដែន"
           port: "ផត"
@@ -651,6 +668,9 @@ kh:
           outgoing: "ចេញ"
           both_directions: "ទាំង​ពីរ"
           prefix_called_number: "បុព្វបទ"
+          normalized_called_number: "Call out prefix"
+          dtmf_mode: "DTMF mode"
+          codec_type: "Codec"
           udp: "UDP"
           tcp: "TCP"
         action:

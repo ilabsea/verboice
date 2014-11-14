@@ -59,6 +59,7 @@ class CallLogsController < ApplicationController
   end
 
   def download_project_call_logs
+    @date_format = params[:date_format]
     render layout: false
   end
 
@@ -67,7 +68,7 @@ class CallLogsController < ApplicationController
   end
 
   def generate_zip
-    Delayed::Job.enqueue Jobs::DownloadCallLogsJob.new current_account.id, @project.id, @search
+    Delayed::Job.enqueue Jobs::DownloadCallLogsJob.new(current_account.id, @project.id, @search, params[:date_format])
     render layout: false
   end
 
@@ -112,6 +113,6 @@ class CallLogsController < ApplicationController
 
     def paginate
       @page = params[:page] || 1
-      @per_page = 10
+      @per_page = params[:per_page] || 10
     end
 end

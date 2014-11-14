@@ -19,6 +19,8 @@ require 'api_constraints'
 
 Verboice::Application.routes.draw do
 
+  devise_for :accounts, controllers: { registrations: 'registrations', sessions: 'sessions' }
+  
   resources :call_log_recorded_audios, only: [:update]
 
   resources :channels do
@@ -34,8 +36,7 @@ Verboice::Application.routes.draw do
 
   match '/' => 'home#index',  :as => 'home'
 
-  devise_for :accounts
-
+  devise_for :accounts, controllers: { registrations: 'account/registrations' }
   resources :feeds, controller: :feed_server do
     member do
       get :recordings

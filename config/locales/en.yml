@@ -40,6 +40,13 @@ en:
 
     errors:
       models:
+        login:
+          invalid_captcha: Invalid captcha
+          invalid_email_password: Invalid email or password
+        account:
+          attributes:
+            password:
+              taken_in_past: Already been taken in the past
         project:
           attributes:
             name:
@@ -605,6 +612,7 @@ en:
           back: "Back"
       download_project_call_log:
         label:
+          date_format: "Date Format"
           download_call_logs: "Download call logs"
           summary: "There are %{audios} recorded voice messages in this call logs, total size %{size}."
           do_you_want_to_download: "Do you want to download call logs along with the recorded voice messages?"
@@ -633,11 +641,21 @@ en:
           dial_string: "Dial string"
         action:
       _form_custom_sip:
+        tooltip:
+          username: "User authentication of SIP channel"
+          password: "Password authentication of SIP channel"
+          prefix: "Phone number with these prefixes will use this channel to call out"
+          limit: "Number of concurrent call"
+          domain: "Domain/IP address of SIP server"
+          prefix_called_number: "Add prefix to called number"
+          normalized_called_number: "Phone number with 0 leading will be added by this prefix"
+
         label:
           username: "Username"
           password: "Password"
           number: "Number"
           prefix: "Prefix"
+          prefix_preference: Prefix preference for call out
           limit: "Limit"
           domain: "Domain"
           port: "Port"
@@ -649,6 +667,9 @@ en:
           outgoing: "Outgoing"
           both_directions: 'Both directions'
           prefix_called_number: 'Add prefix to called number'
+          normalized_called_number: 'Call out prefix'
+          dtmf_mode: 'DTMF mode'
+          codec_type: 'Codec'
           udp: "UDP"
           tcp: "TCP"
         action:

@@ -2,15 +2,15 @@
 %% File   : sendmail.erl
 %% Author : Klacke <klacke@hyber.org>,
 %%          Johan Bevemyr <jb@son.bevemyr.com>,
-%%          Håkan Stenholm <hokan@klarna.com>,
+%%          Hï¿½kan Stenholm <hokan@klarna.com>,
 %%          Richard Carlsson <richardc@klarna.com>
 %%
 %% Description : send mail using local sendmail; based on sendmail.erl
 %% by Klacke and smtp.erl by Johan Bevemyr, with code for RFC1522 by
-%% Håkan Stenholm. Major cleanup and rewrites by Richard Carlsson.
+%% Hï¿½kan Stenholm. Major cleanup and rewrites by Richard Carlsson.
 %%
 %% Copyright (C) Johan Bevemyr 2004, Klacke <klacke@hyber.org> 2005,
-%% Håkan Stenholm 2009, Richard Carlsson 2009.
+%% Hï¿½kan Stenholm 2009, Richard Carlsson 2009.
 %%
 %% Permission is hereby granted, free of charge, to any person obtaining a
 %% copy of this software and associated documentation files (the
@@ -322,7 +322,7 @@ mk_text_header_test_() ->
     [
      %% based on Thunderbird output
      ?_assertEqual("Subject: =?ISO-8859-1?Q?=E5=E4=F6?=",
-                   mk_text_header("Subject", "åäö")),
+                   mk_text_header("Subject", "ï¿½ï¿½ï¿½")),
 
      ?_assertEqual(
         "Subject: =?ISO-8859-1?Q?=E5=E4=F6twequiiiirrrweyqruyqitrrqw"
@@ -333,7 +333,7 @@ mk_text_header_test_() ->
         "uitr?=",
         mk_text_header(
           "Subject",
-          "åäötwequiiiirrrweyqruyqitrrqw"
+          "ï¿½ï¿½ï¿½twequiiiirrrweyqruyqitrrqw"
           "eruitwqeeerwqeurtwuietrriqweeeeeqeiuurrrrrrrweuiqtruiwetriwee"
           "eeyiirrrrrrrrrrrrruiweqtrweertweuitr")),
      
@@ -351,12 +351,12 @@ mk_text_header_test_() ->
                    " =?ISO-8859-1?Q?u?=",
                    mk_text_header(
                      "Subject",
-                     "åäötwequiiiirrrweyqruyqitrrqweruitwqeeerwqeu")),
+                     "ï¿½ï¿½ï¿½twequiiiirrrweyqruyqitrrqweruitwqeeerwqeu")),
      
      %% fits on 1 line
      ?_assertEqual("Subject: =?ISO-8859-1?Q?=E5=E4=F6twequ"
                    "iiiirrrweyqruyqitrrqweruitwqeeerwqe?=",
                    mk_text_header(
                      "Subject",
-                     "åäötwequiiiirrrweyqruyqitrrqweruitwqeeerwqe"))
+                     "ï¿½ï¿½ï¿½twequiiiirrrweyqruyqitrrqweruitwqeeerwqe"))
     ].

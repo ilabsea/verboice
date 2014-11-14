@@ -15,8 +15,6 @@
 # You should have received a copy of the GNU General Public License
 # along with Verboice.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 namespace :call_log do
   desc "Migrate call log trace to step interaction"
   task :migrate_traces => :environment do
@@ -45,6 +43,32 @@ namespace :call_log do
 
     failed_ids = call_logs.pluck(:id)
     print "\n! - Failed to migrate ids: [#{failed_ids.join ','}]\n"
+  end
+
+  desc "Import call log variable value"
+  task :import_call_log_variable_value, [:path_csv_file] => :environment do |t, args|
+    raise "Exception: Missing argument csv file" if args[:path_csv_file].nil?
+
+    is_row_header = false
+    project_variable_name = nil
+
+    if File.exists?(args[:path_csv_file]) && File.extname(args[:path_csv_file]) == ".csv"
+      CSV.foreach(args[:path_csv_file]) do |row|
+        if is_row_header == false
+          project_variable_name = row[1]
+          is_row_header = true
+          next
+        end
+
+        call_log = CallLog.find(row[0])
+        project_variable = ProjectVariable.where(name: project_variable_name, project_id: call_log.project.id).first
+        if project_variable
+          call_log_answer = CallLogAnswer.where(call_log_id: call_log.id, project_variable_id: project_variable.id).first_or_initialize
+          call_log_answer.value = row[1]
+          call_log_answer.save
+        end
+      end
+    end
   end
 end
 

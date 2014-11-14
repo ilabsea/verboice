@@ -8,48 +8,54 @@
   </script>
 <% end %>
 
-<div class="box centered w30">
+<div class="box centered w33">
   
-<%= form_for(resource, :as => resource_name, :url => account_session_path) do |f| %>
-  <%= devise_error_messages! %>
-  <h2>Log In</h2>
-  
-  <hr class="shadow">
-  
-  <div class="field w30">
-    <%= f.label :email %>
-    <%= f.email_field :email, :class => "email" %>
-  </div>
+  <%= form_for(resource, :as => resource_name, :url => account_session_path) do |f| %>
+    <h2>Log In</h2>
 
-  <div class="field w30">
-    <%= f.label :password %>
-    <%= f.password_field :password %>
-  </div>
-
-    <div class="field">
-      <input name="account[remember_me]" type="hidden" value="0">
-      <input id="account_remember_me" name="account[remember_me]" type="checkbox" value="1"> <label class="checkbox" for="account_remember_me">Remember me</label>
+    <hr class="shadow">
+    
+    <div class="field w33">
+      <%= f.label :email %>
+      <%= f.text_field :email, class: 'email' %>
     </div>
 
-  <div class="actions">
-    <button type="submit" class="white">Log In</button>
-  </div>
-  
-  <hr>
+    <div class="field w33">
+      <%= f.label :password %>
+      <%= f.password_field :password %>
+    </div>
 
-<!--  -->
+    <% if @captcha -%>
+      <div class="field w33">
+        <%= recaptcha_tags display: {theme: 'white'} %>
+      </div>
+    <% end -%>
 
-<!-- 
-  <p>
-    Don't have an account? <a href="/accounts/sign_up">Create it</a>
-  </p>
- -->
+    <div class="field">
+      <% if devise_mapping.rememberable? -%>
+        <div><%= f.check_box :remember_me %> <%= f.label :remember_me %></div>
+      <% end -%>
+    </div>
 
-  <p>
-  Forgot your password? <a href="/accounts/password/new">Reset it</a>
-  </p>
+    <div class="actions">
+      <button type="submit" class="white">Log In</button>
+    </div>
+    
+    <hr>
 
-  <a href="/accounts/confirmation/new">Didn't receive confirmation instructions?</a><br>
+  <!--  -->
 
-<% end %>
+  <!-- 
+    <p>
+      Don't have an account? <a href="/accounts/sign_up">Create it</a>
+    </p>
+   -->
+
+    <p>
+    Forgot your password? <a href="/accounts/password/new">Reset it</a>
+    </p>
+
+    <a href="/accounts/confirmation/new">Didn't receive confirmation instructions?</a><br>
+
+  <% end %>
 </div>
