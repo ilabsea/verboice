@@ -52,7 +52,7 @@
           - else
             = log.state
 
-        %td= log.step_interaction
+        %td= log.parent ? "ref_id:#{log.parent.id};#{log.step_interaction}" : log.step_interaction
         - @project.project_variables.each do |variable|
           - existed = false
           - log.call_log_answers.each do |answer|

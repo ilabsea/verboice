@@ -65,6 +65,8 @@ class CallLog < ActiveRecord::Base
 
   delegate :time_zone, to: :project, prefix: true, allow_nil: true
 
+  belongs_to :parent, class_name: CallLog
+
   def state
     read_attribute(:state).try(:to_sym)
   end

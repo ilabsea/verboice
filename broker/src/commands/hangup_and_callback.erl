@@ -26,7 +26,8 @@ run(Args, Session) ->
   CallFlow = call_flow:find(CallFlowId),
   Project = project:find(CallFlow#call_flow.project_id),
 
-  CallLog = call_log_srv:new(NewSessionId, #call_log{
+  CallLog = Session#session.call_log,
+  NewCallLog = call_log_srv:new(NewSessionId, #call_log{
     account_id = Channel#channel.account_id,
     project_id = CallFlow#call_flow.project_id,
     state = "suspended",
@@ -35,7 +36,8 @@ run(Args, Session) ->
     address = Session#session.address,
     started_at = calendar:universal_time(),
     call_flow_id = CallFlow#call_flow.id,
-    store_log_entries = Project#project.store_call_log_entries
+    store_log_entries = Project#project.store_call_log_entries,
+    parent_id = CallLog:id()
   }),
 
   QueuedCall  = #queued_call{
@@ -44,7 +46,7 @@ run(Args, Session) ->
                       channel_id = Session#session.channel#channel.id,
                       address = dial_address(Session#session.address, Prefix),
                       state = list_to_binary("queued"),
-                      call_log_id = CallLog:id(),
+                      call_log_id = NewCallLog:id(),
                       call_flow_id = CallFlow#call_flow.id,
                       project_id = Project#project.id,
                       retries = 0
