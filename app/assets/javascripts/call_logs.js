@@ -34,12 +34,11 @@ function toParams(searchUrl) {
     keyPair = param.split("=")
     
     key = keyPair[0]
-    value = keyPair[1]
+    value = decodeURIComponent(keyPair[1])
 
     if(result[key] == undefined)
       result[key] = value
     else{
-
       if(result[key] instanceof Array) //current var is an array just push another to it
         result[key].push(value)
       else{ //duplicate var, then it must store as an array
