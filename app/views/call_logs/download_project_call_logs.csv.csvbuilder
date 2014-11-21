@@ -1,5 +1,29 @@
-header = [t('views.projects.call_logs.index.label.id'), t('views.projects.call_logs.index.label.started'), t('views.projects.call_logs.index.label.finished'), t('views.projects.call_logs.index.label.duration_in_second'), t('views.projects.call_logs.index.label.caller_id'), t('views.projects.call_logs.index.label.direction'), t('views.projects.call_logs.index.label.number_retried'), t('views.projects.call_logs.index.label.channel'), t('views.projects.call_logs.index.label.queue'), t('views.projects.call_logs.index.label.project'), t('views.projects.call_logs.index.label.call_flow'), t('views.projects.call_logs.index.label.status')]
-fields = %w(call_logs.id call_logs.created_at call_logs.finished_at call_logs.address call_logs.direction call_logs.retries channels.name schedules.name projects.name call_flows.name call_logs.state call_logs.fail_reason)
+header = [t('views.projects.call_logs.index.label.id'),
+          t('views.projects.call_logs.index.label.started'),
+          t('views.projects.call_logs.index.label.finished'),
+          t('views.projects.call_logs.index.label.duration_in_second'),
+          t('views.projects.call_logs.index.label.caller_id'),
+          t('views.projects.call_logs.index.label.direction'),
+          t('views.projects.call_logs.index.label.number_retried'),
+          t('views.projects.call_logs.index.label.channel'),
+          t('views.projects.call_logs.index.label.queue'),
+          t('views.projects.call_logs.index.label.project'),
+          t('views.projects.call_logs.index.label.call_flow'),
+          t('views.projects.call_logs.index.label.status')]
+
+fields = %w(call_logs.id
+            call_logs.created_at
+            call_logs.finished_at
+            call_logs.duration
+            call_logs.address
+            call_logs.direction
+            call_logs.retries
+            channels.name
+            schedules.name
+            projects.name
+            call_flows.name
+            call_logs.state
+            call_logs.fail_reason)
 # Pivot query on project_variables
 # Reference: http://buysql.com/mysql/14-how-to-automate-pivot-tables.html
 pivot_fields = []
@@ -38,10 +62,11 @@ csv << header
   log_id = log.first
   start_time = datetime_format log[1], @project.time_zone
   end_time = datetime_format log[2], @project.time_zone
-  duration = diff_in_second log[2], log[1]
+  duration = log[3]
+
   state = "#{log[fields.count - 2]} #{CallLog::FAIL_REASONS[log[fields.count - 1]]}"
 
-  row = [log_id, start_time, end_time, duration] + log[3..fields.count - 3] + [state]
+  row = [log_id, start_time, end_time, duration] + log[4..fields.count- 3] + [state]
 
   pivot_data = log.drop fields.count
   pivot_fields_types.each do |type|
