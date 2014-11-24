@@ -10,8 +10,12 @@ onWorkflow ->
       @template = 'email_text_localized_resource_template'
       @text = ko.observable hash.text || ""
       @variables = ko.observableArray(
-        for index, variable of distinct_variables.sort() when variable in workflow.variables()
-          if parseInt(index) != distinct_variables.length - 1 then "{" + variable + "}," else "{" + variable + "}")
+        vars = for index, variable of distinct_variables.sort() when variable in workflow.variables()
+          "{" + variable + "}"
+        vars.push("{call_at}")
+        vars.push("{caller_id}")
+        vars.reverse())
+
 
       @is_valid = ko.computed =>
         @text()? and @text().length > 0

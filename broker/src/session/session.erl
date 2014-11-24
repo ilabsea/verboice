@@ -418,14 +418,16 @@ get_contact(ProjectId, undefined, CallLogId) ->
 get_contact(ProjectId, Address, _) ->
   contact:find_or_create_with_address(ProjectId, Address).
 
-default_variables(#session{contact = Contact, queued_call = QueuedCall, project = #project{id = ProjectId}, call_log = CallLog}) ->
+default_variables(#session{contact = Contact, queued_call = QueuedCall, project = #project{id = ProjectId, time_zone = TimeZone}, call_log = CallLog, address = Address, created_at = CreatedAt}) ->
   Context = erjs_context:new([{record_url, fun(Key) ->
     {ok, BaseUrl} = application:get_env(base_url),
     BaseUrl ++ "/calls/" ++ util:to_string(CallLog:id()) ++ "/results/" ++ util:to_string(Key)
   end}]),
   ProjectVars = project_variable:names_for_project(ProjectId),
   Variables = persisted_variable:find_all({contact_id, Contact#contact.id}),
-  DefaultContext = default_variables(Context, ProjectVars, Variables),
+  JsContext = erjs_context:set(var_caller_id, binary_to_list(Address), Context),
+  NewJsContext = erjs_context:set(var_call_at, datetime_utils:strftime(datetime_utils:in_zone(TimeZone, CreatedAt)), JsContext),
+  DefaultContext = default_variables(NewJsContext, ProjectVars, Variables),
   initialize_context(DefaultContext, QueuedCall).
 
 initialize_context(Context, #queued_call{variables = Vars}) ->
@@ -527,6 +529,7 @@ should_reschedule(_) -> true.
 store_default_language(Session = #session{project = Project}) ->
   JsContext = default_variables(Session),
   Session#session{js_context = JsContext, default_language = project:default_language(Project)}.
+
 %% @private
 is_timeout(#session{created_at = CreatedAt}, TimeoutIn) ->
   Now = calendar:universal_time(),
