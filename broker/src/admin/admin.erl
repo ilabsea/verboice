@@ -28,5 +28,5 @@ body_message(#session{channel = Channel, call_log = CallLog}) ->
     string:concat("channel_number:", util:to_string(Channel:number())),
     string:concat("caller_id:", util:to_string(Call#call_log.address)),
     string:concat("direction:", util:to_string(Call#call_log.direction)),
-    string:concat("datetime:", util:strftime(Call:called_at()))
+    string:concat("datetime:", datetime_utils:strftime(Call:called_at()))
   ], ",").

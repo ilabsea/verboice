@@ -27,10 +27,9 @@ duration(#call_log{started_at = StartedAt, finished_at = FinishedAt, duration = 
     NewDuration -> NewDuration
   end.
 
-started_at_or_created_at(#call_log{created_at = {_, CreatedAt}, started_at = StartedAt}) ->
+started_at_or_created_at(#call_log{created_at = CreatedAt, started_at = StartedAt}) ->
   case StartedAt of
     undefined -> CreatedAt;
-    {datetime, Value} -> Value;
     _ -> StartedAt
   end.
 
@@ -39,7 +38,7 @@ called_at(#call_log{not_before = undefined, started_at = StartedAt}) -> StartedA
 called_at(#call_log{not_before = NotBefore}) -> NotBefore.
 
 append_step_interaction(StepName, CallLog = #call_log{step_interaction = StepInteraction}) ->
-  Time = util:time_difference_in_seconds(CallLog:started_at_or_created_at(), calendar:universal_time()),
+  Time = datetime_utils:difference_in_seconds(CallLog:started_at_or_created_at(), calendar:universal_time()),
   Interaction = [StepName, ":", util:to_string(Time)],
   NewStepInteraction = case StepInteraction of
     undefined -> Interaction;
