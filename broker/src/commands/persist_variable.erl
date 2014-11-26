@@ -1,9 +1,9 @@
 -module(persist_variable).
--export([run/2, get_current_date/0]).
+-export([run/2, get_current_date/0, store_peristed_variable/3 ]).
 -include("session.hrl").
 -include("db.hrl").
 
-run(Args, Session = #session{js_context = JS, call_log = CallLog}) ->
+run(Args, Session = #session{js_context = JS}) ->
   Name = proplists:get_value(name, Args),
   Expression = proplists:get_value(expression, Args),
   Type = proplists:get_value(type, Args),
@@ -21,14 +21,19 @@ run(Args, Session = #session{js_context = JS, call_log = CallLog}) ->
       date_to_string_format(NewDate)
   end,
 
-  PersistedVar = (find_or_create_persisted_variable(Name, Session))#persisted_variable{value = NewValue},
-  PersistedVar:save(),
-
-  create_session_call_log_variable(CallLog:id(), PersistedVar#persisted_variable.project_variable_id, NewValue),
+  store_peristed_variable(Name, NewValue, Session), % return a PersistedVar
+  % create_session_call_log_variable(CallLog:id(), PersistedVar#persisted_variable.project_variable_id, NewValue),
 
   VarName = list_to_atom("var_" ++ Name),
   JS3 = erjs_context:set(VarName, NewValue, JS2),
   {next, Session#session{js_context = JS3}}.
+
+store_peristed_variable(Name, NewValue, Session) ->
+  StorePersistedVar = (find_or_create_persisted_variable(Name, Session))#persisted_variable{value = NewValue},
+  StorePersistedVar:save(),
+  #session{call_log = CallLog } = Session,
+  create_session_call_log_variable(CallLog:id(), StorePersistedVar#persisted_variable.project_variable_id, NewValue),
+  StorePersistedVar.
 
 get_2_digits_string(Value) ->
   TwoDigit = if  

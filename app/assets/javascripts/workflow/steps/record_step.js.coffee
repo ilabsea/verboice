@@ -12,6 +12,8 @@ onWorkflow ->
       @defines_store = ko.observable !!attrs.store
 
       @timeout = ko.observable (attrs.timeout || '10')
+      @silence_detection = ko.observable (attrs.silence_detection || '0')
+
       @stop_key = ko.observable (attrs.stop_key || '#')
 
       @current_editing_resource = ko.observable null
@@ -50,6 +52,7 @@ onWorkflow ->
         old_store: (if @old_store() then @old_store() else null)
         store: (if @store() then @store() else null)
         timeout: @timeout()
+        silence_detection: @silence_detection()
         stop_key: @stop_key()
         explanation_resource: @resources.explanation.to_hash()
         confirmation_resource: @resources.confirmation.to_hash()

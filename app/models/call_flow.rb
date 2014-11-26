@@ -93,6 +93,28 @@ class CallFlow < ActiveRecord::Base
     self.push_to_fusion_tables(call_log)
   end
 
+  def resources
+    guids = []
+    resources = []
+    user_flow.each do |step| 
+      guids += guids_from_step(step)
+    end
+    project.resources.each do |resource|
+      resources << resource if guids.include?(resource.guid)
+    end
+    resources
+  end
+
+  def guids_from_step step
+    guids = []
+    step.each do |key, value|
+      if key.match(/resource/) && guid=value['guid']
+        guids << guid
+      end
+    end
+    guids
+  end
+
   def clean_external_service(external_service)
     return unless user_flow.present?
     step_guids = external_service.steps.pluck(:guid)
@@ -137,7 +159,7 @@ class CallFlow < ActiveRecord::Base
   end
 
   def update_flow_with_user_flow
-    if user_flow.presence && user_flow_changed?
+    if user_flow_changed?
       parser  = Parsers::UserFlow.new self, user_flow
       self.broker_flow = self.flow = parser.equivalent_flow
       self.variables = parser.variables.to_a.uniq

@@ -17,17 +17,21 @@
 
 class Commands::NuntiumCommand < Command
 
-  def initialize(resource_guid, rcpt_type, expr = nil)
-    @resource_guid = resource_guid
-    @rcpt_type = rcpt_type   # can be :caller or :expr
-    @expr = expr
+  def initialize(kind, options = {})
+    @kind = kind
+    @rcpt_type = options[:rcpt_type] || nil
+    @expr = options[:expr] || nil
+    @subject_guid = options[:subject_guid] || nil
+    @resource_guid = options[:resource_guid]
   end
 
   def serialize_parameters
     {
+      kind: @kind,
+      rcpt_type: @rcpt_type,
       expr: @expr,
-      resource_guid: @resource_guid,
-      rcpt_type: @rcpt_type
+      subject_guid: @subject_guid,
+      resource_guid: @resource_guid
     }
   end
 

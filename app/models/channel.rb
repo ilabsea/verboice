@@ -17,12 +17,16 @@
 
 class Channel < ActiveRecord::Base
   PREFIX_SEPARATOR = ','
+  PREFIX_NORMALIZATIONS = ['855', '0']
+
   belongs_to :account
   belongs_to :call_flow
   has_one :project, :through => :call_flow
 
   has_many :call_logs, :dependent => :nullify
   has_many :queued_calls, :dependent => :destroy
+
+  has_one :quota, class_name: "ChannelQuota", dependent: :nullify
 
   config_accessor :limit
 
@@ -70,15 +74,7 @@ class Channel < ActiveRecord::Base
     queued_call = enqueue_call_to address, options
     call_log = queued_call.call_log
 
-    begin
-      if queued_call.not_before?
-        BrokerClient.notify_call_queued id, queued_call.not_before
-      else
-        BrokerClient.notify_call_queued id
-      end
-    rescue Exception => ex
-      call_log.warn "Unable to notify the broker about this new call. The call might be delayed"
-    end
+    notify_call_queued queued_call
 
     call_log
   end
@@ -88,9 +84,19 @@ class Channel < ActiveRecord::Base
     "#{prefix_called_number}#{address}"
   end
 
+  def self.normalized_called_number address, prefix
+    return address if prefix.blank?
+    reg = Channel::PREFIX_NORMALIZATIONS.map{|prefix| '^\+?' + prefix }.join("|")
+    normalized_address = address.gsub(%r{#{reg}}, "")
+    prefix + normalized_address
+  end
+
   def enqueue_call_to address, options
     via = options.fetch(:via, 'API')
-    address = address_with_prefix_called_number address
+
+    prefix  = config["normalized_called_number"] 
+    address = Channel.normalized_called_number(address, prefix)
+    address = address_with_prefix_called_number(address)
 
     if options[:call_flow_id]
       current_call_flow = account.call_flows.find(options[:call_flow_id])
@@ -138,7 +144,8 @@ class Channel < ActiveRecord::Base
         :state => :queued,
         :schedule => schedule,
         :not_before => not_before,
-        :prefix_called_number => self.config["prefix_called_number"]
+        :prefix_called_number => self.config["prefix_called_number"],
+        :store_log_entries => project.store_call_log_entries
       )
       call_log.save!
       call_log.info "Received via #{via}: call #{address}"
@@ -197,6 +204,18 @@ class Channel < ActiveRecord::Base
   def broker
     :asterisk_broker
   end
+  
+  def notify_call_queued queued_call
+    begin
+      if queued_call.not_before?
+        BrokerClient.notify_call_queued id, queued_call.not_before
+      else
+        BrokerClient.notify_call_queued id
+      end
+    rescue Exception => ex
+      queued_call.call_log.warn "Unable to notify the broker about this new call. The call might be delayed"
+    end
+  end
 
   def notify_broker
     broker.instance.notify_call_queued self
@@ -252,6 +271,10 @@ class Channel < ActiveRecord::Base
     self
   end
 
+  def self.by_account_id account_id
+    where(['account_id = :account_id', account_id: account_id])
+  end
+
   def as_json(options = {})
     options = { only: [:id, :name, :config] }.merge(options)
     super(options).merge({
@@ -259,4 +282,9 @@ class Channel < ActiveRecord::Base
       call_flow: call_flow.try(:name)
     })
   end
+
+  def enabled?
+    enabled == true || enabled == "1"
+  end
+  
 end

@@ -24,6 +24,8 @@ class Account < ActiveRecord::Base
   # Setup accessible (or protected) attributes for your model
   attr_accessible :email, :password, :password_confirmation, :remember_me, :locale
 
+  validates_strength_of :password, :with => :email
+
   has_many :projects, :dependent => :destroy
   has_many :call_flows, :through => :projects
 
@@ -40,6 +42,18 @@ class Account < ActiveRecord::Base
 
   has_one :google_oauth_token, :class_name => 'OAuthToken', :conditions => {:service => :google}, :dependent => :destroy
 
+  # CONSTANT ROLE
+  ADMIN = 1
+  USER = 2
+
+  before_save :ensure_auth_token
+ 
+  def ensure_auth_token
+    if !self.auth_token
+      self.auth_token = generate_auth_token
+    end
+  end
+
   def call(options = {})
     channel = channels.find_by_name! options[:channel]
     channel.call options[:address], options
@@ -48,6 +62,27 @@ class Account < ActiveRecord::Base
   def clear_downloads
     Dir[File.join RecordingManager.for(self).path_for('downloads'), '*.zip'].each do |file|
       File.delete file if (Time.now - File.ctime(file)).to_i > 7.days
+    end
+  end
+
+  def admin?
+    (role == ADMIN)
+  end
+
+  def user?
+    role == USER
+  end
+
+  def has_access_from? host
+    Api2.host_allowed?(host)
+  end
+
+  private
+
+  def generate_auth_token
+    loop do
+      token = Devise.friendly_token
+      break token unless Account.where(auth_token: token).first
     end
   end
 

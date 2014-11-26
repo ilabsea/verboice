@@ -1,5 +1,4 @@
 = render 'shared/project_tabs_and_title', :project => @project
-
 %h1= t('views.projects.call_logs.index.label.calls')
 %p.desc= t('views.projects.call_logs.index.label.desc')
 
@@ -7,17 +6,17 @@
 
 -unless @logs.empty?
   %p
-    - if render_csv_download? @search
-      = link_to t('views.call_logs.index.action.download_csv'), download_project_call_logs_path(format: :csv, search: @search), :class => "button fimport"
-    - else
-      = link_to t('views.call_logs.index.action.download_csv'), download_project_call_logs_path(search: @search), :class => %w(button fimport download-call_logs)
+    / - if render_csv_download? @project, @search
+    /   = link_to t('views.call_logs.index.action.download_csv'), download_project_call_logs_path(format: :csv, search: @search), :class => "button fimport download-call_logs"
+    / - else
+    = link_to t('views.call_logs.index.action.download_csv'), download_project_call_logs_path(search: @search), :class => %w(button fimport download-call_logs)
 %br/
-%div= page_entries_info @logs, :entry_name => t('views.projects.call_logs.index.label.call_log')
-= will_paginate @logs, :param_name => 'page'
+= paginate_for @logs
 - if @logs.present?
   %br/
   %table.GralTable
     %tr
+      %th= t('views.projects.call_logs.index.label.id')
       %th= t('views.projects.call_logs.index.label.started')
       %th= t('views.projects.call_logs.index.label.finished')
       %th= t('views.projects.call_logs.index.label.duration_in_second')
@@ -34,6 +33,7 @@
       %th
     - @logs.each do |log|
       %tr
+        %td= log.id
         %td= datetime_format log.created_at, @project.time_zone
         %td= datetime_format log.finished_at, @project.time_zone
         %td= log.duration if log.duration && log.duration > 0
@@ -52,7 +52,7 @@
           - else
             = log.state
 
-        %td= log.step_interaction
+        %td= log.parent ? "ref_id:#{log.parent.id};#{log.step_interaction}" : log.step_interaction
         - @project.project_variables.each do |variable|
           - existed = false
           - log.call_log_answers.each do |answer|
@@ -83,9 +83,8 @@
                     %a.fancybox.icon_button{ class: recorded_audio.annotation.present? ? "fedit-blue" : "fedit", href: "#audio_annotation_#{recorded_audio.id}" }
           - unless existed
             %td
-        %td= link_to t('views.projects.call_logs.index.action.view_details'), call_log_path(log)
+        %td= link_to(t('views.projects.call_logs.index.action.view_details'), call_log_path(log)) if log.store_log_entries
   %br/
-  %div= page_entries_info @logs, :entry_name => t('views.projects.call_logs.index.label.call_log')
-  = will_paginate @logs, :param_name => 'page'
+  = paginate_for @logs
 %br/
 

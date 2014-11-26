@@ -8,6 +8,7 @@
 //= require jquery_ujs
 //= require jquery.fancybox-1.3.4.pack
 //= require jquery.control-key-.1.0
+//= require jquery.tooltipster
 //= require underscore
 //= require pigeon
 //= require namespace
@@ -17,3 +18,5 @@
 //= require constant
 //= require_directory ./projects
 //= require_directory ./custom_bindings
+//= require_directory ./devise
+//= require_directory ./password

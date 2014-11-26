@@ -16,8 +16,9 @@
 # along with Verboice.  If not, see <http://www.gnu.org/licenses/>.
 
 module CallLogHelper
-  def render_csv_download? search = nil
-    logs = CallLog.search search
+  def render_csv_download? project_id, search = nil
+    logs = CallLog.where project_id: project_id
+    logs = logs.search search
     audios = CallLogRecordedAudio.where call_log_id: logs 
 
     logs.count > CallLog::CSV_MAX_ROWS || audios.count == 0

@@ -1,5 +1,5 @@
 set :user, 'ilab'
-set :server, "192.168.1.146"
-set :branch, 'default'
+set :server, "192.168.1.53"
+set :branch, 'development'
 
-server "192.168.1.146", :app, :web, :db, primary: true
+server "192.168.1.53", :app, :web, :db, primary: true

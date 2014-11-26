@@ -41,7 +41,7 @@ class Project < ActiveRecord::Base
     :reject_if => lambda { |attributes| attributes[:name].blank?},
     :allow_destroy => true
 
-  attr_accessible :name, :account, :status_callback_url, :status_callback_url_user, :status_callback_url_password, :time_zone, :project_variables_attributes, :languages, :default_language
+  attr_accessible :name, :account, :status_callback_url, :status_callback_url_user, :status_callback_url_password, :time_zone, :project_variables_attributes, :languages, :default_language, :store_call_log_entries
   attr_accessible :tts_engine, :tts_ispeech_api_key
 
   validates_presence_of :name
@@ -86,6 +86,10 @@ class Project < ActiveRecord::Base
         TTS::SystemSynthesizer.instance
       end
     end
+  end
+
+  def active_calls
+    BrokerClient.active_calls_by_project(id)
   end
   
   def channels

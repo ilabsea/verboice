@@ -101,6 +101,8 @@ tr.link, tr.clickable {
   width: 48px;
 }
 
+
+
 span.validation {
   display: inline-block;
   width: 135px;
@@ -264,6 +266,20 @@ a.audio_tool{
   width: 59px;
 }
 
+.lspeech_recognition{
+  background-image: url("../assets/speech_recognition.png");
+  height: 59px;
+  width: 59px; 
+}
+
+.i48grad-speech_recogition {
+    background: image-url("call_flow.speech.png") no-repeat scroll center top rgba(0, 0, 0, 0);
+    display: inline-block;
+    height: 48px;
+    vertical-align: middle;
+    width: 48px;
+}
+
 
 .deregister{
   background-image: url("../assets/unregister.png");
@@ -298,3 +314,75 @@ a.audio_tool{
     vertical-align: middle;
     width: 48px;
 }
+.ws12{
+  width: 150px !important;
+}
+
+div.row-block{
+  margin: 6px 0px;
+  clear:both;
+}
+
+div.label-block {
+  display:block;
+  width: 120px;
+  float: left;
+  margin-top: 6px;
+}
+
+
+.input-block {
+  margin-top: -3px;
+  margin-left: 130px;
+}
+
+.input-block input {
+  width: 120px !important;
+}
+
+.step-ui-table {
+  td, th {
+    padding: 3px 0px;
+  }
+
+  padding: 3px;
+  select, input {
+    width: 96%;
+  }
+}
+
+.paginator_container{
+  text-align: center;
+}
+
+.paginator_container .pagination{
+  float: right !important;
+  margin: 10px !important;
+}
+.paginator_container .counter {
+  margin-top: 8px;
+  float: right;
+}
+
+.paginator_container .entry {
+  float:left;
+  margin: 10px;
+}
+
+.inline-c{
+  padding: 5px 0px;
+  label {
+    display: inline;
+  }
+  .icon-info {
+    vertical-align: middle;
+    display: inline-block;
+  }
+}
+
+.tooltip{
+  cursor: pointer;
+}
+
+
+

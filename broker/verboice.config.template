@@ -1,0 +1,42 @@
+[
+  {verboice, [
+    {asterisk_config_dir, "/etc/asterisk"},
+    {asterisk_sounds_dir, "/var/lib/asterisk/sounds"},
+    {asterisk_agi_use_pipe_separator, false},
+
+    {broker_port, 19000},
+    {base_url, "http://localhost:3000/"},
+    {record_dir, "../data/call_logs/"},
+
+    {db_name, "verboice_development"},
+    {db_user, "root"},
+    {db_pass, ""},
+
+    {crypt_secret, "secret"},
+
+    {nuntium_host, "https://nuntium.instedd.org"},
+    {nuntium_account, ""},
+    {nuntium_app, ""},
+    {nuntium_app_password, ""},
+
+    {twilio_callback_url, "http://localhost:8080/"},
+
+    {hostname, "hostname"},
+    {recipient, ["admin@verboice.instedd.org"]},
+    {sender, "noreply@verboice.instedd.org"}
+  ]},
+
+  {inets, [
+    {services, [
+      {httpd, [
+        {server_name, "verboice_broker"},
+        {server_root, "."},
+        {document_root, "tmp/www"},
+        {port, 8080},
+        {modules, [twilio_httpd_module, mod_get, mod_log]},
+        {transfer_log, "log/httpd.log"},
+        {error_log, "log/httpd_error.log"}
+      ]}
+    ]}
+  ]}
+].

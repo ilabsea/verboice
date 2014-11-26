@@ -150,7 +150,7 @@ describe ExternalServicesController do
         expect {
           put :update_manifest, {:id => other_external_service.to_param, :project_id => other_external_service.project.to_param}
         }.should raise_error
-      end
+     end
   end
 
 end

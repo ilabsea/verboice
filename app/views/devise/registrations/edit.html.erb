@@ -17,17 +17,25 @@
 
   <div class='field w30'>
     <%= f.label :locale, t('views.devise.registrations.edit.label.language') %>
-    <%= f.select :locale, options_for_select([['English', 'en'], ['Khmer', 'kh']], I18n.locale) %>
+    <%= f.select :locale, options_for_select([['English', 'en'], ['Khmer', 'kh']], resource.locale) %>
   </div>
 
   <div class='ux-collapsible collapsed w30' data-on-expanded='box grey'>
     <span><a class='fsettings' href='#'><%= t('views.devise.registrations.edit.label.change_my_password') %></a></span>
     <div class='ux-content'>
-      <div class='field w30'>
+      <div class='field w30 account-form'>
         <%= f.label :password, t('views.devise.registrations.edit.label.new_password') %>
         <p><%= "(#{t('views.devise.registrations.edit.label.leave_blank_no_change')})" %></p>
         <%= f.password_field :password %>
       </div>
+
+      <div class="field w30">
+        <div id='validateMeter' style='height:5px; float:left;'></div>
+        <p id='validateMessage' style='float:right;'></p>
+      </div>
+
+      <div class='clear'></div>
+
       <div class='field w30'>
         <%= f.label :password_confirmation, t('views.devise.registrations.edit.label.confirm_new_password') %>
         <%= f.password_field :password_confirmation %>

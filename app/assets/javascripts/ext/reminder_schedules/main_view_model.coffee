@@ -15,7 +15,6 @@ onReminderSchedules ->
         Operator.GREATER_THAN
       ])
       @data_types = ko.observableArray([
-        DataType.NUMBER
         DataType.DAY
         DataType.WEEK
         DataType.MONTH
@@ -49,7 +48,6 @@ onReminderSchedules ->
     saveReminderSchedule: =>
       @savingReminderSchedule(true)
       json = {ext_reminder_schedule: @currentReminderSchedule().toJSON()}
-      console.log('json' ,json)
       if @currentReminderSchedule().id()
         json._method = 'put'
         $.post "/ext/projects/#{@project_id()}/reminder_schedules/#{@currentReminderSchedule().id()}.json", json, @saveReminderScheduleCallback

@@ -48,7 +48,7 @@ class CallFlowsController < ApplicationController
 
     @call_flow.save
     if request.xhr?
-      render :partial => "box_content", :locals => { :call_flow => @call_flow, :expanded => (@call_flow.mode_flow? || @call_flow.errors.any?)}
+      render :partial => "box_content", :locals => { :call_flow => @call_flow, :project => @call_flow.project , :expanded => (@call_flow.mode_flow? || @call_flow.errors.any?)}
     else
       render :action => "index"
     end
@@ -67,7 +67,7 @@ class CallFlowsController < ApplicationController
   def update
     @call_flow.update_attributes(params[:call_flow])
     if request.xhr?
-      render :partial => "box_content", :locals => { :call_flow => @call_flow, :expanded => @call_flow.errors.any? }
+      render :partial => "box_content", :locals => { :call_flow => @call_flow, :project => @call_flow.project, :expanded => @call_flow.errors.any? }
     else
       render :action => "index"
     end
@@ -86,6 +86,7 @@ class CallFlowsController < ApplicationController
   def edit_workflow
     @variables = @project.defined_variables
     @external_steps = @call_flow.project.external_service_steps.includes(:external_service)
+    @call_flows = @project.call_flows.select{|call_flow| call_flow.id != params[:id].to_i}
   end
 
   def import

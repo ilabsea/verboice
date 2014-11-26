@@ -18,6 +18,7 @@
 class Backup
 
   TEMP_DIR = 'tmp/'
+  PART_FILE_DIR = File.join(TEMP_DIR, "s3parts")
   BASEDIR = File.join(TEMP_DIR, "backups")
   BIN_LOGS = '/var/log/mysql/mysql-bin.[0-9]*'
   FULL = :full
@@ -42,7 +43,7 @@ class Backup
   end
 
   def file_compression
-    @file_compression = "#{@directory[:current]}.tar.gz"
+    @file_compression ||= "#{@directory[:current]}.tar.gz"
   end
 
   class << self
@@ -61,8 +62,11 @@ class Backup
         backup.copy_files
         backup.mysqldump
         backup.compress
+        
         # uploading to aws
         Amazon::S3.upload backup.file_compression
+
+        backup.remove_files
         Log.info(:s3_log_dir, "====== full backup: finished at #{Time.now.to_s} ======")
       end
     end
@@ -74,8 +78,11 @@ class Backup
         backup.copy_files
         backup.incremental
         backup.compress
+        
         # uploading to aws
         Amazon::S3.upload backup.file_compression
+
+        backup.remove_files
         Log.info(:s3_log_dir, "====== incremental backup: finished at #{Time.now.to_s} ======")
       end
     end
@@ -98,6 +105,7 @@ class Backup
       asterisk_sounds: [current_dir, '/', 'asterisk', '/', 'sounds'].join
     }
     FileUtils.mkdir TEMP_DIR unless File.exists? TEMP_DIR
+    FileUtils.mkdir PART_FILE_DIR unless File.exists? PART_FILE_DIR
     FileUtils.mkdir BASEDIR unless File.exists? BASEDIR
     FileUtils.mkdir @directory.values
   end
@@ -136,6 +144,10 @@ class Backup
     system "tar -zcf #{file_compression} #{@directory[:current]}"
     # clean up
     FileUtils.rm_rf @directory[:current]
+  end
+
+  def remove_files
+    FileUtils.rm_rf file_compression
   end
 
   private

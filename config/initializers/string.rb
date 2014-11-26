@@ -3,6 +3,14 @@ class String
     self == self.to_i.to_s
   end
 
+  def to_number
+    self.gsub(" ", "")
+  end
+
+  def is_contact?
+    !self.match(/^[\s\d]+$/).nil?  
+  end
+
   #TODO: be careful modify/delete
   def old_date_format?
     begin
@@ -34,6 +42,10 @@ class String
 
   def mpeg_mime_type?
     ["audio/mp3", "audio/mpeg"].include? self
+  end
+
+  def wav_mime_type?
+    ["audio/x-wav", "audio/wav"].include? self
   end
 
   def to_date_regex()

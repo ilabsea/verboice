@@ -27,6 +27,7 @@ module Parsers
         @explanation_resource = Resource.new params['explanation_resource']
         @confirmation_resource = Resource.new params['confirmation_resource']
         @timeout = params['timeout']
+        @silence_detection = params['silence_detection']
         @stop_key = params['stop_key']
         @call_flow = call_flow
         @next = params['next']
@@ -50,7 +51,7 @@ module Parsers
           compiler.AssignValue "current_step_name", "#{@name}"
           compiler.Trace context_for %("Record message. Download link: " + record_url(#{@id}))
           compiler.append @explanation_resource.equivalent_flow
-          compiler.Record @id, @name, {:stop_keys => @stop_key, :timeout => @timeout, :old_var_name => @old_persisted_variable_name, :var_name => @persisted_variable_name}
+          compiler.Record @id, @name, {:silence_detection => @silence_detection, :stop_keys => @stop_key, :timeout => @timeout, :old_var_name => @old_persisted_variable_name, :var_name => @persisted_variable_name}
           compiler.append @confirmation_resource.equivalent_flow
           compiler.append @next.equivalent_flow if @next
         end

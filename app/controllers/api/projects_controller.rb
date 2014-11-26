@@ -16,6 +16,8 @@
 # along with Verboice.  If not, see <http://www.gnu.org/licenses/>.
 module Api
   class ProjectsController < ApiController
+
+    # GET /api/projects
     def index
       projects = current_account.projects.includes(:call_flows, :schedules).sort_by { |p| p.name.downcase }.map do |project|
         {

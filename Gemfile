@@ -1,6 +1,6 @@
 source 'http://rubygems.org'
 
-gem 'rails', '3.2.15'
+gem 'rails', '3.2.14'
 
 gem 'haml-rails'
 gem "jquery-rails"
@@ -10,6 +10,7 @@ gem 'nokogiri'
 gem 'guid'
 gem 'devise'
 gem "will_paginate", "~> 3.0"
+gem "daemons"
 gem "instedd-rails"
 gem 'decent_exposure'
 gem 'attr_encrypted'
@@ -24,7 +25,6 @@ gem 'newrelic_rpm'
 gem 'language_list'
 gem 'bertrpc'
 gem 'whenever', :require => false
-gem 'bertrpc'
 gem 'formatted_rails_logger'
 gem 'fabrication'
 gem 'instedd-pigeon', :require => 'pigeon'
@@ -32,6 +32,10 @@ gem 'ice_cube'
 gem 'aws-sdk'
 gem 'rails_config'
 gem 'awesome_print'
+
+gem "active_model_serializers"
+gem "recaptcha", :require => "recaptcha/rails"
+gem "password_strength"
 
 group :assets do
   gem 'sass-rails',   '~> 3.2.5'
@@ -48,9 +52,15 @@ group :development, :test do
   gem "shoulda-matchers"
   gem 'ci_reporter'
   gem 'equivalent-xml'
-  gem 'pry-debugger'
+  gem 'pry-debugger', '~> 0.2.2'
   gem 'syntax'
   gem 'timecop'
+
+  gem 'capybara'
+  gem 'database_cleaner'
+
+  gem 'rspec_api_documentation', github: 'zipmark/rspec_api_documentation'
+  gem 'apitome'
 end
 
 group :development do

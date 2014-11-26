@@ -47,11 +47,11 @@ describe CallLogSearch do
     let(:date) { Time.smart_parse(search_date).utc.strftime "%F %X" }    
 
     it "should search by after" do
-      assert_search("after:#{search_date}").should match /created_at >= '#{date}'/
+      assert_search("after:#{search_date}").should match /started_at >= '#{date}'/
     end
 
     it "should search by before" do
-      assert_search("before:#{search_date}").should match /created_at <= '#{date}'/
+      assert_search("before:#{search_date}").should match /started_at <= '#{date}'/
     end
   end
 

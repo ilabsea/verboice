@@ -41,12 +41,14 @@ Sham.define do
     [address]
   }
   number8 { (1..8).map { ('1'..'9').to_a.sample }.join }
+  ip { Faker::Internet.ip_v4_address }
 end
 
 Account.blueprint do
   email
   password
   confirmed_at { 2.days.ago }
+  role { Account::USER }
 end
 
 Project.blueprint do
@@ -120,6 +122,7 @@ QueuedCall.blueprint do
   channel { Channel.all_leaf_subclasses.sample.make }
   call_log
   address { Sham.password }
+  state { "queued" }
 end
 
 PersistedVariable.blueprint do
@@ -259,4 +262,12 @@ CallLogAnswer.blueprint do
   value
   call_log { CallLog.all_leaf_subclasses.sample.make }
   project_variable { ProjectVariable.all_leaf_subclasses.sample.make }
+end
+
+LoginTracker.blueprint do
+  origin_ip { Faker::Internet.ip_v4_address }
+  email
+  logged_in_at { DateTime.now }
+  status { 'ACTIVE' }
+  marked_as { 'FAILED' }
 end

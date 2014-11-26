@@ -28,6 +28,8 @@ module Parsers
         @next = params['next']
         @root_index = params['root']
         @dial_prefix = params['dial_prefix']
+        @selected_call_flow_id = params['selected_call_flow_id']
+        @retries  = params['retries']
       end
 
       def is_root?
@@ -48,7 +50,10 @@ module Parsers
           compiler.AssignValue "current_step", @id
           compiler.AssignValue "current_step_name", "#{@name}"
           compiler.Trace context_for '"Hang up and call back."'
-          compiler.HangupAndCallback(dial_prefix: @dial_prefix)
+          compiler.HangupAndCallback(dial_prefix: @dial_prefix,
+                                     selected_call_flow_id: @selected_call_flow_id,
+                                     retries: @retries)
+
           compiler.append @next.equivalent_flow if @next
         end
       end

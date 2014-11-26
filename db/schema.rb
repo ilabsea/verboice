@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20140115210510) do
+ActiveRecord::Schema.define(:version => 20141117030820) do
 
   create_table "accounts", :force => true do |t|
     t.string   "email",                               :default => "", :null => false
@@ -31,6 +31,8 @@ ActiveRecord::Schema.define(:version => 20140115210510) do
     t.datetime "confirmed_at"
     t.datetime "confirmation_sent_at"
     t.string   "locale"
+    t.integer  "role",                                :default => 2
+    t.string   "auth_token"
   end
 
   add_index "accounts", ["confirmation_token"], :name => "index_accounts_on_confirmation_token", :unique => true
@@ -121,20 +123,35 @@ ActiveRecord::Schema.define(:version => 20140115210510) do
     t.integer  "retries",              :default => 0
     t.text     "step_interaction"
     t.string   "prefix_called_number"
+    t.boolean  "store_log_entries"
+    t.integer  "parent_id"
   end
 
   add_index "call_logs", ["account_id", "id"], :name => "index_call_logs_on_account_id_and_id"
   add_index "call_logs", ["call_flow_id"], :name => "index_call_logs_on_call_flow_id"
+
+  create_table "channel_quota", :force => true do |t|
+    t.integer  "channel_id"
+    t.boolean  "enabled",    :default => false
+    t.boolean  "blocked",    :default => false
+    t.datetime "created_at",                    :null => false
+    t.datetime "updated_at",                    :null => false
+    t.float    "total",      :default => 0.0
+    t.float    "used",       :default => 0.0
+  end
+
+  add_index "channel_quota", ["channel_id"], :name => "index_channel_quota_on_channel_id"
 
   create_table "channels", :force => true do |t|
     t.integer  "account_id"
     t.integer  "call_flow_id"
     t.string   "name"
     t.text     "config"
-    t.datetime "created_at",   :null => false
-    t.datetime "updated_at",   :null => false
+    t.datetime "created_at",                     :null => false
+    t.datetime "updated_at",                     :null => false
     t.string   "type"
     t.string   "guid"
+    t.boolean  "enabled",      :default => true
   end
 
   add_index "channels", ["call_flow_id"], :name => "index_channels_on_call_flow_id"
@@ -229,23 +246,25 @@ ActiveRecord::Schema.define(:version => 20140115210510) do
   end
 
   create_table "ext_reminder_schedules", :force => true do |t|
-    t.string  "name"
-    t.date    "start_date"
-    t.integer "schedule_type",       :default => 0
-    t.integer "recursion"
-    t.string  "days"
-    t.integer "call_flow_id"
-    t.integer "project_id"
-    t.integer "channel_id"
-    t.string  "queue_call_id"
-    t.string  "time_from"
-    t.string  "time_to"
-    t.string  "conditions"
-    t.integer "reminder_group_id"
-    t.text    "schedule"
-    t.boolean "retries",             :default => false
-    t.integer "retries_schedule_id"
-    t.string  "retries_in_hours"
+    t.string   "name"
+    t.date     "start_date"
+    t.integer  "schedule_type",       :default => 0
+    t.integer  "recursion"
+    t.string   "days"
+    t.integer  "call_flow_id"
+    t.integer  "project_id"
+    t.integer  "channel_id"
+    t.string   "queue_call_id"
+    t.string   "time_from"
+    t.string   "time_to"
+    t.string   "conditions"
+    t.integer  "reminder_group_id"
+    t.text     "schedule"
+    t.boolean  "retries",             :default => false
+    t.integer  "retries_schedule_id"
+    t.string   "retries_in_hours"
+    t.datetime "created_at"
+    t.datetime "updated_at"
   end
 
   create_table "external_service_steps", :force => true do |t|
@@ -311,13 +330,27 @@ ActiveRecord::Schema.define(:version => 20140115210510) do
   add_index "localized_resources", ["guid"], :name => "index_localized_resources_on_guid"
   add_index "localized_resources", ["resource_id"], :name => "index_localized_resources_on_resource_id"
 
+  create_table "login_trackers", :force => true do |t|
+    t.string   "email"
+    t.string   "origin_ip"
+    t.string   "status"
+    t.string   "marked_as"
+    t.datetime "logged_in_at"
+    t.datetime "created_at",   :null => false
+    t.datetime "updated_at",   :null => false
+  end
+
+  add_index "login_trackers", ["origin_ip"], :name => "index_login_trackers_on_origin_ip"
+
   create_table "nuntium_channels", :force => true do |t|
     t.integer  "account_id"
     t.string   "name"
     t.string   "channel_name"
     t.boolean  "enabled"
-    t.datetime "created_at",   :null => false
-    t.datetime "updated_at",   :null => false
+    t.datetime "created_at",                      :null => false
+    t.datetime "updated_at",                      :null => false
+    t.string   "kind"
+    t.boolean  "default",      :default => false
   end
 
   add_index "nuntium_channels", ["account_id"], :name => "index_nuntium_channels_on_account_id"
@@ -373,22 +406,23 @@ ActiveRecord::Schema.define(:version => 20140115210510) do
 
   create_table "projects", :force => true do |t|
     t.string   "name"
-    t.datetime "created_at",                             :null => false
-    t.datetime "updated_at",                             :null => false
+    t.datetime "created_at",                                :null => false
+    t.datetime "updated_at",                                :null => false
     t.integer  "account_id"
     t.string   "status_callback_url"
     t.text     "encrypted_config"
-    t.string   "time_zone",           :default => "UTC"
+    t.string   "time_zone",              :default => "UTC"
     t.text     "languages"
     t.string   "default_language"
+    t.boolean  "store_call_log_entries", :default => true
   end
 
   create_table "queued_calls", :force => true do |t|
     t.integer  "channel_id"
     t.integer  "call_log_id"
     t.string   "address"
-    t.datetime "created_at",                         :null => false
-    t.datetime "updated_at",                         :null => false
+    t.datetime "created_at",                                :null => false
+    t.datetime "updated_at",                                :null => false
     t.string   "callback_url"
     t.binary   "flow"
     t.string   "status_callback_url"
@@ -402,6 +436,7 @@ ActiveRecord::Schema.define(:version => 20140115210510) do
     t.string   "session_id"
     t.text     "callback_params"
     t.datetime "answered_at"
+    t.string   "state",               :default => "queued"
   end
 
   add_index "queued_calls", ["call_flow_id"], :name => "index_queued_calls_on_call_flow_id"

@@ -69,8 +69,8 @@ module Api
     end
 
     def list
-      channel_names = current_account.channels.map(&:name)
-      render :json => channel_names
+      channels = current_account.channels
+      render json: channels, each_serializer: CustomChannelSerializer
     end
 
   end

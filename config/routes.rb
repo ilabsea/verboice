@@ -19,6 +19,8 @@ require 'api_constraints'
 
 Verboice::Application.routes.draw do
 
+  devise_for :accounts, controllers: { registrations: 'registrations', sessions: 'sessions' }
+  
   resources :call_log_recorded_audios, only: [:update]
 
   resources :channels do
@@ -28,12 +30,13 @@ Verboice::Application.routes.draw do
     end
   end
 
-  resources :nuntium_channels, except: [:show]
+  resources :nuntium_channels, except: [:show] do
+    put :mark_as_default, on: :member
+  end
 
   match '/' => 'home#index',  :as => 'home'
 
-  devise_for :accounts
-
+  devise_for :accounts, controllers: { registrations: 'account/registrations' }
   resources :feeds, controller: :feed_server do
     member do
       get :recordings
@@ -46,12 +49,13 @@ Verboice::Application.routes.draw do
   # - Deep routes ensure that form_for directives work as expected, so form_for([@project, @contact]) works no matter it is a creation or an update
   [true, false].each do |shallow|
     resources :projects, :shallow => shallow do
+      resources :call_flows
       member do
         post :enqueue_call
         put :update_variables
       end
       
-
+      
       resources :call_flows, except: [:new, :edit] do
         member do
           get :edit_workflow, path: :designer
@@ -112,6 +116,8 @@ Verboice::Application.routes.draw do
     end
     collection do
       get :queued
+      put :queued_paused
+      put :queued_resumed
       get :download
     end
   end
@@ -150,15 +156,6 @@ Verboice::Application.routes.draw do
   end
 
   namespace :api, defaults: {format: 'json'} do
-    scope module: :v1, constraints: ApiConstraints.new(version: 1, default: true) do
-      resources :projects, only: [:index] do
-        resources :reminder_groups, only: [:index, :create, :update, :destroy], shallow: true
-        
-        resources :contacts, only: [:index, :create], shallow: true do
-          delete :unregistration, on: :collection
-        end
-      end
-    end
     match "call" => "calls#call"
     resources :calls, only: [] do
       member do
@@ -175,11 +172,12 @@ Verboice::Application.routes.draw do
       end
     end
     resources :projects, only: [:index] do
-      resources :contacts do
+      resources :contacts, only: [:index, :create] do
         collection do
           get 'by_address/:address', :action => "show_by_address"
           put 'by_address/:address', :action => "update_by_address"
           put 'all', :action => "update_all"
+          delete :unregistration
         end
       end
       resources :schedules, only: [:index, :create] do
@@ -189,12 +187,79 @@ Verboice::Application.routes.draw do
           delete ':name', :action => "destroy"
         end
       end
+
+      resources :reminder_groups, only: [:index, :create, :update, :destroy], shallow: true
     end
+
     resources :logs, only: [] do
       collection do
         get ':call_id', action: :list
       end
     end
+
+    get '/contacts/:address/call_logs', controller: :call_logs, action: :index
+    resources :call_logs, only: [:index, :show]
+
+    get "call_flows" => "call_flows#list"
+  end
+
+  namespace :api2, defaults: {format: 'json'} do
+
+    match "call" => "calls#call"
+    resources :calls, only: [] do
+      member do
+        match :state
+        match :redirect
+      end
+    end
+
+    resources :channels, only: [:create, :index] do
+      collection do
+        get ":name", :action => "get"
+        put ":name", :action => "update"
+        delete ":name", :action => "destroy"
+      end
+    end
+
+    resources :channel_quota, only: [:create, :destroy]
+
+    resources :projects, only: [:index] do
+      resources :contacts, only: [:index, :create] do
+        collection do
+          get 'by_address/:address', :action => "show_by_address"
+          put 'by_address/:address', :action => "update_by_address"
+          put 'all', :action => "update_all"
+          delete :unregistration
+        end
+      end
+      resources :schedules, only: [:index, :create] do
+        collection do
+          get ':name', :action => "show"
+          put ':name', :action => "update"
+          delete ':name', :action => "destroy"
+        end
+      end
+
+      resources :reminder_groups, only: [:index, :create, :update, :destroy], shallow: true
+    end
+
+    resources :logs, only: [] do
+      collection do
+        get ':call_id', action: :list
+      end
+    end
+
+    get '/channels/:channel_id/call_logs' => "call_logs#list_by_channel"
+    get '/contacts/:address/call_logs', controller: :call_logs, action: :index
+    resources :call_logs, only: [:index, :show]
+
+    get "call_flows" => "call_flows#list"
+
+    get "accounts" => "accounts#index"
+
+    post '/auth' => 'sessions#create'
+
+    resources :traffics, only: [:index]
   end
 
   post 'call_simulator/start'

@@ -1,6 +1,7 @@
 -module(call_log).
 -export([error/3, info/3, trace/3]).
--export([duration/1, started_at_or_created_at/1, append_step_interaction/2]).
+-export([duration/1, started_at_or_created_at/1, append_step_interaction/2, address_without_prefix/1]).
+-export([called_at/1]).
 -define(TABLE_NAME, "call_logs").
 -include_lib("erl_dbmodel/include/model.hrl").
 
@@ -26,15 +27,18 @@ duration(#call_log{started_at = StartedAt, finished_at = FinishedAt, duration = 
     NewDuration -> NewDuration
   end.
 
-started_at_or_created_at(#call_log{created_at = {_, CreatedAt}, started_at = StartedAt}) ->
+started_at_or_created_at(#call_log{created_at = CreatedAt, started_at = StartedAt}) ->
   case StartedAt of
     undefined -> CreatedAt;
-    {datetime, Value} -> Value;
     _ -> StartedAt
   end.
 
+called_at(#call_log{not_before = undefined, started_at = undefined, created_at = CreatedAt}) -> CreatedAt;
+called_at(#call_log{not_before = undefined, started_at = StartedAt}) -> StartedAt;
+called_at(#call_log{not_before = NotBefore}) -> NotBefore.
+
 append_step_interaction(StepName, CallLog = #call_log{step_interaction = StepInteraction}) ->
-  Time = util:time_difference_in_seconds(CallLog:started_at_or_created_at(), calendar:universal_time()),
+  Time = datetime_utils:difference_in_seconds(CallLog:started_at_or_created_at(), calendar:universal_time()),
   Interaction = [StepName, ":", util:to_string(Time)],
   NewStepInteraction = case StepInteraction of
     undefined -> Interaction;
@@ -42,3 +46,10 @@ append_step_interaction(StepName, CallLog = #call_log{step_interaction = StepInt
       [util:to_string(StepInteraction), ";", Interaction]
   end,
   CallLog#call_log{step_interaction = binary_util:to_binary(NewStepInteraction)}.
+
+address_without_prefix(#call_log{prefix_called_number = VoipPrefix, address = Address}) ->
+  case VoipPrefix of
+    undefined -> Address;
+    <<>> -> Address;
+    _ -> binary:replace(Address, VoipPrefix, <<>>, [global])
+  end.

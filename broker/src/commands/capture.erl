@@ -12,8 +12,10 @@ run(Args, Session = #session{pbx = Pbx, js_context = JS, call_log = CallLog}) ->
   {_, JS2} = erjs:eval("digits = timeout = finish_key = null", JS),
 
   CallLog:info("Waiting user input", [{command, "capture"}, {action, "waiting"}]),
+  CaptureResult = Pbx:capture(Caption, Timeout, FinishOnKey, Min, Max),
+  io:format("~n CaptureResult: ~p ", [CaptureResult]),
 
-  JS3 = case Pbx:capture(Caption, Timeout, FinishOnKey, Min, Max) of
+  JS3 = case CaptureResult of
     finish_key ->
       CallLog:info("User pressed the finish key", [{command, "capture"}, {action, "finish_key"}]),
       erjs_context:set(finish_key, true, JS2);

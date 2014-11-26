@@ -64,7 +64,7 @@ module ApplicationHelper
     new_object = class_name.to_s.camelize.constantize.new
     new_object.project = project
     key = new_object.class.name.split('::').last.underscore.to_sym
-    fields = render "box", key => new_object, :expanded => true
+    fields = render "box", key => new_object, project: project, :expanded => true
     link_to_function(name, "add_box(this, \"#{escape_javascript(fields)}\")", options)
   end
 
@@ -97,8 +97,42 @@ module ApplicationHelper
     Pigeon.config.nuntium_configured?
   end
 
+  def steps_configured?
+    STEP_CONFIG["speech_recognition"] == true
+  end
+
   def datetime_format(datetime, time_zone)
     datetime = datetime.try(:in_time_zone, time_zone || 'UTC')
     datetime.present? ? datetime.strftime(Time::DEFAULT_FORMAT) : ''
   end
+
+  def tip_info text
+    image_tag "info.png", class: "icon-info tooltip", title: text
+  end
+  
+  def datetime_format_csv(datetime, time_zone, format)
+    datetime = datetime.try(:in_time_zone, time_zone || 'UTC')
+    datetime.present? ? datetime.strftime(format) : ''
+  end
+  
+  def paginate_for records
+    per_page = params[:per_page] || 10
+    select_options = [10, 20, 30, 50].map{|n| [n, n]}
+
+    content_tag :div , class: 'paginator_container' do
+      entry   = content_tag :div, class: 'entry' do
+                  page_entries_info(@logs, :entry_name => t('views.projects.call_logs.index.label.call_log'))
+                end
+
+      counter = content_tag :div, class: 'counter' do
+                  select_tag(:page, options_for_select(select_options, per_page), 
+                              class: 'page_counter')
+                end          
+
+      nav = will_paginate(records) 
+
+      entry + counter + nav          
+    end
+  end
+
 end

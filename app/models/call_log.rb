@@ -23,14 +23,26 @@ class CallLog < ActiveRecord::Base
   STATE_ACTIVE = :active
   STATE_COMPLETED = :completed
   STATE_FAILED = :failed
+  STATE_SUSPENDED = :suspended
 
   FAIL_REASONS = {
     'failed'    => 'failed',
+    'error'     => 'failed',
+    'timeout'   => 'no_answer',
     'no_answer' => 'no_answer',
     'busy'      => 'hangup',
     'hangup'    => 'incompleted',
-    'marked_as_failed' => "marked_as_failed"
+    'marked_as_failed' => "marked_as_failed",
+    'no_ack' => 'no_ack',
+    'blocked' => "blocked",
+    'disabled' => "disabled"
   }
+
+  DATE_FORMAT_EXPORT = [
+    ["D/M/Y", '%d/%m/%Y %H:%M:%S %z'],
+    ["M/D/Y", '%m/%d/%Y %H:%M:%S %z'],
+    ["Y/M/D", '%Y/%m/%d %H:%M:%S %z']
+  ]
 
   belongs_to :account
   belongs_to :project
@@ -52,6 +64,8 @@ class CallLog < ActiveRecord::Base
   validates_presence_of :channel
 
   delegate :time_zone, to: :project, prefix: true, allow_nil: true
+
+  belongs_to :parent, class_name: CallLog
 
   def state
     read_attribute(:state).try(:to_sym)
@@ -126,6 +140,10 @@ class CallLog < ActiveRecord::Base
     end
   end
 
+  def calculate_duration
+    (finished_at - (not_before.nil? ? started_at : not_before)).to_i
+  end
+
   CallLogEntry::Levels.each do | severity |
     class_eval <<-EVAL, __FILE__, __LINE__ + 1
       def #{severity}(description, options = {})
@@ -155,6 +173,18 @@ class CallLog < ActiveRecord::Base
     logs.inject(0) do |result, log|
       result += RecordingManager.for(log).size
     end
+  end
+
+  def self.by_account_id account_id
+    where(account_id: account_id)
+  end
+
+  def self.by_channel_id channel_id
+    where(channel_id: channel_id)
+  end
+
+  def self.between from, to
+    where(started_at: from..to)
   end
 
   private

@@ -16,6 +16,13 @@
 # along with Verboice.  If not, see <http://www.gnu.org/licenses/>.
 
 class Commands::CaptureCommand < Command
+  param :min, :integer, :default => 1, :ui_length => 1
+  param :max, :integer, :default => 1, :ui_length => 1
+  param :finish_on_key, :string, :default => '#', :ui_length => 1
+  param :timeout, :integer, :default => 5, :ui_length => 1
+  param :play, :string, :ui_length => 40
+  param :say, :string, :ui_length => 40
+
   def initialize(options = {})
     @options = {
       :min => self.class.default_minimum_input_lenght,
@@ -39,6 +46,7 @@ class Commands::CaptureCommand < Command
       params[:language] = @options[:language] if @options[:language]
     end
   end
+
 
   def self.default_time_out_in_seconds
     5

@@ -40,6 +40,13 @@ kh:
 
     errors:
       models:
+        login:
+          invalid_captcha: Captcha មិនត្រឹមត្រូវទេ
+          invalid_email_password: អ៊ីម៉ែល រឺ ពាក្យសម្ងាត់មិនត្រឹបត្រូវទេ
+        account:
+          attributes:
+            password:
+              taken_in_past: ធ្លាប់ប្រើរួចហើយ
         project:
           attributes:
             name:
@@ -398,11 +405,25 @@ kh:
           confirmation: "បញ្ជាក់៖"
           time: "ពេលវេលា"
           maximum_recording_time_in_second: "ពេលវេលា​ថត​អតិបរមា​គិត​ជា​វិនាទី"
+          silence_detection: "Silence detection in secs"          
+          min_confidence_acceptable: 'Mininum acceptable confidence'
           properties: "លក្ខណសម្បត្តិ"
-          stop_recording_audio_with_key: "បញ្ឈប់​ការ​ថត​ដោយ​ប្រើ​ប៊ូតុង៖"
+          stop_recording_audio_with_key: "បញ្ឈប់​ការ​ថត​ដោយ​ប្រើ​ប៊ូតុង"
           store_this_result_as: "រក្សា​លទ្ធ​ផល "
         action:
           remove_this_step: "លុប​ជំហាន​នេះ"
+
+      _speech_recognition_step_template:
+        label:
+          store: "Store result in variables"
+          audio: "Audio file"
+          store_result1: "Result 1"
+          store_accuracy1: "Confidence 1"
+          store_result2: "Result 2"
+          store_accuracy2: "Confidence 2"
+          store_result3: "Result 3"
+          store_accuracy3: "Confidence 3"
+
       _register_step_template:
         label:
           messages: "សារ"
@@ -593,6 +614,7 @@ kh:
           back: "ថយក្រោយ"
       download_project_call_log:
         label:
+          date_format: "ទម្រង់កាលបរិច្ឆេទ"
           download_call_logs: "ទាញយក​​កំណត់ហេតុ​ការហៅ"
           summary: "មាន %{audios} សារ​សំឡេងនៅក្នុង​កំណត់ហេតុ​ការហៅ​នេះ​ដែល​មានទំហំ​សរុប %{size}។"
           do_you_want_to_download: "តើអ្នកចង់ទាញយកកំណត់ហេតុការហៅរួមជាមួយសារសំឡេង​ដែរឫទេ?"
@@ -621,21 +643,34 @@ kh:
           dial_string: "Dial string"  
         action:
       _form_custom_sip:
+        tooltip:
+          username: "User authentication of SIP channel"
+          password: "Password authentication of SIP channel"
+          prefix: "Phone number with these prefixes will use this channel to call out"
+          limit: "Number of concurrent call"
+          domain: "Domain/IP address of SIP server"
+          prefix_called_number: "Add prefix to called number"
+          normalized_called_number: "Phone number with 0 leading will be added by this prefix"
         label:
           username: "អ្នកប្រើប្រាស់"
           password: "ពាក្យសម្ងាត់"
           number: "លេខ"
           prefix: "បុព្វបទ"
+          prefix_preference: ការកំនត់បុព្វបទសំរាប់ការហៅចេញ
           limit: "ចំនួនកំនត់"
           domain: "ដែន"
           port: "ផត"
           protocol: "ប្រូតូកូ"
           direction: "ទិសដៅ"
+          enabled: "បើក"
           register: "ចុះឈ្មោះ"
           incoming: "ចូល"
           outgoing: "ចេញ"
           both_directions: "ទាំង​ពីរ"
           prefix_called_number: "បុព្វបទ"
+          normalized_called_number: "Call out prefix"
+          dtmf_mode: "DTMF mode"
+          codec_type: "Codec"
           udp: "UDP"
           tcp: "TCP"
         action:
@@ -1047,6 +1082,7 @@ kh:
           url: "URL"
           user: "អ្នក​ប្រើ"
           password: ពាក្យ​សម្ងាត់
+          store_call_log_details: "រក្សា​ព័ត៌មានលម្អិតកំណត់ការហៅ"
         action:
           save: រក្សាទុក
           cancel: បោះបង់
@@ -1156,6 +1192,7 @@ kh:
           from: ពី
           to: "ទៅ"
           retries: ព្យាយាម​ម្ដង​ទៀត
+          retries_no_answer: ព្យាយាម​ម្ដង​ទៀត បើសិនការហៅមិនមានការឆ្លើយតប
           retries_desc: បញ្ចូល​ការ​ពន្យារ​បំបែក​ដោយ​សញ្ញា​ក្បៀស​គិត​ជា​ម៉ោង
           sun: "អាទិត្យ"
           mon: "ចន្ទ"

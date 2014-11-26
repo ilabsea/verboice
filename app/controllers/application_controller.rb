@@ -20,6 +20,8 @@ class ApplicationController < ActionController::Base
   include ActionView::Helpers::TextHelper
   include AppConfigHelper
 
+  helper_method :verify_captcha
+
   before_filter :set_locale
 
   before_filter do
@@ -30,9 +32,21 @@ class ApplicationController < ActionController::Base
     @body_class << 'fixed-width-content'
   end
 
+  def origin_ip
+    request.remote_ip
+  end
+
   private
   def set_locale
-    I18n.locale = current_account ? current_account.locale : I18n.default_locale
+    if params[:recaptcha_response_field].nil?
+      I18n.locale = current_account.nil? ? I18n.default_locale : current_account.locale
+    else
+      I18n.locale = I18n.default_locale
+    end
+  end
+
+  def verify_captcha
+    verify_recaptcha(private_key: RECAPTCHA_CONFIG['private_key'])
   end
 
 end

@@ -1,0 +1,12 @@
+development:
+  proxy: 'http://example.com'
+  public_key: YOUR_PUBLIC_KEY
+  private_key: YOUR_PRIVATE_KEY
+test:
+  proxy: 'http://example.com'
+  public_key: YOUR_PUBLIC_KEY
+  private_key: YOUR_PRIVATE_KEY
+production:
+  proxy: 'http://example.com'
+  public_key: YOUR_PUBLIC_KEY
+  private_key: YOUR_PRIVATE_KEY

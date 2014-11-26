@@ -18,7 +18,7 @@
 class NuntiumChannelsController < ApplicationController
   before_filter :authenticate_account!
   before_filter :build_channel, only: [:new, :create]
-  before_filter :find_channel, only: [:edit, :update]
+  before_filter :find_channel, only: [:edit, :update, :mark_as_default]
 
   def index
     @channels = current_account.nuntium_channels.order(:name)
@@ -52,6 +52,14 @@ class NuntiumChannelsController < ApplicationController
     redirect_to nuntium_channels_path, notice: 'SMS Channel deleted'
   end
 
+  def mark_as_default
+    if @nuntium_channel.mark_as_default
+      render status: :ok, text: "ok"
+    else
+      render status: :bad_request, text: "bad request"
+    end
+  end
+
   private
 
   def not_found
@@ -61,6 +69,7 @@ class NuntiumChannelsController < ApplicationController
   def build_channel
     @nuntium_channel = NuntiumChannel.new kind: params[:kind]
     @nuntium_channel.account = current_account
+    @nuntium_channel.kind = params[:kind]
     @channel = @nuntium_channel.channel
     not_found if @channel.schema.nil?
   end

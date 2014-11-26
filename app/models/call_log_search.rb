@@ -49,12 +49,12 @@ module CallLogSearch
 
       if search[:after]
         after = Time.smart_parse search[:after]
-        result = result.where "created_at >= ?", after.beginning_of_day if after
+        result = result.where "call_logs.created_at >= ?", after.beginning_of_day if after
       end
 
       if search[:before]
         before = Time.smart_parse search[:before]
-        result = result.where "created_at <= ?", before.end_of_day if before
+        result = result.where "call_logs.created_at <= ?", before.end_of_day if before
       end
 
 

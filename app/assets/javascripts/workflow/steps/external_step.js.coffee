@@ -23,8 +23,10 @@ onWorkflow ->
       settings = []
       for variable in @variables()
         setting = ((s for s in attrs.settings when s.name == variable.name)[0] or {})
-        setting = $.extend({name: variable.name, display_name: variable.display_name}, setting)
+        setting = $.extend({name: variable.name, display_name: variable.display_name, type: variable.type}, setting)
         settings.push(new ExternalStepSetting(@, setting))
+
+        
       @settings = ko.observableArray(settings)
 
       # Setup responses

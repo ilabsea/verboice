@@ -49,7 +49,7 @@ def guess(request)
 end
 
 def gather_with_file(file, request)
-  %Q(<Response><Gather numDigits="2"><Play>http://localhost:4567/#{file}</Play></Gather><Redirect>#{request.env['REQUEST_URI']}</Redirect></Response>)
+  %Q(<Response><Gather timeout="10" numDigits="2" action="http://localhost:4567/"><Play>http://localhost:4567/#{file}</Play></Gather><Redirect>#{request.env['REQUEST_URI']}</Redirect></Response>)
 end
 
 def play(file)
