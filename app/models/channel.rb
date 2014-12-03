@@ -25,13 +25,13 @@ class Channel < ActiveRecord::Base
 
   has_many :call_logs, :dependent => :nullify
   has_many :queued_calls, :dependent => :destroy
+  has_many :channel_permissions, :foreign_key => "model_id", :dependent => :destroy
 
   has_one :quota, class_name: "ChannelQuota", dependent: :nullify
 
   config_accessor :limit
 
   validates_presence_of :account
-  validates_presence_of :call_flow
 
   validates_presence_of :name
   validates_uniqueness_of :name, :scope => :account_id
@@ -71,6 +71,8 @@ class Channel < ActiveRecord::Base
   end
 
   def call(address, options = {})
+    raise "Call address cannot be empty" unless address.present?
+
     queued_call = enqueue_call_to address, options
     call_log = queued_call.call_log
 
@@ -94,14 +96,16 @@ class Channel < ActiveRecord::Base
   def enqueue_call_to address, options
     via = options.fetch(:via, 'API')
 
+    account = options[:account] || self.account
+
     prefix  = config["normalized_called_number"] 
     address = Channel.normalized_called_number(address, prefix)
     address = address_with_prefix_called_number(address)
 
     if options[:call_flow_id]
-      current_call_flow = account.call_flows.find(options[:call_flow_id])
+      current_call_flow = account.find_call_flow_by_id(options[:call_flow_id])
     elsif options[:call_flow]
-      current_call_flow = account.call_flows.find_by_name(options[:call_flow])
+      current_call_flow = account.find_call_flow_by_name(options[:call_flow])
     elsif options[:flow]
       flow = options[:flow]
     elsif options[:callback_url]
@@ -113,7 +117,7 @@ class Channel < ActiveRecord::Base
     if current_call_flow
       project = current_call_flow.project
     elsif options[:project_id]
-      project = account.projects.find(options[:project_id])
+      project = account.find_project_by_id(options[:project_id])
     else
       project = self.project
     end
@@ -185,18 +189,6 @@ class Channel < ActiveRecord::Base
     queued_call
   end
 
-  def active_calls_count_in_call_flow(call_flow)
-    BrokerClient.active_calls_count_for_call_flow(id, call_flow)
-  end
-
-  def poll_call
-    self.class.transaction do
-      queued_call = queued_calls.where('not_before IS NULL OR not_before <= ?', Time.now.utc).order(:created_at).first
-      queued_call.destroy if queued_call
-      queued_call
-    end
-  end
-
   def has_limit?
     limit.present?
   end
@@ -222,15 +214,15 @@ class Channel < ActiveRecord::Base
   end
 
   def call_broker_create_channel
-    BrokerClient.create_channel id, broker
+    BrokerClient.create_channel(id, broker) rescue nil
   end
 
   def call_broker_update_channel
-    BrokerClient.create_channel id, broker
+    BrokerClient.create_channel(id, broker) rescue nil
   end
 
   def call_broker_destroy_channel
-    BrokerClient.destroy_channel id, broker
+    BrokerClient.destroy_channel(id, broker) rescue nil
   end
 
   def active_calls

@@ -19,6 +19,7 @@ en:
         name: "Name"
       call_flow:
         name: "Name"
+        google_oauth_token: "A Google account"
       schedule:
         name: "Name"
         time_from: "From time"
@@ -53,6 +54,8 @@ en:
               blank: Can't be blank
         call_flow:
           attributes:
+            google_oauth_token:
+              blank: "must be linked"
             name:
               blank: Can't be blank
         channel:

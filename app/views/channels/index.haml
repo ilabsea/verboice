@@ -8,7 +8,7 @@
       %th= t('views.channels.index.title')
       %th
         = select_tag('new_channel', options_for_select(@channel_kinds), onchange: 'create_channel(this)', prompt: t("views.channels.index.label.create_new"))
-    - if @channels.empty?
+    - if @all_channels.empty?
       %tr
         %td.EmptyFolder{:colspan => 100}
           %br
@@ -16,7 +16,7 @@
           %br
           = select_tag('new_channel', options_for_select(@channel_kinds), onchange: 'create_channel(this)', prompt: t("views.channels.index.label.create_new"))
     - else
-      - @channels.each do |channel|
+      - @all_channels.each do |channel, permission|
         %tr.link{'data-url' => channel_path(channel)}
           %td
             - status = @channel_status[channel.id]
@@ -25,6 +25,8 @@
             %span{style: "display: inline-block; width: 10px; height: 10px; background-color: #{ status ? (status_ok ? '#6BD346' : '#FF642A') : '#D0D0D0' }"}
             %span{class: "#{clazz}"}
               = channel.name
+            - if permission
+              (shared as #{permission})
             = "("
             = channel.active_calls
             = "active call )"

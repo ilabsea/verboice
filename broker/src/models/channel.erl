@@ -1,7 +1,8 @@
 -module(channel).
--export([find_all_sip/0, find_all_twilio/0, domain/1, port/1, protocol/1, number/1, limit/1, broker/1, username/1, password/1, is_outbound/1, register/1, dtmf_mode/1, codec_type/1 ]).
+-export([find_all_sip/0, find_all_twilio/0, domain/1, number/1, limit/1, broker/1, username/1, password/1, is_outbound/1, register/1, log_broken_channels/2]).
 -export([account_sid/1, auth_token/1]).
--export([enabled/1]).
+-export([enabled/1, port/1, protocol/1, dtmf_mode/1, codec_type/1]).
+-compile([{parse_transform, lager_transform}]).
 -define(CACHE, true).
 -define(TABLE_NAME, "channels").
 -define(MAP, [{config, yaml_serializer}]).
@@ -79,3 +80,22 @@ limit(#channel{config = Config}) ->
 
 broker(#channel{type = <<"Channels::Twilio">>}) -> twilio_broker;
 broker(_) -> asterisk_broker.
+
+log_broken_channels(PrevStatus, NewStatus) ->
+  dict:fold(fun
+    (ChannelId, {_, false, _}, _) ->
+      case channel_was_disconnected(ChannelId, PrevStatus) of
+        false ->
+          Channel = channel:find(ChannelId),
+          lager:error("Channel ~s (id: ~p) is down", [Channel#channel.name, ChannelId]), ok;
+        _ -> ok
+      end;
+    (_, _, _) -> ok
+  end, undefined, NewStatus).
+
+channel_was_disconnected(_, undefined) -> false;
+channel_was_disconnected(ChannelId, Status) ->
+  case dict:find(ChannelId, Status) of
+    {ok, {_, false, _}} -> true;
+    _ -> false
+  end.

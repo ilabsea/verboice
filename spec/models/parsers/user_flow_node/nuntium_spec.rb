@@ -36,15 +36,14 @@ module Parsers
             'caller' => true
           }
 
-        serializer = Compiler.parse do |c|
-          c.Label 1
-          c.AssignValue "current_step", 1
-          c.AssignValue "current_step_name", "Nuntium"
-          c.Trace call_flow_id: call_flow.id, step_id: 1, step_name: 'Nuntium', store: '"Sent text message."'
+        nuntium.equivalent_flow.first.should eq(
+          Compiler.parse do |c|
+            c.Label 1
+            c.StartUserStep :nuntium, 1, "Nuntium"
           c.Nuntium('qst_server', rcpt_type: :caller, resource_guid: 5)
-        end.first
-
-        nuntium.equivalent_flow.first.should eq(serializer)
+            c.Trace call_flow_id: call_flow.id, step_id: 1, step_name: 'Nuntium', store: '"Sent text message."'
+          end.first
+        )
       end
 
       it "shouldn't compile the nuntium command if no resource is given" do
@@ -63,8 +62,7 @@ module Parsers
         nuntium.equivalent_flow.first.should eq(
           Compiler.parse do |c|
             c.Label 1
-            c.AssignValue "current_step", 1
-            c.AssignValue "current_step_name", "Nuntium"
+            c.StartUserStep :nuntium, 1, "Nuntium"
             c.Trace call_flow_id: call_flow.id, step_id: 1, step_name: 'Nuntium', store: '"Sent text message."'
           end.first
         )
@@ -86,10 +84,9 @@ module Parsers
           nuntium.equivalent_flow.first.should eq(
             Compiler.parse do |c|
               c.Label 1
-              c.AssignValue "current_step", 1
-              c.AssignValue "current_step_name", "Nuntium"
-              c.Trace call_flow_id: call_flow.id, step_id: 1, step_name: 'Nuntium', store: '"Sent text message."'
+              c.StartUserStep :nuntium, 1, "Nuntium"
               c.Nuntium 'qst_server', rcpt_type: :expr, expr: expr, resource_guid: 42
+              c.Trace call_flow_id: call_flow.id, step_id: 1, step_name: 'Nuntium', store: '"Sent text message."'
             end.first
           )
         end

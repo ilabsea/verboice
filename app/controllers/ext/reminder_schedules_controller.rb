@@ -1,7 +1,7 @@
 module Ext 
 	class ReminderSchedulesController < ExtApplicationController
 		def index
-			load_project params[:project_id]
+			load_project
 			@reminder_schedules = @project.ext_reminder_schedules
 			respond_to do |format|
 				format.html
@@ -10,7 +10,7 @@ module Ext
 		end
 
 		def create
-			load_project params[:project_id]
+			load_project
 			conditions = Ext::Condition.build params[:ext_reminder_schedule][:conditions]
 			@reminder = @project.ext_reminder_schedules.build(params[:ext_reminder_schedule].merge(:conditions => conditions))
 			if(@reminder.save)
@@ -23,7 +23,7 @@ module Ext
 
 		def update
 			begin
-				load_project params[:project_id]
+				load_project
 				conditions = Ext::Condition.build params[:ext_reminder_schedule][:conditions]
 				@reminder = @project.ext_reminder_schedules.find(params[:id])
 				if(@reminder.update_reminder_schedule_with_queues_call(params[:ext_reminder_schedule].merge(:conditions => conditions)))
@@ -36,7 +36,7 @@ module Ext
 		end
 
 		def destroy
-			load_project params[:project_id]
+			load_project
 	 		begin
 	 			@reminder = @project.ext_reminder_schedules.find(params[:id])
 		 		if @reminder.destroy
@@ -61,7 +61,7 @@ module Ext
 		end
 
 		def references_data
-			load_project params[:project_id]
+			load_project
 			@channels = current_account.channels.select("id, name")
 			@call_flows = @project.call_flows.select("id, name")
 			@reminder_groups = @project.ext_reminder_groups.select("id, name")

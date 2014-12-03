@@ -4,8 +4,7 @@
 -include("db.hrl").
 -include("uri.hrl").
 
-run(Args, Session = #session{js_context = JS, call_log = CallLog, call_flow = CallFlow, callback_params = CallbackParams}) ->
-  CallLog:info("Callback started", [{command, "callback"}, {action, "start"}]),
+run(Args, Session = #session{js_context = JS, call_log = CallLog, call_flow = CallFlow, callback_params = CallbackParams, project = Project}) ->
   Url = case proplists:get_value(url, Args) of
     undefined -> CallFlow#call_flow.callback_url;
     X -> list_to_binary(X)
@@ -13,33 +12,44 @@ run(Args, Session = #session{js_context = JS, call_log = CallLog, call_flow = Ca
   ResponseType = proplists:get_value(response_type, Args, flow),
   Params = proplists:get_value(params, Args, []),
   Variables = proplists:get_value(variables, Args, []),
-  Method = proplists:get_value(method, Args, "post"),
+  Method = util:to_string(proplists:get_value(method, Args, "post")),
   Async = proplists:get_value(async, Args),
 
-  QueryString = prepare_params(Params ++ Variables, [{"CallSid", util:to_string(CallLog:id())} | CallbackParams], JS),
+  QueryString = prepare_params(Params ++ Variables, [{"CallSid", CallLog:id()} | CallbackParams], JS),
   RequestUrl = interpolate(Url, Args, Session),
-  Uri = uri:parse(RequestUrl),
+  PoirotMeta = [
+    {url, iolist_to_binary(RequestUrl)},
+    {method, iolist_to_binary(Method)},
+    {body, {struct, util:to_poirot(QueryString)}}
+  ],
 
   case Async of
     true ->
-      Task = [
-        {url, RequestUrl},
-        {method, Method},
-        {body, QueryString}
-      ],
-      delayed_job:enqueue(yaml:dump({map, Task, <<"!ruby/object:Jobs::CallbackJob">>}, [{schema, yaml_schema_ruby}])),
+      poirot:new("Callback to " ++ RequestUrl, [{finalize, false}, {async, true}, {metadata, PoirotMeta}], fun() ->
+        Task = [
+          {url, RequestUrl},
+          {method, Method},
+          {body, QueryString},
+          {activity, poirot:current_id()},
+          {project_id, Project#project.id}
+        ],
+        delayed_job:enqueue(yaml:dump({map, Task, <<"!ruby/object:Jobs::CallbackJob">>}, [{schema, yaml_schema_ruby}]))
+      end),
       {next, Session};
 
     _ ->
-      {ok, {_StatusLine, _Headers, Body}} = case Method of
-        "get" ->
-          (Uri#uri{query_string = QueryString}):get([]);
-        _ ->
-          Uri:post_form(QueryString, [])
-      end,
+      poirot:new("Callback to " ++ RequestUrl, [{metadata, PoirotMeta}], fun() ->
+        Uri = uri:parse(RequestUrl),
+        {ok, {_StatusLine, _Headers, Body}} = case Method of
+          "get" ->
+            (Uri#uri{query_string = QueryString}):get([]);
+          _ ->
+            Uri:post_form(QueryString, [])
+        end,
 
-      CallLog:trace(["Callback returned: ", Body], [{command, "callback"}, {action, "return"}]),
-      handle_response(ResponseType, Body, Session)
+        poirot:add_meta([{response, iolist_to_binary(Body)}]),
+        handle_response(ResponseType, Body, Session)
+      end)
   end.
 
 handle_response(flow, Body, Session) ->

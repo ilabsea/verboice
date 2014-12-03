@@ -19,7 +19,7 @@ class ResourcesController < ApplicationController
 
   respond_to :html, :json
 
-  expose(:project) { current_account.projects.find(params[:project_id]) }
+  expose(:project) { load_project }
   expose(:resources) do
     if params[:q].present?
       project.resources.where('name LIKE ?', "%#{params[:q]}%")
@@ -28,6 +28,9 @@ class ResourcesController < ApplicationController
     end
   end
   expose(:resource)
+
+  before_filter :load_project
+  before_filter :check_project_admin, only: [:create, :update, :destroy]
 
   def index
     respond_with resource do |format|
@@ -46,11 +49,15 @@ class ResourcesController < ApplicationController
 
   def create
     resource.save
+    # For some reason nested localized resources are duplicated...
+    resource.reload
     respond_with resource, :include => :localized_resources
   end
 
   def update
     resource.save
+    # For some reason nested localized resources are duplicated...
+    resource.reload
     respond_with resource do |format|
       format.json { render :json => resource, :include => :localized_resources }
     end

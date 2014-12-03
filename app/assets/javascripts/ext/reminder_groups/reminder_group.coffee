@@ -72,9 +72,9 @@ onReminderGroups ->
 			prefixes = ["855", "+855", "0", "+0", "+"]
 			i = 0
 			while i < prefixes.length
-			    prefix = prefixes[i]
-			    return address.substr(prefix.length)  if address.substr(0, prefix.length) is prefix
-			    i++
+				prefix = prefixes[i]
+				return address.substr(prefix.length)  if address.substr(0, prefix.length) is prefix
+				i++
 			address
 
 		add_new_contact: =>

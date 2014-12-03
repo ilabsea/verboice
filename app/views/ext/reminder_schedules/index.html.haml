@@ -6,12 +6,10 @@
   :css
     .ux-datepicker { background-color: white }
 
-= render 'shared/project_tabs_and_title', :project => @project
+= render 'shared/project_tabs_and_title', :project => @project, shared_project: @shared_project
 
 %h2= t('views.ext.reminder_schedules.title')
 %p.desc= t('views.ext.reminder_schedules.desc')
-
-
 
 #reminder_schedules-main.hidden-until-loaded
   <!-- ko foreach: reminder_schedules -->
@@ -59,7 +57,7 @@
       <!-- /ko -->
     %ul.clist.w30
       %li
-        %input.ux-search.ui-autocomplete-input.ux-text{ ko(autocomplete: 'new_channel_name', value: 'new_channel_name', valueUpdate: 'afterkeydown'), type: :text, placeholder: "#{t('views.ext.reminder_schedules.label.add_channel')}", url: "/ext/projects/#{@project_id}/reminder_schedules/channels_autocomplete", minChar: 3}
+        %input.ux-search.ui-autocomplete-input.ux-text{ ko(autocomplete: 'new_channel_name', value: 'new_channel_name', valueUpdate: 'afterkeydown'), type: :text, placeholder: "#{t('views.ext.reminder_schedules.label.add_channel')}", url: "/ext/projects/#{@project.id}/reminder_schedules/channels_autocomplete", minChar: 3}
         %button.clist-add{ko(disable: :new_channel_name_duplicated, click: 'addReminderChannelByChannel')}      
 
     %p

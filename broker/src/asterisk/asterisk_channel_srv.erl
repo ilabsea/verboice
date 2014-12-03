@@ -5,6 +5,7 @@
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2, terminate/2, code_change/3]).
 
 -define(SERVER, ?MODULE).
+-define(RELOAD_INTERVAL, timer:minutes(2)).
 
 -record(state, {channels, registry, channel_status, config_job_state = idle, status_job_state = idle}).
 
@@ -28,6 +29,7 @@ init({}) ->
   agi_events:add_sup_handler(asterisk_call_manager, []),
   regenerate_config(),
   timer:send_interval(timer:seconds(30), check_status),
+  timer:send_after(?RELOAD_INTERVAL, sip_reload),
   {ok, #state{channels = dict:new(), registry = dict:new()}}.
 
 %% @private
@@ -43,7 +45,7 @@ handle_call({get_channel_status, ChannelIds}, _From, State) ->
     Status ->
       Result = lists:foldl(fun(ChannelId, R) ->
         case dict:find(ChannelId, Status) of
-          {ok, {Ok, Messages}} -> [{ChannelId, Ok, Messages} | R];
+          {ok, ChannelStatus} -> [ChannelStatus | R];
           _ -> R
         end
       end, [], ChannelIds),
@@ -81,7 +83,8 @@ handle_cast({set_channels, ChannelIndex, RegistryIndex}, State = #state{config_j
   end,
   {noreply, State#state{channels = ChannelIndex, registry = RegistryIndex, config_job_state = idle}};
 
-handle_cast({set_channel_status, Status}, State) ->
+handle_cast({set_channel_status, Status}, State = #state{channel_status = PrevStatus}) ->
+  channel:log_broken_channels(PrevStatus, Status),
   {noreply, State#state{channel_status = Status, status_job_state = idle}};
 
 handle_cast(_Msg, State) ->
@@ -93,6 +96,11 @@ handle_info(check_status, State = #state{status_job_state = idle}) ->
     ok -> {noreply, State#state{status_job_state = working}};
     _ -> {noreply, State#state{channel_status = undefined}}
   end;
+
+handle_info(sip_reload, State) ->
+  ami_client:sip_reload(),
+  timer:send_after(?RELOAD_INTERVAL, sip_reload),
+  {noreply, State};
 
 handle_info({gen_event_EXIT, asterisk_call_manager, Reason}, State) ->
   {stop, Reason, State};

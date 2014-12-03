@@ -34,4 +34,21 @@ module WorkflowHelper
     content_tag(:input, '', :type => 'text', id: 'store-this-result-as', 'data-bind' => "value: store, initAutocomplete: {source: workflow.all_variables()}, initMask: {mask: $.mask.masks.token}, valueUpdate: 'afterkeydown', css: {error: is_store_value_invalid}", :style => "width: 108px")
   end
 
+  def user_step_class(step_type, error = false)
+    icon_class = case step_type
+      when "play", "twiml_play", "twiml_say" then "sound"
+      when "branch" then "directions"
+      when "input", "twiml_gather" then "numeral"
+      when "menu" then "dial"
+      when "impersonate" then "users"
+      when "hangup_and_callback" then "forwardCall"
+      when "language" then "language"
+      when "record" then "microphone"
+      when "hangup", "twiml_hangup" then "phone"
+      when "transfer" then "callback"
+      else "cloud"
+      end
+    "i48grad #{icon_class}#{error ? " red" : ""}"
+  end
+
 end

@@ -16,6 +16,7 @@
 -record(resource, {id, name, project_id, guid, created_at, updated_at}).
 -record(schedule, {id, name, retries, time_from, time_to, weekdays, project_id, disabled, created_at, updated_at}).
 -record(trace_record, {id, call_flow_id, call_id, step_name, step_id, result, created_at, updated_at}).
+-record(hibernated_session, {id, session_id, data, created_at, updated_at}).
 -record(reminder_group, {id, project_id, name, addresses, created_at, updated_at}).
 -record(call_log_recorded_audio, {id, call_log_id, project_variable_id, key, description, created_at, updated_at}).
 -record(call_log_variable, {id, call_log_id, project_variable_id, value, created_at, updated_at}).

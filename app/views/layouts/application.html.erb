@@ -2,7 +2,7 @@
   <%= section t('views.layouts.action.home'), home_path, :home %>
   <% if account_signed_in? %>
     <% if params[:project_id].nil? %>
-      <%= section t('views.layouts.action.projects'), projects_path, :projects, [:projects, :call_flows, :schedules, :resources, :external_services, :contacts, :reminder_groups, :reminder_schedules, :pregnancy_reminders] %>
+      <%= section t('views.layouts.action.projects'), projects_path, :projects, [:projects, :call_flows, :schedules, :resources, :external_services, :contacts, :feeds, :reminder_groups, :reminder_schedules, :pregnancy_reminders] %>
     <% else %>
       <%= section t('views.layouts.action.projects'), projects_path, :projects, [:projects, :call_flows, :schedules, :resources, :external_services, :contacts, :reminder_groups, :reminder_schedules, :pregnancy_reminders, :call_logs] %>
     <% end %>
@@ -12,13 +12,14 @@
     <% else %>
       <%= section t('views.layouts.action.calls'), call_logs_path, nil %>
     <% end %>
+    <%= section "Permissions", permissions_path, :permissions %>
   <% end %>
   <%= section t('views.layouts.action.help'), '/help', :help %>
 <% end %>
 <% content_for :right_menu do %>
   <ul class="RightMenu">
-      <%- if account_signed_in? %>
-        <li>
+    <%- if account_signed_in? %>
+      <li>
         <div id="User">
           <%=current_account.email%><br><br>
           <div class="container">
@@ -32,19 +33,32 @@
             </ul>
           </div>
         </div>
-        </li>
-        <li>
-          <%= link_to '', edit_account_registration_path, :class => 'fsettings' %>
-        </li>
-        <% else %>
-        <li>
-          <%= link_to t('views.layouts.action.create_account'), new_account_registration_path, :class => 'fedit' %>
-        </li>
-        <li>
-          <%= link_to t('views.layouts.action.log_in'), new_account_session_path, :class => 'fuser' %>
-        </li>
-        <% end %>
-      </ul>
+      </li>
+      <li>
+        <div id="alerts" class="alerts">
+          <!-- ko if: alerts.length -->
+          <span class="summary" data-bind="visible: alerts().length > 0, text: alerts().length"></span>
+          <div class="box" data-bind="foreach: alerts">
+            <div class="item" data-bind="click: $parent.open">
+              <span data-bind="text: message"></span>
+              <button class="farrow"></button>
+            </div>
+          </div>
+          <!-- /ko -->
+        </div>
+      </li>
+      <li>
+        <%= link_to '', edit_account_registration_path, :class => 'fsettings' %>
+      </li>
+    <% else %>
+      <li>
+        <%= link_to t('views.layouts.action.create_account'), new_account_registration_path, :class => 'fedit' %>
+      </li>
+      <li>
+        <%= link_to t('views.layouts.action.log_in'), new_account_session_path, :class => 'fuser' %>
+      </li>
+    <% end %>
+  </ul>
 <% end %>
 <% content_for :footer_links do %>
   <a href="<%= root_path %>"><%= t('views.layouts.action.home') %></a>

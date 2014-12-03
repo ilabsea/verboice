@@ -12,26 +12,28 @@ run(Args, Session = #session{pbx = Pbx, call_log = CallLog, contact = Contact, p
   Timeout = proplists:get_value(timeout, Args, 10),
   SilenceTime = proplists:get_value(silence_detection, Args),
 
-  CallLog:info("Record user voice", [{command, "record"}, {action, "start"}]),
   CallLogId = CallLog:id(),
   Filename = filename(CallLogId, Key),
   filelib:ensure_dir(Filename),
 
-  Pbx:record(Filename, StopKeys, Timeout, SilenceTime),
-
-  RecordedAudio = #recorded_audio{
-    contact_id = Contact#contact.id,
-    project_id = Project#project.id,
-    call_log_id = CallLogId,
-    key = Key,
-    description = Description
-  },
-  RecordedAudio:save(),
+  poirot:log(info, "Recording to filename: ~s, stop keys: ~s, timeout: ~B", [Filename, StopKeys, Timeout, SilenceTime]),
+  case Pbx:record(Filename, StopKeys, Timeout, SilenceTime) of
+    ok ->
+      RecordedAudio = #recorded_audio{
+        contact_id = Contact#contact.id,
+        project_id = Project#project.id,
+        call_log_id = CallLogId,
+        key = Key,
+        description = Description
+      },
+      RecordedAudio:save(),
 
   create_call_log_recorded_audio(OldVarName, VarName, Key, Description, Project#project.id, CallLogId),
+      {next, Session};
 
-  CallLog:info("Recording saved", [{command, "record"}, {action, "finish"}]),
-  {next, Session}.
+    {error, Reason} ->
+      throw({error_recording, Reason})
+  end.
 
 filename(CallLogId, Key) ->
   {ok, RecordDir} = application:get_env(record_dir),

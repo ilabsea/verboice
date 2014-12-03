@@ -22,9 +22,11 @@ class QueuedCall < ActiveRecord::Base
   belongs_to :project
   belongs_to :call_flow
 
-  serialize :flow, Command::BrokerFlow
   serialize :variables, Hash
   serialize :callback_params, Hash
+
+  validates_presence_of :address
+  validates_presence_of :channel
 
   STATE_QUEUED = "queued"
   STATE_PAUSED = "paused"

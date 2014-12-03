@@ -4,6 +4,8 @@
 // It's not advisable to add code directly here, but if you do, it'll appear at the bottom of the
 // the compiled file.
 //
+
+//= require constant
 //= require jquery
 //= require jquery_ujs
 //= require jquery.fancybox-1.3.4.pack
@@ -15,7 +17,7 @@
 //= require global
 //= require call_flow
 //= require_directory .
-//= require constant
+
 //= require_directory ./projects
 //= require_directory ./custom_bindings
 //= require_directory ./devise

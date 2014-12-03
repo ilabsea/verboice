@@ -10,7 +10,7 @@ run(Args, Session = #session{js_context = JS}) ->
   {Value, JS2} = erjs:eval(Expression, JS),
 
   TypeBin = list_to_binary(Type),
-
+  poirot:log(info, "Saving variable '~s' with value: ~s", [Name, Value]),
   NewValue = case TypeBin of
     <<>> -> Value;
     <<"CurrentDate">> -> 

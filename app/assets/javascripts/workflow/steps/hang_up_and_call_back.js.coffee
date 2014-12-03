@@ -7,6 +7,13 @@ onWorkflow ->
     constructor: (attrs) ->
       super(attrs)
       @dial_prefix = ko.observable attrs.dial_prefix
+      @when = ko.observable(attrs.when ? 'immediately')
+      @delay = ko.observable(attrs.delay ? '1 hour')
+
+      @is_delay_invalid = ko.computed =>
+        @when() == 'later' && !@delay().match(/^\s*\d+\s*(se?c?o?n?d?s?|mi?n?u?t?e?s?|ho?u?r?s?|da?y?s?)\s*$/)
+      @is_invalid = ko.computed =>
+        @is_name_invalid() || @is_delay_invalid()
 
       @call_flow_options = ko.observableArray call_flows
       @selected_call_flow_id = ko.observable attrs.selected_call_flow_id
@@ -21,6 +28,8 @@ onWorkflow ->
     to_hash: () =>
       $.extend(super,
         dial_prefix: @dial_prefix(),
+        when: @when(),
+        delay: @delay(),
         selected_call_flow_id: @selected_call_flow_id(),
         retries: @retries()
       )

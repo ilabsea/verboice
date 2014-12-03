@@ -7,13 +7,13 @@
     delete_success = "#{t('views.ext.reminder_groups.label.successfully_deleted')}";
     delete_error = "#{t('views.ext.reminder_groups.label.delete_error')}";
     confirm_delete = "#{t('views.ext.reminder_groups.label.confirm_delete')}";
-    project_id = "#{@project_id}"
+    project_id = "#{@project.id}"
 
     $(function(){
       allowKeyInput($("#autocomplete-address"), /[0-9\+]/);
     });
 
-= render 'shared/project_tabs_and_title', :project => @project
+= render 'shared/project_tabs_and_title', :project => @project, shared_project: @shared_project
 
 %h2= t('views.ext.reminder_groups.title')
 
@@ -75,7 +75,7 @@
         %span.warning= t('views.ext.reminder_groups.label.address_exists')
         <!-- /ko -->
         %div{style: "float:left;"}
-          %input#autocomplete-address.autocomplete-site-input.ux-search.ui-autocomplete-input{ ko(autocomplete: :new_address, value: :new_address, valueUpdate: 'afterkeydown'), type: :text, placeholder: "#{t('views.ext.reminder_groups.label.add_contact')}", style: "width: 164px;", url: "/projects/#{@project_id}/contacts/invitable.json", minChar: 3}
+          %input#autocomplete-address.autocomplete-site-input.ux-search.ui-autocomplete-input{ ko(autocomplete: :new_address, value: :new_address, valueUpdate: 'afterkeydown'), type: :text, placeholder: "#{t('views.ext.reminder_groups.label.add_contact')}", style: "width: 164px;", url: "/projects/#{@project.id}/contacts/invitable.json", minChar: 3}
         %button.right.clist-add{ko(disable: :new_address_button_disabled, click: 'add_new_contact'), type: :button, style:"margin-top:2px;"}
         .clear
 

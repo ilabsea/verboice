@@ -1,21 +1,29 @@
 steps = @call_flow.step_names
 ids = steps.keys
 time_zone = @call_flows.try(:project).try(:time_zone)
-header = [t('views.call_flows.download_result_csv.label.call_id'), t('views.call_flows.download_result_csv.label.phone_number'), t('views.call_flows.download_result_csv.label.start_time'), t('views.call_flows.download_result_csv.label.end_time')]
-csv << header + steps.values
-@call_flow.call_logs.includes(:traces).find_each do |call_log|
+header = ['Call ID', 'Phone Number', 'Channel', 'Direction', 'Start Time', 'End Time']
+step_labels = steps.values.map {|label| ["#{label} (Result)", "#{label} (Data)"]}.flatten
+csv << header + step_labels
+@call_logs.includes(:channel).find_each do |call_log|
   line = []
   line << call_log.id
   line << call_log.address
+  line << call_log.channel.try(:name)
+  line << call_log.direction
   line << datetime_format(call_log.started_at, time_zone)
   line << datetime_format(call_log.finished_at, time_zone)
-  call_log.traces.each do |trace|
-    begin
-      line[ids.index(trace.step_id.to_i) + header.size] = trace.result
-    rescue Exception => e
-      # If the Trace belongs to a deleted step, there is no way to represent it.
-      # This should be fixed when the call flow stores it's different flow versions.
-      # For now, the trace is ignored
+
+  if traces = @activities[call_log.id]
+    traces.each do |trace|
+      begin
+        index = header.size + 2 * ids.index(trace.fields['step_id'])
+        line[index] = trace.fields['step_result']
+        line[index + 1] = trace.fields['step_data']
+      rescue Exception => e
+        # If the Trace belongs to a deleted step, there is no way to represent it.
+        # This should be fixed when the call flow stores it's different flow versions.
+        # For now, the trace is ignored
+      end
     end
   end
   csv << line

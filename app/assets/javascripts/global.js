@@ -79,6 +79,14 @@ function onResources(callback) {
   });
 }
 
+function onResourcesWorkflow(callback) {
+  $(function() {
+    if($('#resources').length > 0 || $('#workflow').length > 0) {
+      callback();
+    }
+  });
+}
+
 function remove_fields(link) {
   if(confirm("Column '" +$(link).parent().children()[0].value +"' will be removed when confirmed") == true){
     $(link).prev("input[type=hidden]").val("1");

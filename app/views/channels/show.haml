@@ -1,4 +1,4 @@
-= render 'shared/channel_tabs_and_title', :channel => @channel
+= render 'shared/channel_tabs_and_title', :channel => @channel, :shared_channel => @shared_channel
 
 %h1= t('views.channels.show.title')
 %p= t('views.channels.show.desc')
@@ -30,7 +30,7 @@
           %nobr= @channel.call_flow.name
         - else
           = t('views.channels.show.label.none')
-    - if @channel.project
+    - if @project
       = link_to t('views.channels.show.action.manage_call_flow'), project_call_flows_path(@channel.project), :class => "button farrow"
   %li
     .i48grad-time
@@ -51,5 +51,6 @@
 
 %hr
 
-= link_to t('views.channels.show.action.delete_this_channel'), @channel, :confirm => "#{t('views.channels.show.action.confirm_delete', :channel_name => @channel.name)}", :method => :delete, :class => "button fdelete"
+- if channel_admin?
+  = link_to t('views.channels.show.action.delete_this_channel'), @channel, :confirm => "#{t('views.channels.show.action.confirm_delete', :channel_name => @channel.name)}", :method => :delete, :class => "button fdelete"
 .clear

@@ -18,12 +18,14 @@
 class Commands::HangupAndCallbackCommand < Command
   def initialize(options = {})
     @dial_prefix = options[:dial_prefix]
+    @when = options[:when]
+    @delay = options[:delay]
     @selected_call_flow_id = options[:selected_call_flow_id]
     @retries = options[:retries]
   end
 
   def serialize_parameters
-    params = { dial_prefix: @dial_prefix }
+    params = { dial_prefix: @dial_prefix ,  when: @when, delay: @delay}
     if @selected_call_flow_id.present?
       params[:selected_call_flow_id] = @selected_call_flow_id
       params[:retries] = @retries

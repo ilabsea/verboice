@@ -150,6 +150,39 @@ span.language {
 .name{
   font-size: 14px;
 }
+
+.screen_block {
+  position: fixed;
+  opacity: 1;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1000;
+}
+
+
+#resources, #workflow {
+  .alert-save-resource {
+    color: #999;
+  }
+
+  ::-webkit-input-placeholder { /* WebKit browsers */
+    font-style: italic;
+  }
+
+  :-moz-placeholder { /* Mozilla Firefox 4 to 18 */
+    font-style: italic;
+  }
+
+  ::-moz-placeholder { /* Mozilla Firefox 19+ */
+    font-style: italic;
+  }
+
+  :-ms-input-placeholder { /* Internet Explorer 10+ */
+    font-style: italic;
+  }
+}
 .description{
   color : #aaa;
   font-size : 12px;

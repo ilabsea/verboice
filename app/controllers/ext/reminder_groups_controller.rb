@@ -1,7 +1,7 @@
 module Ext
   class ReminderGroupsController < ExtApplicationController
     def index
-      load_project params[:project_id]
+      load_project
       groups = []
       @project.ext_reminder_groups.each do |reminder_group|
         if reminder_group.addresses.kind_of?(String)
@@ -23,7 +23,7 @@ module Ext
       else
         begin
           extension = File.extname params[:file_name].original_filename
-          load_project params[:project_id]
+          load_project
           @reminder = @project.ext_reminder_groups.find(params[:id])
           case extension
           when '.csv'

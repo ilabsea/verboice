@@ -28,6 +28,8 @@ module Parsers
         @next = params['next']
         @root_index = params['root']
         @dial_prefix = params['dial_prefix']
+        @when = params['when'] || 'immediately'
+        @delay = params['delay'] || '1h'
         @selected_call_flow_id = params['selected_call_flow_id']
         @retries  = params['retries']
       end
@@ -47,10 +49,9 @@ module Parsers
       def equivalent_flow
         Compiler.parse do |compiler|
           compiler.Label @id
-          compiler.AssignValue "current_step", @id
-          compiler.AssignValue "current_step_name", "#{@name}"
-          compiler.Trace context_for '"Hang up and call back."'
+          compiler.StartUserStep :hangup_and_callback, @id, @name
           compiler.HangupAndCallback(dial_prefix: @dial_prefix,
+          				when: @when, delay: @delay,
                                      selected_call_flow_id: @selected_call_flow_id,
                                      retries: @retries)
 

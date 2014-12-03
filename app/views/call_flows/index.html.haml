@@ -1,4 +1,4 @@
-= render 'shared/project_tabs_and_title', :project => @project
+= render 'shared/project_tabs_and_title', :project => @project, :shared_project => @shared_project
 
 %h2= t('views.call_flows.index.title')
 %p= t('views.call_flows.index.desc')
@@ -6,8 +6,9 @@
 - @call_flows.each do |call_flow|
   = render 'box', :call_flow => call_flow, :project => @project, :expanded => call_flow.errors.any?
 
-.box.grey.w60.addqueue
-  %span
+- if project_admin?
+  .box.grey.w60.addqueue
+    %span
     = link_to_add_box :call_flow, t('views.call_flows.index.action.add_call_flow'), @project, :class => 'add_fields'
-  %button.cadd.right{:onclick => "$('.add_fields').click();", :type => "button"}
-  .clear
+    %button.cadd.right{:onclick => "$('.add_fields').click();", :type => "button"}
+    .clear

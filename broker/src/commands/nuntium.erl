@@ -7,14 +7,13 @@
 -define(QST_SERVER, "qst_server").
 -define(SMTP, "smtp").
 
-run(Args, Session = #session{call_log = CallLog, project = Project}) ->
+run(Args, Session = #session{project = Project}) ->
   Kind = proplists:get_value(kind, Args),
   RcptType = proplists:get_value(rcpt_type, Args),
   Expr = proplists:get_value(expr, Args),
   SubjectGuid = proplists:get_value(subject_guid, Args),
   ResourceGuid = proplists:get_value(resource_guid, Args),
 
-  CallLog:info(["Send text message '", ResourceGuid, "'"], [{command, "nuntium"}, {action, "start"}]),
 
   {Result, Message} = case rcpt_address(Kind, RcptType, Expr, Session) of
     undefined -> {error, "Missing recipient"};
@@ -42,6 +41,7 @@ run(Args, Session = #session{call_log = CallLog, project = Project}) ->
                             {account_id, Project#project.account_id},
                             {suggested_channel, DefaultChannel#nuntium_channel.channel_name}
                           ],
+          poirot:log(debug, "Sending to nuntium: ~p", [NuntiumArgs]),
                           case nuntium_api:send_ao(NuntiumArgs) of
                             ok -> {info, "SMS sent"};
                             {error, Reason} -> {error, Reason}
@@ -59,7 +59,10 @@ run(Args, Session = #session{call_log = CallLog, project = Project}) ->
       end
   end,
 
-  CallLog:Result(["Result: ", Message], []),
+  case Result of
+    info -> poirot:log(info, Message);
+    error -> poirot:log(error, Message)
+  end,
 
   {next, Session}.
 

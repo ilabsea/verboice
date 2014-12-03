@@ -168,6 +168,24 @@ class CallLog < ActiveRecord::Base
     self.entries.order('created_at DESC, id DESC').first
   end
 
+  def step_activities
+    Hercule::Activity.search({size: 1000, filter: {
+      and: [
+        {term: {call_log_id: id}},
+        {exists: {field: "step_type"}}
+      ]
+    }}).items
+  end
+
+  def self.step_activities_for(call_logs)
+    Hercule::Activity.search({size: 1000000, filter: {
+      and: [
+        {terms: {call_log_id: call_logs.map(&:id)}},
+        {exists: {field: "step_type"}}
+      ]
+    }}).items.group_by { |x| x.fields['call_log_id'] }
+  end
+
   def self.audios_size
     logs = CallLog.find_by_sql scoped.joins(:call_log_recorded_audios).select('call_logs.id').group('call_logs.id').to_sql
     logs.inject(0) do |result, log|

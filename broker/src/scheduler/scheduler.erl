@@ -39,22 +39,22 @@ init({}) ->
   % Remove stacked session that take longer than SESSION_CLEANUP_TIME
   timer:apply_interval(?SESSION_CLEANUP_TIME, ?MODULE, verify_session, []),
 
-  {ok, #state{last_id = 0, waiting_calls = ordsets:new()}}.
+  {ok, #state{last_id = 0, waiting_calls = gb_sets:empty()}}.
 
 %% @private
 handle_call(_Request, _From, State) ->
   {reply, {error, unknown_call}, State}.
 
 %% @private
+handle_cast(load, State) ->
+  {noreply, load_queued_calls(State)};
 handle_cast(verify_session, State)->
   session_sup:clean_session(),
   {noreply, State};
-handle_cast(load, State = #state{last_id = LastId}) ->
-  LoadedCalls = queued_call:find_all([{call_log_id, '>', LastId}, {state, <<"queued">>}], [{order_by, not_before}]),
-  NewState = lists:foldl(fun process_call/2, State, LoadedCalls),
 
-  {noreply, NewState};
-
+handle_cast({enqueue, #queued_call{call_log_id = Id}}, State = #state{last_id = LastId})
+  when is_integer(Id), Id > LastId ->
+  {noreply, State};
 handle_cast({enqueue, Call}, State = #state{waiting_calls = WaitingCalls}) ->
   {noreply, State#state{waiting_calls = enqueue(Call, WaitingCalls)}};
 
@@ -77,6 +77,14 @@ terminate(_Reason, _State) ->
 code_change(_OldVsn, State, _Extra) ->
   {ok, State}.
 
+load_queued_calls(State = #state{last_id = LastId}) ->
+  case queued_call:find_all([{call_log_id, '>', LastId}, {state, <<"queued">>}], [{order_by, call_log_id}, {limit, 5000}]) of
+    [] -> State;
+    LoadedCalls ->
+      NewState = lists:foldl(fun process_call/2, State, LoadedCalls),
+      load_queued_calls(NewState)
+  end.
+
 process_call(Call, State = #state{last_id = LastId, waiting_calls = WaitingCalls}) ->
   NewWaitingCalls = case Call:should_trigger() of
     true ->
@@ -89,14 +97,18 @@ process_call(Call, State = #state{last_id = LastId, waiting_calls = WaitingCalls
 
 enqueue(Call, WaitingCalls) ->
   {datetime, NotBefore} = Call#queued_call.not_before,
-  ordsets:add_element({NotBefore, Call}, WaitingCalls).
+  gb_sets:add_element({NotBefore, Call}, WaitingCalls).
 
-dispatch([]) -> [];
-dispatch(Queue = [{_, Call} | Rest]) ->
-  case Call:should_trigger() of
-    true ->
-      channel_queue:enqueue(Call),
-      dispatch(Rest);
-    false ->
-      Queue
+dispatch(Queue) ->
+  case gb_sets:is_empty(Queue) of
+    true -> Queue;
+    _ ->
+      {{_, Call}, Queue2} = gb_sets:take_smallest(Queue),
+      case Call:should_trigger() of
+        true ->
+          channel_queue:enqueue(Call),
+          dispatch(Queue2);
+        false ->
+          Queue
+      end
   end.

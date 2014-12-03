@@ -155,6 +155,12 @@ Verboice::Application.routes.draw do
     get :voices
   end
 
+  resources :alerts do
+    member do
+      get :dismiss
+    end
+  end
+
   namespace :api, defaults: {format: 'json'} do
     match "call" => "calls#call"
     resources :calls, only: [] do
@@ -261,6 +267,11 @@ Verboice::Application.routes.draw do
 
     resources :traffics, only: [:index]
   end
+
+  get 'permissions' => 'permissions#index'
+  get 'permissions/autocomplete' => 'permissions#autocomplete'
+  post 'permissions/add_account' => 'permissions#add_account'
+  post 'permissions/update' => 'permissions#update'
 
   post 'call_simulator/start'
   post 'call_simulator/resume'

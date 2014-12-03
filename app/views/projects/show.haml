@@ -1,4 +1,4 @@
-= render 'shared/project_tabs_and_title', :project => @project
+= render 'shared/project_tabs_and_title', :project => @project, :shared_project => @shared_project
 
 = render 'enqueue_new_call', :project => @project, :call_flows => @call_flows, :channels => @channels, :schedules => @schedules
 
@@ -54,5 +54,6 @@
 = link_to t('views.projects.show.action.edit_settings'), edit_project_path(@project), :class => "button faccept"
 %hr
 
-= link_to t('views.projects.show.action.delete_this_project'), @project, :confirm => "#{t('views.projects.show.action.confirm_delete')} #{@project.name}?", :method => :delete, :class => "button fdelete"
+- if project_owner?
+  = link_to t('views.projects.show.action.delete_this_project'), @project, :confirm => "#{t('views.projects.show.action.confirm_delete')} #{@project.name}?", :method => :delete, :class => "button fdelete"
 .clear

@@ -39,6 +39,19 @@ ActiveRecord::Schema.define(:version => 20141117030820) do
   add_index "accounts", ["email"], :name => "index_accounts_on_email", :unique => true
   add_index "accounts", ["reset_password_token"], :name => "index_accounts_on_reset_password_token", :unique => true
 
+  create_table "alerts", :force => true do |t|
+    t.integer  "account_id"
+    t.string   "type"
+    t.string   "severity"
+    t.string   "message"
+    t.string   "key"
+    t.text     "data"
+    t.datetime "created_at", :null => false
+    t.datetime "updated_at", :null => false
+  end
+
+  add_index "alerts", ["account_id", "key"], :name => "index_alerts_on_account_id_and_key"
+
   create_table "call_flow_external_services", :force => true do |t|
     t.integer  "call_flow_id"
     t.integer  "external_service_id"
@@ -313,6 +326,21 @@ ActiveRecord::Schema.define(:version => 20141117030820) do
   add_index "feeds", ["key"], :name => "index_feeds_on_key"
   add_index "feeds", ["project_id"], :name => "index_feeds_on_project_id"
 
+  create_table "hibernated_sessions", :force => true do |t|
+    t.string   "session_id"
+    t.binary   "data"
+    t.datetime "created_at", :null => false
+    t.datetime "updated_at", :null => false
+  end
+
+  create_table "identities", :force => true do |t|
+    t.integer  "account_id"
+    t.string   "provider"
+    t.string   "token"
+    t.datetime "created_at", :null => false
+    t.datetime "updated_at", :null => false
+  end
+
   create_table "localized_resources", :force => true do |t|
     t.string   "language"
     t.text     "text"
@@ -382,6 +410,15 @@ ActiveRecord::Schema.define(:version => 20141117030820) do
   end
 
   add_index "pbx_logs", ["guid", "id"], :name => "index_pbx_logs_on_guid_and_id"
+
+  create_table "permissions", :force => true do |t|
+    t.integer  "account_id"
+    t.string   "type"
+    t.integer  "model_id"
+    t.string   "role"
+    t.datetime "created_at", :null => false
+    t.datetime "updated_at", :null => false
+  end
 
   create_table "persisted_variables", :force => true do |t|
     t.string   "value"

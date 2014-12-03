@@ -3,7 +3,7 @@
 -include("session.hrl").
 -include("db.hrl").
 
-run(Args, Session = #session{pbx = Pbx, channel = CurrentChannel, call_log = CallLog, js_context = JS}) ->
+run(Args, Session = #session{pbx = Pbx, channel = CurrentChannel, js_context = JS}) ->
   Number = proplists:get_value(number, Args),
   CallerId = proplists:get_value(caller_id, Args),
 
@@ -22,10 +22,37 @@ run(Args, Session = #session{pbx = Pbx, channel = CurrentChannel, call_log = Cal
       end
   end,
 
-  CallLog:info(["Dialing ", Number, " throug channel ", Channel#channel.name], [{command, "dial"}, {action, "start"}]),
+  SuccessAfterSeconds = case proplists:get_value(successful_after, Args) of
+                          undefined -> undefined;
+                          Expr -> util:parse_short_time(Expr)
+                        end,
 
-  Result = Pbx:dial(Channel, Number, CallerId),
-  NewJS = erjs_context:set(dial_status, Result, JS),
+  poirot:log(info, "Dialing ~s through channel ~s", [Number, Channel#channel.name]),
 
-  CallLog:info(["Dial completed  with status ", atom_to_list(Result)], [{command, "dial"}, {action, "finish"}]),
-  {next, Session#session{js_context = NewJS}}.
+  DialStart = erlang:now(),
+
+  try
+    Result = Pbx:dial(Channel, list_to_binary(Number), CallerId),
+    ResultJS = erjs_context:set(dial_status, Result, JS),
+    NewJS = maybe_mark_session_successful(DialStart, SuccessAfterSeconds, ResultJS),
+
+    poirot:log(info, "Dial completed with status ~s", [Result]),
+    {next, Session#session{js_context = NewJS}}
+  catch
+    hangup ->
+      UpdatedJS = maybe_mark_session_successful(DialStart, SuccessAfterSeconds, JS),
+      throw({hangup, Session#session{js_context = UpdatedJS}})
+  end.
+
+maybe_mark_session_successful(_DialStart, undefined, JS) ->
+  JS;
+maybe_mark_session_successful(DialStart, SuccessAfterSeconds, JS) ->
+  CallTimeSeconds = timer:now_diff(erlang:now(), DialStart) div 1000000,
+  if
+    CallTimeSeconds > SuccessAfterSeconds ->
+      poirot:log(info, "Call time exceeded threshold, marking session successful", []),
+      erjs_context:set(status, "successful", JS);
+    true ->
+      JS
+  end.
+

@@ -1,12 +1,19 @@
 - content_for :head do
+  :css
+    .ui-autocomplete.ui-menu {
+      width: 200px !important;
+    }
+
   :javascript
+    window.callFlowId = #{@call_flow.id}
+
     var distinct_variables = #{ @variables.to_json };
     var call_flow = #{ raw (@call_flow.user_flow || []).to_json };
     var call_flows = #{ @call_flows.map{|call_flow| {id: call_flow.id, name: call_flow.name} }.to_json }
 
     var reminder_groups = #{ @reminder_groups.to_json }
     var external_steps = #{ @external_steps.to_json };
-    var languages = #{ project_languages_json(@project) };
+    var project_languages = #{ project_languages_json(@project) };
     var project_id = #{ @project.id };
     var nuntium_configured = #{ nuntium_configured?.to_json };
     var steps_configured = #{steps_configured?.to_json}
@@ -39,32 +46,33 @@
   - %W(speech_recognition external_step hang_up_step workflow_step capture_step menu_step play_step mark_as_failed_step mark_as_successful_step transfer_step goto_step branch_step record_step language_step text_localized_resource url_localized_resource record_localized_resource upload_localized_resource command_selector call_simulator branch_option external_setting resource_editor hang_up_and_call_back nuntium_step impersonate_step register_step register_option deregister_step datetime_step email_resource_editor email_text_localized_resource).each do |template|
     = render "call_flows/#{template}_template"
 
-= render 'shared/project_tabs_and_title', :project => @project
+= render 'shared/project_tabs_and_title', :project => @project, :shared_project => @shared_project
 
 %h2= @call_flow.name
 %p= t('views.call_flows.edit_workflow.label.desc')
 
-= form_tag export_call_flow_path(@call_flow), :method => :get do
+= form_tag export_project_call_flow_path(@project, @call_flow), :method => :get do
   %button.fimport= t('views.call_flows.edit_workflow.action.export_call_flow')
   = check_box_tag :export_audios
   = t('views.call_flows.edit_workflow.label.include_audio_recording')
 
+- if project_admin?
 .ux-collapsible.collapsed.w40.file_upload{"data-on-expanded" => "box grey"}
   %span
-    %a.button.fexport{:href => "#"}= t('views.call_flows.edit_workflow.action.import_new_call_flow')
+  %a.button.fexport{:href => "#"}= t('views.call_flows.edit_workflow.action.import_new_call_flow')
   .ux-content
     = form_tag({:action => :import}, :multipart => true) do
       %hr
-      = file_field_tag 'vrb', :label => t('views.call_flows.edit_workflow.action.browse'), :class =>'button white'
+    = file_field_tag 'vrb', :label => t('views.call_flows.edit_workflow.action.browse'), :class =>'button white'
       %hr
       .right
-        %button.grey{:type => "submit"}= t('views.call_flows.edit_workflow.action.upload')
+      %button.grey{:type => "submit"}= t('views.call_flows.edit_workflow.action.upload')
       .clear
 
 %hr
 
-= form_tag update_workflow_call_flow_path(@call_flow), :method => "PUT", :'data-bind' => "submit: serialize_workflow" do
-  #wami
+= form_tag update_workflow_project_call_flow_path(@project, @call_flow), :method => "PUT", :'data-bind' => "submit: serialize_workflow" do
+  = render 'shared/recorder'
   #workflow
     #workflow-page
       %p.left.title.clickable{ 'data-bind' => 'click: show_new_step_selector' }= t('views.call_flows.edit_workflow.action.create_new_sub_flow')
@@ -72,7 +80,8 @@
       -# %p.left.title.clickable{ 'data-bind' => 'click: call_from_browser' } | Try it now!
       %div.right
         = hidden_field_tag 'flow', (@call_flow.user_flow || []).to_json
-        %button.grey{:type => "submit"}= t('views.call_flows.edit_workflow.action.save')
+        - if project_admin?
+          %button.grey{:type => "submit"}= t('views.call_flows.edit_workflow.action.save')
         = link_to t('views.call_flows.edit_workflow.action.back'), project_call_flows_path(@project), :class => "button white cancel", :style => 'top: 1px; margin-right: 15px'
       .clear
       .left
@@ -82,7 +91,3 @@
       .clear
 
 #call-flow-simulator{style: 'display: none'}
-  HOLA!
-
-:javascript
-  window.callFlowId = #{@call_flow.id}

@@ -30,10 +30,6 @@ table.workflow-table {
   overflow:auto;
 }
 
-.ui-autocomplete.ui-menu {
-  width: 200px !important;
-}
-
 .workflow-container {
   position:relative;
   white-space:nowrap;
@@ -318,3 +314,30 @@ a.email_param {
   color: blue;
 }
 
+
+// ----------
+
+.transfer_successful_after {
+  label {
+    color: #000000;
+  }
+  input[type="text"] {
+    width: 140px;
+    display: block;
+  }
+  .block {
+    margin-top:  8px;
+    margin-left: 22px;
+  }
+  .examples {
+    color: #555555;
+    font-size: 12px;
+    padding-left: 4px;
+    ul {
+      list-style-type: none;
+      margin-top: 3px;
+      padding: 0;
+    }
+  }
+  
+}

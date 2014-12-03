@@ -16,7 +16,14 @@
 # along with Verboice.  If not, see <http://www.gnu.org/licenses/>.
 
 require 'bundler/capistrano'
-require 'rvm/capistrano'
+
+if ENV['RVM']
+  require 'rvm/capistrano'
+  set :rvm_ruby_string, '1.9.3'
+  set :rvm_type, :system
+else
+  default_run_options[:shell] = "/bin/bash --login"
+end
 
 set :whenever_command, "bundle exec whenever"
 require "whenever/capistrano"
@@ -24,9 +31,6 @@ require "whenever/capistrano"
 set :stages, %w(production staging)
 set :default_stage, :staging
 require 'capistrano/ext/multistage'
-
-set :rvm_ruby_string, '1.9.3'
-set :rvm_type, :system
 
 set :application, "verboice"
 set :use_sudo , false
@@ -36,6 +40,11 @@ set :scm, :git
 set :deploy_via, :remote_cache
 
 default_environment['TERM'] = ENV['TERM']
+
+# role :web, "your web-server here"                          # Your HTTP server, Apache/etc
+# role :app, "your app-server here"                          # This may be the same as your `Web` server
+# role :db,  "your primary db-server here", :primary => true # This is where Rails migrations will run
+# role :db,  "your slave db-server here"
 
 namespace :deploy do
   task :start do ; end
@@ -53,7 +62,7 @@ namespace :deploy do
   end
 
   task :compile_broker, :roles => :app do
-    run "cd #{release_path}/broker && make deps"
+    run "make -C #{release_path}/broker"
   end
 
   task :symlink_configs, :roles => :app do
@@ -69,14 +78,22 @@ namespace :deploy do
   task :symlink_help, :roles => :app do
     run "ln -nfs #{shared_path}/help #{release_path}/public"
   end
+  
+  task :generate_version, :roles => :app do
+    run "cd #{release_path} && git describe --always > #{release_path}/VERSION"
+  end
 end
 
 namespace :foreman do
   desc 'Export the Procfile to Ubuntu upstart scripts'
   task :export, :roles => :app do
-    run "echo -e \"PATH=$PATH\\nGEM_HOME=$GEM_HOME\\nGEM_PATH=$GEM_PATH\\nRAILS_ENV=production\" >  #{current_path}/.env"
-    run "export rvmsudo_secure_path=1"
-    run "cd #{current_path} && rvmsudo bundle exec foreman export upstart /etc/init -f #{current_path}/Procfile -a #{application} -u #{user} --concurrency=\"broker=1,delayed=1\""
+    if ENV['RVM']
+      run "echo -e \"PATH=$PATH\\nGEM_HOME=$GEM_HOME\\nGEM_PATH=$GEM_PATH\\nRAILS_ENV=production\" >  #{current_path}/.env"
+      run "cd #{current_path} && rvmsudo bundle exec foreman export upstart /etc/init -f #{current_path}/Procfile -a #{application} -u #{user} --concurrency=\"broker=1,delayed=1\""
+    else
+      run "echo -e \"PATH=$PATH\\nRAILS_ENV=production\" >  #{current_path}/.env"
+      run "cd #{current_path} && #{try_sudo} `which bundle` exec foreman export upstart /etc/init -f #{current_path}/Procfile -a #{application} -u #{user} --concurrency=\"broker=1,delayed=1\""
+    end
   end
 
   desc "Start the application services"
@@ -98,6 +115,7 @@ end
 
 before "deploy:start", "deploy:migrate"
 before "deploy:restart", "deploy:migrate"
+after "deploy:update_code", "deploy:generate_version"
 after "deploy:update_code", "deploy:symlink_configs"
 after "deploy:update_code", "deploy:symlink_data"
 after "deploy:update_code", "deploy:symlink_help"
