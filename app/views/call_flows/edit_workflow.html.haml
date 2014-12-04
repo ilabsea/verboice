@@ -57,18 +57,17 @@
   = t('views.call_flows.edit_workflow.label.include_audio_recording')
 
 - if project_admin?
-.ux-collapsible.collapsed.w40.file_upload{"data-on-expanded" => "box grey"}
-  %span
-  %a.button.fexport{:href => "#"}= t('views.call_flows.edit_workflow.action.import_new_call_flow')
-  .ux-content
-    = form_tag({:action => :import}, :multipart => true) do
-      %hr
-    = file_field_tag 'vrb', :label => t('views.call_flows.edit_workflow.action.browse'), :class =>'button white'
-      %hr
-      .right
-      %button.grey{:type => "submit"}= t('views.call_flows.edit_workflow.action.upload')
-      .clear
-
+  .ux-collapsible.collapsed.w40.file_upload{"data-on-expanded" => "box grey"}
+    %span
+      %a.button.fexport{:href => "#"}= t('views.call_flows.edit_workflow.action.import_new_call_flow')
+    .ux-content
+      = form_tag({:action => :import}, :multipart => true) do
+        %hr
+        = file_field_tag 'vrb', :label => t('views.call_flows.edit_workflow.action.browse'), :class =>'button white'
+        %hr
+        .right
+        %button.grey{:type => "submit"}= t('views.call_flows.edit_workflow.action.upload')
+        .clear
 %hr
 
 = form_tag update_workflow_project_call_flow_path(@project, @call_flow), :method => "PUT", :'data-bind' => "submit: serialize_workflow" do
