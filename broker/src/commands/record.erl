@@ -16,7 +16,7 @@ run(Args, Session = #session{pbx = Pbx, call_log = CallLog, contact = Contact, p
   Filename = filename(CallLogId, Key),
   filelib:ensure_dir(Filename),
 
-  poirot:log(info, "Recording to filename: ~s, stop keys: ~s, timeout: ~B", [Filename, StopKeys, Timeout, SilenceTime]),
+  poirot:log(info, "Recording to filename: ~s, stop keys: ~s, timeout: ~B, silent: ~B", [Filename, StopKeys, Timeout, SilenceTime]),
   case Pbx:record(Filename, StopKeys, Timeout, SilenceTime) of
     ok ->
       RecordedAudio = #recorded_audio{
