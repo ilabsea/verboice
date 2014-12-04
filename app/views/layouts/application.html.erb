@@ -29,7 +29,7 @@
             <hr/>
             <ul>
               <li><a href="mailto:support@instedd.org?subject=[<%= application_name.underscore %>-bug]"><%=t('views.layouts.action.report_bug') %></a></li>
-              <li><%= link_to t('views.layouts.action.sign_out'), destroy_account_session_path %></li>
+              <li><%= link_to t('views.layouts.action.sign_out'), destroy_account_session_path, method: :delete %></li>
             </ul>
           </div>
         </div>
