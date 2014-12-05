@@ -237,10 +237,10 @@ ready({dial, RealBroker, Channel, QueuedCall}, _From, State = #state{session_id 
               {_, _, NewSession2} = finalize({failed, Reason}, State#state{session = NewSession}),
               {stop, normal, error, State#state{session = NewSession2}};
             _ ->
-      lager:info("Dialing to ~s through channel ~s", [QueuedCall#queued_call.address, Channel#channel.name]),
+              lager:info("Dialing to ~s through channel ~s", [QueuedCall#queued_call.address, Channel#channel.name]),
               notify_status(ringing, NewSession),
               CallLog:update([{state, "active"}, {fail_reason, undefined}]),
-      {reply, ok, dialing, State#state{session = NewSession}, ?TIMEOUT_DIALING}
+              {reply, ok, dialing, State#state{session = NewSession}, ?TIMEOUT_DIALING}
           end
       end;
     _ -> 
@@ -289,9 +289,9 @@ in_progress({completed, ok}, State = #state{session = Session}) ->
   notify_status(completed, Session),
   finalize(completed, State);
 
-in_progress({completed, Failure}, State = #state{session = Session}) ->
+in_progress({completed, {failed, Reason}}, State = #state{session = Session}) ->
   notify_status(failed, Session),
-  finalize({failed, Failure}, State);
+  finalize({failed, Reason}, State);
 
 in_progress(timeout, State = #state{session = Session = #session{pbx = Pbx}}) ->
   IsTimeout = is_timeout(Session, ?TIMEOUT_SESSION),
