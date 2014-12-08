@@ -66,6 +66,14 @@ class Account < ActiveRecord::Base
     ChannelPermission.where(account_id: id).includes(:channel)
   end
 
+  def available_channels
+    @channels = self.channels.all
+    @shared_channels = shared_channels.all.map(&:channel)
+    @shared_channels.each { |c| c.name = "#{c.name} (shared)" }
+    @channels.concat @shared_channels
+    @channels
+  end
+
   def find_project_by_id(project_id)
     project_id = project_id.to_i
 

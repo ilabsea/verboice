@@ -28,10 +28,11 @@
       %span{ko(text: 'channel_name()')}
       = t('views.ext.reminder_schedules.label.channel').downcase
       %span.title{ko(text: :name)}
-    .rightbuttons
-      %button.fdelete{ko(click: '$root.deleteReminderSchedule')}
-    .bottom
-      %button.farrow.collapse_trigger{ko(click: '$root.editReminderSchedule')}= t('views.ext.reminder_schedules.action.edit')
+    - if project_admin?
+      .rightbuttons
+        %button.fdelete{ko(click: '$root.deleteReminderSchedule')}
+      .bottom
+        %button.farrow.collapse_trigger{ko(click: '$root.editReminderSchedule')}= t('views.ext.reminder_schedules.action.edit')
   <!-- /ko -->
   <!-- ko if: $data == $root.currentReminderSchedule() -->
   .box.collapsible_crud_box.expanded.grey.w60
@@ -136,10 +137,11 @@
   <!-- /ko -->
   <!-- /ko -->
 
-  .box.grey.w60.addqueue{ ko(visible: '!currentReminderSchedule()', click: 'newReminderSchedule'), style: 'display:none'}
-    %span
-      %a.add_field{href: 'javascript:void(0)'}= t('views.ext.reminder_schedules.action.new_reminder_schedule')
-    %button.cadd.right
-    %br{clear: 'all'}
+  - if project_admin?
+    .box.grey.w60.addqueue{ ko(visible: '!currentReminderSchedule()', click: 'newReminderSchedule'), style: 'display:none'}
+      %span
+        %a.add_field{href: 'javascript:void(0)'}= t('views.ext.reminder_schedules.action.new_reminder_schedule')
+      %button.cadd.right
+      %br{clear: 'all'}
 
 %br

@@ -21,8 +21,6 @@ class ProjectsController < ApplicationController
   before_filter :load_enqueue_call_fields, only: [:show, :enqueue_call]
   before_filter :check_project_admin, only: [:update, :update_variables]
 
-  
-
   def index
     @projects = current_account.projects.all
     @shared_projects = current_account.shared_projects.all

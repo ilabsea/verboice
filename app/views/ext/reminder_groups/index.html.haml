@@ -13,7 +13,7 @@
       allowKeyInput($("#autocomplete-address"), /[0-9\+]/);
     });
 
-= render 'shared/project_tabs_and_title', :project => @project, shared_project: @shared_project
+= render 'shared/project_tabs_and_title', project: @project, shared_project: @shared_project
 
 %h2= t('views.ext.reminder_groups.title')
 
@@ -25,24 +25,25 @@
       %span.title{ko(text: :name)}
       %span :
       %span.title{ko(text: 'contacts_display()')}
-    .rightbuttons
-      %button.fdelete{ko(click: '$root.delete_reminder_group')}
-    .bottom
-      %div
-        %button.farrow.collapse_trigger{ko(click: '$root.edit_reminder_group')}= t('views.ext.reminder_groups.action.edit')
-        .ux-collapsible.collapsed.w40.file_upload{"data-on-expanded" => "grey"}
-          %span
-            %a.button.fexport{ko(click: 'collapse_expand_import'), :href => "#"}= t('views.ext.reminder_groups.action.import_csv')
-            %span (*.csv)
-          .ux-content
-            = form_tag("", :multipart => true) do
-              %hr
-              = file_field_tag 'file_name', :class =>'button white', accept: '.csv,text/csv'
-              %hr
-              .right
-                %button.grey{ko(click: 'upload'), :type => "submit"}= t('views.ext.reminder_groups.action.upload')
-                %a.button.white.cancel{ko(click: 'cancel_upload'), href: 'javascript:void(0)'}= t('views.ext.reminder_groups.action.cancel')
-              .clear
+    - if project_admin?
+      .rightbuttons
+        %button.fdelete{ko(click: '$root.delete_reminder_group')}
+      .bottom
+        %div
+          %button.farrow.collapse_trigger{ko(click: '$root.edit_reminder_group')}= t('views.ext.reminder_groups.action.edit')
+          .ux-collapsible.collapsed.w40.file_upload{"data-on-expanded" => "grey"}
+            %span
+              %a.button.fexport{ko(click: 'collapse_expand_import'), :href => "#"}= t('views.ext.reminder_groups.action.import_csv')
+              %span (*.csv)
+            .ux-content
+              = form_tag("", :multipart => true) do
+                %hr
+                = file_field_tag 'file_name', :class =>'button white', accept: '.csv,text/csv'
+                %hr
+                .right
+                  %button.grey{ko(click: 'upload'), :type => "submit"}= t('views.ext.reminder_groups.action.upload')
+                  %a.button.white.cancel{ko(click: 'cancel_upload'), href: 'javascript:void(0)'}= t('views.ext.reminder_groups.action.cancel')
+                .clear
 
   <!-- /ko -->
 
@@ -87,9 +88,10 @@
   <!-- /ko -->
   <!-- /ko -->
 
-  .box.grey.w60.addqueue{ ko(visible: '!current_reminder_group()', click: 'new_reminder_group'), style: 'display:none'}
-    %span
-      %a.add_field{href: 'javascript:void(0)'}= t('views.ext.reminder_groups.action.new')
-    %button.cadd.right
-    %br{clear: 'all'}
+  - if project_admin?
+    .box.grey.w60.addqueue{ ko(visible: '!current_reminder_group()', click: 'new_reminder_group'), style: 'display:none'}
+      %span
+        %a.add_field{href: 'javascript:void(0)'}= t('views.ext.reminder_groups.action.new')
+      %button.cadd.right
+      %br{clear: 'all'}
 %br

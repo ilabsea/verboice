@@ -100,24 +100,27 @@ onReminderSchedules ->
       @reminder_channels.push(reminder_channel)
     
     addReminderChannelByChannel: =>
-      existed_channel = @findReminderChannelFromChannelName(@new_channel_name() )
+      existed_channel = @findReminderChannelFromChannelName(@new_channel_name())
       if existed_channel
          # show error
       else
         channel = @findChannelByName(@new_channel_name())
         if channel
-          reminder_channel = new ReminderChannel(channel: channel, reminder_schedule_id: @id() ) 
+          reminder_channel = new ReminderChannel(channel: channel, reminder_schedule_id: @id()) 
           @reminder_channels.push(reminder_channel)
           @new_channel_name("")
 
     findReminderChannelFromChannelName: (channel_name) =>
-      return reminder_channel for reminder_channel in @reminder_channels() when reminder_channel.channel().name() == channel_name       
+      for reminder_channel in @reminder_channels()
+        if reminder_channel.channel()
+          if reminder_channel.channel().name() == channel_name
+            return reminder_channel
 
     findChannelById: (id) =>
       return channel for channel in window.model.channels() when channel.id() == id
 
     findChannelByName: (name) =>
-      return channel for channel in window.model.channels() when channel.name() == name      
+      return channel for channel in window.model.channels() when channel.name() == name
 
     add_condition: =>
       condition = new Condition()
@@ -168,7 +171,7 @@ onReminderSchedules ->
     is_retries_in_hours_valid: => !@has_retries() or (@has_retries and new RegExp("^[0-9\.]+(,[0-9\.]+)*$").test(@retries_in_hours()))
 
     channel_exists: (channel_name) =>
-      $.map(@reminder_channels(), (x) -> x if x.channel().name() == channel_name).length > 0
+      $.map(@reminder_channels(), (x) -> x if x.channel() && x.channel().name() == channel_name).length > 0
 
     toJSON: =>
       reminder_id = @id()

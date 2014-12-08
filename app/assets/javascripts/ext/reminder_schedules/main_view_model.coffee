@@ -72,8 +72,6 @@ onReminderSchedules ->
     find_channel: (id) =>
       return channel for channel in @channels() when channel.id() == id
 
-      
-
     find_call_flow: (id) =>
       return call_flow for call_flow in @call_flows() when call_flow.id() == id
 
