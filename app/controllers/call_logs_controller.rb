@@ -17,6 +17,7 @@
 
 class CallLogsController < ApplicationController
   before_filter :authenticate_account!
+  
   before_filter :paginate, only: [:index, :queued]
   before_filter :search, only: [:index, :download_project_call_logs, :generate_zip]
   before_filter :check_max_row, only: [:download_project_call_logs]
@@ -81,10 +82,11 @@ class CallLogsController < ApplicationController
 
   private
     def search
-      load_project
       @search = params[:search] || ""
       @logs = current_account.call_logs.includes(:project).includes(:channel).includes(:call_flow).order('call_logs.id DESC')
       if params[:project_id].present?
+        load_project
+        
         %w(phone_number after before call_flow_id).each do |key|
           @search << search_by_key(key)
         end
