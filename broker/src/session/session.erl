@@ -308,15 +308,12 @@ in_progress(timeout, State = #state{session = Session = #session{pbx = Pbx}}) ->
     true -> {next_state, in_progress, State}
   end.
 
-in_progress({suspend, NewSessionPid, Ptr}, _From, State = #state{session = Session}) ->
-  session:set_pointer(NewSessionPid, Ptr),
-  
+in_progress({suspend, NewSession, Ptr}, _From, State = #state{session = Session = #session{session_id = SessionId}}) ->
+  lager:info("Session (~p) suspended", [SessionId]),
   channel_queue:unmonitor_session(Session#session.channel#channel.id, self()),
+  {reply, ok, ready, State#state{pbx_pid = undefined, flow_pid = undefined, resume_ptr = Ptr, session = NewSession}};
   
-  notify_status(completed, Session),
-  finalize(completed, State);
-  
- in_progress({hibernate, NewSession, Ptr}, _From, State = #state{session = _Session = #session{session_id = SessionId}}) ->
+in_progress({hibernate, NewSession, Ptr}, _From, State = #state{session = _Session = #session{session_id = SessionId}}) ->
   lager:info("Session (~p) hibernated", [SessionId]),
   Data = #hibernated_session_data{
     flow = NewSession#session.flow,
@@ -590,8 +587,8 @@ run(Session = #session{flow = Flow, stack = Stack}, Ptr) ->
           end;
         finish ->
           end_flow(NewSession);
-        {suspend, NewSessionPid} ->
-          {suspend, NewSessionPid, Ptr + 1};
+        suspend ->
+          {suspend, NewSession, Ptr + 1};
         hibernate ->
           {hibernate, NewSession, Ptr + 1}
       end

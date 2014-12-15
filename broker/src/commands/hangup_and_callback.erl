@@ -15,7 +15,7 @@ run(Args, Session) ->
     "later" ->
       Delay = proplists:get_value(delay, Args),
       Seconds = util:parse_short_time(Delay),
-      CallDate = util:time_from_now(Seconds),
+      CallDate = datetime_utils:time_from_now(Seconds),
       QueuedCall = queued_call:create(#queued_call{
         channel_id = Session#session.channel#channel.id,
         call_log_id = (Session#session.call_log):id(),
@@ -31,17 +31,21 @@ run(Args, Session) ->
         % TODO: time_zone
         session_id = Session#session.session_id,
         variables = [],
-        callback_params = []
+        callback_params = [],
+        state = <<"queued">>,
+        retries = 0
       }),
       scheduler:enqueue(QueuedCall),
       {hibernate, Session};
     _ ->
-      NotBefore = util:time_from_now(15),
+      NotBefore = datetime_utils:time_from_now(15),
       scheduler:enqueue(#queued_call{
         not_before = {datetime, NotBefore},
         session_id = Session#session.session_id,
         channel_id = Session#session.channel#channel.id,
-        address = dial_address(Session#session.address, Prefix)
+        address = dial_address(Session#session.address, Prefix),
+        state = <<"queued">>,
+        retries = 0
       }),
       {suspend, Session}
   end.
