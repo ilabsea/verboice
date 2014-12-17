@@ -52,9 +52,6 @@ handle_cast(verify_session, State)->
   session_sup:clean_session(),
   {noreply, State};
 
-handle_cast({enqueue, #queued_call{call_log_id = Id}}, State = #state{last_id = LastId})
-  when is_integer(Id), Id > LastId ->
-  {noreply, State};
 handle_cast({enqueue, Call}, State = #state{waiting_calls = WaitingCalls}) ->
   {noreply, State#state{waiting_calls = enqueue(Call, WaitingCalls)}};
 

@@ -41,5 +41,26 @@
         %input.w25{'type' => 'text', 'data-bind' => 'value: dial_prefix'}
         %br/
 
+      %table.step-ui-table
+        %tr
+          %td{'colspan'=> '2'}
+            %br
+            With retries option
+        %tr
+          %td Call Flow
+          %td
+            %select{'data-bind' => 'value: selected_call_flow_id, options: call_flow_options(), optionsText: "name", optionsValue: "id", optionsCaption: "Choose a call flow"'}
+        %tr
+          %td{colspan: 2}
+            %br/
+        %tr{'data-bind' => 'visible: selected_call_flow_id() != null'}
+          %td{colspan: 2}
+            Retries if the call was not pick up 
+            Enter comma separated delays in hours 
+        %tr{'data-bind' => 'visible: selected_call_flow_id() != null'}
+          %td Retry
+          %td
+            %input{'type' => 'text', 'placeholder' => '1,2,4', 'data-bind' => 'value: retries'}
+
       .bottom-actions
         %button.fdelete{ 'data-bind' => 'click: remove_with_confirm' } Remove this step

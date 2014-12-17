@@ -2,7 +2,7 @@
 -export([start_link/1, new/0, new/1, find/1, answer/2, answer/4, dial/4, reject/2, stop/1, resume/1, default_variables/1, create_default_erjs_context/1]).
 -export([no_ack/1]).
 -export([language/1]).
--export([generate_id/0, set_pointer/2]).
+-export([new_id/0, set_pointer/2]).
 -compile([{parse_transform, lager_transform}]).
 
 % FSM Description
@@ -43,17 +43,18 @@ start_link(SessionId) ->
   gen_fsm:start_link({global, ?SESSION(StringSessionId)}, ?MODULE, StringSessionId, []).
 
 new() ->
-  SessionId = generate_id(),
+  new(new_id()).
+
+new(HibernatedSession = #hibernated_session{}) ->
+  HibernatedSessionId = HibernatedSession#hibernated_session.session_id,
+  SessionSpec = {util:to_string(HibernatedSessionId), {session, start_link, [HibernatedSession]}, temporary, 5000, worker, [session]},
+  supervisor:start_child(session_sup, SessionSpec);
+new(SessionId) ->
   SessionSpec = {SessionId, {session, start_link, [SessionId]}, temporary, 5000, worker, [session]},
   supervisor:start_child(session_sup, SessionSpec).
 
-generate_id() ->
+new_id() ->
   uuid:to_string(uuid:v4()).
-
-new(HibernatedSession) ->
-  HibernatedSessionId = HibernatedSession#hibernated_session.session_id,
-  SessionSpec = {util:to_string(HibernatedSessionId), {session, start_link, [HibernatedSession]}, temporary, 5000, worker, [session]},
-  supervisor:start_child(session_sup, SessionSpec).
 
 -spec find(binary() | string()) -> undefined | pid().
 find(SessionId) ->
@@ -334,8 +335,15 @@ in_progress({hibernate, NewSession, Ptr}, _From, State = #state{session = _Sessi
   },
   HibernatedSession = #hibernated_session{session_id = SessionId, data = Data},
   HibernatedSession:create(),
-  {stop, normal, ok, State#state{hibernated = true}}.
+  {stop, normal, ok, State#state{hibernated = true}};
 
+in_progress({respawn, NewSessionPid, Ptr}, _From, State = #state{session = Session}) ->
+  session:set_pointer(NewSessionPid, Ptr),
+  
+  channel_queue:unmonitor_session(Session#session.channel#channel.id, self()),
+  
+  notify_status(completed, Session),
+  finalize(completed, State).
 
 notify_status(Status, Session = #session{call_log = CallLog, address = Address, callback_params = CallbackParams}) ->
   case Session#session.status_callback_url of
@@ -484,6 +492,8 @@ spawn_run(Session = #session{pbx = Pbx}, Ptr) ->
         {hibernate, NewSession, NewPtr} ->
           close_user_step_activity(NewSession),
           gen_fsm:sync_send_event(SessionPid, {hibernate, NewSession#session{in_user_step_activity = false}, NewPtr});
+        {respawn, NewSessionPid, NewPtr} ->
+          gen_fsm:sync_send_event(SessionPid, {respawn, NewSessionPid, NewPtr});
         {Result, NewSession = #session{js_context = JsContext}} ->
           close_user_step_activity(NewSession),
           Status = erjs_context:get(status, JsContext),
@@ -540,7 +550,6 @@ create_default_erjs_context(CallLogId) ->
     end},
     {'split_digits', fun(Value) ->
       Result = re:replace(Value,"\\d"," &",[{return,list}, global]),
-      io:format("result: ~p~n", [Result]),
       Result
     end}
   ]).
@@ -590,7 +599,11 @@ run(Session = #session{flow = Flow, stack = Stack}, Ptr) ->
         suspend ->
           {suspend, NewSession, Ptr + 1};
         hibernate ->
-          {hibernate, NewSession, Ptr + 1}
+          {hibernate, NewSession, Ptr + 1};
+        {respawn, NewSessionPid} ->
+          {respawn, NewSessionPid, undefined};
+        {respawn_continuous, NewSessionPid} ->
+          {respawn, NewSessionPid, Ptr + 1}
       end
   catch
     hangup ->
