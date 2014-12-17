@@ -368,14 +368,18 @@ handle_event(stop, _, State) ->
   {stop, normal, State}.
 
 handle_sync_event({matches, Criteria}, _From, StateName, State = #state{session = Session}) ->
-  MatchResult = case Criteria of
-    {project, ProjectId} ->
-      Session#session.project#project.id == ProjectId;
-    {channel, ChannelId} ->
-      Session#session.channel#channel.id == ChannelId;
-    {call_flow, CallFlowId} ->
-      Session#session.call_flow#call_flow.id == CallFlowId;
-    _ -> false
+  MatchResult = case Session of
+    undefined -> false;
+    _ ->
+     case Criteria of
+      {project, ProjectId} ->
+        Session#session.project#project.id == ProjectId;
+      {channel, ChannelId} ->
+        Session#session.channel#channel.id == ChannelId;
+      {call_flow, CallFlowId} ->
+        Session#session.call_flow#call_flow.id == CallFlowId;
+      _ -> false
+    end
   end,
   {reply, MatchResult, StateName, State, ?TIMEOUT_INPROGRESS};
 
