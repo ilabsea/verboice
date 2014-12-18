@@ -12,6 +12,6 @@
 - if project_admin?
   .box.grey.w60.addqueue
     %span
-    = link_to_add_box :external_service, t('views.external_services.index.action.add_external_service'), @project, :class => 'add_fields'
+      = link_to_add_box :external_service, t('views.external_services.index.action.add_external_service'), @project, :class => 'add_fields'
     %button.cadd.right{:onclick => "$('.add_fields').click();", :type => "button"}
     .clear
