@@ -69,7 +69,12 @@ dial(Pid, ArgList) ->
     _ -> ","
   end,
   Args = string:join(ArgList, Separator),
-  gen_server:call(Pid, {execute, ["EXEC DIAL ", Args]}, infinity).
+  case gen_server:call(Pid, {execute, ["EXEC DIAL ", Args]}, infinity) of
+    hangup -> hangup;
+    #response{result = "0"} -> answer;
+    #response{result = "-1"} -> hangup;
+    _ -> error
+  end.
 
 %% @private
 init(Sock) ->
