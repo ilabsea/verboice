@@ -35,7 +35,7 @@ require 'capistrano/ext/multistage'
 set :application, "verboice"
 set :use_sudo , false
 
-set :repository, "https://bitbucket.org/ilab/verboice-git"
+set :repository, "https://bitbucket.org/ilab/verboice"
 set :scm, :git
 set :deploy_via, :remote_cache
 
