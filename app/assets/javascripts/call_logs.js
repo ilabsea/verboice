@@ -16,6 +16,9 @@ function bindPerPageChange(){
 function replaceParam(key, value){
   pathname = window.location.pathname;
   params = toParams(window.location.search);
+  if(params['page']){
+    delete(params['page']);
+  }
   params[key] = value;
 
   return pathname + "?" + jQuery.param(params)
