@@ -111,7 +111,7 @@ module ApplicationHelper
   
   def datetime_format_csv(datetime, time_zone, format)
     return '' unless datetime
-    date_format ||= Time::DEFAULT_FORMAT
+    date_format = format || Time::DEFAULT_FORMAT
     datetime_with_zone = datetime.in_time_zone(time_zone || 'UTC')
     datetime.strftime(date_format)
   end
