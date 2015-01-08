@@ -10,7 +10,7 @@ class RegistrationsController < Devise::RegistrationsController
   def create
     if !verify_captcha
       flash[:error] = I18n.t("activerecord.errors.models.login.invalid_captcha")
-      redirect_to action: :new, account: params[:account]
+      redirect_to action: :new, account: params[:account].except!(:password, :password_confirmation)
     else
       super
     end
