@@ -145,10 +145,12 @@ ready({set_pointer, Ptr}, _From, State) ->
 ready({dial, RealBroker, Channel, QueuedCall}, _From, State = #state{session_id = SessionId}) ->
   error_logger:info_msg("Session (~p) dial", [SessionId]),
 
+  AddressWithoutVoipPrefix = channel:address_without_voip_prefix(Channel, QueuedCall#queued_call.address),
+
   NewSession = case State#state.session of
     undefined ->
       CallLog = call_log_srv:new(SessionId, call_log:find(QueuedCall#queued_call.call_log_id)),
-      Contact = get_contact(QueuedCall#queued_call.project_id, QueuedCall#queued_call.address, QueuedCall#queued_call.call_log_id),
+      Contact = get_contact(QueuedCall#queued_call.project_id, AddressWithoutVoipPrefix, QueuedCall#queued_call.call_log_id),
       Session = QueuedCall:start_session(),
 
       Session#session{
@@ -160,7 +162,7 @@ ready({dial, RealBroker, Channel, QueuedCall}, _From, State = #state{session_id 
       };
     Session ->
       CallLog = Session#session.call_log,
-      Session#session{queued_call = QueuedCall, address = QueuedCall#queued_call.address}
+      Session#session{queued_call = QueuedCall, address = AddressWithoutVoipPrefix}
   end,
 
   case channel:enabled(Channel) of
