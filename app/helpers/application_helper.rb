@@ -102,8 +102,7 @@ module ApplicationHelper
   end
 
   def datetime_format(datetime, time_zone)
-    datetime = datetime.try(:in_time_zone, time_zone || 'UTC')
-    datetime.present? ? datetime.strftime(Time::DEFAULT_FORMAT) : ''
+    datetime_format_csv(datetime, time_zone, Time::DEFAULT_FORMAT)
   end
 
   def tip_info text
@@ -111,8 +110,10 @@ module ApplicationHelper
   end
   
   def datetime_format_csv(datetime, time_zone, format)
-    datetime = datetime.try(:in_time_zone, time_zone || 'UTC')
-    datetime.present? ? datetime.strftime(format) : ''
+    return '' unless datetime
+    date_format ||= Time::DEFAULT_FORMAT
+    datetime_with_zone = datetime.in_time_zone(time_zone || 'UTC')
+    datetime.strftime(date_format)
   end
   
   def paginate_for records

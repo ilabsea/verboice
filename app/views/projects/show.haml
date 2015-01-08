@@ -11,7 +11,8 @@
       %span.big= @call_logs.size
       %span= "#{@call_logs.size == 1 ? t('views.projects.show.label.call') : t('views.projects.show.label.calls')} #{t('views.projects.show.label.registered')}"
 
-  = link_to t('views.projects.show.action.download_csv'), download_project_call_logs_path(@project, format: :csv), class: 'button white'
+  /= link_to t('views.projects.show.action.download_csv'), download_project_call_logs_path(@project, format: :csv), class: 'button white'
+  = link_to t('views.call_logs.index.action.download_csv'), download_project_call_logs_path(@project, search: @search), :class => %w(button fimport download-call_logs)
 
 %br/
 
