@@ -113,7 +113,7 @@ module ApplicationHelper
     return '' unless datetime
     date_format = format || Time::DEFAULT_FORMAT
     datetime_with_zone = datetime.in_time_zone(time_zone || 'UTC')
-    datetime.strftime(date_format)
+    datetime_with_zone.strftime(date_format)
   end
   
   def paginate_for records
