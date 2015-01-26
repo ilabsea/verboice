@@ -81,6 +81,7 @@ limit(#channel{config = Config}) ->
 address_without_voip_prefix(Channel = #channel{}, Address) when is_binary(Address) -> address_without_voip_prefix(Channel, binary_to_list(Address));
 address_without_voip_prefix(#channel{config = Config}, Address) ->
   case proplists:get_value("prefix_called_number", Config) of
+    undefined -> Address;
     [] -> Address;
     Voip -> 
       VoipLength = string:len(Voip),
