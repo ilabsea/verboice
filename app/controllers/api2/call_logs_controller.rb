@@ -32,7 +32,14 @@ module Api2
         end
       else
         @call_logs = api_current_account.call_logs
-        @call_logs = @call_logs.where(address: params[:address]) if params[:address]
+
+        if params[:channel_id].present?
+          @call_logs = @call_logs.where(channel_id: params[:channel_id])
+        end
+
+        if params[:address].present?
+          @call_logs = @call_logs.where(address: params[:address])
+        end
       end
 
       @call_logs = @call_logs.includes([:account, :channel, :project])
