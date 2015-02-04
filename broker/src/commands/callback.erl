@@ -1,4 +1,4 @@
--module(callback).
+ -module(callback).
 -export([run/2]).
 -include("session.hrl").
 -include("db.hrl").
@@ -16,7 +16,9 @@ run(Args, Session = #session{js_context = JS, call_log = CallLog, call_flow = Ca
   Method = proplists:get_value(method, Args, "post"),
   Async = proplists:get_value(async, Args),
 
-  QueryString = prepare_params(Params ++ Variables, [{"CallSid", util:to_string(CallLog:id())} | CallbackParams], JS),
+  Call = call_log:find(CallLog:id()),
+  
+  QueryString = prepare_params(Params ++ Variables, [{"address", Call#call_log.address}, {"channel_id", Call#call_log.channel_id}, {"CallSid", util:to_string(CallLog:id())} | CallbackParams], JS),
   RequestUrl = interpolate(Url, Args, Session),
   Uri = uri:parse(RequestUrl),
 
