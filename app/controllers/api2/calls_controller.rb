@@ -18,9 +18,13 @@ module Api2
   class CallsController < Api2Controller
 
     def call
-      params[:flow] = Parsers::Xml.parse request.body if request.post?
-      call_log = api_current_account.call params
-      render :json => {:call_id => call_log.id, :state => call_log.state}
+      if api_current_account.has_access_from?(origin_host) 
+        channel  = api_current_account.channels.find(params[:channel_id])
+        call_log = channel.call(params[:address], params)
+        render :json => {:call_id => call_log.id, :state => call_log.state}
+      else
+        return head :unauthorized
+      end
     end
 
     def redirect
