@@ -18,10 +18,24 @@ module Api2
   class CallsController < Api2Controller
 
     def call
-      if api_current_account.has_access_from?(origin_host) 
-        channel  = api_current_account.channels.find(params[:channel_id])
-        call_log = channel.call(params[:address], params)
+      if api_current_account.has_access_from?(origin_host)
+        options = params[:call]
+        channel  = api_current_account.channels.find(options[:channel_id])
+        call_log = channel.call(options[:address], options)
         render :json => {:call_id => call_log.id, :state => call_log.state}
+      else
+        return head :unauthorized
+      end
+    end
+
+    def bulk_call
+      if api_current_account.has_access_from?(origin_host)
+        options = params[:call]
+        call_logs = options.each do |call_options|
+          channel  = api_current_account.channels.find(call_options[:channel_id])
+          call_log = channel.call(call_options[:address], call_options)
+        end
+        render :json => call_logs.map{|call_log| {call_id: call_log.id, state: call_log.state} }
       else
         return head :unauthorized
       end
