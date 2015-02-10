@@ -157,6 +157,10 @@ class Channel < ActiveRecord::Base
     if options[:vars].is_a?(Hash)
       variables = {}
       options[:vars].each do |name, value|
+        # add call log answer for default context variables
+        project_variable = project.project_variables.find_by_name(name)
+        CallLogAnswer.create! :call_log_id => call_log.id, :project_variable_id => project_variable.id, :value => value if project_variable
+
         variables[name] = (value =~ /^\d+$/ ? value.to_i : value)
       end
     end
