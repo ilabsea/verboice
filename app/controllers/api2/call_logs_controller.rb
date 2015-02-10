@@ -21,25 +21,29 @@ module Api2
 
     # GET /call_logs
     def index
-      if true or api_current_account.admin?
-        if true or api_current_account.has_access_from?(origin_host)
+      if api_current_account.admin?
+        if api_current_account.has_access_from?(origin_host)
           @call_logs = CallLog.where("1=1")
-          @call_logs = @call_logs.by_account_id(params[:account_id]) if params[:account_id]
-          @call_logs = @call_logs.by_channel_id(params[:channel_id]) if params[:channel_id]
+          @call_logs = @call_logs.by_account_id(params[:account_id]) if params[:account_id].present?
           if params[:channels_id].present?
             ids = params[:channels_id].split(",")
             @call_logs = @call_logs.where(["channel_id in (?) ", ids])
           end
-	@call_logs = @call_logs.between(params[:start_date], params[:end_date]) if params[:start_date] && params[:end_date]
         else
           return head :unauthorized
         end
       else
         @call_logs = api_current_account.call_logs
-        @call_logs = @call_logs.where(address: params[:address]) if params[:address]
+        @call_logs = @call_logs.where(address: params[:address]) if params[:address].present?
       end
 
       @call_logs = @call_logs.where(["direction = ?", params[:direction]]) if params[:direction].present?
+
+      @call_logs = @call_logs.by_channel_id(params[:channel_id]) if params[:channel_id].present?
+      @call_logs = @call_logs.by_call_flow_id(params[:call_flow_id]) if params[:call_flow_id].present?
+      @call_logs = @call_logs.between(params[:start_date], params[:end_date]) if params[:start_date].present? && params[:end_date].present?
+      @call_logs - @call_logs.where(status: params[:status]) if params[:status].present?
+
       @call_logs = @call_logs.order('channel_id').includes([:account, :channel, :project])
 
       render json: @call_logs, each_serializer: CustomCallLogSerializer

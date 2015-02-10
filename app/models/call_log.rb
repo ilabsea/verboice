@@ -183,6 +183,10 @@ class CallLog < ActiveRecord::Base
     where(channel_id: channel_id)
   end
 
+  def self.by_call_flow_id call_flow_id
+    where(call_flow_id: call_flow_id)
+  end
+
   def self.between from, to
     where(started_at: from..to)
   end
