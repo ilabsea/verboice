@@ -448,7 +448,7 @@ initialize_context(Context, #queued_call{variables = Vars}) ->
         VarName = binary_to_atom(iolist_to_binary(["var_", Name]), utf8),
         erjs_context:set(VarName, Value, C)
     end
-  end, Context, yaml_serializer:load(Vars));
+  end, Context, Vars);
 initialize_context(Context, _) -> Context.
 
 default_variables(Context, _ProjectVars, []) -> Context;
