@@ -84,19 +84,20 @@ record(FileName, StopKeys, Timeout, SilenceDetection, {?MODULE, Pid}) ->
 
 dial(Channel, Address, undefined, {?MODULE, Pid}) ->
   DialAddress = case asterisk_broker:dial_address(Channel, Address) of
-                  AsBinary when is_binary(AsBinary) -> binary_to_list(AsBinary);
-                  AsList -> AsList
-                end,
-  agi_session:dial(Pid, [DialAddress, "60", "m"]),
-  case agi_session:get_variable(Pid, "DIALSTATUS") of
+  case agi_session:dial(Pid, [DialAddress, "60", "m"]) of
+    answer -> 
+      case agi_session:get_variable(Pid, "DIALSTATUS") of
+        hangup -> throw(hangup);
+        {ok, Value} -> case Value of
+          "ANSWER" -> completed;
+          "BUSY" -> busy;
+          "NOANSWER" -> no_answer;
+          "CANCEL" -> throw(hangup);
+          _ -> failed
+        end
+      end;
     hangup -> throw(hangup);
-    {ok, Value} -> case Value of
-      "ANSWER" -> completed;
-      "BUSY" -> busy;
-      "NOANSWER" -> no_answer;
-      "CANCEL" -> throw(hangup);
-      _ -> failed
-    end
+    _ -> failed
   end;
   
 dial(Channel, Address, CallerId, Pbx = {?MODULE, Pid}) ->

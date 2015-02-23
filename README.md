@@ -8,6 +8,6 @@ Getting Started
 -------------
 [Start using Verboice now](http://verboice.com)
 
-[Verboice Help](https://bitbucket.org/ilab/verboice-git/wiki/Home)
+[Verboice Help](https://bitbucket.org/ilab/verboice/wiki/Home)
 
-[What's coming next?](https://bitbucket.org/ilab/verboice-git/wiki/Roadmap)
+[What's coming next?](https://bitbucket.org/ilab/verboice/wiki/Roadmap)

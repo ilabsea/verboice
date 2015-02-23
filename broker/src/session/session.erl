@@ -187,10 +187,12 @@ ready({dial, _, _, QueuedCall = #queued_call{address = undefined}}, _From, State
 ready({dial, RealBroker, Channel, QueuedCall}, _From, State = #state{session_id = SessionId, resume_ptr = ResumePtr}) ->
   lager:info("Session (~p) dial", [SessionId]),
 
+  AddressWithoutVoipPrefix = channel:address_without_voip_prefix(Channel, QueuedCall#queued_call.address),
+
   NewSession = case State#state.session of
     undefined ->
       CallLog = call_log_srv:new(SessionId, call_log:find(QueuedCall#queued_call.call_log_id)),
-      Contact = get_contact(QueuedCall#queued_call.project_id, QueuedCall#queued_call.address, QueuedCall#queued_call.call_log_id),
+      Contact = get_contact(QueuedCall#queued_call.project_id, AddressWithoutVoipPrefix, QueuedCall#queued_call.call_log_id),
       Session = QueuedCall:start_session(),
 
       poirot:add_meta([
@@ -211,7 +213,7 @@ ready({dial, RealBroker, Channel, QueuedCall}, _From, State = #state{session_id 
 
     Session ->
       CallLog = Session#session.call_log,
-      Session#session{queued_call = QueuedCall, address = QueuedCall#queued_call.address}
+      Session#session{queued_call = QueuedCall, address = AddressWithoutVoipPrefix}
   end,
 
   % Don't the started_at if we are resuming an existing session
