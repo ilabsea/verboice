@@ -32,7 +32,13 @@ class CallLogsController < ApplicationController
 
   def show
     set_fixed_width_content
-    @log = current_account.call_logs.find params[:id]
+    if params[:project_id].present?
+      load_project
+      @log = @project.call_logs.find params[:id]
+    else
+      @log = current_account.call_logs.find params[:id]
+    end
+    
     @activities = @log.step_activities.sort_by(&:start)
   end
 
@@ -67,7 +73,8 @@ class CallLogsController < ApplicationController
   end
 
   def download_details
-    @log = current_account.call_logs.includes(:entries).find params[:id]
+    load_project
+    @log = @project.call_logs.includes(:entries).find params[:id]
   end
 
   def generate_zip
@@ -83,17 +90,15 @@ class CallLogsController < ApplicationController
   private
     def search
       @search = params[:search] || ""
-      @logs = current_account.call_logs.includes(:project).includes(:channel).includes(:call_flow).order('call_logs.id DESC')
       if params[:project_id].present?
-        load_project
-        
         %w(phone_number after before call_flow_id).each do |key|
           @search << search_by_key(key)
         end
 
-        @project = current_account.find_project_by_id(params[:project_id]) 
-        @logs = @logs.includes(project: :project_variables).includes(:call_log_answers).includes(:call_log_recorded_audios)
-        @logs = @logs.where(:project_id => @project.id)
+        load_project
+        @logs = @project.call_logs.includes(project: :project_variables).includes(:call_log_answers).includes(:call_log_recorded_audios).order('call_logs.id DESC')
+      else
+        @logs = current_account.call_logs.includes(:project).includes(:channel).includes(:call_flow).order('call_logs.id DESC')
       end
       @logs = @logs.search @search, :account => current_account if @search.present?
     end

@@ -101,6 +101,10 @@ Verboice::Application.routes.draw do
           get :generate_zip
           get :download_zip
         end
+
+        member do
+          get :download_details
+        end
       end
 
       resources :feeds
@@ -111,7 +115,6 @@ Verboice::Application.routes.draw do
     member do
       get :progress
       get 'results/:key', :action => :play_result, :as => 'result'
-      get :download_details
     end
     collection do
       get :queued

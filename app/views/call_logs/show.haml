@@ -38,7 +38,7 @@
     = @log.fail_reason
 %br/
 %p
-  = link_to 'Download CSV', download_details_call_log_path(@log, :format => :csv), :class => "button fimport"
+  = link_to 'Download CSV', download_details_project_call_log_path(@project, @log, :format => :csv), :class => "button fimport"
 
 .tablewrapp.user-flow-log
   %table

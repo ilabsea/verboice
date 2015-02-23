@@ -83,7 +83,7 @@
                     %a.fancybox.icon_button{ class: recorded_audio.annotation.present? ? "fedit-blue" : "fedit", href: "#audio_annotation_#{recorded_audio.id}" }
           - unless existed
             %td
-        %td= link_to(t('views.projects.call_logs.index.action.view_details'), call_log_path(log)) if log.store_log_entries
+        %td= link_to(t('views.projects.call_logs.index.action.view_details'), call_log_path(log, project_id: @project.id)) if log.store_log_entries
   %br/
   = paginate_for @logs
 %br/
