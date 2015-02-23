@@ -193,7 +193,7 @@ Verboice::Application.routes.draw do
         end
       end
 
-      resources :reminder_groups, only: [:index, :create, :update, :destroy], shallow: true
+      resources :reminder_groups, only: [:index, :create, :update, :destroy]
     end
 
     resources :logs, only: [] do

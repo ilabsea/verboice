@@ -35,7 +35,7 @@ onReminderGroups ->
       json = {reminder_group: @current_reminder_group().toJSON()}
       if @current_reminder_group().id()
         $.ajax
-          url: "/api/reminder_groups/#{@current_reminder_group().id()}.json"
+          url: "/api/projects/#{@project_id()}/reminder_groups/#{@current_reminder_group().id()}.json"
           type: 'PUT'
           data: JSON.stringify(json)
           contentType: 'application/json'
@@ -53,6 +53,6 @@ onReminderGroups ->
 
     delete_reminder_group: (reminder_group) =>
       if confirm(confirm_delete)
-        $.post "/api/reminder_groups/#{reminder_group.id()}.json", {_method: 'delete'}, =>
+        $.post "/api/projects/#{@project_id()}/reminder_groups/#{reminder_group.id()}.json", {_method: 'delete'}, =>
           @reminder_groups.remove(reminder_group)
           $.status.showNotice(delete_success, 2000)
