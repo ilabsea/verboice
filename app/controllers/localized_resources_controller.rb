@@ -17,7 +17,7 @@
 
 class LocalizedResourcesController < ApplicationController
 
-  expose(:project) { current_account.projects.find(params[:project_id]) }
+  expose(:project) { load_project }
   expose(:resource) { project.resources.find(params[:resource_id]) }
   expose(:localized_resources) { resource.localized_resources }
   expose(:localized_resource)
