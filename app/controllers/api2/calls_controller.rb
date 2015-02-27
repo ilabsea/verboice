@@ -31,7 +31,8 @@ module Api2
     def bulk_call
       if api_current_account.has_access_from?(origin_host)
         options = params[:call]
-        call_logs = options.each do |call_options|
+
+        call_logs = options.map do |call_options|
           channel  = api_current_account.channels.find(call_options[:channel_id])
           call_log = channel.call(call_options[:address], call_options)
         end
