@@ -289,5 +289,13 @@ class Channel < ActiveRecord::Base
   def enabled?
     enabled == true || enabled == "1"
   end
+
+  def pending?
+    status == STATUS_PENDING
+  end
+
+  def approved?
+    status == STATUS_APPROVED
+  end
   
 end
