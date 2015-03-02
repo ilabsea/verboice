@@ -41,23 +41,30 @@ handle_event({new_session, Pid, Env}, State) ->
           end,
 
           Channel = channel:find(ChannelId),
-          case channel:enabled(Channel) of
-            true -> 
-              CallerId = case proplists:get_value(callerid, Env) of
-                <<>> -> undefined;
-                <<"unknown">> -> undefined;
-                X -> X
-              end,
+          case channel:is_approved(Channel) of
+            true ->
+              case channel:enabled(Channel) of
+                true -> 
+                  CallerId = case proplists:get_value(callerid, Env) of
+                    <<>> -> undefined;
+                    <<"unknown">> -> undefined;
+                    X -> X
+                  end,
 
-              case session:new() of
-                {ok, SessionPid} ->
-                  session:answer(SessionPid, Pbx, ChannelId, CallerId),
-                  {ok, State};
-                {error, _Reason} ->
+                  case session:new() of
+                    {ok, SessionPid} ->
+                      session:answer(SessionPid, Pbx, ChannelId, CallerId),
+                      {ok, State};
+                    {error, _Reason} ->
+                      agi_session:close(Pid),
+                      {ok, State}
+                  end;
+                _ -> 
+                  error_logger:info_msg("ChannelId: (~p) was disabled", [ChannelId]),
                   agi_session:close(Pid),
                   {ok, State}
               end;
-            _ -> 
+            _ ->
               error_logger:info_msg("ChannelId: (~p) was disabled", [ChannelId]),
               agi_session:close(Pid),
               {ok, State}

@@ -1,7 +1,7 @@
 -record(call_flow, {id, callback_url, broker_flow, project_id, encrypted_config, store_in_fusion_tables, created_at, updated_at}).
 -record(call_log, {id, account_id, project_id, finished_at, direction, address, state, created_at, updated_at, channel_id, started_at, schedule_id, not_before, call_flow_id, pbx_logs_guid, fail_reason, duration, retries, step_interaction, store_log_entries, prefix_called_number, parent_id}).
 -record(call_log_entry, {id, call_id, severity, details, created_at, updated_at}).
--record(channel, {id, account_id, call_flow_id, name, config, type, created_at, updated_at, enabled}).
+-record(channel, {id, account_id, call_flow_id, name, config, type, created_at, updated_at, enabled, status}).
 -record(contact, {id, project_id, anonymous, created_at, updated_at}).
 -record(contact_address, {id, address, contact_id, project_id, created_at, updated_at}).
 -record(delayed_job, {id, handler, run_at, created_at, updated_at}).

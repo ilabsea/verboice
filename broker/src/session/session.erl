@@ -165,34 +165,40 @@ ready({dial, RealBroker, Channel, QueuedCall}, _From, State = #state{session_id 
       Session#session{queued_call = QueuedCall, address = AddressWithoutVoipPrefix}
   end,
 
-  case channel:enabled(Channel) of
+  case channel:is_approved(Channel) of
     true ->
-      QuotaReaches = case channel_quota:find([{channel_id, Channel#channel.id}]) of
-        undefined -> false;
-        ChannelQuota -> ChannelQuota:enabled() andalso ChannelQuota:blocked()
-      end,
-      case QuotaReaches of
+      case channel:enabled(Channel) of
         true ->
-          {_, _, NewSession2} = finalize({failed, blocked}, State#state{session = NewSession}),
-          {stop, normal, error, State#state{session = NewSession2}};
-        _ -> 
-          case RealBroker:dispatch(NewSession) of
-            {error, unavailable} ->
-              {stop, normal, unavailable, State#state{session = NewSession}};
-            {error, Reason} ->
-              {_, _, NewSession2} = finalize({failed, Reason}, State#state{session = NewSession}),
+          QuotaReaches = case channel_quota:find([{channel_id, Channel#channel.id}]) of
+            undefined -> false;
+            ChannelQuota -> ChannelQuota:enabled() andalso ChannelQuota:blocked()
+          end,
+          case QuotaReaches of
+            true ->
+              {_, _, NewSession2} = finalize({failed, blocked}, State#state{session = NewSession}),
               {stop, normal, error, State#state{session = NewSession2}};
-            _ ->
-              CallLog:info(["Dialing to ", QueuedCall#queued_call.address, " through channel ", Channel#channel.name], []),
-              notify_status(ringing, NewSession),
-              CallLog:update([{state, "active"}, {fail_reason, undefined}]),
-      {reply, ok, dialing, State#state{session = NewSession}, ?TIMEOUT_DIALING}
-          end
+            _ -> 
+              case RealBroker:dispatch(NewSession) of
+                {error, unavailable} ->
+                  {stop, normal, unavailable, State#state{session = NewSession}};
+                {error, Reason} ->
+                  {_, _, NewSession2} = finalize({failed, Reason}, State#state{session = NewSession}),
+                  {stop, normal, error, State#state{session = NewSession2}};
+                _ ->
+                  CallLog:info(["Dialing to ", QueuedCall#queued_call.address, " through channel ", Channel#channel.name], []),
+                  notify_status(ringing, NewSession),
+                  CallLog:update([{state, "active"}, {fail_reason, undefined}]),
+                  {reply, ok, dialing, State#state{session = NewSession}, ?TIMEOUT_DIALING}
+              end
+          end;
+        _ -> 
+          {_, _, NewSession2} = finalize({failed, disabled}, State#state{session = NewSession}),
+          {stop, normal, error, State#state{session = NewSession2}}
       end;
-    _ -> 
+    _ ->
       {_, _, NewSession2} = finalize({failed, disabled}, State#state{session = NewSession}),
       {stop, normal, error, State#state{session = NewSession2}}
-  end.
+    end.
 
 dialing({answer, Pbx}, State = #state{session_id = SessionId, session = Session = #session{call_log = CallLog}, resume_ptr = Ptr}) ->
   NewQueuedCall = Session#session.queued_call#queued_call{answered_at = {datetime, calendar:universal_time()}},
