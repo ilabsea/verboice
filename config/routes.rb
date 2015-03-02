@@ -219,6 +219,11 @@ Verboice::Application.routes.draw do
         put ":name", :action => "update"
         delete ":name", :action => "destroy"
       end
+
+      member do
+        put "mark_as_approved"
+        put "mark_as_pending"
+      end
     end
 
     resources :channel_quota, only: [:create, :destroy]

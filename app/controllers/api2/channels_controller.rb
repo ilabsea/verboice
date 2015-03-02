@@ -16,6 +16,21 @@
 # along with Verboice.  If not, see <http://www.gnu.org/licenses/>.
 module Api2
   class ChannelsController < Api2Controller
+    before_filter :authorize_admin, only: [:mark_as_approved, :mark_as_pending]
+
+    def index
+      if api_current_account.admin?
+        if api_current_account.has_access_from?(origin_host)
+          channels = params[:account_id] ? Channel.by_account_id(params[:account_id]) : Channel.where("1=1") 
+        else
+          return head :unauthorized
+        end
+      else
+        channels = api_current_account.channels
+      end
+
+      render json: channels, each_serializer: CustomChannelSerializer
+    end
 
     def get
       channel = api_current_account.channels.find_by_name params[:name]
@@ -68,18 +83,32 @@ module Api2
       end
     end
 
-    def index
-      if api_current_account.admin?
-        if api_current_account.has_access_from?(origin_host)
-          channels = params[:account_id] ? Channel.by_account_id(params[:account_id]) : Channel.where("1=1") 
-        else
-          return head :unauthorized
-        end
-      else
-        channels = api_current_account.channels
-      end
+    # restrict admin tasks
+    def mark_as_approved
+      load_channel
 
-      render json: channels, each_serializer: CustomChannelSerializer
+      if @channel.update_attributes({status: Channel::STATUS_APPROVED})
+        render json: @channel
+      else
+        render :json => errors_to_json(@channel, 'updating')
+      end
+    end
+
+    def mark_as_pending
+      load_channel
+      
+      if @channel.update_attributes({status: Channel::STATUS_PENDING})
+        render json: @channel
+      else
+        render :json => errors_to_json(@channel, 'updating')
+      end
+    end
+
+    private
+
+    def load_channel
+      @channel = Channel.find_by_id(params[:id])
+      return head :not_found unless @channel
     end
 
   end
