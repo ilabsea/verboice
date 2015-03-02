@@ -19,6 +19,9 @@ class Channel < ActiveRecord::Base
   PREFIX_SEPARATOR = ','
   PREFIX_NORMALIZATIONS = ['855', '0']
 
+  STATUS_PENDING = "pending"
+  STATUS_APPROVED = "approved"
+
   belongs_to :account
   belongs_to :call_flow
   has_one :project, :through => :call_flow
