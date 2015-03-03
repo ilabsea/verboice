@@ -649,6 +649,7 @@ en:
           domain: "Domain/IP address of SIP server"
           prefix_called_number: "Add prefix to called number"
           normalized_called_number: "Phone number with 0 leading will be added by this prefix"
+          pending: "Pending for activation, please contact InSTEDD's team for more information"
 
         label:
           username: "Username"
