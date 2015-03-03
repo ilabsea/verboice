@@ -221,8 +221,8 @@ Verboice::Application.routes.draw do
       end
 
       member do
-        put "mark_as_approved"
-        put "mark_as_pending"
+        put "activate"
+        put "deactivate"
       end
     end
 

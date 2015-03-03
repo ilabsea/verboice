@@ -86,7 +86,7 @@ module Api2
     end
 
     # restrict admin tasks
-    def mark_as_approved
+    def activate
       load_channel
 
       if @channel.update_attributes({status: Channel::STATUS_APPROVED})
@@ -96,7 +96,7 @@ module Api2
       end
     end
 
-    def mark_as_pending
+    def deactivate
       load_channel
 
       if @channel.update_attributes({status: Channel::STATUS_PENDING})
