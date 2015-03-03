@@ -278,6 +278,10 @@ class Channel < ActiveRecord::Base
     where(['account_id = :account_id', account_id: account_id])
   end
 
+  def self.by_status(status)
+    where(['status = :status', status: status])
+  end
+
   def as_json(options = {})
     options = { only: [:id, :name, :config, :enabled, :status] }.merge(options)
     super(options).merge({

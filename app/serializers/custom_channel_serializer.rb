@@ -16,7 +16,7 @@
 # along with Verboice.  If not, see <http://www.gnu.org/licenses/>.
 
 class CustomChannelSerializer < ActiveModel::Serializer
-  attributes :id, :name, :traffics, :prefix_called_number
+  attributes :id, :name, :number, :traffics, :prefix_called_number, :status, :kind, :created_at
 
   has_one :account, serializer: CustomAccountSerializer
 
@@ -30,6 +30,10 @@ class CustomChannelSerializer < ActiveModel::Serializer
 
   def include_prefix_called_number?
     @options[:prefix_called_number]
+  end
+
+  def number
+    object.config["number"] if object.config
   end
 
   def traffics

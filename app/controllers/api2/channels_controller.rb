@@ -29,7 +29,9 @@ module Api2
         channels = api_current_account.channels
       end
 
-      render json: channels, each_serializer: CustomChannelSerializer
+      channels = channels.by_status(params[:status]) if params[:status].present?
+
+      render json: channels, each_serializer: CustomChannelSerializer, account: true
     end
 
     def get
@@ -96,7 +98,7 @@ module Api2
 
     def mark_as_pending
       load_channel
-      
+
       if @channel.update_attributes({status: Channel::STATUS_PENDING})
         render json: @channel
       else
