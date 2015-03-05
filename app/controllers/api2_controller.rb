@@ -33,10 +33,6 @@ class Api2Controller < ActionController::Base
     return @current_account if @current_account 
     account  = Account.find_by_email(params[:email])
 
-    p "account: "
-    p account
-    p "token: #{params[:token]}"
- 
     if account && account.auth_token == params[:token]
       @current_account = account
     end
