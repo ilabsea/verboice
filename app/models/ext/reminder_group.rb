@@ -50,17 +50,19 @@ module Ext
         self.addresses = Ext::ReminderGroup.deserialized_to_array self.addersses
       end
       
-      unless self.addresses.include?(address)
+      if self.addresses.include?(address)
+        true
+      else
         self.addresses.push(address)
-        save
-      end      
+        self.save
+      end
     end
 
     def deregister_address(address)
       if addresses.include? (address)
         addresses.delete(address)
         save
-      end  
+      end
     end
 
   end

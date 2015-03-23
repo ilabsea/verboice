@@ -188,7 +188,11 @@ Verboice::Application.routes.draw do
         end
       end
 
-      resources :reminder_groups, only: [:index, :create, :update, :destroy], shallow: true
+      resources :reminder_groups, only: [:index, :create, :update, :destroy], shallow: true do
+        member do
+          post 'contacts'
+        end
+      end
     end
 
     resources :logs, only: [] do
@@ -248,6 +252,9 @@ Verboice::Application.routes.draw do
 
       resources :reminder_groups, only: [:index, :create, :update, :destroy], shallow: true
     end
+
+    resources :project_variables, only: [:index]
+    resources :call_log_answers, only: [:index]
 
     resources :logs, only: [] do
       collection do

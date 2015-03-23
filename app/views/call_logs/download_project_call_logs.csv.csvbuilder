@@ -66,6 +66,7 @@ csv << header
   end_time = datetime_format_csv log[2], @project.time_zone, @date_format
   duration = log[3]
 
+
   state = "#{log[fields.count - 3]} #{CallLog::FAIL_REASONS[log[fields.count - 2]]}"
   step_interaction = log[13]
 

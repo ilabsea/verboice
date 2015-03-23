@@ -1,6 +1,7 @@
 class ContactAddress < ActiveRecord::Base
   belongs_to :contact, :inverse_of => :addresses
   belongs_to :project, :inverse_of => :contact_addresses
+  has_many :persisted_variables, through: :contact
 
   attr_accessible :address
 
@@ -8,6 +9,14 @@ class ContactAddress < ActiveRecord::Base
   validates_uniqueness_of :address, :scope => :project_id
 
   before_validation :copy_project_id
+
+  class << self
+    def remove ids, project
+      project.contact_addresses.each do |contact_address|
+        contact_address.destroy if ids.include?(contact_address.id)
+      end
+    end
+  end
 
   private
 
