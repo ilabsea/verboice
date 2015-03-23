@@ -24,9 +24,10 @@ module Api2
       if api_current_account.admin?
         if api_current_account.has_access_from?(origin_host)
           @call_logs = CallLog.where("1=1")
-          @call_logs = @call_logs.by_account_id(params[:account_id]) if params[:account_id] 
-          @call_logs = @call_logs.by_channel_id(params[:channel_id]) if params[:channel_id] 
-          @call_logs = @call_logs.between(params[:start_date], params[:end_date])
+          @call_logs = @call_logs.by_account_id(params[:account_id]) if params[:account_id]
+          @call_logs = @call_logs.by_channel_id(params[:channel_id]) if params[:channel_id]
+          @call_logs = @call_logs.where(address: params[:address]) if params[:address]
+          @call_logs = @call_logs.between(params[:start_date], params[:end_date]) if params[:start_date] && params[:end_date]
         else
           return head :unauthorized
         end
