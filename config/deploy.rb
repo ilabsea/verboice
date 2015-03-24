@@ -112,11 +112,10 @@ namespace :foreman do
   end
 end
 
-
+before 'deploy:finalize_update', "deploy:symlink_configs"
 before "deploy:start", "deploy:migrate"
 before "deploy:restart", "deploy:migrate"
-after "deploy:update_code", "deploy:generate_version"
-after "deploy:update_code", "deploy:symlink_configs"
+# after "deploy:update_code", "deploy:symlink_configs"
 after "deploy:update_code", "deploy:symlink_data"
 after "deploy:update_code", "deploy:symlink_help"
 after "deploy:update_code", "deploy:prepare_broker"

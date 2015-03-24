@@ -112,7 +112,7 @@ class Schedule < ActiveRecord::Base
   end
 
   def as_json(options={})
-    super(options.merge({:only => [:name, :retries, :weekdays], :methods => [:time_from_str, :time_to_str]}))
+    super(options.merge({:only => [:name, :retries, :weekdays, :id], :methods => [:time_from_str, :time_to_str]}))
   end
 
   def retry_delays

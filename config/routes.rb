@@ -199,6 +199,8 @@ Verboice::Application.routes.draw do
       resources :reminder_groups, only: [:index, :create, :update, :destroy]
     end
 
+    post 'reminder_groups/:id/contacts' => 'reminder_groups#contacts', as: 'register_contact_to_reminder_group'
+
     resources :logs, only: [] do
       collection do
         get ':call_id', action: :list
@@ -213,7 +215,8 @@ Verboice::Application.routes.draw do
 
   namespace :api2, defaults: {format: 'json'} do
 
-    match "call" => "calls#call"
+    post "call" => "calls#call"
+    post "bulk_call" => 'calls#bulk_call'
     resources :calls, only: [] do
       member do
         match :state
@@ -226,6 +229,11 @@ Verboice::Application.routes.draw do
         get ":name", :action => "get"
         put ":name", :action => "update"
         delete ":name", :action => "destroy"
+      end
+
+      member do
+        put "activate"
+        put "deactivate"
       end
     end
 
@@ -250,6 +258,9 @@ Verboice::Application.routes.draw do
 
       resources :reminder_groups, only: [:index, :create, :update, :destroy], shallow: true
     end
+
+    resources :project_variables, only: [:index]
+    resources :call_log_answers, only: [:index]
 
     resources :logs, only: [] do
       collection do

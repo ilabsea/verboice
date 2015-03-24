@@ -31,10 +31,8 @@ class Api2Controller < ActionController::Base
 
   def api_current_account 
     return @current_account if @current_account 
+    account  = Account.find_by_email(params[:email])
 
-    email = params[:email].presence
-    account  = email && Account.find_by_email(email)
- 
     if account && account.auth_token == params[:token]
       @current_account = account
     end

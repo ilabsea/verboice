@@ -16,7 +16,7 @@
 # along with Verboice.  If not, see <http://www.gnu.org/licenses/>.
 module Api
   class ReminderGroupsController < ApiController
-    before_filter :validate_record, only: [:update, :destroy]
+    before_filter :validate_record, only: [:update, :destroy, :contacts]
     before_filter :validate_project, only: [:index, :create]
 
     # GET /api/projects/:project_id/reminder_groups
@@ -62,6 +62,16 @@ module Api
         render json: @reminder_group
       else
         render json: errors_to_json(@reminder_group, 'deleting'), status: :bad_request
+      end
+    end
+
+    # POST /api/reminder_groups/:id/contacts Create contact
+    def contacts
+      if(params[:address].blank?)
+        render json: 'Parameter address is missing', status: :bad_request
+      else
+        @reminder_group.register_address(params[:address])
+        render json: @reminder_group, status: :created
       end
     end
 

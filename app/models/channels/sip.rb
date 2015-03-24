@@ -21,6 +21,8 @@ class Channels::Sip < Channel
   validate :server_username_uniqueness
   validate :server_number_uniqueness
 
+  before_create :mark_as_pending
+
   config_accessor :username
   config_accessor :password
   config_accessor :domain
@@ -108,4 +110,9 @@ class Channels::Sip < Channel
     status = BrokerClient.channel_status(id)[id]
     status && !status[:ok] ? status[:messages].length : 0
   end
+
+  def mark_as_pending
+    self.status = STATUS_PENDING if self.kind == Channels::Sip.kind
+  end
+
 end

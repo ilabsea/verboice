@@ -19,6 +19,9 @@ class Channel < ActiveRecord::Base
   PREFIX_SEPARATOR = ','
   PREFIX_NORMALIZATIONS = ['855', '0']
 
+  STATUS_PENDING = "pending"
+  STATUS_APPROVED = "approved"
+
   belongs_to :account
   belongs_to :call_flow
   has_one :project, :through => :call_flow
@@ -117,7 +120,7 @@ class Channel < ActiveRecord::Base
     if current_call_flow
       project = current_call_flow.project
     elsif options[:project_id]
-      project = account.find_project_by_id(options[:project_id])
+      project = Project.find_by_id(options[:project_id])
     else
       project = self.project
     end
@@ -158,6 +161,10 @@ class Channel < ActiveRecord::Base
     if options[:vars].is_a?(Hash)
       variables = {}
       options[:vars].each do |name, value|
+        # add call log answer for default context variables
+        project_variable = project.project_variables.find_by_name(name)
+        CallLogAnswer.create! :call_log_id => call_log.id, :project_variable_id => project_variable.id, :value => value if project_variable
+
         variables[name] = (value =~ /^\d+$/ ? value.to_i : value)
       end
     end
@@ -267,8 +274,12 @@ class Channel < ActiveRecord::Base
     where(['account_id = :account_id', account_id: account_id])
   end
 
+  def self.by_status(status)
+    where(['status = :status', status: status])
+  end
+
   def as_json(options = {})
-    options = { only: [:id, :name, :config] }.merge(options)
+    options = { only: [:id, :name, :config, :enabled, :status] }.merge(options)
     super(options).merge({
       kind: kind.try(:downcase),
       call_flow: call_flow.try(:name)
@@ -277,6 +288,14 @@ class Channel < ActiveRecord::Base
 
   def enabled?
     enabled == true || enabled == "1"
+  end
+
+  def pending?
+    status == STATUS_PENDING
+  end
+
+  def approved?
+    status == STATUS_APPROVED
   end
   
 end

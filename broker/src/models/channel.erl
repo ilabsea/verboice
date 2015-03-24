@@ -1,7 +1,7 @@
 -module(channel).
 -export([find_all_sip/0, find_all_twilio/0, domain/1, number/1, limit/1, broker/1, username/1, password/1, is_outbound/1, register/1, log_broken_channels/2]).
 -export([account_sid/1, auth_token/1]).
--export([enabled/1, port/1, protocol/1, dtmf_mode/1, codec_type/1]).
+-export([enabled/1, port/1, protocol/1, dtmf_mode/1, codec_type/1, is_approved/1]).
 -export([address_without_voip_prefix/2]).
 -compile([{parse_transform, lager_transform}]).
 -define(CACHE, true).
@@ -59,6 +59,12 @@ is_outbound(#channel{config = Config}) ->
   case proplists:get_value("direction", Config) of
     "outbound" -> true;
     "both" -> true;
+    _ -> false
+  end.
+
+is_approved(#channel{status = Status}) ->
+  case Status of
+    <<"approved">> -> true;
     _ -> false
   end.
 
