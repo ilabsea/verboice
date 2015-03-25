@@ -34,6 +34,7 @@ describe Api::ContactsController do
     ContactAddress.make contact_id: contact.id
 
     @project_var = project.project_variables.make name: "var1"
+    @project_var2 = project.project_variables.make name: "var2"
     @contact_var = PersistedVariable.make project_variable_id: @project_var.id, contact_id: contact.id, value: "foo"
   end
 
@@ -62,18 +63,37 @@ describe Api::ContactsController do
     json['vars'].should eq({"var1" => "foo"})
   end
 
-  it "updates a contact's var by address" do
-    put :update_by_address, project_id: project.id, address: contact.addresses.first.address, vars: {var1: "bar"}
+  describe "update a contact's varaible by address" do
+    it "response 422 when it's missing parameter" do
+      put :update_by_address, project_id: project.id, address: contact.addresses.first.address
 
-    @contact_var.reload
-    @contact_var.value.should eq("bar")
+      assert_response :unprocessable_entity
+    end
 
-    response.should be_ok
+    it "update an existing contact variable value" do
+      put :update_by_address, project_id: project.id, address: contact.addresses.first.address, vars: {var1: "bar"}
 
-    json = JSON.parse response.body
-    json['id'].should eq(contact.id)
-    json['addresses'].should eq(contact.addresses.map(&:address))
-    json['vars'].should eq({"var1" => "bar"})
+      @contact_var.reload
+      @contact_var.value.should eq("bar")
+
+      response.should be_ok
+
+      json = JSON.parse response.body
+      json['id'].should eq(contact.id)
+      json['addresses'].should eq(contact.addresses.map(&:address))
+      json['vars'].should eq({"var1" => "bar"})
+    end
+
+    it "update an non-existing contact variable value" do
+      put :update_by_address, project_id: project.id, address: contact.addresses.first.address, vars: {var2: "bar"}
+
+      response.should be_ok
+
+      json = JSON.parse response.body
+      json['id'].should eq(contact.id)
+      json['addresses'].should eq(contact.addresses.map(&:address))
+      json['vars'].should eq({"var1" => "foo", "var2" => "bar"})
+    end
   end
 
   it "updates all contacts vars" do
