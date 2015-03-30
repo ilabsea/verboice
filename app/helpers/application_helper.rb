@@ -97,8 +97,12 @@ module ApplicationHelper
     Pigeon.config.nuntium_configured?
   end
 
-  def steps_configured?
+  def step_asr_enabled?
     STEP_CONFIG["speech_recognition"] == true
+  end
+
+  def step_impersonate_enabled?
+    STEP_CONFIG["impersonate"] == true
   end
 
   def datetime_format(datetime, time_zone)

@@ -7,10 +7,13 @@ onWorkflow ->
       @default_command_selected = ko.observable 'skip'
 
     commands: () =>
-      if steps_configured
-        (step_type.type for step_type in step_types).concat(['skip'])
-      else
-        (step_type.type for step_type in step_types when step_type isnt SpeechRecognition).concat(['skip'])
+      (for step_type in step_types
+        if step_type is SpeechRecognition
+          if step_asr_enabled then step_type.type else continue
+        else if step_type is Impersonate
+          if step_impersonate_enabled then step_type.type else continue
+        else
+          step_type.type).concat(['skip'])
 
     new_child_step_for: (command) =>
       if (command == 'skip') then null else workflow.create_step(command, false).id
