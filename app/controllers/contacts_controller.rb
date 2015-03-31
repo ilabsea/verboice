@@ -17,23 +17,14 @@
 
 class ContactsController < ApplicationController
   before_filter :authenticate_account!
-  before_filter :load_project, :only => [:new, :create, :index, :invitable]
+  before_filter :load_project, :only => [:new, :create, :index, :invitable, :download]
   before_filter :initialize_context, :only => [:show, :edit, :update, :destroy]
   before_filter :call_logs, only: :edit
   before_filter :exclude_call_log_recorded_audios, only: :edit
 
   def index
-    @contacts = @project.contacts.includes(:addresses).includes(:recorded_audios).includes(:persisted_variables).includes(:project_variables)
-    @search = params[:search]
-
-    if !@search.blank?
-      @contacts = @contacts.where(["contact_addresses.address like :address", :address => "#{@search}%" ])
-    end
-
-    @contacts = @contacts.paginate(:page => params[:page])
-    @project_variables = @project.project_variables
-    @recorded_audio_descriptions = RecordedAudio.select(:description).where(:contact_id => @contacts.collect(&:id)).collect(&:description).to_set
-    @implicit_variables = ImplicitVariable.subclasses
+    load_contacts
+    load_dependencies
 
     respond_to do |format|
       format.html # index.html.erb
@@ -122,6 +113,11 @@ class ContactsController < ApplicationController
     render json: @contacts.pluck(:address)
   end
 
+  def download
+    load_contacts
+    load_dependencies
+  end
+
   private
 
   def load_project
@@ -155,4 +151,22 @@ class ContactsController < ApplicationController
     calls = @project.call_logs.joins(:call_log_recorded_audios).search("address:#{@contact.first_address}").pluck :id
     @recorded_audios = @contact.recorded_audios.where('call_log_id NOT IN (?)', calls) if calls.present?
   end
+
+  def load_dependencies
+    @project_variables = @project.project_variables
+    @recorded_audio_descriptions = RecordedAudio.select(:description).where(:contact_id => @contacts.collect(&:id)).collect(&:description).to_set
+    @implicit_variables = ImplicitVariable.subclasses
+  end
+
+  def load_contacts
+    @contacts = @project.contacts.includes(:addresses).includes(:recorded_audios).includes(:persisted_variables).includes(:project_variables)
+    @search = params[:search]
+
+    if !@search.blank?
+      @contacts = @contacts.where(["contact_addresses.address like :address", :address => "#{@search}%" ])
+    end
+
+    @contacts = @contacts.paginate(:page => params[:page])
+  end
+
 end

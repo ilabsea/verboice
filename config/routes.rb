@@ -73,6 +73,7 @@ Verboice::Application.routes.draw do
 
       resources :contacts, except: [:show] do
         get :invitable, on: :collection
+        get :download, on: :collection, as: 'download'
       end
 
       resources :resources do
