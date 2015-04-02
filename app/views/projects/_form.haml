@@ -17,9 +17,9 @@
 
   %h1= t('views.projects._form.label.properties')
 
-  = f.text_field :name, :label => t('views.projects._form.label.name', readonly: readonly)
-  = f.time_zone_select :time_zone, ActiveSupport::TimeZone.all, :label => t('views.projects._form.label.time_zone')
-  = f.check_box :store_call_log_entries, :label => t('views.projects._form.label.store_call_log_details')
+  = f.text_field :name, :label => t('views.projects._form.label.name'), readonly: readonly
+  = f.time_zone_select :time_zone, ActiveSupport::TimeZone.all, {}, {disabled: readonly, :label => t('views.projects._form.label.time_zone')}
+  = f.check_box :store_call_log_entries, :label => t('views.projects._form.label.store_call_log_details'), disabled: readonly
 
   %hr
 
@@ -27,7 +27,6 @@
   %br
 
   %h1= t('views.projects._form.label.languages')
-
   = f.label :default_language, "#{t('views.projects._form.label.default_language')}"
   %br
   %select.w30{ko(value: 'defaultLanguage', options: 'languages', optionsText: "'label'", optionsValue: "'value'"), name: 'project[default_language]', disabled: readonly}
