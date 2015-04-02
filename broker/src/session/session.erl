@@ -438,7 +438,7 @@ default_variables(#session{contact = Contact, queued_call = QueuedCall, project 
   DefaultContext = default_variables(NewJsContext, ProjectVars, Variables),
   initialize_context(DefaultContext, QueuedCall).
 
-initialize_context(Context, #queued_call{variables = Vars}) ->
+initialize_context(Context, QueuedCall = #queued_call{}) ->
   lists:foldl(fun({Name, Value}, C) ->
     case Value of
       undefined -> C;
@@ -448,7 +448,7 @@ initialize_context(Context, #queued_call{variables = Vars}) ->
         VarName = binary_to_atom(iolist_to_binary(["var_", Name]), utf8),
         erjs_context:set(VarName, Value, C)
     end
-  end, Context, Vars);
+  end, Context, QueuedCall:variables());
 initialize_context(Context, _) -> Context.
 
 default_variables(Context, _ProjectVars, []) -> Context;
