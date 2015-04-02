@@ -19,7 +19,7 @@ run(Args, Session) ->
   Channel = channel:find(Session#session.channel#channel.id),
 
   CallFlowId = case SelectedCallFlowId of
-    undefined -> Channel#channel.call_flow_id;
+    undefined -> Session#session.call_flow#call_flow.id;
     X -> X
   end,
 
