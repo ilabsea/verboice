@@ -1,6 +1,6 @@
 -module(queued_call).
 -export([reschedule/1, start_session/1, should_trigger/1]).
--export([called_at/1]).
+-export([called_at/1, variables/1]).
 -define(TABLE_NAME, "queued_calls").
 -include("session.hrl").
 
@@ -62,3 +62,6 @@ should_trigger(_) -> false.
 
 called_at(#queued_call{not_before = undefined, created_at = CreatedAt}) -> CreatedAt;
 called_at(#queued_call{not_before = NotBefore}) -> NotBefore.
+
+variables(#queued_call{variables = Vars}) when is_list(Vars) -> Vars;
+variables(#queued_call{variables = Vars}) -> yaml_serializer:load(Vars).

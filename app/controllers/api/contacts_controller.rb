@@ -30,28 +30,19 @@ class Api::ContactsController < ApiController
   end
 
   def update_by_address
-    contact = project.contacts.joins(:addresses).where(contact_addresses: {address: params[:address]}).first or return head(:not_found)
-    project_vars = project.project_variables.all
-    project_vars = project_vars.index_by &:name
+    return head :unprocessable_entity unless params[:vars].present?
 
-    vars = PersistedVariable.includes(:project_variable).where(project_variables: {project_id: project.id}, contact_id: contact.id).all
-    vars = vars.index_by { |var| var.project_variable.name }
+    contact = project.contacts.joins(:addresses).where(contact_addresses: {address: params[:address]}).first or return head(:not_found)
 
     Contact.transaction do
-    params[:vars].each do |key, value|
-      var = vars[key]
-      unless var
-          project_var = project_vars[key]
-          unless project_var
-            return render text: "No such variable: #{key}", status: :bad_reqeust
-          end
+    params[:vars].each do |name, value|
+      variable = project.project_variables.find_by_name(name)
 
-          var = PersistedVariable.new
-          var.contact_id = contact.id
-          var.project_variable_id = project_var.id
-        end
-        var.value = value
-        var.save!
+      return render text: "No such variable: #{name}", status: :bad_reqeust unless variable
+
+      persisted_variable = PersistedVariable.where(project_variable_id: variable.id, contact_id: contact.id).first_or_initialize
+      persisted_variable.value = value
+      persisted_variable.save!
       end
     end
 

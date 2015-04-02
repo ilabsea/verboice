@@ -19,7 +19,7 @@ run(Args, Session) ->
   {ok, NewPid} = session:new(NewSessionId),
 
   CallFlowId = case SelectedCallFlowId of
-    undefined -> Session#session.channel#channel.call_flow_id;
+    undefined -> Session#session.call_flow#call_flow.id;
     X -> X
   end,
 
