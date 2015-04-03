@@ -528,13 +528,13 @@ spawn_run(Session = #session{pbx = Pbx}, Ptr) ->
         {Result, NewSession = #session{js_context = JsContext}} ->
           close_user_step_activity(NewSession),
           Status = erjs_context:get(status, JsContext),
-        FlowResult = flow_result(Result, Status),
-        case FlowResult of
-          {error, "marked as failed"} ->
-            notify_status(marked_as_failed, NewSession),
-            finalize({failed, marked_as_failed}, #state{session = NewSession});
-          _ -> gen_fsm:send_event(SessionPid, {completed, flow_result(Result, Status)})
-        end
+          FlowResult = flow_result(Result, Status),
+          case FlowResult of
+            {failed, "marked as failed"} ->
+              notify_status(marked_as_failed, NewSession),
+              finalize({failed, marked_as_failed}, #state{session = NewSession});
+            _ -> gen_fsm:send_event(SessionPid, {completed, FlowResult})
+          end
       after
         catch Pbx:terminate()
       end
