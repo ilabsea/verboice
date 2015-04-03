@@ -4,7 +4,7 @@
 
 .field
   = f.label :normalized_called_number, t('views.channels._form_custom_sip.label.normalized_called_number')
-  = f.text_field :normalized_called_number
+  = f.text_field :normalized_called_number, readonly: readonly
 
 .field
   = f.label :limit
