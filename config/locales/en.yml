@@ -474,6 +474,11 @@ en:
           use_current_channel: "Use current channel"
         action:
           remove_this_step: "Remove this step"
+      _impersonate_step_template:
+        label:
+          transfer_data_to: "Transfer data to"
+        action:
+          remove_this_step: "Remove this step"
       _upload_localized_resource_template:
         label:
           no_file_uploaded_yet: "No file uploaded yet"

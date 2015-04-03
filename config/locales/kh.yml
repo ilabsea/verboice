@@ -476,6 +476,11 @@ kh:
           use_current_channel: "ប្រើ​ឆានែល​បច្ចុប្បន្ន"
         action:
           remove_this_step: "លុប​ជំហាន​នេះ"
+      _impersonate_step_template:
+        label:
+          transfer_data_to: "បញ្ជូនទិនន្ន័យទៅ"
+        action:
+          remove_this_step: "លុបជំហ៊ាននេះ"
       _upload_localized_resource_template:
         label:
           no_file_uploaded_yet: "មិនទាន់​មាន​ឯកសារ​បានផ្ទុក​ឡើង​​"

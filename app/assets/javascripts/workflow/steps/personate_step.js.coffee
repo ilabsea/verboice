@@ -7,14 +7,10 @@ onWorkflow ->
     constructor: (attrs) ->
       super(attrs)
 
-      @current_editing_resource = ko.observable null
-      @is_editing_resource = ko.computed () =>
-        @current_editing_resource() != null
-
       @option = ko.observable if attrs?.option then new PersonateOption(attrs.option) else new PersonateOption({})
 
     button_class: () =>
-      'luser'
+      'control_step impersonate'
 
     @add_to_steps: () ->
       workflow.add_step(new Personate)
@@ -27,3 +23,6 @@ onWorkflow ->
       $.extend(super,
         option: @option().to_hash()
       )
+
+    default_name: () =>
+      'Transfer Data'

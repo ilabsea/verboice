@@ -1,18 +1,15 @@
 %script{type: "text/html", id: "personate_step_template"}
   .feditor-sidebar.right.box.w28.iblock.h65
 
-    %div{ko(:if => "is_editing_resource()")}
-      %div{ko(template: "{name: 'resource_editor_template', data: current_editing_resource}")}
-
     .tableheader
-      %span.left.i48grad-register{ ko(css: '{ "orange": is_invalid }') }
+      %span.left.i48grad-impersonate{ ko(css: '{ "orange": is_invalid }') }
       %input.ux-text.w20.right{ ko(value: 'name', valueUpdate: '"afterkeydown"', css: '{ "error": is_name_invalid }')}
 
-    .content.reminder_group
+    .content
       %hr
       %div{style: "padding-bottom:10px;"}
-        %label= t('views.call_flows._new_impersonate_step_template.label.impersonate_to') + ":"
+        %label= t('views.call_flows._impersonate_step_template.label.transfer_data_to') + ":"
       %div{ko(:template => "{name: 'personate_option_template', data: option}")}
 
     .bottom-actions
-      %button.fdelete{ 'data-bind' => 'click: remove_with_confirm' }= t('views.call_flows._register_step_template.action.remove_this_step')
+      %button.fdelete{ 'data-bind' => 'click: remove_with_confirm' }= t('views.call_flows._impersonate_step_template.action.remove_this_step')
