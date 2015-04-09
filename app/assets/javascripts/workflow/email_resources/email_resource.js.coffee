@@ -12,10 +12,9 @@ onWorkflow ->
         callback?((new EmailResource(i) for i in data))
 
     constructor: (hash = {}) ->
-
       unpack_localized_resources = (localized_resources) =>
         localized_resources = localized_resources or []
-        _.map languages, (l) =>
+        _.map project_languages, (l) =>
           localized_resource = _.find localized_resources, (lr) => lr.language is l.key
           localized_resource ||= language: l.key
           EmailLocalizedResourceSelector.from_hash(localized_resource).with_title(l.value).with_language(l.key).with_parent(@)
@@ -24,14 +23,14 @@ onWorkflow ->
       @name = ko.observable hash.name
       @guid = ko.observable hash.guid
       @project_id = hash.project_id || project_id
-      @localized_resources = ko.observableArray unpack_localized_resources hash.localized_resources
+      @localizedResources = ko.observableArray unpack_localized_resources hash.localized_resources
 
-      @current_editing_localized_resource = ko.observable @localized_resources()[0]
+      @current_editing_localized_resource = ko.observable @localizedResources()[0]
 
       @is_valid = ko.computed =>
-        _.all(@localized_resources(), (x) => x.is_valid())
+        _.all(@localizedResources(), (x) => x.is_valid())
       @is_text = ko.computed =>
-        _.all(@localized_resources(), (x) => x.is_text())
+        _.all(@localizedResources(), (x) => x.is_text())
 
     to_hash: () =>
       id: @id()
@@ -69,17 +68,17 @@ onWorkflow ->
 
     pack_localized_resources: () =>
       result = {}
-      for lr, i in @localized_resources()
+      for lr, i in @localizedResources()
         do (lr, i) ->
           result[i] = lr.to_hash()
       result
 
     save_localized_resources: (arr = []) =>
       for hash in arr
-        localized_resource = _.find @localized_resources(), (x) => x.language is hash.language
+        localized_resource = _.find @localizedResources(), (x) => x.language is hash.language
         localized_resource.id(hash.id) if localized_resource?
 
     show_language: (language) =>
-      for lr in @localized_resources()
+      for lr in @localizedResources()
         if lr.language == language
           @current_editing_localized_resource(lr)

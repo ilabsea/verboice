@@ -14,7 +14,6 @@ run(Args, Session = #session{project = Project}) ->
   SubjectGuid = proplists:get_value(subject_guid, Args),
   ResourceGuid = proplists:get_value(resource_guid, Args),
 
-
   {Result, Message} = case rcpt_address(Kind, RcptType, Expr, Session) of
     undefined -> {error, "Missing recipient"};
     RecipientAddress ->
@@ -41,7 +40,7 @@ run(Args, Session = #session{project = Project}) ->
                             {account_id, Project#project.account_id},
                             {suggested_channel, DefaultChannel#nuntium_channel.channel_name}
                           ],
-          poirot:log(debug, "Sending to nuntium: ~p", [NuntiumArgs]),
+                          poirot:log(debug, "Sending to nuntium: ~p", [NuntiumArgs]),
                           case nuntium_api:send_ao(NuntiumArgs) of
                             ok -> {info, "SMS sent"};
                             {error, Reason} -> {error, Reason}
@@ -61,7 +60,7 @@ run(Args, Session = #session{project = Project}) ->
 
   case Result of
     info -> poirot:log(info, Message);
-    error -> poirot:log(error, Message)
+    error -> poirot:add_meta([{error, iolist_to_binary(io_lib:format("~p", [Message]))}])
   end,
 
   {next, Session}.
