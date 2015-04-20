@@ -25,6 +25,7 @@ class ContactsController < ApplicationController
   def index
     load_contacts
     load_dependencies
+    paginate
 
     respond_to do |format|
       format.html # index.html.erb
@@ -166,6 +167,10 @@ class ContactsController < ApplicationController
       @contacts = @contacts.where(["contact_addresses.address like :address", :address => "#{@search}%" ])
     end
 
+    @contacts
+  end
+
+  def paginate
     @contacts = @contacts.paginate(:page => params[:page])
   end
 
