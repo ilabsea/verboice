@@ -50,7 +50,7 @@ module Parsers
               c.Capture resource: 1, min: 1, max: 2, finish_on_key: '#', timeout: 10
               c.Assign 'value_1', 'digits'
               c.PersistVariable 'some_variable', 'value_1'
-              c.If "(digits == 1) || (digits >= 2 && digits <= 4) || (digits >= 10 && digits <= 20)" do |c|
+              c.If "(digits == '1') || (digits >= '2' && digits <= '4') || (digits >= '10' && digits <= '20')" do |c|
                 c.SetStepResult :pressed, "digits"
                 c.Goto "end1"
               end
@@ -128,7 +128,7 @@ module Parsers
           c.While 'attempt_number4 <= 3' do |c|
             c.Capture min: 0, max: 2, finish_on_key: '#', timeout: 5
             c.Assign 'value_4', 'digits'
-            c.If '(digits == 1) || (digits >= 2 && digits <= 4) || (digits >= 10 && digits <= 20) || (digits == null)' do |c|
+            c.If "(digits == '1') || (digits >= '2' && digits <= '4') || (digits >= '10' && digits <= '20') || (digits == null)" do |c|
               c.SetStepResult :pressed, "digits"
               c.Goto "end4"
             end
@@ -201,7 +201,7 @@ module Parsers
             c.While 'attempt_number4 <= 3' do |c|
               c.Capture min: 0, max: 2, finish_on_key: '#', timeout: 5
               c.Assign 'value_4', 'digits'
-              c.If '(digits == 1) || (digits >= 2 && digits <= 4) || (digits >= 10 && digits <= 20) || (digits == null)' do |c|
+              c.If "(digits == '1') || (digits >= '2' && digits <= '4') || (digits >= '10' && digits <= '20') || (digits == null)" do |c|
                 c.SetStepResult :pressed, "digits"
                 c.Goto "end4"
               end

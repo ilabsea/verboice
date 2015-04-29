@@ -1,35 +1,46 @@
 = render 'tabs'
 
-%h2 Queued calls
+%h2= t('views.call_logs.queued.label.title')
 %p
-  Here you can see the details of enqueued calls.
-%form
-  %div= page_entries_info @calls, :entry_name => 'queued calls'
+  = t('views.call_logs.queued.label.desc')
+
+= form_tag queued_paused_call_logs_path, method: :put do
+  %div= page_entries_info @calls, :entry_name => t('views.call_logs.queued.label.queued_calls')
+  - if @calls.present?
+    %div
+      = link_to "Pause", "#", :class => "button white", :id => "pause"
+      = link_to "Resume", "#", :class => "button white", :id => "resume"
+
   = will_paginate @calls, :param_name => 'page'
   - if @calls.present?
     %br/
     %table.GralTable
       %tr
-        %th ID
-        %th Channel
-        %th Date
-        %th Phone number
+        %th= check_box_tag "select_all"
+        %th= t('views.call_logs.queued.label.id')
+        %th= t('views.call_logs.queued.label.channel')
+        %th= t('views.call_logs.queued.label.date')
+        %th= t('views.call_logs.queued.label.phone_number')
         %th Schedule
-        %th Project
-        %th State
+        %th= t('views.call_logs.queued.label.queue')
+        %th= t('views.call_logs.queued.label.project')
+        %th= t('views.call_logs.queued.label.state')
         %th
       - @calls.each do |call|
-        %tr
+        - clazz = call.state == QueuedCall::STATE_QUEUED ? "" : "inactive"
+        %tr{class: "#{clazz}"}
+          %td= check_box_tag "queued_call_ids[]", call.id, false, class: "queued_calls"
           %td= call.id
-          %td= call.channel.try(:name)
-          %td= call.not_before
+          %td= call.try(:channel).try(:name)
+          %td= call.time_zone.nil? ? datetime_format(call.not_before, call.project.time_zone) : datetime_format(call.not_before, call.time_zone)
           %td= call.address
           %td= call.schedule.try(:name)
           %td= call.project.try(:name)
-          %td= call.call_log.try(:state)
+          %td= call.try(:state)
           %td
-            = link_to 'view log details', call_log_path(call.call_log)
-            = link_to '', [call.channel, call], :confirm => "Are you sure you want to delete the call #{call.address}?", :method => :delete, :class => "button fdelete"
+            = link_to t('views.call_logs.queued.action.view_log_details'), call_log_path(call.call_log)
+            = link_to '', [call.channel, call], :confirm => "#{t('views.call_logs.queued.action.confirm_delete')} #{call.address}?", :method => :delete, :class => "button fdelete"
     %br/
-    %div= page_entries_info @calls, :entry_name => 'queued calls'
+    %div= page_entries_info @calls, :entry_name => t('views.call_logs.queued.label.queued_calls')
     = will_paginate @calls, :param_name => 'page'
+

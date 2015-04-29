@@ -23,6 +23,6 @@ class QueuedCallsController < ApplicationController
     @call.cancel_call!
     @call.destroy
 
-    redirect_to(queued_call_logs_path, :notice => "Call to #{@call.address} successfully canceled.")
+    redirect_to(queued_call_logs_path, :notice => I18n.t("controllers.queued_calls_controller.call_successfully_canceled", :call_address => @call.address))
   end
 end

@@ -18,7 +18,7 @@
 class SchedulesController < ApplicationController
 
   expose(:project) { load_project }
-  expose(:schedules) { project.schedules }
+  expose(:schedules) { project.schedules.enabled }
   expose(:schedule)
 
   before_filter :load_project, only: [:index]
@@ -36,6 +36,6 @@ class SchedulesController < ApplicationController
 
   def destroy
     schedule.destroy
-    redirect_to project_schedules_path(project), :notice => "Schedule #{schedule.name} successfully deleted."
+    redirect_to project_schedules_path(project), :notice => I18n.t("controllers.schedules_controller.schedule_succesfully_deleted", :schedule_name => schedule.name)
   end
 end

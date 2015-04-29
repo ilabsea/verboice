@@ -19,10 +19,14 @@ class Commands::RecordCommand < Command
   attr_accessor :filename, :stop_keys, :timeout
 
   def initialize key, description, options = {}
-    @key         = key
-    @description = description
-    @stop_keys   = options[:stop_keys] || '01234567890*#'
-    @timeout     = options[:timeout].try(:to_i) || 10
+    @key                = key
+    @description        = description
+    @stop_keys          = options[:stop_keys] || '01234567890*#'
+    @silence_detection  = options[:silence_detection].try(:to_i) || 0
+
+    @timeout            = options[:timeout].try(:to_i) || 10
+    @old_var_name       = options[:old_var_name]
+    @var_name           = options[:var_name]
   end
 
   def serialize_parameters
@@ -30,7 +34,10 @@ class Commands::RecordCommand < Command
       key: @key,
       description: @description,
       stop_keys: @stop_keys,
-      timeout: @timeout
+      timeout: @timeout,
+      silence_detection: @silence_detection,
+      old_var_name: @old_var_name,
+      var_name: @var_name
     }
   end
 end

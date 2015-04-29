@@ -305,6 +305,15 @@ select.error {
   border: 2px solid #ff6600;
 }
 
+a.email_param:hover {
+  color: grey;
+  text-decoration: underline;
+}
+
+a.email_param {
+  color: blue;
+}
+
 
 // ----------
 

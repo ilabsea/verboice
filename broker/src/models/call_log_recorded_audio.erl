@@ -1,0 +1,3 @@
+-module(call_log_recorded_audio).
+-define(TABLE_NAME, "call_log_recorded_audios").
+-include_lib("erl_dbmodel/include/model.hrl").

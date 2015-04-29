@@ -1,0 +1,3 @@
+data_path: data
+channel:
+  validate_domain: true

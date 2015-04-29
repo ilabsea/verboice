@@ -115,7 +115,8 @@ describe VrzContainer do
     CallFlow.count.should == 1
     CallFlow.first.user_flow.should == @call_flow.user_flow
 
-    Resource.count.should == 1
+    # Resource.count.should == 1
+    Resource.count.should == 2 # re-generate a new resource guid to remove references to existing resource
     Resource.first.project.should == @project
     Resource.first.guid.should == @resource.guid
 
@@ -161,11 +162,13 @@ describe VrzContainer do
     CallFlow.count.should == 1
     CallFlow.first.user_flow.should == @call_flow.user_flow
 
-    Resource.count.should == 1
+    # Resource.count.should == 1
+    Resource.count.should == 2 # re-generate a new resource guid to remove references to existing resource
     Resource.first.project.should == @project
     Resource.first.guid.should == @resource.guid
 
-    LocalizedResource.count.should == 1
+    # LocalizedResource.count.should == 1
+    LocalizedResource.count.should == 2 # re-generate a new resource guid to remove references to existing resource
     LocalizedResource.first.guid.should == @localized_resource.guid
     LocalizedResource.first.resource.attributes.except('updated_at').should == @resource.attributes.except('updated_at')
     LocalizedResource.first.audio.should == @localized_resource.audio
@@ -214,14 +217,17 @@ describe VrzContainer do
 
     CallFlow.count.should == 2
     CallFlow.first.user_flow.should == nil
+    # CallFlow.last.user_flow.should == @call_flow.user_flow
+    @call_flow.user_flow[0]["resource"]['guid'] = Resource.last.guid # re-generate a new resource guid to remove refererences to existing resource
     CallFlow.last.user_flow.should == @call_flow.user_flow
 
-    Resource.count.should == 2
+    # Resource.count.should == 2
+    Resource.count.should == 3 # re-generate a new resource guid to remove references to existing resource
     Resource.first.project.should == @project
     Resource.first.guid.should == @resource.guid
 
     Resource.last.project.should == @second_call_flow.project
-    Resource.last.guid.should == @resource.guid
+    # Resource.last.guid.should == @resource.guid # the last random one we don't know
 
     LocalizedResource.count.should == 2
     LocalizedResource.first.guid.should == @localized_resource.guid

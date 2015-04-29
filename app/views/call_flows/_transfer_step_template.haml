@@ -5,19 +5,19 @@
       %input.ux-text.w20.right{ ko(value: 'name', valueUpdate: '"afterkeydown"', css: '{ "error": is_name_invalid }')}
 
     .content
-      %label Forward to
+      %label= t('views.call_flows._transfer_step_template.label.forward_to')
       %br
 
       %span.forwardto{ko(css: "{ orange: is_address_invalid }")}
-        Phone number:
+        = t('views.call_flows._transfer_step_template.label.phone_number')
         %span{ko(css: "{ alert: is_address_invalid }")}
       %input.ux-text.w20{ 'data-bind' => 'value: address, valueUpdate: "afterkeydown"' }
       %br
 
       %span.forwardto
-        Channel:
+        = t('views.call_flows._transfer_step_template.label.channel')
       %select{ko(value: 'channel')}
-        %option{:value => nil} Use current channel
+        %option{:value => nil}= t('views.call_flows._transfer_step_template.label.use_current_channel')
         = options_from_collection_for_select(current_account.channels, 'name', 'name')
       %br
 
@@ -38,4 +38,4 @@
               %li 1 hour
 
       .bottom-actions
-        %button.fdelete{ 'data-bind' => 'click: remove_with_confirm' } Remove this step
+        %button.fdelete{ 'data-bind' => 'click: remove_with_confirm' }= t('views.call_flows._transfer_step_template.action.remove_this_step')

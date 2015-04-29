@@ -1,0 +1,90 @@
+= render 'shared/project_tabs_and_title', :project => @project, :shared_project => @shared_project
+%h1= t('views.projects.call_logs.index.label.calls')
+%p.desc= t('views.projects.call_logs.index.label.desc')
+
+= render 'search', project: @project
+
+-unless @logs.empty?
+  %p
+    / - if render_csv_download? @project, @search
+    /   = link_to t('views.call_logs.index.action.download_csv'), download_project_call_logs_path(format: :csv, search: @search), :class => "button fimport download-call_logs"
+    / - else
+    = link_to t('views.call_logs.index.action.download_csv'), download_project_call_logs_path(search: @search), :class => %w(button fimport download-call_logs)
+%br/
+= paginate_for @logs
+- if @logs.present?
+  %br/
+  %table.GralTable
+    %tr
+      %th= t('views.projects.call_logs.index.label.id')
+      %th= t('views.projects.call_logs.index.label.started')
+      %th= t('views.projects.call_logs.index.label.finished')
+      %th= t('views.projects.call_logs.index.label.duration_in_second')
+      %th= t('views.projects.call_logs.index.label.caller_id')
+      %th= t('views.projects.call_logs.index.label.direction')
+      %th= t('views.projects.call_logs.index.label.number_retried')
+      %th= t('views.projects.call_logs.index.label.channel')
+      %th= t('views.projects.call_logs.index.label.project')
+      %th= t('views.projects.call_logs.index.label.call_flow')
+      %th= t('views.projects.call_logs.index.label.status')
+      %th= t('views.projects.call_logs.index.label.interaction')
+      - @project.project_variables.each do |variable|
+        %th= variable.try(:name)
+      %th
+    - @logs.each do |log|
+      %tr
+        %td= log.id
+        %td= datetime_format log.created_at, @project.time_zone
+        %td= datetime_format log.finished_at, @project.time_zone
+        %td= log.duration if log.duration && log.duration > 0
+        - if log.address.present?
+          %td= link_to log.address_without_prefix, call_logs_path(:search => "caller:#{log.address_without_prefix}")
+        - else
+          %td= log.address
+        %td= log.direction
+        %td= log.retries if log.retries && log.retries > 0
+        %td= log.channel.try(:name)
+        %td= log.project.try(:name)
+        %td= log.call_flow.try(:name)
+        %td
+          - if log.state == CallLog::STATE_FAILED
+            = CallLog::FAIL_REASONS[log.fail_reason]
+          - else
+            = log.state
+
+        %td= log.parent ? "ref_id:#{log.parent.id};#{log.step_interaction}" : log.step_interaction
+        - @project.project_variables.each do |variable|
+          - existed = false
+          - log.call_log_answers.each do |answer|
+            - if answer.project_variable && answer.project_variable.id == variable.id
+              - existed = true
+              %td= answer.try(:value)
+              - break
+          - log.call_log_recorded_audios.each do |recorded_audio|
+            - if recorded_audio.project_variable_id == variable.id
+              - existed = true
+              %td{ id: "audio_#{recorded_audio.id}" }
+                .audio-annotation
+                  .modal{ id: "audio_annotation_#{recorded_audio.id}" }
+                    %h2= t('views.call_logs.index.label.annotation')
+                    %audio.recorded-audio{ controls: "", data: { audio_id: recorded_audio.id } }
+                      %source{ src: result_call_log_path(recorded_audio.call_log, { key: recorded_audio.key }) + ".wav", type: "audio/wav" }
+                        Your browser does not support the audio element.
+                    %br/
+                    %textarea{ rows: 5, data: { annotation: recorded_audio.annotation } }= recorded_audio.annotation
+                    %br/
+                    %button.white.save-annotation= t('views.form.save')
+                    %a.cancel-edit-annotation{ href: "Javascript:void(0);" }= t('views.form.close')
+                .div_content_variable
+                  .div_left
+                    %a.fplay.audio-control{ href: "Javascript:void(0);" }
+                  .div_right
+                    %a.fimport{ href: result_call_log_path(recorded_audio.call_log, {:key => recorded_audio.key}) }
+                    %a.fancybox.icon_button{ class: recorded_audio.annotation.present? ? "fedit-blue" : "fedit", href: "#audio_annotation_#{recorded_audio.id}" }
+          - unless existed
+            %td
+        %td= link_to(t('views.projects.call_logs.index.action.view_details'), call_log_path(log, project_id: @project.id)) if log.store_log_entries
+  %br/
+  = paginate_for @logs
+%br/
+

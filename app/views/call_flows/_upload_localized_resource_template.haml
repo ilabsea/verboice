@@ -16,13 +16,13 @@
     / ko ifnot: hasAudio()
     .upload-file.fexport
       %input{:type => 'file', 'data-bind' => 'fileupload: url, fileuploadAdd: add'}
-    Upload
+    = t('views.call_flows._upload_localized_resource_template.action.upload')
     / /ko
     / ko if: hasAudio()
     .upload-file.fsync
       %input{:type => 'file', 'data-bind' => 'fileupload: url, fileuploadAdd: add'}
-    Replace
+    = t('views.call_flows._upload_localized_resource_template.action.replace')
     / /ko
   %br{clear: 'all'}
   .w22
-    %textarea{:rows => 6, :placeholder => 'Write here a description of the recording, either as a reminder for you or as a reference for the person that will record the message.', 'data-bind' => 'value: description'}
+    %textarea{:rows => 6, :placeholder => "#{t('views.call_flows._upload_localized_resource_template.label.placeholder')}", 'data-bind' => 'value: description'}

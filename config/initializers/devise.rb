@@ -158,4 +158,7 @@ Devise.setup do |config|
   #   end
   #   manager.default_strategies(:scope => :user).unshift :twitter_oauth
   # end
+
+  config.secret_key = '1d01e20ca0b25bdb8699d204b949985556e088ec8963b437ac14b16ebd84627c8b6d08acf3c2650e84337a47e412c4501430f13c26e70999d712b88435cbb179'
+
 end

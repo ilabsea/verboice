@@ -55,9 +55,9 @@ class ExternalServicesController < ApplicationController
   def update_manifest
     begin
       external_service.update_manifest!
-      flash[:notice] = 'Manifest successfully updated'
+      flash[:notice] = I18n.t("controllers.external_services_controller.manifest_successfully_update")
     rescue Exception => ex
-      flash[:error] = 'Error updating manifest'
+      flash[:error] = I18n.t("controllers.external_services_controller.error_updating_manifest")
       logger.warn ex
     end
     if request.xhr?

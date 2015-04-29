@@ -1,0 +1,1 @@
+window.onReminderGroups ?= (callback) -> $(-> callback() if $('#reminder_groups-main').length > 0)

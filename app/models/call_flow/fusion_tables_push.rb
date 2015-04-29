@@ -16,20 +16,33 @@
 # along with Verboice.  If not, see <http://www.gnu.org/licenses/>.
 
 module CallFlow::FusionTablesPush
+  def get_fusion_table
+    pusher = Pusher.new(self.id)
+    pusher.load_dependencies
+    pusher.load_token
+    fusion_tables = pusher.list_tables.select { |x| x[:name].start_with?(self.fusion_table_name) }
+    fusion_tables.first if fusion_tables
+  end
+
   def push_to_fusion_tables(call_log)
     Delayed::Job.enqueue Pusher.new(self.id, call_log.id)
   end
 
   class Pusher < Struct.new(:call_flow_id, :call_log_id)
+    FUSION_TABLE_URL = "https://www.google.com/fusiontables/DataSource"
     API_URL = "https://www.googleapis.com/fusiontables/v1/query"
 
     attr_accessor :call_flow, :call_log, :access_token
 
     delegate :current_fusion_table_id, :fusion_table_name, to: :call_flow
 
+    def load_dependencies
+      self.call_flow = CallFlow.find(self.call_flow_id) if self.call_flow_id
+      self.call_log = CallLog.includes(:project).find(self.call_log_id) if self.call_log_id
+    end
+
     def perform
-      self.call_flow = CallFlow.find(self.call_flow_id)
-      self.call_log = CallLog.find(self.call_log_id)
+      load_dependencies
       return if !OAuth2::Client.service_configured?(:google) || !self.call_flow.store_in_fusion_tables || self.call_flow.fusion_table_name.blank? || self.call_flow.account.google_oauth_token.nil?
       push
     end
@@ -46,11 +59,18 @@ module CallFlow::FusionTablesPush
       end.access_token
     end
 
+    # convert time to zone specified in project
+    def time_in_zone time
+      timezone_name = call_log.project.time_zone  # Get timezone string store in the project    
+      zone = ActiveSupport::TimeZone.new timezone_name # Create zone from the timezone string
+      time.in_time_zone(zone)  #convert time to that zone
+    end
+
     def upload_call_data
-      columns_expr = columns.map{|name, kind| "'#{name.gsub("'", "\\'")}'"}.join(', ')
+      columns_expr = columns.map{|name, kind| "'#{name.gsub("'", "\\\\'")}'"}.join(', ')
 
       ids = call_flow.step_names.keys
-      values = [call_log.id, call_log.address, call_log.state, call_log.started_at, call_log.finished_at]
+      values = [call_log.id, call_log.address, call_log.state, time_in_zone(call_log.started_at), time_in_zone(call_log.finished_at) ]
 
       CallLog.poirot_activities(call_log.id).each do |trace|
         begin
@@ -72,8 +92,9 @@ module CallFlow::FusionTablesPush
     end
 
     def create_table
-      columns_expr = columns.map{|name, kind| "'#{name.gsub("'", "\\'")}': #{kind || 'STRING'}"}.join(', ')
+      columns_expr = columns.map{|name, kind| "'#{name.gsub("'", "\\\\'")}': #{kind || 'STRING'}"}.join(', ')
       query = "CREATE TABLE #{new_table_name} ( #{columns_expr} )"
+
       response = post_sql_query query
       id = csv_parse(response)[:tableid][0]
       call_flow.update_attribute :current_fusion_table_id, id
@@ -85,15 +106,13 @@ module CallFlow::FusionTablesPush
 
     def new_table_name
       existing = list_tables.map{|r| r[:name]}
-      index = 1
-      while existing.include?(make_name(index)) do
-        index += 1
-      end
+      name_without_suffix = existing.map{ |x| x[0, x.length - 4]}
+      index = name_without_suffix.include?(fusion_table_name.strip.gsub(/[- ]/,'_')) ? (existing.first[-3, 3].to_i + 1) : 1
       make_name(index)
     end
 
     def make_name(index)
-      "#{fusion_table_name.strip.gsub(/ /,'_')}_#{index.to_s.rjust(3,'0')}"
+      "#{fusion_table_name.strip.gsub(/[- ]/,'_')}_#{index.to_s.rjust(3,'0')}"
     end
 
     def is_table_valid?

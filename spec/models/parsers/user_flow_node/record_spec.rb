@@ -34,14 +34,16 @@ module Parsers
             "guid" => 2
           },
           'timeout' => 7,
-          'stop_key' => '#'
+          'stop_key' => '#',
+          'old_var_name' => "",
+          'var_name' => "recorded_audio"
 
         record.equivalent_flow.first.should eq(
           Compiler.parse do
             Label 1
             StartUserStep :record, 1, "Record Step"
             PlayResource 1
-            Record 1, 'Record Step', {:stop_keys => '#', :timeout => 7}
+            Record 1, 'Record Step', {:stop_keys => '#', :timeout => 7, :old_store => "", :store => "recorded_audio"}
             SetStepResult :recorded, "record_url(1)"
             PlayResource 2
           end.first

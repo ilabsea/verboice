@@ -16,6 +16,12 @@
 # along with Verboice.  If not, see <http://www.gnu.org/licenses/>.
 
 class Channel < ActiveRecord::Base
+  PREFIX_SEPARATOR = ','
+  PREFIX_NORMALIZATIONS = ['855', '0']
+
+  STATUS_PENDING = "pending"
+  STATUS_APPROVED = "approved"
+
   belongs_to :account
   belongs_to :call_flow
   has_one :project, :through => :call_flow
@@ -23,6 +29,8 @@ class Channel < ActiveRecord::Base
   has_many :call_logs, :dependent => :nullify
   has_many :queued_calls, :dependent => :destroy
   has_many :channel_permissions, :foreign_key => "model_id", :dependent => :destroy
+
+  has_one :quota, class_name: "ChannelQuota", dependent: :nullify
 
   config_accessor :limit
 
@@ -54,12 +62,29 @@ class Channel < ActiveRecord::Base
     super
   end
 
+  def new_session(options = {})
+    session = Session.new options
+    session.call_flow ||= call_flow
+    session.channel = self
+    unless session.call_log
+      session.call_log = call_logs.create! :direction => :incoming, :call_flow => session.call_flow, :account => account, :project => session.call_flow.project, :started_at => Time.now.utc
+    end
+    session.commands = session.call_flow.commands.dup
+    session
+  end
+
   def call(address, options = {})
     raise "Call address cannot be empty" unless address.present?
 
     queued_call = enqueue_call_to address, options
     call_log = queued_call.call_log
 
+    notify_call_queued queued_call
+
+    call_log
+  end
+
+  def notify_call_queued queued_call
     begin
       if queued_call.not_before?
         BrokerClient.notify_call_queued id, queued_call.not_before
@@ -67,16 +92,30 @@ class Channel < ActiveRecord::Base
         BrokerClient.notify_call_queued id
       end
     rescue Exception => ex
-      call_log.warn "Unable to notify the broker about this new call. The call might be delayed"
+      queued_call.call_log.warn "Unable to notify the broker about this new call. The call might be delayed"
     end
+  end
 
-    call_log
+  def address_with_prefix_called_number address
+    prefix_called_number = config["prefix_called_number"]
+    "#{prefix_called_number}#{address}"
+  end
+
+  def self.normalized_called_number address, prefix
+    return address if prefix.blank?
+    reg = Channel::PREFIX_NORMALIZATIONS.map{|prefix| '^\+?' + prefix }.join("|")
+    normalized_address = address.gsub(%r{#{reg}}, "")
+    prefix + normalized_address
   end
 
   def enqueue_call_to address, options
     via = options.fetch(:via, 'API')
 
     account = options[:account] || self.account
+
+    prefix  = config["normalized_called_number"] 
+    address = Channel.normalized_called_number(address, prefix)
+    address = address_with_prefix_called_number(address)
 
     if options[:call_flow_id]
       current_call_flow = account.find_call_flow_by_id(options[:call_flow_id])
@@ -93,7 +132,7 @@ class Channel < ActiveRecord::Base
     if current_call_flow
       project = current_call_flow.project
     elsif options[:project_id]
-      project = account.find_project_by_id(options[:project_id])
+      project = Project.find_by_id(options[:project_id])
     else
       project = self.project
     end
@@ -133,6 +172,8 @@ class Channel < ActiveRecord::Base
         :state => :queued,
         :schedule => schedule,
         :not_before => not_before,
+        :prefix_called_number => self.config["prefix_called_number"],
+        :store_log_entries => project.store_call_log_entries,
         :not_after => not_after,
         :contact_id => contact_id
       )
@@ -143,7 +184,11 @@ class Channel < ActiveRecord::Base
     if options[:vars].is_a?(Hash)
       variables = {}
       options[:vars].each do |name, value|
-        variables[name] = (value =~ /^(0|[1-9]\d*)$/ ? value.to_i : value)
+        # add call log answer for default context variables
+        project_variable = project.project_variables.find_by_name(name)
+        CallLogAnswer.create! :call_log_id => call_log.id, :project_variable_id => project_variable.id, :value => value if project_variable
+
+        variables[name] = (value =~ /^\d+$/ ? value.to_i : value)
       end
     end
 
@@ -167,6 +212,10 @@ class Channel < ActiveRecord::Base
       :contact_id => contact_id,
       :scheduled_call_id => options[:scheduled_call_id]
     )
+
+    queued_call.not_before = queued_call.schedule.with_time_zone(time_zone) do |time_zoned_schedule|
+      time_zoned_schedule.next_available_time(queued_call.not_before || Time.now.utc)
+    end if queued_call.schedule
 
     queued_call.save!
 
@@ -245,11 +294,32 @@ class Channel < ActiveRecord::Base
     self
   end
 
+  def self.by_account_id account_id
+    where(['account_id = :account_id', account_id: account_id])
+  end
+
+  def self.by_status(status)
+    where(['status = :status', status: status])
+  end
+
   def as_json(options = {})
-    options = { only: [:name, :config] }.merge(options)
+    options = { only: [:id, :name, :config, :enabled, :status] }.merge(options)
     super(options).merge({
       kind: kind.try(:downcase).try(:gsub, ' ', '_'),
       call_flow: call_flow.try(:name)
     })
   end
+
+  def enabled?
+    enabled == true || enabled == "1"
+  end
+
+  def pending?
+    status == STATUS_PENDING
+  end
+
+  def approved?
+    status == STATUS_APPROVED
+  end
+  
 end

@@ -1,0 +1,11 @@
+%script{type: "text/html", id: "email_text_localized_resource_template"}
+
+  .w22
+    /ko foreach: variables
+    %a.email_param{ko(click: '$parent.variable_selected', text: "$data"), href: 'javascript:void();'}
+    /ko if: $index() != ($parent.variables().length - 1)
+    ,
+    / /ko
+    / /ko
+  .w22
+    %textarea{:rows => 6, :placeholder => "#{t('views.call_flows._text_localized_resource_template.label.placeholder')}", 'data-bind' => 'value: text, valueUpdate: "afterkeydown"'}

@@ -15,6 +15,10 @@ onWorkflow ->
       @is_invalid = ko.computed =>
         @is_name_invalid() || @is_delay_invalid()
 
+      @call_flow_options = ko.observableArray call_flows
+      @selected_call_flow_id = ko.observable attrs.selected_call_flow_id
+      @retries = ko.observable attrs.retries
+
     button_class: =>
       'lcallback'
 
@@ -26,6 +30,8 @@ onWorkflow ->
         dial_prefix: @dial_prefix(),
         when: @when(),
         delay: @delay(),
+        selected_call_flow_id: @selected_call_flow_id(),
+        retries: @retries()
       )
 
     @add_to_steps: () ->

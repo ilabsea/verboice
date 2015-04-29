@@ -43,7 +43,7 @@ class ProjectsController < ApplicationController
     @project.account = current_account
 
     if @project.save
-      redirect_to(project_call_flows_path(@project), :notice => "Project #{@project.name} successfully created.")
+      redirect_to(project_call_flows_path(@project), :notice => I18n.t("controllers.projects_controller.project_successfully_created", :project_name => @project.name))
     else
       render :action => "new"
     end
@@ -51,17 +51,17 @@ class ProjectsController < ApplicationController
 
   def update
     if @project.update_attributes(params[:project])
-      redirect_to(project_path(@project), :notice => "Project #{@project.name} successfully updated.")
+      redirect_to(project_path(@project), :notice => I18n.t("controllers.projects_controller.project_successfully_updated", :project_name => @project.name))
     else
       render :action => "edit"
     end
   end
 
   def enqueue_call
-    redirect_to project_path(params[:id]), flash: {error: 'You need to select a Call Flow'} and return unless params[:call_flow_id].present?
+    redirect_to project_path(params[:id]), flash: {error: I18n.t("controllers.projects_controller.you_need_to_select_call_flow")} and return unless params[:call_flow_id].present?
 
     @channel = @channels.find { |c| c.id == params[:channel_id].to_i }
-    redirect_to project_path(params[:id]), flash: {error: 'You need to select a channel'} and return unless @channel
+    redirect_to project_path(params[:id]), flash: {error: I18n.t("controllers.projects_controller.you_need_to_select_channel")} and return unless @channel
 
     addresses = params[:addresses].split(/\n/).map(&:strip).select(&:presence)
 
@@ -80,7 +80,7 @@ class ProjectsController < ApplicationController
       @channel.call(address.strip, options)
     end
 
-    redirect_to project_path(params[:id], {:notice => "Enqueued calls to #{pluralize(addresses.count, 'address')} on channel #{@channel.name}"})
+    redirect_to project_path(params[:id]), {:notice => I18n.t("controllers.projects_controller.enqueued_call_to_on_channel", :pluralize => pluralize(addresses.count, 'address'), :channel_name => @channel.name)}
   rescue CallQueuingError => e
     redirect_to project_path(params[:id], flash: {error: e.message})
   end
@@ -88,14 +88,14 @@ class ProjectsController < ApplicationController
   def destroy
     @project = current_account.projects.find(params[:id])
     @project.destroy
-    redirect_to(projects_url, :notice => "Project #{@project.name} successfully deleted.")
+    redirect_to(projects_url, :notice => I18n.t("controllers.projects_controller.project_successfully_deleted", :project_name => @project.name))
   end
 
   def update_variables
     if @project.update_attributes(params[:project])
-      redirect_to project_contacts_path(@project), notice: "Columns successfully updated."
+      redirect_to project_contacts_path(@project), notice: I18n.t("controllers.projects_controller.columns_successfully_updated")
     else
-      redirect_to project_contacts_path(@project), flash: { error: "Error updating columns."}
+      redirect_to project_contacts_path(@project), flash: { error: I18n.t("controllers.projects_controller.error_updating_columns")}
     end
   end
 
@@ -104,12 +104,11 @@ class ProjectsController < ApplicationController
   def load_enqueue_call_fields
     load_project
     @channels = current_account.channels.all
-
+    @schedules = @project.schedules.enabled
     shared_channels = current_account.shared_channels.all.map(&:channel)
     shared_channels.each { |c| c.name = "#{c.name} (shared)" }
     @channels.concat shared_channels
 
-    @schedules = @project.schedules
     @call_flows = @project.call_flows.includes(:channels).includes(:queued_calls)
     @project_channels = @call_flows.collect(&:channels).flatten.to_set
     @queued_calls = @call_flows.collect(&:queued_calls).flatten

@@ -1,0 +1,147 @@
+- content_for :head do
+  :javascript
+    when_text = "#{t('views.ext.reminder_schedules.label.when')}"
+    and_text = "#{t('views.ext.reminder_schedules.label.and')}"
+
+  :css
+    .ux-datepicker { background-color: white }
+
+= render 'shared/project_tabs_and_title', :project => @project, shared_project: @shared_project
+
+%h2= t('views.ext.reminder_schedules.title')
+%p.desc= t('views.ext.reminder_schedules.desc')
+
+#reminder_schedules-main.hidden-until-loaded
+  <!-- ko foreach: reminder_schedules -->
+  <!-- ko if: $data != $root.currentReminderSchedule() -->
+  .box.collapsed.collapsible_crud_box.grey.w60
+    .toptitle{ko(css:{warning: '!valid()'})}
+      = t('views.ext.reminder_schedules.label.call_all_contacts_in')
+      %span{ko(text: 'reminder_group_name()')}
+      = t('views.ext.reminder_schedules.label.reminder_group').downcase
+      %br/
+      %span{ko(text: :conditions_description)}
+      = t('views.ext.reminder_schedules.label.with')
+      %span{ko(text: 'call_flow_name()')}
+      = t('views.ext.reminder_schedules.label.call_flow').downcase
+      = t('views.ext.reminder_schedules.label.using')
+      %span{ko(text: 'channel_name()')}
+      = t('views.ext.reminder_schedules.label.channel').downcase
+      %span.title{ko(text: :name)}
+    - if project_admin?
+      .rightbuttons
+        %button.fdelete{ko(click: '$root.deleteReminderSchedule')}
+      .bottom
+        %button.farrow.collapse_trigger{ko(click: '$root.editReminderSchedule')}= t('views.ext.reminder_schedules.action.edit')
+  <!-- /ko -->
+  <!-- ko if: $data == $root.currentReminderSchedule() -->
+  .box.collapsible_crud_box.expanded.grey.w60
+
+    %p
+      %label{ko(css: {error: :reminder_group_error}), :for => :reminder_group}= t('views.ext.reminder_schedules.label.reminder_group')
+      %br/
+      %select.w30{ko(css: {error: :reminder_group_error}, options: '$root.reminder_groups', optionsText: "'name'", value: :reminder_group, optionsCaption: "'#{t('views.ext.reminder_schedules.label.select_reminder_group')}'")}
+
+    .w30
+      %label{ko(css: {error: :channel_error}), :for => :channel}= t('views.ext.reminder_schedules.label.channel')
+    %ul.w30.list_item{ko(css: { :'list_item_border' => 'has_channel()==true' } ,  foreach: 'reminder_channels()' ) } 
+      <!-- ko if: channel() -->
+      %li
+        %div.left-side{ko(text: 'channel().name()')}
+        %button.clist-remove.right-side{ko(click: '$parent.removeReminderChannelByChannel')}  
+        %div.clear
+      <!-- /ko -->
+
+    .w20{style:"margin-left:5px;"}
+      <!-- ko if: new_channel_name_duplicated() -->
+      %span.warning= t('views.ext.reminder_schedule.label.channel_exists')
+      <!-- /ko -->
+    %ul.clist.w30
+      %li
+        %input.ux-search.ui-autocomplete-input.ux-text{ ko(autocomplete: 'new_channel_name', value: 'new_channel_name', valueUpdate: 'afterkeydown'), type: :text, placeholder: "#{t('views.ext.reminder_schedules.label.add_channel')}", url: "/ext/projects/#{@project.id}/reminder_schedules/channels_autocomplete", minChar: 3}
+        %button.clist-add{ko(disable: :new_channel_name_duplicated, click: 'addReminderChannelByChannel')}      
+
+    %p
+      %label{ko(css: {error: :call_flow_error}), :for => :call_flow}= t('views.ext.reminder_schedules.label.call_flow')
+      %br/
+      %select.w30{ko(css: {error: :call_flow_error}, options: '$root.call_flows', optionsText: "'name'", value: :call_flow, optionsCaption: "'#{t('views.ext.reminder_schedules.label.select_call_flow')}'")}
+
+    %hr{style:"width:60%"}
+    %br/
+
+    %div
+      %label{:for => :start_date}= t('views.ext.reminder_schedules.label.start_on')
+      = t('views.ext.reminder_schedules.label.date_format')
+
+    %br/
+
+    .condition
+      %input{ko(checked: :repeat), :type=>"radio", :name=>"type", :value=>"0"}
+      %input.ux-datepicker.w20{ko(datePicker: :start_date, css: {error: :start_date_error}, attr: {disabled: 'is_repeat()==true'}, valueUpdate: 'afterkeydown'), placeholder: "#{t('views.ext.reminder_schedules.label.date_format')}", type: 'text', html: {readonly: "readonly"}}
+
+    <!-- ko with: condition -->
+    .condition
+      .left-side
+        %input{ko(checked: '$parent.repeat'), :type=>"radio", :name=>"type", :value=>"1", style:"float:left;"}
+        = ko_number_field_tag :value, css: {error: '$parent.condition_value_error()'}, html: {class: "w10", style: "float:left;margin-left:4px;"}, attr: {disabled: '$parent.is_repeat()==false'}
+        %select.w10.select{ko(options: '$root.data_types', optionsText: "'name'", value: :data_type, css: {error: '$parent.condition_data_type_error()'}, attr: {disabled: '$parent.is_repeat()==false'}), style: "float:left;margin-left:6px;"}
+        .left-side{style:"margin-left:6px;"}=t('view.ext.reminder_schedules.label.after')
+
+      .clear
+    
+      %div
+        %select.w20{ko(options: '$root.variables', optionsText: "'name'", value: :variable, css: {error: '$parent.condition_variable_error()'}, attr: {disabled: '$parent.is_repeat()==false'}), style: "margin-left:25px;"}
+    <!-- /ko -->
+
+    .clear
+
+    %br/
+    %hr{style: "width:60%"}
+    %br/
+
+    %div
+      %label= t('views.ext.reminder_schedules.label.call_time')
+      = t('views.ext.reminder_schedules.label.time_format')
+
+    %br/
+
+    %div
+      <!-- ko if: call_time_error() -->
+      %br/
+      %label{ko(css: {error: :call_time_error})}= t('views.ext.reminder_schedules.label.from_must_be_less_than_to')
+      <!-- /ko -->
+      .condition
+        .ux-nstep.w06
+          %label{ko(css: {error: :from_time_error}), :for => :from_time}= t('views.ext.reminder_schedules.label.from')
+          = ko_text_field_tag :from_time, css: {error: :from_time_error}, html: {class: 'ux-nstep w06', maxlength: '5'}
+          %label{ko(css: {error: :to_time_error}), :for => :to_time}= t('views.ext.reminder_schedules.label.to')
+          = ko_text_field_tag :to_time, css: {error: :to_time_error}, html: {class: 'ux-nstep w06', maxlength: '5'}
+
+    %br/
+
+    .condition
+      %div{ko(css: {warning: :retries_error})}
+        = t('views.schedules._form.label.retries_no_answer')
+        %br/
+        = t('views.schedules._form.label.retries_desc')
+        %br/
+        = ko_text_field_tag :retries_in_hours, css: {error: :retries_error}, html: {class: 'ux-nstep w30'}
+
+    %br/
+    %hr
+
+    %p
+      %button.white{ko(click: '$root.saveReminderSchedule', enable: :valid), type: :button}= t('views.ext.reminder_schedules.action.save')
+      %a.button.white.cancel{ko(click: '$root.cancelReminderSchedule'), href: 'javascript:void(0)'}= t('views.ext.reminder_schedules.action.cancel')
+
+  <!-- /ko -->
+  <!-- /ko -->
+
+  - if project_admin?
+    .box.grey.w60.addqueue{ ko(visible: '!currentReminderSchedule()', click: 'newReminderSchedule'), style: 'display:none'}
+      %span
+        %a.add_field{href: 'javascript:void(0)'}= t('views.ext.reminder_schedules.action.new_reminder_schedule')
+      %button.cadd.right
+      %br{clear: 'all'}
+
+%br

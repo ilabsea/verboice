@@ -1,11 +1,11 @@
 .field
-  = f.label :username
+  = f.label :username, t('views.channels._form_template_based_sip.label.username')
   = f.text_field :username, :autocomplete => 'off', readonly: readonly
 .field
-  = f.label :password
+  = f.label :password, t('views.channels._form_template_based_sip.label.password')
   = f.password_field :password, :value => @channel.config['password'], :autocomplete => 'off', readonly: readonly
 .field
-  = f.label :number
+  = f.label :number, t('views.channels._form_template_based_sip.label.number')
   = f.text_field :number, readonly: readonly
 .field
   = f.label :limit

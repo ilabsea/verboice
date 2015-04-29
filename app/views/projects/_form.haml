@@ -8,27 +8,26 @@
   - if @project.errors.any?
     #error_explanation
       %h2
-        = pluralize(@project.errors.count, "error")
-        prohibited this project from being saved:
+        = t('views.projects._form.errors.prohibited', :count => @project.errors.count)
       %ul
         - @project.errors.full_messages.each do |msg|
           %li= msg
 
   %br
 
-  %h1 Properties
+  %h1= t('views.projects._form.label.properties')
 
-  = f.text_field :name, readonly: readonly
-  = f.time_zone_select(:time_zone, TZInfo::Timezone.all.sort, {:model => TZInfo::Timezone}, {disabled: readonly})
+  = f.text_field :name, :label => t('views.projects._form.label.name'), readonly: readonly
+  = f.time_zone_select :time_zone, ActiveSupport::TimeZone.all, {}, {disabled: readonly, :label => t('views.projects._form.label.time_zone')}
+  = f.check_box :store_call_log_entries, :label => t('views.projects._form.label.store_call_log_details'), disabled: readonly
 
   %hr
 
   %br
   %br
 
-  %h1 Languages
-
-  = f.label :default_language
+  %h1= t('views.projects._form.label.languages')
+  = f.label :default_language, "#{t('views.projects._form.label.default_language')}"
   %br
   %select.w30{ko(value: 'defaultLanguage', options: 'languages', optionsText: "'label'", optionsValue: "'value'"), name: 'project[default_language]', disabled: readonly}
 
@@ -37,7 +36,7 @@
   = f.select(:tts_engine, options_for_select([['Built in', 'built-in'], ['iSpeech', 'ispeech']], @project.tts_engine), {label: 'Text-to-speech Engine'}, {disabled: readonly})
   = f.text_field :tts_ispeech_api_key, label: 'iSpeech API key'
 
-  = f.label :languages, "Languages you will support in this project"
+  = f.label :languages, t('views.projects._form.label.supported_languages')
   %br
 
   %ul.clist.w30
@@ -51,7 +50,7 @@
     //ko
     - unless readonly
       %li
-        %input#add_language.ux-type{ko(value: 'newLanguage', valueUpdate: 'afterkeydown', event: {keydown: 'keydown'}), type: 'text', placeholder: 'Add a new language'}
+      %input#add_language.ux-type{ko(value: 'newLanguage', valueUpdate: 'afterkeydown', event: {keydown: 'keydown'}), type: 'text', placeholder: "#{t('views.projects._form.label.add_new_language')}"}
         %button#add_language_button.clist-add{ko(click: 'addLanguage')}
 
   %br
@@ -61,11 +60,11 @@
   %br
   %br
 
-  %h1 Status callback
+  %h1= t('views.projects._form.label.status_callback')
 
-  = f.text_field :status_callback_url, :label => 'URL', readonly: readonly
-  = f.text_field :status_callback_url_user, :label => 'User', :autocomplete => 'off', readonly: readonly
-  = f.password_field :status_callback_url_password, :label => 'Password', :autocomplete => 'off', readonly: readonly
+  = f.text_field :status_callback_url, :label => t('views.projects._form.label.url'), readonly: readonly
+  = f.text_field :status_callback_url_user, :label => t('views.projects._form.label.user'), :autocomplete => 'off', readonly: readonly
+  = f.password_field :status_callback_url_password, :label => t('views.projects._form.label.password'), :autocomplete => 'off', readonly: readonly
 
   - if @project.new_record? || project_admin?
     %hr

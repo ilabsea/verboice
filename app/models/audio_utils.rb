@@ -26,6 +26,7 @@ module AudioUtils
   end
 
   def convert_to_8000_hz_gsm(input, output)
+    convert_to_wav input if File.is_mpeg? input
     new_input = File.is_wav?(input) ? "#{input}.wav" : "#{input}.gsm"
     FileUtils.mv input, new_input
     FileUtils.makedirs File.dirname(output)
@@ -70,4 +71,36 @@ module AudioUtils
     http.errback { f.resume Exception.new(http.error) }
     Fiber.yield
   end
+
+  def convert_to_8000_hz_wav(input, mime_type)
+    output = nil
+
+    if mime_type.audio_mime_type?
+      path = File.join(Rails.root, "/tmp/data/")
+      Dir.mkdir path unless Dir.exists? path
+      source_path = File.join(path,"#{Time.now.to_s.split(" ").join("-")}.#{extension_file_from_mime_type(mime_type)}")
+      File.open(source_path, 'wb:ASCII-8BIT') { |f| f.write(input) }
+
+      destination_path = File.join(path,"#{(Time.now + 1.second).to_s.split(" ").join("-")}.wav")
+      `sox #{source_path} -r 8000 -c1 #{destination_path}`
+      File.open(destination_path, 'rb'){ |f| output = f.read() } if File.exists? destination_path
+      
+      File.delete(source_path) if File.exists? source_path
+      File.delete(destination_path) if File.exists? destination_path
+
+      if $?.exitstatus == 2
+        raise Exception.new 'Error processing audio file'
+      end
+    end
+    
+    output
+  end
+
+  private
+
+  def extension_file_from_mime_type mime_type
+    return 'mp3' if mime_type.mpeg_mime_type?
+    return 'wav' if mime_type.wav_mime_type?
+  end
+
 end

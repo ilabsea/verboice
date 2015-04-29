@@ -12,7 +12,8 @@
         %td
           Hang up call back the caller, continuing the Call Flow from this point.
         %td
-    %br/
+
+    %br
 
     .content
       %div
@@ -23,13 +24,7 @@
         %input{ko(checked: "when"), 'type' => 'radio', 'value' => 'later'} Later
         %input{ko(value: 'delay', valueUpdate: '"afterkeydown"', visible: "when() == 'later'", css: '{ "error": is_delay_invalid }'), 'type' => 'text'}
 
-      %br/
-      %div
-        Dial Prefix
-        %br/
-        %input.w25{'type' => 'text', 'data-bind' => 'value: dial_prefix'}
-        %br/
-
+      /ko if: when() == 'later'
       %div{style: 'padding-top:20px'}
         Examples for "Later":
         %ul
@@ -37,6 +32,35 @@
           %li 30 minutes
           %li 2 hours
           %li 7 days
+      / /ko
+
+      %br/
+      %div
+        Dial Prefix
+        %br/
+        %input.w25{'type' => 'text', 'data-bind' => 'value: dial_prefix'}
+        %br/
+
+      %table.step-ui-table
+        %tr
+          %td{'colspan'=> '2'}
+            %br
+            With retries option
+        %tr
+          %td Call Flow
+          %td
+            %select{'data-bind' => 'value: selected_call_flow_id, options: call_flow_options(), optionsText: "name", optionsValue: "id", optionsCaption: "Choose a call flow"'}
+        %tr
+          %td{colspan: 2}
+            %br/
+        %tr{'data-bind' => 'visible: selected_call_flow_id() != null'}
+          %td{colspan: 2}
+            Retries if the call was not pick up 
+            Enter comma separated delays in hours 
+        %tr{'data-bind' => 'visible: selected_call_flow_id() != null'}
+          %td Retry
+          %td
+            %input{'type' => 'text', 'placeholder' => '1,2,4', 'data-bind' => 'value: retries'}
 
       .bottom-actions
         %button.fdelete{ 'data-bind' => 'click: remove_with_confirm' } Remove this step

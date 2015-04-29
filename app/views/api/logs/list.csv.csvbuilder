@@ -1,4 +1,4 @@
-csv << ['Entry ID', 'Time', 'Step name', 'Command', 'Action', 'Detail']
+csv << [t('views.api.logs.list_csv.label.entry_id'), t('views.api.logs.list_csv.label.time'), t('views.api.logs.list_csv.label.step_name'), t('views.api.logs.list_csv.label.command'), t('views.api.logs.list_csv.label.action'), t('views.api.logs.list_csv.label.detail')]
 @entries.find_each do |entry|
   csv << [entry.id, entry.created_at, entry.step_name, entry.command, entry.action, entry.description]
 end

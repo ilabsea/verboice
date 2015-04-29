@@ -22,7 +22,9 @@ class Account < ActiveRecord::Base
          :recoverable, :rememberable, :trackable, :validatable, :confirmable, :omniauthable
 
   # Setup accessible (or protected) attributes for your model
-  attr_accessible :email, :password, :password_confirmation, :remember_me
+  attr_accessible :email, :password, :password_confirmation, :remember_me, :locale
+
+  validates_strength_of :password, with: :email, unless: Proc.new { |acc| acc.password_confirmation.nil? }
 
   has_many :projects, :dependent => :destroy
   has_many :call_flows, :through => :projects
@@ -30,6 +32,7 @@ class Account < ActiveRecord::Base
   has_many :contacts, :through => :projects
   has_many :persisted_variables, :through => :contacts
   has_many :recorded_audios, :through => :contacts
+  has_many :ext_reminder_groups, :through => :projects
 
   has_many :call_logs
 
@@ -43,12 +46,32 @@ class Account < ActiveRecord::Base
 
   has_one :google_oauth_token, :class_name => 'OAuthToken', :conditions => {:service => :google}, :dependent => :destroy
 
+  # CONSTANT ROLE
+  ADMIN = 1
+  USER = 2
+
+  before_save :ensure_auth_token
+ 
+  def ensure_auth_token
+    if !self.auth_token
+      self.auth_token = generate_auth_token
+    end
+  end
+  
   def shared_projects
     ProjectPermission.where(account_id: id).includes(:project)
   end
 
   def shared_channels
     ChannelPermission.where(account_id: id).includes(:channel)
+  end
+
+  def available_channels
+    @channels = self.channels.all
+    @shared_channels = shared_channels.all.map(&:channel)
+    @shared_channels.each { |c| c.name = "#{c.name} (shared)" }
+    @channels.concat @shared_channels
+    @channels
   end
 
   def find_project_by_id(project_id)
@@ -103,6 +126,33 @@ class Account < ActiveRecord::Base
       channel.call options[:address], options
     else
       raise "Channel not found: #{options[:channel]}"
+    end
+  end
+
+  def clear_downloads
+    Dir[File.join RecordingManager.for(self).path_for('downloads'), '*.zip'].each do |file|
+      File.delete file if (Time.now - File.ctime(file)).to_i > 7.days
+    end
+  end
+
+  def admin?
+    (role == ADMIN)
+  end
+
+  def user?
+    role == USER
+  end
+
+  def has_access_from? host
+    Api2.host_allowed?(host)
+  end
+
+  private
+
+  def generate_auth_token
+    loop do
+      token = Devise.friendly_token
+      break token unless Account.where(auth_token: token).first
     end
   end
 end

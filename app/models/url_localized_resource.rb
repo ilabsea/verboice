@@ -17,6 +17,10 @@
 
 class UrlLocalizedResource < LocalizedResource
 
+  before_save do
+    self.url = URI::encode self.url
+  end
+
   def play_command_for play_resource_command
     play_resource_command.play_url_command_for self
   end

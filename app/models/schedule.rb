@@ -16,10 +16,14 @@
 # along with Verboice.  If not, see <http://www.gnu.org/licenses/>.
 
 class Schedule < ActiveRecord::Base
+  scope :enabled, -> { where :disabled => false }
+  scope :disabled, -> { where disabled => true }
+
   belongs_to :project
   has_many :queued_calls
   has_many :call_logs, :dependent => :nullify
   has_one :account, :through => :project
+  has_many :reminder_schedules, :class_name => "Ext::ReminderSchedule", :foreign_key => :retries_schedule_id, :dependent => :nullify
 
   validates_presence_of :account
   validates_presence_of :name
@@ -109,7 +113,7 @@ class Schedule < ActiveRecord::Base
   end
 
   def as_json(options={})
-    super(options.merge({:only => [:name, :retries, :weekdays], :methods => [:time_from_str, :time_to_str]}))
+    super(options.merge({:only => [:name, :retries, :weekdays, :id], :methods => [:time_from_str, :time_to_str]}))
   end
 
   def retry_delays

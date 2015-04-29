@@ -31,6 +31,11 @@ module ApplicationHelper
     '<span title="' << time.utc.to_s << '">' << time_ago_in_words(time.utc, true) << ' ago</span>'
   end
 
+  def time_ago_by_timezone(time, zone)
+    return '' if time.nil?
+    '<span title="' << time.in_time_zone(zone).to_s << '">' << time_ago_in_words(time.utc, true) << ' ago</span>'
+  end
+
   def ko(hash = {})
     {'data-bind' => kov(hash)}
   end
@@ -58,7 +63,8 @@ module ApplicationHelper
   def link_to_add_box(class_name, name, project, options={})
     new_object = class_name.to_s.camelize.constantize.new
     new_object.project = project
-    fields = render "box", class_name => new_object, :expanded => true
+    key = new_object.class.name.split('::').last.underscore.to_sym
+    fields = render "box", key => new_object, project: project, :expanded => true
     link_to_function(name, "add_box(this, \"#{escape_javascript(fields)}\")", options)
   end
 
@@ -78,6 +84,15 @@ module ApplicationHelper
     form.hidden_field(:_destroy) + link_to_function(name, "remove_fields(this)", options)
   end
 
+  def link_to_remove_contact_group(name, form, options={})
+    form.hidden_field(:_destroy) + link_to_function(name, "remove_contact_group(this)", options)
+  end
+
+  def diff_in_second(end_time, start_time)
+    return '' unless end_time.present?
+    (end_time - start_time).to_i.to_s
+  end
+  
   def project_owner?
     @project.account_id == current_account.id
   end
@@ -98,4 +113,44 @@ module ApplicationHelper
     return nil unless time
     "#{l(time.to_date, format: :long)}, #{time.strftime("%H:%M:%S")} (UTC)"
   end
+
+  def steps_configured?
+    STEP_CONFIG["speech_recognition"] == true
+  end
+
+  def datetime_format(datetime, time_zone)
+    datetime_format_csv(datetime, time_zone, Time::DEFAULT_FORMAT)
+  end
+
+  def tip_info text
+    image_tag "info.png", class: "icon-info tooltip", title: text
+  end
+  
+  def datetime_format_csv(datetime, time_zone, format)
+    return '' unless datetime
+    date_format = format || Time::DEFAULT_FORMAT
+    datetime_with_zone = datetime.in_time_zone(time_zone || 'UTC')
+    datetime_with_zone.strftime(date_format)
+  end
+  
+  def paginate_for records
+    per_page = params[:per_page] || 10
+    select_options = [10, 20, 30, 50].map{|n| [n, n]}
+
+    content_tag :div , class: 'paginator_container' do
+      entry   = content_tag :div, class: 'entry' do
+                  page_entries_info(@logs, :entry_name => t('views.projects.call_logs.index.label.call_log'))
+                end
+
+      counter = content_tag :div, class: 'counter' do
+                  select_tag(:page, options_for_select(select_options, per_page), 
+                              class: 'page_counter')
+                end          
+
+      nav = will_paginate(records) 
+
+      entry + counter + nav          
+    end
+  end
+
 end

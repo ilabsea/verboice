@@ -21,8 +21,12 @@ describe Api::ContactsController do
   include Devise::TestHelpers
 
   let!(:account) { Account.make }
+  let!(:account_two) { Account.make }
   let!(:project) { Project.make account: account }
+  let!(:other_project) { Project.make account: account_two }
   let!(:contact) { project.contacts.make }
+  let!(:contact_two) { Contact.make :project => project }
+  let!(:other_contact) { Contact.make :project => other_project }
 
   before(:each) do
     sign_in account
@@ -30,9 +34,8 @@ describe Api::ContactsController do
     ContactAddress.make contact_id: contact.id
 
     @project_var = project.project_variables.make name: "var1"
-    @contact_var = PersistedVariable.make project_variable_id: @project_var.id, contact_id: contact.id, value: "foo"
-
     @project_var2 = project.project_variables.make name: "var2"
+    @contact_var = PersistedVariable.make project_variable_id: @project_var.id, contact_id: contact.id, value: "foo"
   end
 
   it "gets all contacts" do
@@ -41,7 +44,7 @@ describe Api::ContactsController do
     response.should be_ok
 
     json = JSON.parse response.body
-    json.length.should eq(1)
+    json.length.should eq(2)
 
     json = json[0]
     json['id'].should eq(contact.id)
@@ -100,32 +103,37 @@ describe Api::ContactsController do
     json['vars'].should eq({"var1" => "foo"})
   end
 
-  it "updates a contact's var by address" do
-    put :update_by_address, project_id: project.id, address: contact.addresses.first.address, vars: {var1: "bar"}
+  describe "update a contact's varaible by address" do
+    it "response 422 when it's missing parameter" do
+      put :update_by_address, project_id: project.id, address: contact.addresses.first.address
 
-    @contact_var.reload
-    @contact_var.value.should eq("bar")
+      assert_response :unprocessable_entity
+    end
 
-    response.should be_ok
+    it "update an existing contact variable value" do
+      put :update_by_address, project_id: project.id, address: contact.addresses.first.address, vars: {var1: "bar"}
 
-    json = JSON.parse response.body
-    json['id'].should eq(contact.id)
-    json['addresses'].should eq(contact.addresses.map(&:address))
-    json['vars'].should eq({"var1" => "bar"})
-  end
+      @contact_var.reload
+      @contact_var.value.should eq("bar")
 
-  it "updates a contact's var (that didn't have a previous value) by address" do
-    put :update_by_address, project_id: project.id, address: contact.addresses.first.address, vars: {var2: "bar"}
+      response.should be_ok
 
-    var = PersistedVariable.where(contact_id: contact.id, project_variable_id: @project_var2.id).first
-    var.value.should eq("bar")
+      json = JSON.parse response.body
+      json['id'].should eq(contact.id)
+      json['addresses'].should eq(contact.addresses.map(&:address))
+      json['vars'].should eq({"var1" => "bar"})
+    end
 
-    response.should be_ok
+    it "update an non-existing contact variable value" do
+      put :update_by_address, project_id: project.id, address: contact.addresses.first.address, vars: {var2: "bar"}
 
-    json = JSON.parse response.body
-    json['id'].should eq(contact.id)
-    json['addresses'].should eq(contact.addresses.map(&:address))
-    json['vars'].should eq({"var1" => "foo", "var2" => "bar"})
+      response.should be_ok
+
+      json = JSON.parse response.body
+      json['id'].should eq(contact.id)
+      json['addresses'].should eq(contact.addresses.map(&:address))
+      json['vars'].should eq({"var1" => "foo", "var2" => "bar"})
+    end
   end
 
   it "updates all contacts vars" do
@@ -135,7 +143,7 @@ describe Api::ContactsController do
     @contact_var.value.should eq("bar")
 
     json = JSON.parse response.body
-    json.length.should eq(1)
+    json.length.should eq(2)
 
     json = json[0]
     json['id'].should eq(contact.id)
@@ -143,16 +151,169 @@ describe Api::ContactsController do
     json['vars'].should eq({"var1" => "bar"})
   end
 
-  it "updates all contacts vars (when a var didn't have a previous value)" do
-    put :update_all, project_id: project.id, vars: {var2: "bar"}
+  describe "POST create" do
+    before(:each) do
+      contact.addresses.build(address: "1000").save
+    end
 
-    json = JSON.parse response.body
-    json.length.should eq(1)
+    it "should response 404 when project doesn't exists" do
+      expect{
+        post :create, project_id: 9999
 
-    json = json[0]
-    json['id'].should eq(contact.id)
-    json['addresses'].should eq(contact.addresses.map(&:address))
-    json['vars'].should eq({"var1" => "foo", "var2" => "bar"})
+        assert_response :not_found
+        response = ActiveSupport::JSON.decode(@response.body)
+        response.should == "The project is not found"
+      }.to change(project.contacts, :count).by(0)
+    end
+
+    it "should response 400 when addresses is missing" do
+      expect{
+        post :create, project_id: project.id
+
+        assert_response :bad_request
+        response = ActiveSupport::JSON.decode(@response.body)
+        response.should == "Addresses is missing"
+      }.to change(project.contacts, :count).by(0)
+    end
+
+    it "should response 400 when addresses is string" do
+      expect {
+        post :create, {:project_id => project.id, :addresses => "1000"}
+
+        assert_response :bad_request
+        response = ActiveSupport::JSON.decode(@response.body)
+        response.should == "Addresses was supposed to be a Array, but was a String"
+      }.to change(project.contacts, :count).by(0)
+    end
+
+    it "should response 400 when addresses is numeric" do
+      expect {
+        post :create, {:project_id => project.id, :addresses => 1000}
+
+        assert_response :bad_request
+        response = ActiveSupport::JSON.decode(@response.body)
+        response.should == "Addresses was supposed to be a Array, but was a String"
+      }.to change(project.contacts, :count).by(0)
+    end
+
+    it "should response 200 when addresses is empty" do
+      expect {
+        post :create, {:project_id => project.id, :addresses => []}
+
+        assert_response :success
+      }.to change(project.contacts, :count).by(0)
+    end
+
+    it "should ignore existing addresses" do
+      expect {
+        post :create, {:project_id => project.id, :addresses => ["1000"]}
+      }.to change(project.contacts, :count).by(0)
+    end
+
+    it "should create non-existing addresses" do
+      expect {
+        post :create, :project_id => project.id, :addresses => ["01236475", "0243332343", "0186354633"]
+      }.to change(project.contacts, :count).by(3)
+    end
+
+    it "should create non-existing and ignore existing addresses" do
+      expect {
+        post :create, :project_id => project.id, :addresses => ["2000", 2000, "3000"]
+      }.to change(project.contacts, :count).by(2)
+    end
+  end
+
+  describe "DELETE unregistration" do
+    before(:each) do
+      contact.addresses.destroy_all # reset contact addresses to destroy the default of primary address
+      contact.addresses.build(address: "1000").save
+      contact_two.addresses.destroy_all # reset contact addresses to destroy the default of primary address
+      contact_two.addresses.build(address: "2000")
+      contact_two.addresses.build(address: "2001")
+      contact_two.save
+    end
+
+    it "should response 404 when project doesn't exists" do
+      expect{
+        delete :unregistration, project_id: 9999
+
+        assert_response :not_found
+        response = ActiveSupport::JSON.decode(@response.body)
+        response.should == "The project is not found"
+      }.to change(project.contacts, :count).by(0)
+    end
+
+    it "should response 400 when addresses is missing" do
+      expect{
+        delete :unregistration, project_id: project.id
+
+        assert_response :bad_request
+        response = ActiveSupport::JSON.decode(@response.body)
+        response.should == "Addresses is missing"
+      }.to change(project.contacts, :count).by(0)
+    end
+
+    it "should response 400 when addresses is string" do
+      expect {
+        delete :unregistration, {:project_id => project.id, :addresses => "1000"}
+
+        assert_response :bad_request
+        response = ActiveSupport::JSON.decode(@response.body)
+        response.should == "Addresses was supposed to be a Array, but was a String"
+      }.to change(project.contacts, :count).by(0)
+    end
+
+    it "should response 400 when addresses is numeric" do
+      expect {
+        delete :unregistration, {:project_id => project.id, :addresses => 1000}
+
+        assert_response :bad_request
+        response = ActiveSupport::JSON.decode(@response.body)
+        response.should == "Addresses was supposed to be a Array, but was a String"
+      }.to change(project.contacts, :count).by(0)
+    end
+
+    it "should response 200 when addresses is empty" do
+      expect {
+        delete :unregistration, {:project_id => project.id, :addresses => []}
+
+        assert_response :success
+      }.to change(project.contacts, :count).by(0)
+    end
+
+    it "should ignore non-existing addresses" do
+      expect {
+        delete :unregistration, {:project_id => project.id, :addresses => ["9999"]}
+      }.to_not change(project.contacts, :count).by(1)
+    end
+
+    it "should destroy contact and contact addresses when it has only one address" do
+      expect {
+        contact.addresses.count.should == 1
+        contact.first_address.should == "1000"
+        delete :unregistration, {:project_id => project.id, :addresses => ["1000"]}
+      }.to change(project.contacts, :count).from(2).to(1)
+    end
+
+    it "should destroy only contact adderss when contact has many addresses" do
+      expect {
+        contact_two.addresses.count.should == 2
+        delete :unregistration, {:project_id => project.id, :addresses => ["2000"]}
+        contact_two.addresses.count.should == 1
+      }.to_not change(project.contacts, :count).by(1)
+    end
+
+    it "should destroy existing and ignore non-existing addresses" do
+      expect {
+        delete :unregistration, {:project_id => project.id, :addresses => ["1000", "9999"]}
+      }.to change(project.contacts, :count).from(2).to(1)
+    end
+
+    it "should destroy only contact/contact addresses when it's has only one/many addresses" do
+      expect {
+        delete :unregistration, {:project_id => project.id, :addresses => ["1000", "2000"]}
+      }.to change(project.contacts, :count).from(2).to(1)
+    end
   end
 
   it "creates a new contact with a single address" do

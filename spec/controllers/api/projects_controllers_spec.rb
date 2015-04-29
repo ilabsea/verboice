@@ -21,19 +21,37 @@ describe Api::ProjectsController do
   include Devise::TestHelpers
 
   before(:each) do
-    sign_in account
+    @account = Account.make
+    @admin = Account.make role: Account::ADMIN
+
+    @project = @account.projects.make
+    @another_project = @admin.projects.make
   end
-  let!(:account) { Account.make }
-  let!(:project) { account.projects.make }
-  let!(:call_flow) { project.call_flows.make }
-  let!(:schedule) { project.schedules.make }
+
+  context "sign in as admin" do
+    before(:each) do
+      sign_in @admin
+    end
+
+    it "should list all projects" do
+      get :index
+
+      response = JSON.parse(@response.body)
+      response.length.should eq(2)
+    end
+  end
+
+  context "sign in as normal user" do
+    before(:each) do
+      sign_in @account
+    end
   let!(:variable) { project.project_variables.make }
 
-  it "should list all projects" do
-    get :index
+    it "should list all projects" do
+      get :index
 
-    response = JSON.parse(@response.body)
-    response.length.should == 1
+      response = JSON.parse(@response.body)
+      response.length.should == 1
     assert_project_json response[0]
   end
 

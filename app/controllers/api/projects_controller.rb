@@ -15,6 +15,8 @@
 # You should have received a copy of the GNU General Public License
 # along with Verboice.  If not, see <http://www.gnu.org/licenses/>.
 class Api::ProjectsController < ApiController
+
+    # GET /api/projects
   def index
     projects = current_account.projects.includes(:call_flows, :schedules, :project_variables).sort_by { |p| p.name.downcase }.map do |project|
       project_as_json(project)

@@ -4,6 +4,9 @@
 -include("db.hrl").
 -include("uri.hrl").
 
+-define(QST_SERVER, "qst_server").
+-define(SMTP, "smtp").
+
 run(Args, Session = #session{project = Project}) ->
   Guid = proplists:get_value(resource_guid, Args),
   RcptType = proplists:get_value(rcpt_type, Args),

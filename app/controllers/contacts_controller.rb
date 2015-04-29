@@ -19,11 +19,20 @@ class ContactsController < ApplicationController
   before_filter :authenticate_account!
   before_filter :load_project
   before_filter :initialize_context, :only => [:show, :edit, :update, :destroy]
+  before_filter :call_logs, only: :edit
   before_filter :check_project_admin, :only => [:create, :edit, :update, :destroy]
   before_filter :init_calls_context, :only => [:calls, :queued_calls]
+  before_filter :exclude_call_log_recorded_audios, only: :edit
 
   def index
-    @contacts = ContactsFinder.for(@project).find(filters, includes: [:addresses, :recorded_audios, :persisted_variables, :project_variables])
+    @contacts = @project.contacts.includes(:addresses).includes(:recorded_audios).includes(:persisted_variables).includes(:project_variables)
+    @search = params[:search]
+
+    if !@search.blank?
+      @contacts = @contacts.where(["contact_addresses.address like :address", :address => "#{@search}%" ])
+    end
+
+    @contacts = @contacts.paginate(:page => params[:page])
     @project_variables = @project.project_variables
     @recorded_audio_descriptions = RecordedAudio.select(:description).where(:contact_id => @contacts.collect(&:id)).collect(&:description).to_set
     @implicit_variables = ImplicitVariable.subclasses
@@ -81,10 +90,10 @@ class ContactsController < ApplicationController
 
     respond_to do |format|
       if @contact.save
-        format.html { redirect_to project_contacts_url(@project), notice: 'Contact was successfully created.' }
+        format.html { redirect_to project_contacts_url(@project), notice: I18n.t("controllers.contacts_controller.contact_was_successfully_created")}
         format.json { render json: @contact, status: :created, location: @contact }
       else
-        format.html { render action: "new" }
+        format.html { redirect_to new_project_contact_path(@project), alert: @contact.errors.full_messages.first }
         format.json { render json: @contact.errors, status: :unprocessable_entity }
       end
     end
@@ -94,10 +103,10 @@ class ContactsController < ApplicationController
     mark_empty_variables_for_removal params
     respond_to do |format|
       if @contact.update_attributes(params[:contact])
-        format.html { redirect_to project_contacts_url(@project), notice: 'Contact was successfully updated.' }
+        format.html { redirect_to project_contacts_url(@project), notice: I18n.t("controllers.contacts_controller.contact_was_successfully_updated")}
         format.json { head :no_content }
       else
-        format.html { render action: "edit" }
+        format.html { redirect_to edit_project_contact_path(@project), alert: @contact.errors.full_messages.first }
         format.json { render json: @contact.errors, status: :unprocessable_entity }
       end
     end
@@ -116,6 +125,13 @@ class ContactsController < ApplicationController
       .where(contact_id: @contact.id)
       .order('id DESC')
       .paginate(:page => @page, :per_page => @per_page)
+  end
+  
+  def invitable
+    @contacts = @project.contacts.joins(:addresses).
+      where('contact_addresses.address LIKE ?', "#{params[:term]}%").
+      order('address').paginate(page: params[:page])
+    render json: @contacts.pluck(:address)
   end
 
   def queued_calls
@@ -139,7 +155,7 @@ class ContactsController < ApplicationController
       unless variable['value'].present?
         variable['_destroy'] = "1"
       end
-    end if params[:contact][:persisted_variables_attributes].present?
+    end if params[:contact].present? && params[:contact][:persisted_variables_attributes].present?
   end
 
   def filters
@@ -150,5 +166,17 @@ class ContactsController < ApplicationController
     @contact = @project.contacts.find(params[:id])
     @page = params[:page] || 1
     @per_page = 10
+  end
+  
+  def call_logs
+    @logs = @project.call_logs.includes(:channel).includes(:call_flow).includes(:call_log_answers).includes(:call_log_recorded_audios)
+    @logs = @logs.search "address:#{@contact.first_address}"
+    @logs = @logs.order 'call_logs.id DESC'
+    @logs = @logs.paginate :page => params[:page]
+  end
+
+  def exclude_call_log_recorded_audios
+    calls = @project.call_logs.joins(:call_log_recorded_audios).search("address:#{@contact.first_address}").pluck :id
+    @recorded_audios = @contact.recorded_audios.where('call_log_id NOT IN (?)', calls) if calls.present?
   end
 end

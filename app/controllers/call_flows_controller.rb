@@ -29,6 +29,7 @@ class CallFlowsController < ApplicationController
 
   def download_results
     @filename = "Call_results_-_#{@call_flow.name}_(#{Time.now.to_s.gsub(' ', '_')}).csv"
+    @output_encoding = 'UTF-8'
     @streaming = true
     @csv_options = { :col_sep => ',' }
 
@@ -49,7 +50,7 @@ class CallFlowsController < ApplicationController
 
     @call_flow.save
     if request.xhr?
-      render :partial => "box_content", :locals => { :call_flow => @call_flow, :expanded => (@call_flow.mode_flow? || @call_flow.errors.any?)}
+      render :partial => "box_content", :locals => { :call_flow => @call_flow, :project => @call_flow.project , :expanded => (@call_flow.mode_flow? || @call_flow.errors.any?)}
     else
       render :action => "index"
     end
@@ -67,7 +68,7 @@ class CallFlowsController < ApplicationController
   def update
     @call_flow.update_attributes(params[:call_flow])
     if request.xhr?
-      render :partial => "box_content", :locals => { :call_flow => @call_flow, :expanded => @call_flow.errors.any? }
+      render :partial => "box_content", :locals => { :call_flow => @call_flow, :project => @call_flow.project, :expanded => @call_flow.errors.any? }
     else
       render :action => "index"
     end
@@ -77,7 +78,7 @@ class CallFlowsController < ApplicationController
     @call_flow.user_flow = JSON.parse params[:flow]
     @call_flow.mode= :flow
     if @call_flow.save
-      redirect_to edit_workflow_project_call_flow_path(@project, @call_flow), :notice => "Call Flow #{@call_flow.name} successfully updated."
+      redirect_to edit_workflow_project_call_flow_path(@project, @call_flow), :notice => I18n.t("controllers.call_flows_controller.call_flow_successfully_updated", :call_flow_name => @call_flow.name)
     else
       render :action => "edit_workflow"
     end
@@ -87,26 +88,28 @@ class CallFlowsController < ApplicationController
     @variables = @project.defined_variables
     @external_steps = @call_flow.project.external_service_steps.includes(:external_service)
     @sms_channels = current_account.nuntium_channels.order(:name)
+    @call_flows = @project.call_flows.select{|call_flow| call_flow.id != params[:id].to_i}
   end
 
   def import
     if params[:vrb].blank?
-      redirect_to({:action => :edit_workflow}, :flash => {:alert => "No file found"})
+      redirect_to({:action => :edit_workflow}, :flash => {:alert => I18n.t("controllers.call_flows_controller.no_file_found")})
     else
       begin
         extension = File.extname params[:vrb].original_filename
         case extension
         when '.vrb'
-          @call_flow.user_flow = YAML::load File.read(params[:vrb].tempfile.path)
+          yaml = Yaml.regenerate_new_resource_guid!(YAML::load(File.read(params[:vrb].tempfile.path)), @call_flow.project)
+          @call_flow.user_flow = yaml
           @call_flow.save!
         when '.vrz', '.zip'
           VrzContainer.for(@call_flow).import params[:vrb].tempfile.path
         else
-          raise 'Invalid extension'
+          raise I18n.t("controllers.call_flows_controller.invalide_extension")
         end
-        redirect_to({ :action => :edit_workflow }, {:notice => "Call Flow #{@call_flow.name} successfully updated."})
+        redirect_to({ :action => :edit_workflow }, {:notice => I18n.t("controllers.call_flows_controller.call_flow_successfully_updated", :call_flow_name => @call_flow.name)})
       rescue Exception => ex
-        redirect_to({:action => :edit_workflow}, :flash => {:error => "Invalid file: #{ex.message.truncate(150)}"})
+        redirect_to({:action => :edit_workflow}, :flash => {:error => I18n.t("controllers.call_flows_controller.invalide_file", :ex => ex)})
       end
     end
   end
@@ -114,6 +117,7 @@ class CallFlowsController < ApplicationController
   def export
     if params[:export_audios] || @call_flow.call_flow_external_services.count > 0
       file = Tempfile.new(@call_flow.id.to_s)
+      file.chmod 0644 # NOTE: allow other read access for x_sendfile
       begin
         VrzContainer.for(@call_flow, params[:export_audios]).export file.path
       ensure
@@ -141,6 +145,7 @@ class CallFlowsController < ApplicationController
   def load_call_flow_and_project
     load_project
     @call_flow = @project.call_flows.find(params[:id])
+    @reminder_groups = @project.ext_reminder_groups
   end
 
   def load_all_call_flows

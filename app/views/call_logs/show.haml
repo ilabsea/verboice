@@ -2,19 +2,22 @@
 .call-log-header
   .item
     %b Not Before:
-    = @log.not_before
+    = datetime_format @log.not_before, @log.project.time_zone
+    
   .item
     %b Not After:
     = @log.not_after
   .item
     %b Started:
-    = format_timestamp(@log.started_at)
+    = datetime_format @log.created_at, @log.project_time_zone
+
   .item
     %b Finished:
-    = format_timestamp(@log.finished_at)
+    = datetime_format @log.finished_at, @log.project_time_zone
+
   .item
     %b Duration:
-    = distance_of_time_in_words(@log.finished_at, @log.started_at, true) if @log.finished_at
+    = @log.duration if @log.duration && @log.duration > 0
   .item
     %b Phone number:
     = @log.address
@@ -38,7 +41,7 @@
     = @log.fail_reason
 %br/
 %p
-  = link_to 'Download CSV', download_details_call_log_path(@log, :format => :csv), :class => "button fimport"
+  = link_to 'Download CSV', download_details_project_call_log_path(@project, @log, :format => :csv), :class => "button fimport"
 
 .tablewrapp.user-flow-log
   %table

@@ -1,6 +1,6 @@
 = render 'shared/project_tabs_and_title', :project => project, :shared_project => @shared_project
 
-%h1 Schedules
+%h1= t('views.schedules.index.title')
 
 - schedules.each do |schedule|
   = render 'box', :schedule => schedule, :expanded => schedule.errors.any?
@@ -8,7 +8,7 @@
 - if project_admin?
   .box.grey.addqueue.w60
     %span
-      = link_to_add_box :schedule, "Add Schedule", @project, :class => 'add_fields'
+      = link_to_add_box :schedule, t('views.schedules.index.action.add_schedule'), @project, :class => 'add_fields'
     %button.cadd.right{:onclick => "$('.add_fields').click();", :type => "button"}
     %br{clear: 'all'}
 

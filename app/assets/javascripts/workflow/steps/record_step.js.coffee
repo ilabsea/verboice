@@ -7,7 +7,13 @@ onWorkflow ->
     constructor: (attrs) ->
       super(attrs)
 
+      @old_store = ko.observable attrs.store
+      @store = ko.observable attrs.store
+      @defines_store = ko.observable !!attrs.store
+
       @timeout = ko.observable (attrs.timeout || '10')
+      @silence_detection = ko.observable (attrs.silence_detection || '0')
+
       @stop_key = ko.observable (attrs.stop_key || '#')
 
       @current_editing_resource = ko.observable null
@@ -23,8 +29,11 @@ onWorkflow ->
       @is_confirmation_resource_invalid = ko.computed () =>
         not @resources.confirmation.is_valid()
 
+      @is_store_value_invalid = ko.computed () =>
+        not @store()
+
       @is_invalid = ko.computed () =>
-        @is_name_invalid() or @is_explanation_resource_invalid() or @is_confirmation_resource_invalid()
+        @is_name_invalid() or @is_explanation_resource_invalid() or @is_confirmation_resource_invalid() or @is_store_value_invalid()
 
     button_class: () =>
       'lmicrophone'
@@ -38,7 +47,12 @@ onWorkflow ->
 
     to_hash: () =>
       $.extend(super,
+        # old_store: (if @defines_store() then @old_store() else null)
+        # store: (if @defines_store() then @store() else null)
+        old_store: (if @old_store() then @old_store() else null)
+        store: (if @store() then @store() else null)
         timeout: @timeout()
+        silence_detection: @silence_detection()
         stop_key: @stop_key()
         explanation_resource: @resources.explanation.to_hash()
         confirmation_resource: @resources.confirmation.to_hash()

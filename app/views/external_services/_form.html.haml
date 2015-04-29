@@ -5,24 +5,24 @@
         = f.label :name
         = f.text_field :name, :disabled => true, :readonly => true, :class => "w30"
     .field
-      = f.label :url, 'URL'
+      = f.label :url, t('views.external_services._form.label.url')
       = f.text_field :url, :class => "w50"
-    = link_to 'Update Manifest', update_manifest_project_external_service_path(project.id, external_service.id), :method => :put, :class => 'fsync' if external_service.id
+    = link_to t('views.external_services._form.action.update_manifest'), update_manifest_project_external_service_path(project.id, external_service.id), :method => :put, :class => 'fsync' if external_service.id
     - unless external_service.new_record?
       .external_service_settings
-        %p Settings
+        %p= t('views.external_services._form.label.settings')
         .field
           = f.label :base_url, 'Base URL'
           = f.text_field :base_url, :class => "w30"
         = f.fields_for :global_variables, external_service.global_variables do |variables_form|
           .field
-            = variables_form.label :value, variables_form.object.display_name
+            = f.label :value, variables_form.object.display_name
             = variables_form.hidden_field :name
             = variables_form.text_field :value, :class => "w30"
 
       .steps
         - if external_service.steps.any?
-          %p Steps
+          %p= t('views.external_services._form.label.steps')
           - external_service.steps.each do |step|
             %div
               %a{:class => "#{step.icon.index('http') == 0 ? 'lpgear' : "lp#{step.icon}" }"}
@@ -37,7 +37,7 @@
                     = step.response_variables.map {|variable| variable.display_name }.join ", "
   %hr
     - if external_service.new_record?
-      %button.white{:type => "submit"} Save
+      %button.white{:type => "submit"}= t('views.external_services._form.action.save')
     - else
-      %button.white{:type => "submit"} Update
-    = link_to 'Cancel', '#', :class => "button white cancel #{external_service.new_record? ? 'remove_unsaved_element' : 'collapse_trigger'}", :style => 'top: 1px;'
+      %button.white{:type => "submit"}= t('views.external_services._form.action.update')
+    = link_to t('views.external_services._form.action.cancel'), '#', :class => "button white cancel #{external_service.new_record? ? 'remove_unsaved_element' : 'collapse_trigger'}", :style => 'top: 1px;'

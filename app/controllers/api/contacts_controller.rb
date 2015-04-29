@@ -61,28 +61,19 @@ class Api::ContactsController < ApiController
   end
 
   def update_by_address
-    contact = project.contacts.joins(:addresses).where(contact_addresses: {address: params[:address]}).first or return head(:not_found)
-    project_vars = project.project_variables.all
-    project_vars = project_vars.index_by &:name
+    return head :unprocessable_entity unless params[:vars].present?
 
-    vars = PersistedVariable.includes(:project_variable).where(project_variables: {project_id: project.id}, contact_id: contact.id).all
-    vars = vars.index_by { |var| var.project_variable.name }
+    contact = project.contacts.joins(:addresses).where(contact_addresses: {address: params[:address]}).first or return head(:not_found)
 
     Contact.transaction do
-      params[:vars].each do |key, value|
-        var = vars[key]
-        unless var
-          project_var = project_vars[key]
-          unless project_var
-            return render text: "No such variable: #{key}", status: :bad_reqeust
-          end
+    params[:vars].each do |name, value|
+      variable = project.project_variables.find_by_name(name)
 
-          var = PersistedVariable.new
-          var.contact_id = contact.id
-          var.project_variable_id = project_var.id
-        end
-        var.value = value
-        var.save!
+      return render text: "No such variable: #{name}", status: :bad_reqeust unless variable
+
+      persisted_variable = PersistedVariable.where(project_variable_id: variable.id, contact_id: contact.id).first_or_initialize
+      persisted_variable.value = value
+      persisted_variable.save!
       end
     end
 
@@ -122,6 +113,58 @@ class Api::ContactsController < ApiController
     end
 
     index
+  end
+  
+  # POST /projects/:project_id/contact
+  def create
+    if params[:addresses].nil?
+      render json: "Addresses is missing".to_json, status: :bad_request
+      return
+    else
+      unless params[:addresses].kind_of?(Array)
+        render json: "Addresses was supposed to be a Array, but was a String".to_json, status: :bad_request
+        return
+      end
+    end
+
+    import = { "success" => [], "existing" => [], "project_id" => project.id }
+    params[:addresses].map do |address|
+      contact = project.contacts.build
+      contact.addresses.build(:address => address)
+      if contact.save
+        import["success"].push(address.to_s)
+      else
+        import["existing"].push(address.to_s)
+      end
+    end
+    render json: import
+  end
+
+  # DELETE /projects/:project_id/contacts/unregistration
+  def unregistration
+    if params[:addresses].nil?
+      render json: "Addresses is missing".to_json, status: :bad_request
+      return
+    else
+      unless params[:addresses].kind_of?(Array)
+        render json: "Addresses was supposed to be a Array, but was a String".to_json, status: :bad_request
+        return
+      end
+    end
+    
+    result = { "success" => [], "non-existing" => [], "project_id" => project.id }
+    params[:addresses].each do |address|
+      is_deleted = false
+      contact = project.contacts.joins(:addresses).where(:contact_addresses => {address: address}).first
+      if contact.addresses.count == 1
+        is_deleted = true if contact.destroy
+      else
+        is_deleted = true if contact.remove_address address
+      end if contact
+
+      is_deleted ? result['success'].push(address.to_s) : result['non-existing'].push(address.to_s)
+    end
+    render json: result
   end
 
   private

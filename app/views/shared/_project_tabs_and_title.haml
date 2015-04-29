@@ -5,22 +5,25 @@
 
 %ul.tabs.top
   %li{ :class =>"#{"active" if params[:controller] == "projects" && params[:action] == 'show'}" }
-    = link_to "Overview", project_path(project)
+    = link_to t('views.shared._project_tabs_and_title.action.overview'), project_path(project)
+  %li{ :class =>"#{"active" if params[:controller] == "call_logs"}" }
+    = link_to t('views.shared._project_tabs_and_title.action.calls'), project_call_logs_path(project)
   %li{ :class =>"#{"active" if params[:controller] == "call_flows"}" }
-    = link_to "Call Flows", project_call_flows_path(project)
+    = link_to t('views.shared._project_tabs_and_title.action.call_flows'), project_call_flows_path(project)
   %li{ :class =>"#{"active" if params[:controller] == "resources"}" }
-    = link_to "Resources", project_resources_path(project)
+    = link_to t('views.shared._project_tabs_and_title.action.resources'), project_resources_path(project)
   %li{ :class =>"#{"active" if params[:controller] == "schedules"}" }
-    = link_to "Schedules", project_schedules_path(project)
+    = link_to t('views.shared._project_tabs_and_title.action.schedules'), project_schedules_path(project)
   %li{ :class =>"#{"active" if params[:controller] == "scheduled_calls"}" }
     = link_to "Scheduled Calls", project_scheduled_calls_path(project)
   %li{ :class =>"#{"active" if params[:controller] == "contacts"}" }
-    = link_to "Phone Book", project_contacts_path(project)
+    = link_to t('views.shared._project_tabs_and_title.action.phone_book'), project_contacts_path(project)
   %li{ :class =>"#{"active" if params[:controller] == "external_services"}"}
-    = link_to "External Services", project_external_services_path(project)
+    = link_to t('views.shared._project_tabs_and_title.action.external_services'), project_external_services_path(project)
   %li{ :class =>"#{"active" if params[:controller] == "feeds"}" }
     = link_to "Feeds", project_feeds_path(project)
   %li{ :class =>"#{"active" if params[:controller] == "projects" && params[:action] == 'edit'}" }
-    = link_to "Settings", edit_project_path(project)
+    = link_to t('views.shared._project_tabs_and_title.action.settings'), edit_project_path(project)
+  = render "ext/shared/project_tabs", :project => project
 .tabsline
 %br

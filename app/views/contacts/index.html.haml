@@ -1,12 +1,17 @@
 = render 'shared/project_tabs_and_title', :project => @project, :shared_project => @shared_project
+:javascript
+  $(function(){
+    allowKeyInput($("#search"), /[0-9\+]/);
+  });
 
-%h2 Phone Book
-%p.desc List of all the people that have made or received calls in this project
+
+%h2= t('views.contacts.index.title')
+%p.desc= t('views.contacts.index.desc')
 
 .ux-collapsible.collapsed.w40.file_upload{"data-on-expanded" => "box grey"}
   %span
     - if project_admin?
-      %a.button.fconfiguration{:href => "#"} Manage Phone Book's columns
+      %a.button.fconfiguration{:href => "#"}= t('views.contacts.index.action.manage_phone_book_columns')
   .ux-content
     = form_for(@project, :url => update_variables_project_path(@project)) do |f|
       %hr
@@ -15,12 +20,12 @@
           = render 'project_variable_fields', :f => builder
         .add_project_variable
           .ux-optext{class: 'w30', style: 'display: inline-block;'}
-            Add new variable
+            = t('views.contacts.index.label.add_new_variable')
           = link_to_add_fields '', f, :project_variables, :class => 'button clist-add'
       %hr
       .right
-        %a.button.ux-collapse-trigger Cancel
-        %button.white{:type => "submit"} Confirm
+        %button.white{:type => "submit"}= t('views.contacts.index.action.confirm')
+        %a.button.white.cancel.ux-collapse-trigger= t('views.contacts.index.action.cancel')
       .clear
 
 %a.button.fimport{:href => project_contacts_path(@project, format: :csv)} Download Phone Book as CSV

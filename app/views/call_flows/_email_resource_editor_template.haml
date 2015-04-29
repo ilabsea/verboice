@@ -1,0 +1,56 @@
+%script{type: "text/html", id: "email_resource_editor_template"}
+  .popup
+    .courtain
+    .box.popupmessage
+
+      / ko if: resource() == null
+      %div= t('views.call_flows._resource_editor_template.label.message')
+      %hr
+      %div
+        %input#create-new-message{:type => 'radio', :value => 'new', 'data-bind' => 'checked: type'}
+        = t('views.call_flows._resource_editor_template.label.create_new_message')
+      .resource-name
+        %input.w22{:type => 'text', :placeholder => "#{t('views.call_flows._resource_editor_template.label.enter_message_name')}", 'data-bind' => 'value: name, valueUpdate: "afterkeydown", visible: type() == "new"'}
+      %div
+        %input#select-an-existing-one{:type => 'radio', :value => 'existing', 'data-bind' => 'checked: type'}
+        %label{:for => 'select-an-existing-one'}= t('views.call_flows._resource_editor_template.label.select_existing_one')
+        .resource-name
+        %input.w22{:type => 'text', :placeholder => "#{t('views.call_flows._resource_editor_template.label.enter_message_name')}", 'data-bind' => "visible: type() == 'existing', jqAuto: { autoFocus: true }, jqAutoSource: matching_resources, jqAutoQuery: get_resources, jqAutoValue: existing_resource_guid, jqAutoSourceLabel: 'name', jqAutoSourceInputValue: 'name', jqAutoSourceValue: 'guid'"}
+      %hr
+      %button.white{'data-bind' => 'click: next, enable: is_next_enabled'}= t('views.call_flows._resource_editor_template.action.next')
+      %a.cancel{:href => '#', 'data-bind' => 'click: cancel'}= t('views.call_flows._resource_editor_template.action.cancel')
+      / /ko
+
+      / ko if: resource() != null
+      / ko with: resource
+      %div
+        %label= t('views.call_flows._resource_editor_template.label.name')
+        %br
+        %span.desc= t('views.call_flows._resource_editor_template.label.enter_message_name')
+      .w22
+        %input.ux-text{:type => 'text', 'data-bind' => 'value: name'}
+      / %div
+      /   %span.alert-orange-b Message in use in 3 other steps
+      /   %span.alert-orange
+      %hr
+      %div.hidden= t('views.call_flows._resource_editor_template.label.languages')
+      / ko foreach: localizedResources
+      %div
+        %a{:href => '#', 'data-bind' => 'click: $parent.edit'}
+          %span{'data-bind' => "css: {'arrow-col': $parent.current_editing_localized_resource() != $data, 'arrow-exp': $parent.current_editing_localized_resource() == $data}"}
+          %span{'data-bind' => 'text: title'}
+      / ko if: $parent.current_editing_localized_resource() == $data
+      .text-right
+        %select.w100.hidden{ko(options: "options", optionsText: "'label'", value: "current")}
+        %div{ko(:template => "{name: current().template, data: current}")}
+      / /ko
+      / /ko
+      / /ko
+
+      %hr
+
+      %button.white{'data-bind' => 'click: save'}= t('views.call_flows._resource_editor_template.action.save')
+      %a.cancel{:href => '#', 'data-bind' => 'click: cancel'}= t('views.call_flows._resource_editor_template.action.cancel')
+      %button.fsync.right{'data-bind' => 'click: replace'}= t('views.call_flows._resource_editor_template.action.replace')
+
+      / /ko

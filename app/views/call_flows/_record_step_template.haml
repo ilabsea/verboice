@@ -10,37 +10,43 @@
 
     %table.GralTable.TwoColumn.CleanTable.NoHead
       %tr
-        %th Messages
+        %th= t('views.call_flows._record_step_template.label.messages')
         %th
       %tr
         %td{ko(css: "{ orange: is_explanation_resource_invalid }")}
-          Explanation:
+          = t('views.call_flows._record_step_template.label.explanation')
           %span{ko(css: "{ alert: is_explanation_resource_invalid }")}
           %span{ko(text: "resource('explanation').display_name()")}
         %td
           %button.farrow{:type => "button", 'data-bind' => 'click: show_explanation_resource'}
       %tr
         %td{ko(css: "{ orange: is_confirmation_resource_invalid }")}
-          Confirmation:
+          = t('views.call_flows._record_step_template.label.confirmation')
           %span{ko(css: "{ alert: is_confirmation_resource_invalid }")}
           %span{ko(text: "resource('confirmation').display_name()")}
         %td
           %button.farrow{:type => "button", 'data-bind' => 'click: show_confirmation_resource'}
 
-    .content
+    .content{ko('instedd_init' => true)}
       %hr
-      %label Time
-      %br
       .ux-nstep.w06
         %input{:type => 'number', :size => '2', 'data-bind' => 'value: timeout'}
-      %span Maximum recording time in secs.
+      %span= t('views.call_flows._record_step_template.label.maximum_recording_time_in_second')
       %br
-      %hr
-      %label Properties
+
+      .ux-nstep.w06
+        %input{:type => 'number', :size => '2', 'data-bind' => 'value: silence_detection'}
+      %span= t('views.call_flows._record_step_template.label.silence_detection')
       %br
-      Stop recording audio with key:
-      %select{'data-bind' => 'value: stop_key, options: available_keys()'}
+
+      %select{'data-bind' => 'value: stop_key, options: available_keys()', 'style' => 'width: 60px;padding:2px;margin:2px;'}
+      = t('views.call_flows._record_step_template.label.stop_recording_audio_with_key')
+
       %hr
+      = required_store_value_tags
+      / = store_value_tags_without_checkbox
+      / = store_value_tags
+      %br/
 
     .bottom-actions
-      %button.fdelete{ 'data-bind' => 'click: remove_with_confirm' } Remove this step
+      %button.fdelete{ 'data-bind' => 'click: remove_with_confirm' }= t('views.call_flows._record_step_template.action.remove_this_step')

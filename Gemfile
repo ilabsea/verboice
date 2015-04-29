@@ -1,6 +1,6 @@
 source 'http://rubygems.org'
 
-gem 'rails', '~> 3.2.0'
+gem 'rails', '3.2.18'
 
 gem 'haml-rails'
 gem "jquery-rails"
@@ -10,21 +10,24 @@ gem 'nokogiri'
 gem 'guid'
 gem 'devise'
 gem "will_paginate", "~> 3.0"
+gem "daemons"
 gem "instedd-rails"
 gem 'decent_exposure'
 gem 'attr_encrypted'
 gem 'foreman'
 gem 'oauth2', :require => 'oauth2'
 gem 'delayed_job_active_record'
-gem 'rubyzip', :require => 'zip/zip'
+gem 'rubyzip', require: 'zip/zip'
 gem 'rest-client'
 gem 'enumerated_attribute', :git => "https://github.com/edave/enumerated_attribute.git"
-gem 'csv_builder'
+gem 'csv_builder', :git => "https://github.com/lchanmann/csv_builder.git"
 gem 'newrelic_rpm'
 gem 'hub_client', github: 'instedd/ruby-hub_client', branch: 'master'
 gem 'language_list'
 gem 'bertrpc'
+gem 'whenever', :require => false
 gem 'formatted_rails_logger'
+gem 'fabrication'
 gem 'instedd-pigeon', :require => 'pigeon'
 gem 'poirot_rails', git: 'https://github.com/instedd/poirot_rails.git', branch: 'master'
 gem 'hercule', git: 'https://github.com/instedd/poirot.git', branch: 'master'
@@ -34,6 +37,14 @@ gem 'ruby-openid'
 gem 'omniauth'
 gem 'omniauth-openid'
 gem 'recurring_select', git: "https://github.com/instedd/recurring_select", branch: 'instedd'
+gem 'ice_cube'
+gem 'aws-sdk'
+gem 'rails_config'
+gem 'awesome_print'
+
+gem "active_model_serializers"
+gem "recaptcha", :require => "recaptcha/rails"
+gem "password_strength"
 
 group :assets do
   gem 'sass-rails',   '~> 3.2.5'
@@ -53,12 +64,18 @@ group :development, :test do
   gem 'pry-debugger'
   gem 'syntax'
   gem 'timecop'
+
+  gem 'capybara'
+  gem 'database_cleaner'
+
+  gem 'rspec_api_documentation', github: 'zipmark/rspec_api_documentation'
+  gem 'apitome'
 end
 
 group :development do
   gem 'capistrano'
   gem 'rvm'
-  gem 'rvm-capistrano'
+  gem 'rvm-capistrano', require: false
   gem 'licit'
 end
 

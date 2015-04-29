@@ -16,7 +16,11 @@
 # along with Verboice.  If not, see <http://www.gnu.org/licenses/>.
 
 class Time
+  include DateComparison
+  
   Numbers = %w(one two three four five six seven eight nine ten)
+
+  DEFAULT_FORMAT  = '%d/%m/%Y %H:%M:%S %z'
 
   def milliseconds
     ((to_f - to_f.floor) * 1000).floor
@@ -47,4 +51,10 @@ class Time
   rescue Exception => e
     nil
   end
+
+  def to_string format = Time::DEFAULT_FORMAT, time_zone = "UTC"
+    zone = self.in_time_zone(time_zone)
+    zone.strftime(format)
+  end
+
 end

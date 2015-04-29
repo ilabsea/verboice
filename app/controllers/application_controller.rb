@@ -18,6 +18,11 @@
 class ApplicationController < ActionController::Base
   protect_from_forgery
   include ActionView::Helpers::TextHelper
+  include AppConfigHelper
+
+  helper_method :verify_captcha
+
+  before_filter :set_locale
 
   before_filter do
     @body_class = ['full-width']
@@ -79,4 +84,22 @@ class ApplicationController < ActionController::Base
   def set_fixed_width_content
     @body_class << 'fixed-width-content'
   end
+
+  def origin_ip
+    request.remote_ip
+  end
+
+  private
+  def set_locale
+    if params[:recaptcha_response_field].nil?
+      I18n.locale = current_account.nil? ? I18n.default_locale : current_account.locale
+    else
+      I18n.locale = I18n.default_locale
+    end
+  end
+
+  def verify_captcha
+    verify_recaptcha(private_key: RECAPTCHA_CONFIG['private_key'])
+  end
+
 end

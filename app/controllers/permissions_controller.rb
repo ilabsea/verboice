@@ -47,7 +47,7 @@ class PermissionsController < ApplicationController
 
   def add_account
     email = params[:email]
-    account = Account.find_by_email email
+    account = Account.find_by_email email unless current_account.email == email
 
     unless account
       return render json: {ok: false, error: 'User not found'}

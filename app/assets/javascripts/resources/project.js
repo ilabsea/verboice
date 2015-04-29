@@ -1,12 +1,14 @@
 onResources(function(){
-  window['Project']= function Project(){
+  window.Project = function Project(){
 
     this.resources = ko.observableArray([]);
     var self = this;
     this.languages = ko.observableArray(_.map(project_languages, function(hash){ return Language.fromHash(hash) }));
 
     $.getJSON("/projects/" + project_id + "/resources.json", function(project_resources){
+
       self.resources(_.map(project_resources, function(hash){ return Resource.fromHash(hash, self) }));
+      console.dir(self.resources());
     });
 
     this.firstLanguage = ko.observable(null);
@@ -24,6 +26,15 @@ onResources(function(){
 
   Project.prototype.removeResource = function(res){
     this.resources.remove(res)
+  }
+
+  Project.prototype.isResourceEditing = function(){
+    for(var i=0; i< this.resources().length; i++){
+      var resources = this.resources();
+      if(resources[i].editing())
+        return true;
+    }
+    return false;
   }
 
 })

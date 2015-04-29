@@ -1,11 +1,14 @@
 -module(queued_call).
--export([reschedule/1, start_session/1]).
+-export([reschedule/1, start_session/1, should_trigger/1]).
+-export([called_at/1, variables/1]).
 -define(TABLE_NAME, "queued_calls").
 -include("session.hrl").
+
 -define(MAP, [
   {callback_params, yaml_serializer},
   {variables, yaml_serializer}
 ]).
+
 -include_lib("erl_dbmodel/include/model.hrl").
 
 reschedule(#queued_call{schedule_id = undefined}) -> no_schedule;
@@ -17,7 +20,10 @@ reschedule(_, #schedule{retries = undefined}) -> max_retries;
 reschedule(Q, S) when Q#queued_call.retries >= length(S#schedule.retries) -> max_retries;
 reschedule(Q = #queued_call{retries = Retries, time_zone = TimeZone}, S) ->
   NextRetryOffset = trunc(lists:nth(Retries + 1, S#schedule.retries)),
-  TimeZoneOffset = tz_server:get_timezone_offset(TimeZone),
+  TimeZoneOffset = case TimeZone of
+    undefined -> 0;
+    _ -> tz_server:get_timezone_offset(TimeZone)
+  end,
   NextRetry = calendar:datetime_to_gregorian_seconds(calendar:universal_time()) + NextRetryOffset + TimeZoneOffset,
   RetryTime = calendar:gregorian_seconds_to_datetime(S:next_available_time(NextRetry) - TimeZoneOffset),
   case should_skip(Q, RetryTime) of
@@ -58,3 +64,13 @@ should_skip(#queued_call{not_after = undefined}, _) -> false;
 should_skip(#queued_call{not_after = {datetime, NotAfter}}, RetryTime) ->
   NotAfter =< RetryTime;
 should_skip(_, _) -> false.
+should_trigger(#queued_call{not_before = undefined, state = <<"queued">>}) -> true;
+should_trigger(#queued_call{not_before = {datetime, NotBefore}, state = <<"queued">>}) ->
+  NotBefore =< calendar:universal_time();
+should_trigger(_) -> false.
+
+called_at(#queued_call{not_before = undefined, created_at = CreatedAt}) -> CreatedAt;
+called_at(#queued_call{not_before = NotBefore}) -> NotBefore.
+
+variables(#queued_call{variables = Vars}) when is_list(Vars) -> Vars;
+variables(#queued_call{variables = Vars}) -> yaml_serializer:load(Vars).

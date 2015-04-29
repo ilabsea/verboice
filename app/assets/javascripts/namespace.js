@@ -1,0 +1,1 @@
+var verboice = window.verboice || {};

@@ -36,7 +36,11 @@ generate_config([Channel | Rest], RegFile, ChannelsFile, ResolvCache, ChannelInd
   Username = channel:username(Channel),
   Password = channel:password(Channel),
   Domain = channel:domain(Channel),
+  SipPort = channel:port(Channel),
+  Protocol = channel:protocol(Channel),
   Number = channel:number(Channel),
+  DtmfMode = channel:dtmf_mode(Channel),
+  CodecType = channel:codec_type(Channel),
 
   case Domain of
     [] ->
@@ -59,6 +63,16 @@ generate_config([Channel | Rest], RegFile, ChannelsFile, ResolvCache, ChannelInd
       file:write(ChannelsFile, "nat=yes\n"),
       file:write(ChannelsFile, "qualify=yes\n"),
 
+  if
+    length(DtmfMode) > 0 -> file:write(ChannelsFile, ["dtmfmode=", DtmfMode, "\n"]);
+    true -> ok
+  end,
+  
+  if 
+    length(CodecType) > 0 -> file:write(ChannelsFile, ["allow=", CodecType, "\n"]);
+    true -> ok
+  end,
+
       if length(Username) > 0 andalso length(Password) > 0 ->
         file:write(ChannelsFile, ["fromuser=", Username, "\n"]),
         file:write(ChannelsFile, ["defaultuser=", Username, "\n"]),
@@ -68,6 +82,19 @@ generate_config([Channel | Rest], RegFile, ChannelsFile, ResolvCache, ChannelInd
 
       file:write(ChannelsFile, "insecure=invite,port\n"),
       file:write(ChannelsFile, "context=verboice\n"),
+
+  if length(SipPort) > 0 ->
+    file:write(ChannelsFile, ["port=", SipPort, "\n"]);
+    true -> ok
+  end,
+
+  case Protocol of
+    <<"tcp">> ->
+      file:write(ChannelsFile, "transport=tcp\n"),
+      file:write(ChannelsFile, "tcpenable=yes\n");
+    _ -> ok
+  end,
+
       file:write(ChannelsFile, "\n"),
 
       case channel:is_outbound(Channel) of

@@ -45,9 +45,9 @@
               %button.clist-remove{'data-bind' => 'click: $parent.remove_condition'}
           / /ko
           %tr
-            %td Add condition
+            %td= t('views.call_flows._branch_option_template.action.add_condition')
             %td
               %button.clist-add{'data-bind' => 'click: add_condition'}
       %hr
-      %button.white{'data-bind' => 'click: save'} Save
-      %button.white.cancel{'data-bind' => 'click: cancel'} Cancel
+      %button.white{'data-bind' => 'click: save'}= t('views.call_flows._branch_option_template.action.save')
+      %button.white.cancel{'data-bind' => 'click: cancel'}= t('views.call_flows._branch_option_template.action.cancel')

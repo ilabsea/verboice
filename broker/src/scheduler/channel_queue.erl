@@ -116,22 +116,31 @@ do_dispatch(State = #state{current_calls = C, queued_calls = Q, sessions = S}) -
     {{value, Call}, Q2} ->
       case Call#queued_call.id =:= undefined orelse Call:exists() of
         true ->
-          case broker:dispatch(State#state.channel, Call) of
-            {ok, SessionPid} ->
+          ReloadQueuedCall = queued_call:find([{id, Call#queued_call.id}]),
+            case is_queueing(ReloadQueuedCall) of
+              true ->
+                case broker:dispatch(State#state.channel, Call) of
+                  {ok, SessionPid} ->
               contact_scheduled_call:record_last_call(Call),
-              Call:delete(),
-              monitor(process, SessionPid),
-              NewSessions = ordsets:add_element(SessionPid, S),
-              do_dispatch(State#state{current_calls = C + 1, queued_calls = Q2, sessions = NewSessions});
-            error ->
-              Call:delete(),
-              do_dispatch(State#state{queued_calls = Q2});
-            unavailable ->
-              State#state{active = false}
-          end;
+                    Call:delete(),
+                    monitor(process, SessionPid),
+                    NewSessions = ordsets:add_element(SessionPid, S),
+                    do_dispatch(State#state{current_calls = C + 1, queued_calls = Q2, sessions = NewSessions});
+                  error ->
+                    Call:delete(),
+                    do_dispatch(State#state{queued_calls = Q2});
+                  unavailable ->
+                    State#state{active = false}
+                end;
+              _ ->
+                error_logger:info_msg("Ignoring queued call ~p which seems has been paused", [Call#queued_call.id]),
+                do_dispatch(State#state{queued_calls = Q2})
+            end;
         false ->
           error_logger:info_msg("Ignoring queued call ~p which seems has been deleted", [Call#queued_call.id]),
           do_dispatch(State#state{queued_calls = Q2})
       end
   end.
 
+is_queueing(undefined) -> true;
+is_queueing(Call) -> Call:should_trigger().

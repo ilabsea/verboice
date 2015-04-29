@@ -18,12 +18,13 @@
 class Commands::PersistVariableCommand < Command
   attr_accessor :variable_name, :expression
 
-  def initialize(variable_name, expression)
+  def initialize variable_name, expression, data_type=nil
     @variable_name = variable_name
     @expression    = expression
+    @data_type = data_type
   end
 
   def serialize_parameters
-    { name: @variable_name, expression: @expression }
+    { name: @variable_name, expression: @expression, type: @data_type }
   end
 end

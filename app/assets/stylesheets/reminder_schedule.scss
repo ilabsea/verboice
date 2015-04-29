@@ -1,0 +1,95 @@
+/* Used for the Switch effect: */
+  .cb-enable, .cb-disable, .cb-enable span, .cb-disable span { background: url(/assets/on_off.png) repeat-x; display: block; float: left; height: 22px; }
+  
+  .cb-enable span, .cb-disable span { 
+    line-height: 22px; 
+    display: block; 
+    background-repeat: no-repeat; 
+    font-weight: bold; 
+  }
+  
+  .cb-enable span { 
+    background-position: 0px; 
+    width: 30.5px;
+  }
+  
+  .cb-disable span { 
+    background-position: -72px;
+    width: 30.5px;
+  }
+  
+  .cb-disable.selected { 
+    background-position: 0 -22px; 
+  }
+  
+  .cb-disable.selected span { 
+    background-position: -30.5px; 
+    width: 20.5px;
+  }
+  
+  .cb-enable.selected { 
+    background-position: 52.5px; 
+  }
+  .cb-enable.selected span { 
+    background-position: 103px; 
+    width: 20.5px;
+    color: #fff; 
+  }
+  .switch label { 
+    cursor: pointer; 
+  }
+
+  .repeat-field {
+    display: inline-block; 
+    float: left;
+    margin-right: 5px;
+  }
+
+  .clear {
+    clear: both;
+  }
+
+  .condition {
+    padding-left: 10px;
+  }
+
+  .warning {
+    background: url(http://theme.instedd.org/theme/images/icons/18/orange/alert.png) no-repeat;
+    color: #ff6600 !important;
+    padding-left: 19px;
+    padding-top: 1px;
+    margin-left: 2px;
+    white-space: nowrap;
+    display: inline !important;
+  }
+
+  .list_item_border {
+    border-top: 1px solid #fff;
+  }
+  .list_item{
+    margin: 0px;
+    padding: 0px;
+    list-style-type: none;
+  }
+  .list_item li{
+    border-bottom: 1px solid #fff;
+  }
+
+  .left-side{
+    float: left;
+    margin-top: 5px;
+  }
+
+  .right-side{
+    float: right;
+  }
+
+  .clear{
+    clear: both;
+  }
+
+  .ui-corner-all{
+    display: block;
+  }
+
+

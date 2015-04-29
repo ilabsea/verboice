@@ -68,12 +68,47 @@ class CallFlow < ActiveRecord::Base
     (Parsers::UserFlow.new self, user_flow).step_names
   end
 
+  def self.include_resource_name user_flow
+    user_flow_with_name = user_flow.clone
+
+    user_flow_with_name.each do |step|
+      step.each do |key, value|
+        if key.match /resource/
+          resource = Resource.find_by_guid(value["guid"])
+          value["name"] = resource.name if resource
+        end
+      end
+    end
+  end
+
   def error_flow
     Commands::TraceCommand.new call_flow_id: id, step_id: 'current_step', step_name: '', store: '"User hung up."'
   end
 
   def push_results(call_log)
     self.push_to_fusion_tables(call_log)
+  end
+
+  def resources
+    guids = []
+    resources = []
+    user_flow.each do |step| 
+      guids += guids_from_step(step)
+    end
+    project.resources.each do |resource|
+      resources << resource if guids.include?(resource.guid)
+    end
+    resources
+  end
+
+  def guids_from_step step
+    guids = []
+    step.each do |key, value|
+      if key.match(/resource/) && guid=value['guid']
+        guids << guid
+      end
+    end
+    guids
   end
 
   def clean_external_service(external_service)

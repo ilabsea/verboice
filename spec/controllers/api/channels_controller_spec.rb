@@ -105,7 +105,7 @@ describe Api::ChannelsController do
 
       response = JSON.parse(@response.body).with_indifferent_access
       response[:summary].should == "There were problems creating the Channel"
-      response[:properties].should == ["name" => "can't be blank"]
+      response[:properties].should == ["name" => "Can't be blank"]
     end
   end
 
@@ -146,7 +146,7 @@ describe Api::ChannelsController do
 
       response = JSON.parse(@response.body).with_indifferent_access
       response[:summary].should == "There were problems updating the Channel"
-      response[:properties].should == ["name" => "can't be blank"]
+      response[:properties].should == ["name" => "Can't be blank"]
 
       chan.reload.name.should eq('the_channel')
     end
@@ -165,6 +165,20 @@ describe Api::ChannelsController do
       assert_response :ok
 
       @account.channels.count.should == 0
+    end
+  end
+
+  describe "list" do
+    before(:each) do
+      Channels::Custom.make account: @account
+    end
+
+    it "should list all channels" do
+      get :list
+
+      assert_response :ok
+      response = ActiveSupport::JSON.decode(@response.body)
+      response.length.should eq(1)
     end
   end
 end

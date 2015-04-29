@@ -26,6 +26,11 @@ class Api::CallFlowsController < ApiController
     call_flow = current_account.projects.includes(:call_flows).find(params[:project_id]).call_flows.find(params[:id])
     render json: call_flow_as_json(call_flow)
   end
+  
+  def list
+    call_flows = current_account.call_flows
+    render json: call_flows, each_serializer: CustomCallFlowSerializer
+  end
 
   private
 

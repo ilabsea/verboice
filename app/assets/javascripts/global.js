@@ -11,6 +11,12 @@ $(function() {
     }
   });
 
+  // Customize Help link to open in new windows
+  $(function(){
+    element = $("#NavMenu a").last();
+    $(element).attr("target", "_blank");
+  })
+
   // Handle automatic links
   $('.link').live('click', function() {
     window.location = $(this).data('url');
@@ -19,12 +25,30 @@ $(function() {
   // Datetime components
   $(".ux-custom-datetimepicker:not([readonly])")
     .click(function(){ $(this).datepicker("show"); })
-    .datetimepicker({showButtonPanel: false, dateFormat: 'yy-mm-dd'});
+    .datetimepicker({showButtonPanel: false, dateFormat: 'dd/mm/yy'});
 
   $(".ux-custom-datepicker:not([readonly])")
     .click(function(){ if(!$(this).is('[readonly]')) {$(this).datepicker("show");} return false; })
-    .datepicker({showButtonPanel: false, dateFormat: 'yy-mm-dd'});
+    .datepicker({showButtonPanel: false, dateFormat: 'dd/mm/yy'});
 
+  set_default_nuntium_channel = function(select){
+    $.ajax({
+      type: 'put',
+      url: '/nuntium_channels/' + select.value + '/mark_as_default',
+      success: function(data, statusCode){
+        if(statusCode == "success") {
+          $(".mark_as_default").each(function(){
+            $("#label_default").html(""); // reset the first loading page
+            if($(this).val() == $(select).val()){
+              $("#label_default_" + $(this).val()).html("default");
+            }else{
+              $("#label_default_" + $(this).val()).html("");
+            }
+          })
+        }
+      }
+    })
+  }
 });
 
 function create_channel(select) {
@@ -64,8 +88,17 @@ function onResourcesWorkflow(callback) {
 }
 
 function remove_fields(link) {
-  $(link).prev("input[type=hidden]").val("1");
-  $(link).closest(".fields").hide();
+  if(confirm("Column '" +$(link).parent().children()[0].value +"' will be removed when confirmed") == true){
+    $(link).prev("input[type=hidden]").val("1");
+    $(link).closest(".fields").hide();
+  }
+}
+
+function remove_contact_group(link){
+  if(confirm("Contact group '" +$(link).parent().children()[0].value +"' will be removed when confirmed") == true){
+    $(link).prev("input[type=hidden]").val("1");
+    $(link).closest(".fields").hide();
+  }
 }
 
 function add_fields(link, association, content) {
@@ -85,4 +118,15 @@ function add_variable(link, association, content) {
     add_fields(link, association, content.replace(label_regexp, text_input.attr('value')));
     $('.field').last().find('input[type=hidden]').attr('value', text_input.attr('value'));
   }
+}
+
+function allowKeyInput(elements, pattern){
+  $(elements).controlKeyInput({
+    allowChar: pattern,
+    allow: function(input, char){
+      if(char == "+" && ($.caretPosition(input) !=0 || input.value.indexOf(char) != -1 ))
+        return false;
+      return true;
+    }
+  });
 }

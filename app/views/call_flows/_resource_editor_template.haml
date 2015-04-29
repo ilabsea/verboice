@@ -4,36 +4,36 @@
     .box.popupmessage
 
       / ko if: resource() == null
-      %div Message
+      %div= t('views.call_flows._resource_editor_template.label.message')
       %hr
       %div
         %input#create-new-message{:type => 'radio', :value => 'new', 'data-bind' => 'checked: type'}
-        %label{:for => 'create-new-message'} Create new message
+        = t('views.call_flows._resource_editor_template.label.create_new_message')
       .resource-name
-        %input.w22{:type => 'text', :placeholder => 'Enter message name', 'data-bind' => 'value: name, valueUpdate: "afterkeydown", visible: type() == "new"'}
+        %input.w22{:type => 'text', :placeholder => "#{t('views.call_flows._resource_editor_template.label.enter_message_name')}", 'data-bind' => 'value: name, valueUpdate: "afterkeydown", visible: type() == "new"'}
       %div
         %input#select-an-existing-one{:type => 'radio', :value => 'existing', 'data-bind' => 'checked: type'}
-        %label{:for => 'select-an-existing-one'} Select an existing one
-      .resource-name
-        %input.w22{:type => 'text', :placeholder => 'Enter message name', 'data-bind' => "visible: type() == 'existing', jqAuto: { autoFocus: true }, jqAutoSource: matching_resources, jqAutoQuery: get_resources, jqAutoValue: existing_resource_guid, jqAutoSourceLabel: 'name', jqAutoSourceInputValue: 'name', jqAutoSourceValue: 'guid'"}
+        %label{:for => 'select-an-existing-one'}= t('views.call_flows._resource_editor_template.label.select_existing_one')
+        .resource-name
+        %input.w22{:type => 'text', :placeholder => "#{t('views.call_flows._resource_editor_template.label.enter_message_name')}", 'data-bind' => "visible: type() == 'existing', jqAuto: { autoFocus: true }, jqAutoSource: matching_resources, jqAutoQuery: get_resources, jqAutoValue: existing_resource_guid, jqAutoSourceLabel: 'name', jqAutoSourceInputValue: 'name', jqAutoSourceValue: 'guid'"}
       %hr
-      %button.white{'data-bind' => 'click: next, enable: is_next_enabled'} Next
-      %a.cancel{:href => '#', 'data-bind' => 'click: cancel'} Cancel
+      %button.white{'data-bind' => 'click: next, enable: is_next_enabled'}= t('views.call_flows._resource_editor_template.action.next')
+      %a.cancel{:href => '#', 'data-bind' => 'click: cancel'}= t('views.call_flows._resource_editor_template.action.cancel')
       / /ko
 
       / ko if: resource() != null
       / ko with: resource
       %div
-        %label Name
+        %label= t('views.call_flows._resource_editor_template.label.name')
         %br
-        %span.desc Enter message name
+        %span.desc= t('views.call_flows._resource_editor_template.label.enter_message_name')
       .w22
         %input.ux-text{:type => 'text', 'data-bind' => 'value: name'}
       / %div
       /   %span.alert-orange-b Message in use in 3 other steps
       /   %span.alert-orange
       %hr
-      %div Languages
+      %div= t('views.call_flows._resource_editor_template.label.languages')
       / ko foreach: localizedResources
       %div
         %span{'data-bind' => "css: {'alert-orange': uploadStatus() == 'error'}"}
@@ -51,7 +51,6 @@
       %hr
 
       %button#save-resource.white{ko(click: 'save', text: "resource().saving() ? 'Saving...' : 'Save'", disable: "resource().saving()")}
-      %a.cancel{:href => '#', 'data-bind' => 'click: cancel'} Cancel
-      %button.fsync.right{'data-bind' => 'click: replace'} Replace
+      %button.fsync.right{'data-bind' => 'click: replace'}= t('views.call_flows._resource_editor_template.action.replace')
 
       / /ko

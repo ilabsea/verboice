@@ -41,9 +41,11 @@ dial_address(Channel = #channel{id = Id}, Address) ->
   end.
 
 dispatch(#session{session_id = SessionId, channel = Channel, address = Address}) ->
+  CallerId = channel:number(Channel),
   DialAddress = dial_address(Channel, Address),
   {ok, BrokerPort} = application:get_env(broker_port),
   ami_client:originate([
+    {callerid, CallerId},
     {channel, DialAddress},
     {application, "AGI"},
     {data, ["agi://localhost:", integer_to_list(BrokerPort), ",", SessionId]},

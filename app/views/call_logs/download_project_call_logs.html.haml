@@ -1,0 +1,61 @@
+:javascript
+  $(function(){
+    $('.download-zip').fancybox();
+    defaultDateFormat();
+
+  });
+
+  function readDateFormat(){
+    defaultDateFormat();
+  }
+
+  function defaultDateFormat(){
+    var value = $("#download_date_format").val();
+    urlWithDateFormat(value);
+  }
+
+  function urlWithDateFormat(value){
+    $zip = $("#download_generate_zip");
+
+    if($zip){
+      var zip_url = updateParams($zip.attr("data-url"), value);
+      $zip.attr("href", zip_url);
+    }
+
+    $csv = $("#download_format_csv");
+    var csv_url = updateParams($csv.attr("data-url"), value);
+    $csv.attr("href", csv_url);
+  }
+
+  function updateParams(url, value){
+    return url + "&" + "date_format=" + encodeURIComponent(value)
+  }
+
+
+%div{style: 'min-width: 450px;'}
+  %h2= t('views.call_logs.download_project_call_log.label.download_call_logs')
+  %hr/
+  - audios = CallLogRecordedAudio.where(call_log_id: @logs)
+  - if audios.count >0
+    %p
+      %span= t('views.call_logs.download_project_call_log.label.summary',
+              audios: audios.count,
+              size: number_to_human_size(@logs.audios_size))
+  %p
+    %span= t('views.call_logs.download_project_call_log.label.date_format')
+    %span= select_tag('date_format', options_for_select(CallLog::DATE_FORMAT_EXPORT),
+      onchange: 'readDateFormat(this)', id: 'download_date_format')
+
+  %div{class: 'action', style: 'float:right;'}
+    -if audios.count > 0
+      = link_to t('views.call_logs.download_project_call_log.action.yes_csv_and_voice'),
+         generate_zip_project_call_logs_path(search: @search), 
+         'data-url' => generate_zip_project_call_logs_path(search: @search),
+         class: %w(button white download-zip), 
+         id: 'download_generate_zip'
+
+    = link_to t('views.call_logs.download_project_call_log.action.no_only_csv'),
+        download_project_call_logs_path(format: :csv, search: @search),
+        'data-url' => download_project_call_logs_path(format: :csv, search: @search),
+        class: %w(button white), 
+        id: 'download_format_csv'

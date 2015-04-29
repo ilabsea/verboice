@@ -1,4 +1,4 @@
-enabled: false
-url: http://log.instedd.org:3001
-client_id:
-client_secret:
+enabled: true
+url: https://login.instedd.org
+client_id: hOcJuADGrDhzDusNrDkedQ
+client_secret: C_vnBbR-B6b0ngGW6naiVAzL0Ma7rMe6Ie51Rgdtf0E

@@ -81,9 +81,9 @@ class Compiler
     Goto nil
   end
 
-  def PersistVariable(variable, expression)
+  def PersistVariable(variable, expression, data_type = nil)
     @variables.add variable unless ImplicitVariable.find(variable)
-    append Commands::PersistVariableCommand.new(variable, expression)
+    append Commands::PersistVariableCommand.new(variable, expression, data_type)
   end
 
   def Callback url=nil, options={}

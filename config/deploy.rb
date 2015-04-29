@@ -25,11 +25,17 @@ else
   default_run_options[:shell] = "/bin/bash --login"
 end
 
+set :whenever_command, "bundle exec whenever"
+require "whenever/capistrano"
+
+set :stages, %w(production staging)
+set :default_stage, :staging
+require 'capistrano/ext/multistage'
+
 set :application, "verboice"
-set :repository,  "https://github.com/instedd/verboice"
+set :repository,  "https://github.com/ilabsea/verboice"
 set :scm, :git
 set :deploy_via, :remote_cache
-set :user, 'ubuntu'
 
 default_environment['TERM'] = ENV['TERM']
 
@@ -58,7 +64,7 @@ namespace :deploy do
   end
 
   task :symlink_configs, :roles => :app do
-    %W(credentials verboice newrelic oauth nuntium poirot guisso database hub).each do |file|
+    %W(asterisk credentials freeswitch verboice voxeo newrelic oauth nuntium poirot guisso database aws log_file app_config step_config api recaptcha login hub).each do |file|
       run "ln -nfs #{shared_path}/#{file}.yml #{release_path}/config/"
     end
   end
@@ -67,6 +73,10 @@ namespace :deploy do
     run "ln -nfs #{shared_path}/data #{release_path}/"
   end
 
+  task :symlink_help, :roles => :app do
+    run "ln -nfs #{shared_path}/help #{release_path}/public"
+  end
+  
   task :generate_version, :roles => :app do
     run "cd #{release_path} && git describe --always > #{release_path}/VERSION"
   end
@@ -100,12 +110,12 @@ namespace :foreman do
   end
 end
 
-
+before 'deploy:finalize_update', "deploy:symlink_configs"
 before "deploy:start", "deploy:migrate"
 before "deploy:restart", "deploy:migrate"
-after "deploy:update_code", "deploy:generate_version"
-after "deploy:update_code", "deploy:symlink_configs"
+# after "deploy:update_code", "deploy:symlink_configs"
 after "deploy:update_code", "deploy:symlink_data"
+after "deploy:update_code", "deploy:symlink_help"
 after "deploy:update_code", "deploy:prepare_broker"
 after "deploy:update_code", "deploy:compile_broker"
 

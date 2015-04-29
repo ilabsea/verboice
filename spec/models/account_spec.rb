@@ -18,7 +18,32 @@
 require 'spec_helper'
 
 describe Account do
+  let(:super_user) { Account.make role: Account::ADMIN }
+  let(:user) { Account.make role: Account::USER }
+
   it { should have_many(:projects) }
   it { should have_many(:channels) }
   it { should have_many(:call_logs) }
+  it { should have_many(:ext_reminder_groups) }
+
+  describe 'save' do
+    it 'generate auth_token for user' do
+      expect(super_user.auth_token.empty?).to be false
+    end
+  end
+
+  describe "#admin?" do
+    it { expect(super_user.admin?).to be true }
+    it { expect(user.admin?).to be false }
+  end
+
+  describe "#user?" do
+    it { expect(super_user.user?).to be false }
+    it { expect(user.user?).to be true }
+  end
+  
+  describe "#has_access_from?" do
+    it { expect(super_user.has_access_from?("192.192.192.192")).to be false }
+    it { expect(super_user.has_access_from?("127.0.0.1")).to be true }
+  end
 end

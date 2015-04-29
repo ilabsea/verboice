@@ -3,45 +3,45 @@
   - call_flow.store_in_fusion_tables = true
 = form_for [call_flow.project, call_flow], :remote => true do |f|
   .field
-    = f.label :name
+    = f.label :name, t('views.call_flows._form.label.name')
     = f.text_field :name, :class => "w30"
   .field
     = f.label :mode
-    %p.desc Choose whether you will use an external app or build one using Verboice
+    %p.desc= t('views.call_flows._form.label.choose_external_app_or_build_on_verboice')
     .call_flow_mode
-      = f.select :mode, options_for_select([['Use an external application', :callback_url], ['Design your app in Verboice', :flow]], call_flow.mode), {}, :class => "w30"
-      = link_to "Go to Designer", edit_workflow_project_call_flow_path(@project, call_flow), :class => 'button farrow flow_settings flow_settings' unless call_flow.new_record?
+      = f.select :mode, options_for_select([[t('views.call_flows._form.label.use_external_application'), :callback_url], [ t('views.call_flows._form.label.design_app_in_verboice'), :flow]], call_flow.mode), {}, :class => "w30"
+      = link_to t('views.call_flows._form.action.go_to_designer'), edit_workflow_project_call_flow_path(project, call_flow), :class => 'button farrow flow_settings flow_settings' unless call_flow.new_record?
     .flow_settings
-      = link_to 'Download call results as CSV', download_results_project_call_flow_path(@project, call_flow, :format => :csv), :class => "button fimport" unless call_flow.new_record? || call_flow.user_flow.nil?
+      = link_to t('views.call_flows._form.action.download_call_result_as_csv'), download_results_project_call_flow_path(@project, call_flow, :format => :csv), :class => "button fimport" unless call_flow.new_record? || call_flow.user_flow.nil?
 
   .callback_url_settings
-    = f.label :callback_url, 'URL'
+    = f.label :callback_url, t('views.call_flows._form.label.url')
     %br/
     = f.text_field :callback_url, :class => "w30"
     %br/
-    = f.label :callback_url_user, 'User'
+    = f.label :callback_url_user, t('views.call_flows._form.label.user')
     %br/
     = f.text_field :callback_url_user, :class => "w30"
     %br/
-    = f.label :callback_url_password, 'Password'
+    = f.label :callback_url_password, t('views.call_flows._form.label.password')
     %br/
     = f.password_field :callback_url_password, :class => "w30"
 
   - if OAuth2::Client.service_configured?(:google) && !call_flow.new_record?
     %hr
-    %p Fusion Tables
-    %p.desc Enter a fusion table name and Verboice will create the table and store call results in real-time to it. Note that in case that the flow definition changes, Verboice might need to generate a fresh table with the new structure to store new results; in such case, Verboice will generate new tables using the name you provided and revision number.
+    %p= t('views.call_flows._form.label.fusion_tables_title')
+    %p.desc= t('views.call_flows._form.label.fusion_tables_desc')
     %p
       = f.check_box :store_in_fusion_tables, :class => "store_in_fusion_tables"
-      = f.label "Store results of this call flow"
+      = f.label t('views.call_flows._form.label.store_results_call_flow')
     .fusion_tables_settings{:style => "display: #{call_flow.store_in_fusion_tables ? 'block' : 'none'};"}
-      = f.label :fusion_table_name, "Fusion Table name"
+      = f.label :fusion_table_name, t('views.call_flows._form.label.fusion_table_name')
       %br
-      = f.text_field :fusion_table_name, :class => 'w30 fusion_table_name'
-      = link_to current_account.google_oauth_token.nil? ? 'Set your Google Account' : 'Change your Google Account', oauth_project_call_flow_path(@project, call_flow), :class => 'button farrow link_to_oauth'
+      = f.text_field :fusion_table_name, :class => 'w30 fusion_table_name', :onpaste => "return false", :autocomplete => 'off'
+      = link_to current_account.google_oauth_token.nil? ? t('views.call_flows._form.action.set_google_account') : t('views.call_flows._form.action.change_google_account'), oauth_project_call_flow_path(call_flow), :class => 'button farrow link_to_oauth'
   %hr
   - if call_flow.new_record?
-    %button.white{:type => "submit"} Save
+    %button.white{:type => "submit"}= t('views.call_flows._form.action.save')
   - else
-    %button.white{:type => "submit"} Update
-  = link_to 'Cancel', '#', :class => "button white cancel #{call_flow.new_record? ? 'remove_unsaved_element' : 'collapse_trigger'}", :style => 'top: 1px;'
+    %button.white{:type => "submit"}= t('views.call_flows._form.action.update')
+  = link_to t('views.call_flows._form.action.cancel'), '#', :class => "button white cancel #{call_flow.new_record? ? 'remove_unsaved_element' : 'collapse_trigger'}", :style => 'top: 1px;'

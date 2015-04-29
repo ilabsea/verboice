@@ -29,7 +29,7 @@ onWorkflow ->
       $(element).addClass(value)
       element['__ko__previousClassValue__'] = value
 
-  window.step_types = [Play, Menu, Capture, Transfer, Goto, Branch, HangUp, Record, Language, MarkAsFailed, MarkAsSuccessful, HangUpAndCallBack, Nuntium, Impersonate, WriteVariable, Hub].concat(External.classes())
+  window.step_types = [Play, Menu, Capture, Transfer, Goto, Branch, HangUp, Record, Language, MarkAsFailed, MarkAsSuccessful, HangUpAndCallBack, Nuntium, Impersonate, WriteVariable, Hub, Register, Deregister, Datetime].concat(External.classes())
   for step_type in window.step_types
     window[step_type.type] = step_type
 
@@ -41,14 +41,13 @@ onWorkflow ->
 
   $(window).bind 'beforeunload', () ->
     if window.workflow.has_changed()
-      "There are unsaved changes in the workflow."
+      MSG_QUIT_UNSAVE
 
   $(window).resize () ->
     container_width = $('#container').width()
     $('.workflow-content-container').width(container_width - 364)
     $('.workflow').width(container_width - 364)
   .resize()
-
 
   $('#workflow-page').keydown((e) ->
     if(e.which == 13)

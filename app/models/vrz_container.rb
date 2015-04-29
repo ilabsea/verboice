@@ -31,6 +31,8 @@ class VrzContainer
     audios = []
     external_steps = []
     localized_resources = []
+    resources_entry = []
+    workflow = nil
 
     Zip::ZipFile.open(path) do |zip|
       zip.each do |entry|
@@ -39,7 +41,7 @@ class VrzContainer
           case ext
           when '.yml'
             if entry.name == 'workflow.yml'
-              @call_flow.user_flow = YAML::load(zip.read(entry))
+              workflow = entry
             else
               if entry.name.split[0] == 'Service'
                 attrs = YAML::load(zip.read(entry))
@@ -53,16 +55,7 @@ class VrzContainer
                 #Wait until all the external services are loaded to load the steps
                 external_steps << entry
               elsif entry.name.split[0] == 'resource'
-                attrs = YAML::load(zip.read(entry))
-                resource = @project.resources.find_by_guid(attrs['guid'])
-                if resource
-                  resource.update_attributes! attrs
-                else
-                  resource = Resource.new attrs
-                  resource.project = @project
-                  resource.guid = attrs['guid']
-                  resource.save!
-                end
+                resources_entry <<  entry 
               elsif entry.name.split[0] == 'localized_resource'
                 #Wait until all the resources are loaded to load the localized resources
                 localized_resources << entry
@@ -75,6 +68,14 @@ class VrzContainer
         end
       end
 
+      # re-create new resource guid to remove references
+      importer = ImportFlowFromZip.new(zip)
+      flow     = YAML::load(zip.read(workflow))
+
+      user_flow   = importer.user_flow(flow, @project, resources_entry, localized_resources, audios )
+      # @call_flow.user_flow = YAML::load(zip.read(entry))
+      @call_flow.user_flow = user_flow
+
       external_steps.each do |entry|
         attrs = YAML::load(zip.read(entry))
         external_service = @project.external_services.find_by_guid(attrs['external_service_guid'])
@@ -83,31 +84,6 @@ class VrzContainer
           external_service_step = ExternalServiceStep.new attrs
           external_service_step.external_service = external_service
           external_service_step.save!
-        end
-      end
-
-      localized_resources.each do |entry|
-        attrs = YAML::load(zip.read(entry))
-
-        resource = @project.resources.find_by_guid(attrs['resource_guid'])
-        localized_resource = resource.localized_resources.find_by_guid(attrs['guid']) rescue nil
-
-        if localized_resource
-          localized_resource.update_attributes! attrs
-        else
-          localized_resource = LocalizedResource.new attrs
-          localized_resource.guid = attrs['guid']
-          localized_resource.resource = resource
-          localized_resource.save!
-        end
-      end
-
-      audios.each do |entry|
-        guid = File.basename(entry.name).split.last.gsub('.wav', '')
-        localized_resource = LocalizedResource.find_by_guid(guid)
-        if localized_resource
-          localized_resource.audio= zip.read(entry)
-          localized_resource.save!
         end
       end
     end
@@ -141,7 +117,7 @@ class VrzContainer
       # audio files
       if @export_audios
         #TODO Change this to export only the resources used in the call flow
-        @project.resources.each do |resource|
+        @call_flow.resources.each do |resource|
           resource.localized_resources.each do |localized_resource|
             zos.put_next_entry "localized_resource #{resource.guid} - #{localized_resource.language} - #{localized_resource.guid}.yml"
             zos.print(localized_resource.attributes.tap do |attributes|

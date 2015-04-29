@@ -1,22 +1,22 @@
 .box.w30.right.lmargin.enqueue_new_call
-  %h2 Enqueue new calls
-  %p.desc Add new calls to this project queue
+  %h2= t('views.projects._enqueue_new_call.title')
+  %p.desc= t('views.projects._enqueue_new_call.desc')
   = form_tag enqueue_call_project_path, :method => 'POST' do
     %p
-      = label_tag :call_flow_id, 'Call Flow'
+      = label_tag :call_flow_id, t('views.projects._enqueue_new_call.label.call_flow')
       %br/
-      = select_tag :call_flow_id, options_from_collection_for_select(call_flows, 'id', 'name'), :prompt => 'Select a Call Flow...', :class => 'w30'
+      = select_tag :call_flow_id, options_from_collection_for_select(call_flows, 'id', 'name'), :prompt => t('views.projects._enqueue_new_call.label.select_call_flow'), :class => 'w30'
     %p
-      = label_tag :channel_id, 'Channel'
+      = label_tag :channel_id, t('projects._enqueue_new_call.label.channel')
       %br/
-      = select_tag :channel_id, options_from_collection_for_select(channels, 'id', 'name'), :prompt => 'Select a Channel...', :class => 'w30'
+      = select_tag :channel_id, options_from_collection_for_select(channels, 'id', 'name'), :prompt => t('views.projects._enqueue_new_call.label.select_channel'), :class => 'w30'
     %p
-      = label_tag :schedule_id, 'Schedule'
+      = label_tag :schedule_id, t('projects._enqueue_new_call.label.schedule')
       %br/
-      = select_tag :schedule_id, options_from_collection_for_select(schedules, 'id', 'name'), :prompt => 'Select a Schedule...', :class => 'w30'
+      = select_tag :schedule_id, options_from_collection_for_select(schedules, 'id', 'name'), :prompt => t('views.projects._enqueue_new_call.label.select_schedule'), :class => 'w30'
     %p
       = check_box_tag :not_before
-      = label_tag :not_before, 'Not before'
+      = label_tag :not_before, t('views.projects._enqueue_new_call.label.not_before')
       %br/
       = text_field_tag :not_before_date, '', :class => "ux-custom-datepicker ux-datepicker w10"
       = text_field_tag :not_before_time, '00:00', :class => 'w10', :alt => 'time'
@@ -31,7 +31,7 @@
       %br/
       = select_tag :time_zone, time_zone_options_for_select(project.time_zone, TZInfo::Timezone.all.sort, TZInfo::Timezone), :class => 'w30'
     %p
-      = label_tag :language
+      = label_tag :language, t('views.projects._enqueue_new_call.label.language')
       %br/
       = select_tag :language, options_for_select(project.languages.map { |lang| [LanguageList::LanguageInfo.find(lang['language']).name, lang['language']] }), prompt: 'None specified', name: 'vars[language]'
     - if project.project_variables.any?
@@ -39,7 +39,7 @@
         .ux-collapsible.collapsed
           %span
             %a.arrow{href: "#"}
-              = label_tag :variables
+              = label_tag :variables, "#{t('views.projects._enqueue_new_call.label.variables')}:"
           .ux-content
             - project.project_variables.each do |var|
               %br/
@@ -53,10 +53,10 @@
                 %br/
                 = text_field_tag var.name, '', name: "vars[#{var.name}]"
     %p
-      = label_tag :addresses, 'Phone numbers'
+      = label_tag :addresses, t('views.projects._enqueue_new_call.label.phone_numbers')
       %br/
-      %span.desc Enter each phone number in a separate line
+      %span.desc= t('views.projects._enqueue_new_call.label.desc')
       %p
         = text_area_tag :addresses, nil, :placeholder => "555-1000", :rows => 10, :class => 'w30'
     %p
-      = button_tag "Enqueue calls", :class => 'orange'
+      = button_tag t('views.projects._enqueue_new_call.action.enqueue_calls'), :class => 'orange'

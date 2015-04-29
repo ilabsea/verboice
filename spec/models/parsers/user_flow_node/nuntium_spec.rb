@@ -37,6 +37,7 @@ module Parsers
         nuntium = Nuntium.new call_flow, 'id' => 1,
           'type' => 'nuntium',
           'name' => 'Nuntium',
+          'kind' => 'qst_server',
           'resource' => {
             "guid" => 5
           },
@@ -60,6 +61,7 @@ module Parsers
         nuntium = Nuntium.new call_flow, 'id' => 1,
           'type' => 'nuntium',
           'name' => 'Nuntium',
+          'kind' => 'qst_server',
           'resource' => {
             "guid" => nil
           },
@@ -86,6 +88,7 @@ module Parsers
           nuntium = Nuntium.new call_flow, 'id' => 1,
             'type' => 'nuntium',
             'name' => 'Nuntium',
+            'kind' => 'qst_server',
             'resource' => { "guid" => 42 },
             'recipient' => recipient,
             'channel_id' => 7

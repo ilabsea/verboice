@@ -22,6 +22,7 @@ require 'rspec/rails'
 require 'rspec/autorun'
 
 require 'webmock/rspec'
+require 'capybara/rspec'
 
 WebMock.disable_net_connect!(allow_localhost: true)
 
@@ -39,7 +40,7 @@ RSpec.configure do |config|
   # config.mock_with :rr
 
   # Render views in functional tests
-  config.render_views
+  # config.render_views
 
   # Remove this line if you're not using ActiveRecord or ActiveRecord fixtures
   config.fixture_path = "#{::Rails.root}/spec/fixtures"
@@ -56,6 +57,12 @@ RSpec.configure do |config|
 
   config.before(:each) do
     Timecop.return
+  end
+
+  config.after(:all) do
+    if Rails.env.test?
+      FileUtils.rm_rf Dir['spec/data/*']
+    end
   end
 
   def expect_em_http(method, url, options = {})

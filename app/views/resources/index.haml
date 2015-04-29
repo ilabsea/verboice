@@ -22,19 +22,19 @@
 
 = render 'shared/project_tabs_and_title', :project => project, :shared_project => @shared_project
 
-%h1 Resources
-%p.desc You can translate the content of your call flows to other languages
+%h1= t('views.resources.index.title')
+%p.desc= t('views.resources.index.desc')
 
 - if project_admin?
   %br
-  = link_to 'Create Resource', '#', :class => 'cadd', 'data-bind' => 'click: addResource'
+  = link_to t('views.resources.index.action.create_resource'), '#', :class => 'cadd', 'data-bind' => 'click: addResource'
 
 = render 'shared/recorder'
 #resources
   .tablewrapp
     %table.GralTable
       %tr
-        %th.w30p Name
+        %th.w30p= t('views.resources.index.label.name')
         %th.w30p
           %select.w100(data-bind= "options: languages, value: firstLanguage, optionsText: 'label'")
         %th.w30p

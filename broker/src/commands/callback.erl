@@ -1,4 +1,4 @@
--module(callback).
+ -module(callback).
 -export([run/2]).
 -include("session.hrl").
 -include("db.hrl").
@@ -9,6 +9,7 @@ run(Args, Session = #session{js_context = JS, call_log = CallLog, call_flow = Ca
     undefined -> CallFlow#call_flow.callback_url;
     X -> list_to_binary(X)
   end,
+  
   ResponseType = proplists:get_value(response_type, Args, flow),
   Params = proplists:get_value(params, Args, []),
   Variables = proplists:get_value(variables, Args, []),
@@ -17,7 +18,9 @@ run(Args, Session = #session{js_context = JS, call_log = CallLog, call_flow = Ca
   JsonBody = proplists:get_value(json_body, Args),
   TrustedApp = proplists:get_value(trusted_app, Args, false),
 
-  QueryString = prepare_params(Params ++ Variables, [{"CallSid", CallLog:id()} | CallbackParams], JS),
+  Call = call_log:find(CallLog:id()),
+  
+  QueryString = prepare_params(Params ++ Variables, [{"address", Call#call_log.address}, {"channel_id", Call#call_log.channel_id}, {"CallSid", util:to_string(CallLog:id())} | CallbackParams], JS),
   RequestUrl = interpolate(Url, Args, Session),
 
   PoirotMeta = [

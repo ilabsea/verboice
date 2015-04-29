@@ -30,7 +30,7 @@ init({}) ->
     undefined -> "localhost"
   end,
 
-  mysql:connect(log, DbHost, undefined, DbUser, DbPass, DbName, true),
+  mysql:connect(log, DbHost, undefined, DbUser, DbPass, DbName, utf8, true),
   db:set_db(log),
   {ok, undefined}.
 

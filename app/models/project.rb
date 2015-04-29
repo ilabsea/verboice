@@ -43,7 +43,7 @@ class Project < ActiveRecord::Base
     :reject_if => lambda { |attributes| attributes[:name].blank?},
     :allow_destroy => true
 
-  attr_accessible :name, :account, :status_callback_url, :status_callback_url_user, :status_callback_url_password, :time_zone, :project_variables_attributes, :languages, :default_language
+  attr_accessible :name, :account, :status_callback_url, :status_callback_url_user, :status_callback_url_password, :time_zone, :project_variables_attributes, :languages, :default_language, :store_call_log_entries
   attr_accessible :tts_engine, :tts_ispeech_api_key
 
   validates_presence_of :name
@@ -90,6 +90,32 @@ class Project < ActiveRecord::Base
     end
   end
 
+  def active_calls
+    BrokerClient.active_calls_by_project(id)
+  end
+  
+  def channels
+    channels = []
+    Channel.all.each do |channel|
+      if channel.try(:call_flow).try(:project_id) == self.id
+        channels.push(channel)
+      end
+    end
+    channels
+  end
+
+  def number_of_active_call
+    count = 0
+    self.channels.each do |channel|
+      # ruby broker
+      # count = count + channel.active_calls_count_in_call_flow(channel.call_flow)
+      
+      # erlang broker
+      count += channel.active_calls
+    end
+    count
+  end
+  
   def active_calls
     BrokerClient.active_calls_by_project(id)
   end

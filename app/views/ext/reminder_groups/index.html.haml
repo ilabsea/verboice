@@ -1,0 +1,97 @@
+- content_for :head do
+  :javascript
+    create_success = "#{t('views.ext.reminder_groups.label.successfully_created')}";
+    create_error = "#{t('views.ext.reminder_groups.label.create_error')}";
+    update_success = "#{t('views.ext.reminder_groups.label.successfully_updated')}";
+    update_error = "#{t('views.ext.reminder_groups.label.update_error')}";
+    delete_success = "#{t('views.ext.reminder_groups.label.successfully_deleted')}";
+    delete_error = "#{t('views.ext.reminder_groups.label.delete_error')}";
+    confirm_delete = "#{t('views.ext.reminder_groups.label.confirm_delete')}";
+    project_id = "#{@project.id}"
+
+    $(function(){
+      allowKeyInput($("#autocomplete-address"), /[0-9\+]/);
+    });
+
+= render 'shared/project_tabs_and_title', project: @project, shared_project: @shared_project
+
+%h2= t('views.ext.reminder_groups.title')
+
+#reminder_groups-main.hidden-until-loaded
+  <!-- ko foreach: reminder_groups -->
+  <!-- ko if: $data != $root.current_reminder_group() -->
+  .box.collapsed.collapsible_crud_box.grey.w60
+    .toptitle
+      %span.title{ko(text: :name)}
+      %span :
+      %span.title{ko(text: 'contacts_display()')}
+    - if project_admin?
+      .rightbuttons
+        %button.fdelete{ko(click: '$root.delete_reminder_group')}
+      .bottom
+        %div
+          %button.farrow.collapse_trigger{ko(click: '$root.edit_reminder_group')}= t('views.ext.reminder_groups.action.edit')
+          .ux-collapsible.collapsed.w40.file_upload{"data-on-expanded" => "grey"}
+            %span
+              %a.button.fexport{ko(click: 'collapse_expand_import'), :href => "#"}= t('views.ext.reminder_groups.action.import_csv')
+              %span (*.csv)
+            .ux-content
+              = form_tag("", :multipart => true) do
+                %hr
+                = file_field_tag 'file_name', :class =>'button white', accept: '.csv,text/csv'
+                %hr
+                .right
+                  %button.grey{ko(click: 'upload'), :type => "submit"}= t('views.ext.reminder_groups.action.upload')
+                  %a.button.white.cancel{ko(click: 'cancel_upload'), href: 'javascript:void(0)'}= t('views.ext.reminder_groups.action.cancel')
+                .clear
+
+  <!-- /ko -->
+
+  <!-- ko if: $data == $root.current_reminder_group() -->
+  .box.collapsible_crud_box.expanded.grey.w60
+    %p
+      <!-- ko ifnot: name_duplicated() -->
+      %label{ko(css: {error: :name_error}), :for => :name}= t('views.ext.reminder_groups.label.name')
+      <!-- /ko -->
+      <!-- ko if: name_duplicated() -->
+      %label{ko(css: {error: :name_duplicated}), :for => :name}= t('views.ext.reminder_groups.label.name_exists')
+      <!-- /ko -->
+
+      %br/
+      = ko_text_field_tag :name, css: {error: :name_error}, html: {class: 'w30'}
+    
+    %p
+      .w30= "#{t('views.ext.reminder_groups.label.contacts')}:"
+      <!-- ko foreach: contacts -->
+      .w20{style:"margin-left:5px;"}
+        %div{ko(text: :address), style: "float:left;"}
+        %button.right.clist-remove{ko(click: '$parent.remove_contact'), style: "margin-top:-4px;"}
+      .clear
+      .w20{style:"margin-left:5px; border-bottom: 1px solid white;"}
+      %div{style:"height:10px;"}
+      <!-- /ko -->
+
+      .w20{style:"margin-left:5px;"}
+        <!-- ko if: new_address_duplicated() -->
+        %span.warning= t('views.ext.reminder_groups.label.address_exists')
+        <!-- /ko -->
+        %div{style: "float:left;"}
+          %input#autocomplete-address.autocomplete-site-input.ux-search.ui-autocomplete-input{ ko(autocomplete: :new_address, value: :new_address, valueUpdate: 'afterkeydown'), type: :text, placeholder: "#{t('views.ext.reminder_groups.label.add_contact')}", style: "width: 164px;", url: "/projects/#{@project.id}/contacts/invitable.json", minChar: 3}
+        %button.right.clist-add{ko(disable: :new_address_button_disabled, click: 'add_new_contact'), type: :button, style:"margin-top:2px;"}
+        .clear
+
+    %hr
+
+    %button.white{ko(click: '$root.save_reminder_group', enable: :valid), type: :button}= t('views.ext.reminder_groups.action.save')
+    %a.button.white.cancel{ko(click: '$root.cancel_reminder_group'), href: 'javascript:void(0)'}= t('views.ext.reminder_groups.action.cancel')
+
+  <!-- /ko -->
+  <!-- /ko -->
+
+  - if project_admin?
+    .box.grey.w60.addqueue{ ko(visible: '!current_reminder_group()', click: 'new_reminder_group'), style: 'display:none'}
+      %span
+        %a.add_field{href: 'javascript:void(0)'}= t('views.ext.reminder_groups.action.new')
+      %button.cadd.right
+      %br{clear: 'all'}
+%br

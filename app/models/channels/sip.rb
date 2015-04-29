@@ -16,14 +16,40 @@
 # along with Verboice.  If not, see <http://www.gnu.org/licenses/>.
 
 class Channels::Sip < Channel
+
+  before_create :mark_as_pending
+  
   validate :server_username_uniqueness
 
   config_accessor :username
   config_accessor :password
   config_accessor :domain
+  config_accessor :port
+  config_accessor :protocol
   config_accessor :direction
   config_accessor :register
   config_accessor :number
+  config_accessor :prefix
+  config_accessor :prefix_called_number
+  config_accessor :normalized_called_number
+  config_accessor :dtmf_mode
+  config_accessor :codec_type
+
+  attr_accessor :ip_address
+
+  DTMF_MODE_LIST = [
+      ['auto', 'auto'],
+      ['inband', 'inband'],
+      ['rfc2833', 'rfc2833'],
+      ['info', 'info']
+  ]
+
+  CODECS_LIST = [
+    ['default', ''],
+    ['alaw (g711)', 'alaw'],
+    ['ulaw (g711)', 'ulaw'],
+    ['g729', 'g729'],
+  ]
 
   def register?
     register == true || register == "1"
@@ -49,4 +75,9 @@ class Channels::Sip < Channel
     status = BrokerClient.channel_status(id)[id]
     status && !status[:ok] ? status[:messages].length : 0
   end
+
+  def mark_as_pending
+    self.status = STATUS_PENDING if self.kind == Channels::Sip.kind
+  end
+
 end

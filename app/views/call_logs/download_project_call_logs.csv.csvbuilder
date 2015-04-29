@@ -1,0 +1,89 @@
+header = [t('views.projects.call_logs.index.label.id'),
+          t('views.projects.call_logs.index.label.started'),
+          t('views.projects.call_logs.index.label.finished'),
+          t('views.projects.call_logs.index.label.duration_in_second'),
+          t('views.projects.call_logs.index.label.caller_id'),
+          t('views.projects.call_logs.index.label.direction'),
+          t('views.projects.call_logs.index.label.number_retried'),
+          t('views.projects.call_logs.index.label.channel'),
+          t('views.projects.call_logs.index.label.queue'),
+          t('views.projects.call_logs.index.label.project'),
+          t('views.projects.call_logs.index.label.call_flow'),
+          t('views.projects.call_logs.index.label.status'),
+          t('views.projects.call_logs.index.label.interaction')]
+
+fields = %w(call_logs.id
+            call_logs.created_at
+            call_logs.finished_at
+            call_logs.duration
+            call_logs.address
+            call_logs.direction
+            call_logs.retries
+            channels.name
+            schedules.name
+            projects.name
+            call_flows.name
+            call_logs.state
+            call_logs.fail_reason
+            call_logs.step_interaction)
+# Pivot query on project_variables
+# Reference: http://buysql.com/mysql/14-how-to-automate-pivot-tables.html
+pivot_fields = []
+pivot_fields_types = []
+
+@project.project_variables.each do |variable|
+  header << variable.name
+  if variable.call_log_recorded_audios.exists?
+    header << "#{variable.name}_annotation"
+    pivot_fields_types << :audio
+  else
+    pivot_fields_types << :input
+  end
+  pivot_fields << "MAX(IF(project_variables.id = #{variable.id}, call_log_answers.value, NULL))"  # call_log_answers value function
+  pivot_fields << "MAX(IF(pvs.id = #{variable.id}, call_log_recorded_audios.key, NULL))"          # call_log_recorded_audios key function
+  pivot_fields << "MAX(IF(pvs.id = #{variable.id}, call_log_recorded_audios.annotation, NULL))"   # call_log_recorded_audios annnotation function
+end
+
+# Construct SQL query
+@logs = @logs.joins(:project)
+@logs = @logs.joins('LEFT JOIN channels on call_logs.channel_id = channels.id')
+@logs = @logs.joins('LEFT JOIN call_flows on call_logs.call_flow_id = call_flows.id')
+@logs = @logs.joins('LEFT JOIN schedules on call_logs.schedule_id = schedules.id')
+@logs = @logs.joins('LEFT JOIN call_log_answers on call_logs.id = call_log_answers.call_log_id')
+@logs = @logs.joins('LEFT JOIN project_variables on call_log_answers.project_variable_id = project_variables.id')
+@logs = @logs.joins('LEFT JOIN call_log_recorded_audios on call_logs.id = call_log_recorded_audios.call_log_id')
+@logs = @logs.joins('LEFT JOIN project_variables pvs on call_log_recorded_audios.project_variable_id = pvs.id')
+
+@logs = @logs.select((fields + pivot_fields).join ', ')
+@logs = @logs.group('call_logs.id')
+@logs = ActiveRecord::Base.connection.execute(@logs.to_sql)
+
+# Write CSV content
+csv << header
+@logs.each do |log|
+  log_id = log.first
+  start_time = datetime_format_csv log[1], @project.time_zone, @date_format
+  end_time = datetime_format_csv log[2], @project.time_zone, @date_format
+  duration = log[3]
+
+
+  state = "#{log[fields.count - 3]} #{CallLog::FAIL_REASONS[log[fields.count - 2]]}"
+  step_interaction = log[13]
+
+  row = [log_id, start_time, end_time, duration] + log[4..fields.count- 4] + [state, step_interaction]
+
+  pivot_data = log.drop fields.count
+  pivot_fields_types.each do |type|
+    data = pivot_data.shift 3
+    row += case type
+    when :input then [data.first]
+    when :audio
+      [
+        data[1] && (@custom_audio_path ? "audios/#{log_id}_#{data[1]}.wav" : result_call_log_url(log.first, { key: data[1] })) ,
+        data[2]
+      ]
+    end
+  end
+
+  csv << row
+end

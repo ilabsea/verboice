@@ -18,7 +18,7 @@
 class NuntiumChannel < ActiveRecord::Base
   belongs_to :account
 
-  attr_accessible :name, :enabled, :kind
+  attr_accessible :name, :enabled, :kind, :default
 
   before_destroy :destroy_nuntium_channel
   before_validation :configure_nuntium_channel
@@ -29,16 +29,6 @@ class NuntiumChannel < ActiveRecord::Base
 
   validates_presence_of :name
   validates_uniqueness_of :name, :scope => :account_id
-
-  def kind
-    @kind ||= channel.try(:kind)
-  end
-
-  def kind=(value)
-    unless @kind.present?
-      @kind = value
-    end
-  end
 
   def channel
     @channel ||= find_or_create_channel
@@ -52,13 +42,23 @@ class NuntiumChannel < ActiveRecord::Base
     end
   end
 
+  def mark_as_default
+    account.nuntium_channels.each do |nuntium_channel|
+      nuntium_channel.default = false
+      nuntium_channel.save
+    end
+
+    self.default = true
+    self.save
+  end
+
   private
 
   def find_or_create_channel
     if channel_name.present?
       Pigeon::NuntiumChannel.find(channel_name)
     else
-      Pigeon::NuntiumChannel.new kind: @kind 
+      Pigeon::NuntiumChannel.new kind: kind 
     end
   end
 
