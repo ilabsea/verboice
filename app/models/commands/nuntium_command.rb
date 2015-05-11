@@ -18,7 +18,7 @@
 class Commands::NuntiumCommand < Command
 
   def initialize(resource_guid, channel_id, rcpt_type, expr = nil)
-    @kind = kind
+    @resource_guid = resource_guid
     @channel_id = channel_id
     @rcpt_type = rcpt_type   # can be :caller or :expr
     @expr = expr
