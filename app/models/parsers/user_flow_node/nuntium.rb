@@ -21,9 +21,14 @@ module Parsers
       attr_reader :id, :name, :call_flow
       attr_accessor :next
 
+      QST_SERVER = "qst_server"
+      SMTP = "smtp"
+
       def initialize call_flow, params
         @id = params['id']
         @name = params['name'] || ''
+        @kind = params['kind'] || QST_SERVER
+        @subject = Resource.new params['subject']
         @resource = Resource.new params['resource']
         @recipient = params['recipient']
         # ensure channel belongs to account
@@ -47,9 +52,11 @@ module Parsers
           compiler.StartUserStep :nuntium, @id, @name
           if @resource.guid
             if @recipient['caller']
-              compiler.Nuntium @resource.guid, @channel_id, :caller
+              compiler.Nuntium @kind, @channel_id, rcpt_type: :caller, resource_guid: @resource.guid
             else
-              compiler.Nuntium @resource.guid, @channel_id, :expr, InputSetting.new(@recipient).expression()
+              options = {rcpt_type: :expr, expr: InputSetting.new(@recipient).expression(), resource_guid: @resource.guid}
+              options[:subject_guid] = @subject.guid if @kind == SMTP
+              compiler.Nuntium @kind, @channel_id, options
             end
           end
           compiler.Trace context_for '"Sent text message."'

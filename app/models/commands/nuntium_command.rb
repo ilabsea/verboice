@@ -17,18 +17,22 @@
 
 class Commands::NuntiumCommand < Command
 
-  def initialize(resource_guid, channel_id, rcpt_type, expr = nil)
-    @resource_guid = resource_guid
+  def initialize(kind, channel_id, options = {})
+    @kind = kind
+    @rcpt_type = options[:rcpt_type] || nil
+    @expr = options[:expr] || nil
+    @subject_guid = options[:subject_guid] || nil
+    @resource_guid = options[:resource_guid]
     @channel_id = channel_id
-    @rcpt_type = rcpt_type   # can be :caller or :expr
-    @expr = expr
   end
 
   def serialize_parameters
     params = {
+      kind: @kind,
+      rcpt_type: @rcpt_type,
       expr: @expr,
-      resource_guid: @resource_guid,
-      rcpt_type: @rcpt_type
+      subject_guid: @subject_guid,
+      resource_guid: @resource_guid
     }
 
     if @channel_id.present?
