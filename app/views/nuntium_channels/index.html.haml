@@ -7,7 +7,6 @@
     %tr
       %th My Channels
       %th
-      %th
         = select_tag('new_channel', pigeon_nuntium_channel_kinds_for_select, onchange: 'create_nuntium_channel(this)', prompt: 'Create new...')
     - if @channels.empty?
       %tr
@@ -23,14 +22,6 @@
             = channel.name
             - unless channel.enabled
               %span.lightgreytext (disabled)
-          %td
-            = radio_button_tag 'default', channel.id, channel.default, onchange: 'set_default_nuntium_channel(this)', class: 'mark_as_default'
-            - if channel.default
-              / the first loading page
-              %span{id: "label_default"} default
-            %span{id: "label_default_#{channel.id}"}
-
-
           %td
             %a.farrow.link{'data-url' => edit_nuntium_channel_path(channel)}
             = link_to 'Delete', channel, :method => :delete, :confirm => 'Are you sure?', :class => 'fdelete'
