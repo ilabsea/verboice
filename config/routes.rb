@@ -276,6 +276,12 @@ Verboice::Application.routes.draw do
       member do
         get 'play_audio'
       end
+      
+      resources :recorded_audios, path: :audios, only: [:index] do
+        collection do
+          get ':filename', action: :play
+        end
+      end
     end
 
     get "call_flows" => "call_flows#list"

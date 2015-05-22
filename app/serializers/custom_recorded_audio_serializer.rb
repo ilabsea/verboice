@@ -15,15 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Verboice.  If not, see <http://www.gnu.org/licenses/>.
 
-class RecordedAudio < ActiveRecord::Base
-  belongs_to :contact
-  belongs_to :call_log
-  has_one :project, :through => :contact
+class CustomRecordedAudioSerializer < ActiveModel::Serializer
+  attributes :call_log_id, :key
 
-  attr_accessible :call_log, :description, :key
-  validates_presence_of :call_log, :contact, :key, :description
-
-  def url
-    RecordingManager.for(call_log).result_path_for(key)
-  end
 end
