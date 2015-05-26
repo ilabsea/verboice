@@ -7,7 +7,7 @@
 -define(QST_SERVER, "qst_server").
 -define(SMTP, "smtp").
 
-run(Args, Session = #session{call_log = CallLog, project = Project}) ->
+run(Args, Session = #session{project = Project}) ->
   Kind = proplists:get_value(kind, Args, undefined),
   RcptType = proplists:get_value(rcpt_type, Args),
   Expr = proplists:get_value(expr, Args),
