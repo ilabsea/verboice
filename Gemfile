@@ -38,7 +38,7 @@ gem 'omniauth'
 gem 'omniauth-openid'
 gem 'recurring_select', git: "https://github.com/instedd/recurring_select", branch: 'instedd'
 gem 'ice_cube'
-gem 'aws-sdk'
+gem 'aws-sdk-v1'
 gem 'rails_config'
 gem 'awesome_print'
 
