@@ -21,7 +21,7 @@ GIT
 
 GIT
   remote: git://github.com/instedd/ruby-hub_client.git
-  revision: dc96567ccd1a1c5e1f3eb851c86da6cd8c6c64f8
+  revision: 5904359e9bc865415a6e8ea4c8bcf8ea1f19ee64
   branch: master
   specs:
     hub_client (0.0.1)
@@ -403,7 +403,7 @@ GEM
       json (>= 1.8.0)
       mime-types (>= 1.16)
       oauth (>= 0.4.7)
-    tzinfo (0.3.43)
+    tzinfo (0.3.44)
     uglifier (2.7.1)
       execjs (>= 0.3.0)
       json (>= 1.8.0)
