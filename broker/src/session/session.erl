@@ -371,10 +371,9 @@ notify_status(Status, Session = #session{call_log = CallLog, address = Address, 
         Uri = uri:parse(binary_to_list(Url)),
         Duration = case StartedAt of
           undefined -> 0;
-          _ ->
-            StartedAtSeconds = calendar:datetime_to_gregorian_seconds(StartedAt),
+          {_, StartedAtValue} ->
             Now = calendar:universal_time(),
-            calendar:datetime_to_gregorian_seconds(Now) - StartedAtSeconds
+            calendar:datetime_to_gregorian_seconds(Now) - calendar:datetime_to_gregorian_seconds(StartedAtValue)
         end,
         QueryString = [{"CallSid", CallSid}, {"CallStatus", Status}, {"From", Address}, {"CallDuration", erlang:integer_to_list(Duration)} | CallbackParams],
         AuthOptions = case Session#session.status_callback_user of
