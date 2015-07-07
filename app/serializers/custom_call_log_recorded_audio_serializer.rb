@@ -15,19 +15,6 @@
 # You should have received a copy of the GNU General Public License
 # along with Verboice.  If not, see <http://www.gnu.org/licenses/>.
 
-class CustomCallLogSerializer < ActiveModel::Serializer
-  attributes :id, :prefix_called_number, :address, :duration, :direction, :started_at,
-             :call_flow_id, :state, :fail_reason, :not_before, :finished_at, :called_at
-
-  has_one :account, serializer: CustomAccountSerializer
-  has_one :project, serializer: CustomProjectSerializer
-  has_one :channel, serializer: CustomChannelSerializer
-
-  has_many :call_log_recorded_audios, serializer: CustomCallLogRecordedAudioSerializer
-
-
-  def called_at
-    return self.not_before if self.direction == 'outgoing' && self.not_before
-    return self.started_at
-  end
+class CustomCallLogRecordedAudioSerializer < ActiveModel::Serializer
+  attributes :call_log_id, :key
 end

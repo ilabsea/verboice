@@ -270,7 +270,11 @@ Verboice::Application.routes.draw do
 
     get '/channels/:channel_id/call_logs' => "call_logs#list_by_channel"
     get '/contacts/:address/call_logs', controller: :call_logs, action: :index
-    resources :call_logs, only: [:index, :show]
+    resources :call_logs, only: [:index, :show] do
+      member do
+        get 'play_audio'
+      end
+    end
 
     get "call_flows" => "call_flows#list"
 
