@@ -16,7 +16,7 @@
 # along with Verboice.  If not, see <http://www.gnu.org/licenses/>.
 module Api2
 	class ProjectVariablesController < Api2Controller
-		# GET /api2/persisted_variables
+		# GET /api2/project_variables
 	  def index
 	    project = api_current_account.projects.find(params[:project_id])
 	    project_variables = project.project_variables

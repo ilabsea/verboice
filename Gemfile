@@ -59,7 +59,7 @@ group :development, :test do
   gem "shoulda-matchers"
   gem 'ci_reporter'
   gem 'equivalent-xml'
-  gem 'pry-debugger', '~> 0.2.2'
+  # gem 'pry-debugger', '~> 0.2.2'
   gem 'syntax'
   gem 'timecop'
 
@@ -73,6 +73,6 @@ end
 group :development do
   gem 'capistrano'
   gem 'rvm'
-  gem 'rvm-capistrano'
+  gem 'rvm-capistrano', require: false
   gem 'licit'
 end

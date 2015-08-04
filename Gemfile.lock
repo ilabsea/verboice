@@ -136,7 +136,6 @@ GEM
     chronic (0.9.0)
     ci_reporter (1.6.5)
       builder (>= 2.1.2)
-    coderay (1.0.9)
     coffee-rails (3.2.2)
       coffee-script (>= 2.2.0)
       railties (~> 3.2.0)
@@ -144,15 +143,8 @@ GEM
       coffee-script-source
       execjs
     coffee-script-source (1.3.1)
-    columnize (0.3.6)
     daemons (1.1.3)
     database_cleaner (1.2.0)
-    debugger (1.6.1)
-      columnize (>= 0.3.1)
-      debugger-linecache (= 1.2.0)
-      debugger-ruby_core_source (~> 1.2.3)
-    debugger-linecache (1.2.0)
-    debugger-ruby_core_source (1.2.3)
     decent_exposure (1.0.1)
     delayed_job (4.0.1)
       activesupport (>= 3.0, < 4.2)
@@ -224,7 +216,6 @@ GEM
       treetop (~> 1.4.8)
     meta_programming (0.2.2)
     metaclass (0.0.1)
-    method_source (0.8.2)
     mime-types (1.25.1)
     mocha (0.10.5)
       metaclass (~> 0.0.1)
@@ -257,13 +248,6 @@ GEM
     password_strength (1.0.1)
       activerecord
     polyglot (0.3.5)
-    pry (0.9.12.2)
-      coderay (~> 1.0.5)
-      method_source (~> 0.8)
-      slop (~> 3.4)
-    pry-debugger (0.2.2)
-      debugger (~> 1.3)
-      pry (~> 0.9.10)
     rack (1.4.5)
     rack-cache (1.2)
       rack (>= 0.4)
@@ -325,7 +309,6 @@ GEM
       tilt (~> 1.3)
     shoulda-matchers (2.2.0)
       activesupport (>= 3.0.0)
-    slop (3.4.5)
     sprockets (2.2.2)
       hike (~> 1.2)
       multi_json (~> 1.0)
@@ -403,7 +386,6 @@ DEPENDENCIES
   omniauth-openid
   password_strength
   poirot_rails!
-  pry-debugger (~> 0.2.2)
   rack-oauth2!
   rails (= 3.2.14)
   rails_config
