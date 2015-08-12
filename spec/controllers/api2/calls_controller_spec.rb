@@ -31,7 +31,7 @@ describe Api2::CallsController do
     end
 
     it "calls" do
-      get :call, email: account.email, token: account.auth_token, :address => 'foo', :channel => channel.name, :callback => 'bar'
+      get :call, email: account.email, token: account.auth_token, call: { :address => 'foo', :channel => channel.name, :callback => 'bar', channel_id: channel.id }
       call_log = CallLog.last
       result = JSON.parse(@response.body)
       result['call_id'].should == call_log.id
@@ -39,24 +39,24 @@ describe Api2::CallsController do
 
     it "schedule call in the future" do
       time = Time.now.utc + 1.hour
-      get :call, email: account.email, token: account.auth_token, :address => 'foo', :not_before => time, :channel => channel.name
+      get :call, email: account.email, token: account.auth_token, call: { :address => 'foo', :not_before => time, :channel => channel.name, channel_id: channel.id }
       QueuedCall.first.not_before.time.to_i.should == time.to_i
     end
 
     it "schedule call in specific schedule" do
-      get :call, email: account.email, token: account.auth_token, :address => 'foo', :channel => channel.name, :schedule => schedule.name
+      get :call, email: account.email, token: account.auth_token, call: { :address => 'foo', :channel => channel.name, :schedule => schedule.name, channel_id: channel.id }
       QueuedCall.first.schedule.should == schedule
     end
 
     it "calls with call flow id" do
       call_flow_2 = CallFlow.make project: project
-      get :call, email: account.email, token: account.auth_token, :address => 'foo', :channel => channel.name, :callback => 'bar', :call_flow_id => call_flow_2.id
+      get :call, email: account.email, token: account.auth_token, call: { :address => 'foo', :channel => channel.name, :callback => 'bar', :call_flow_id => call_flow_2.id, channel_id: channel.id }
       CallLog.last.call_flow.should eq(call_flow_2)
     end
 
     it "calls with call flow name" do
       call_flow_2 = CallFlow.make project: project
-      get :call, email: account.email, token: account.auth_token, :address => 'foo', :channel => channel.name, :callback => 'bar', :call_flow => call_flow_2.name
+      get :call, email: account.email, token: account.auth_token, call: { :address => 'foo', :channel => channel.name, :callback => 'bar', :call_flow => call_flow_2.name, channel_id: channel.id }
       CallLog.last.call_flow.should eq(call_flow_2)
     end
   end
