@@ -16,7 +16,7 @@
 # along with Verboice.  If not, see <http://www.gnu.org/licenses/>.
 module Api2
   class ChannelsController < Api2Controller
-    before_filter :authorize_admin, only: [:mark_as_approved, :mark_as_pending]
+    before_filter :authorize_admin, only: [:activate, :deactivate]
 
     def index
       if api_current_account.admin?
