@@ -20,6 +20,10 @@ module Api2
     expose(:call_flows) { api_current_account.call_flows }
 
     def list
+      if params[:project_id].present?
+        call_flows = api_current_account.projects.find(params[:project_id]).call_flows
+      end
+
       render json: call_flows, each_serializer: CustomCallFlowSerializer
     end
   end
