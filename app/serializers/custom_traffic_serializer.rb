@@ -16,6 +16,22 @@
 # along with Verboice.  If not, see <http://www.gnu.org/licenses/>.
 
 class CustomTrafficSerializer < ActiveModel::Serializer
-  attributes :address, :total_duration, :direction, :total_call
+  attributes :address, :total_duration, :direction, :total_call, :date
+
+  def date
+    object.started_at.to_date if object.started_at
+  end
+
+  def include_address?
+    @options[:address]
+  end
+
+  def include_direction?
+    @options[:direction]
+  end
+
+  def include_date?
+    @options[:date]
+  end
 
 end

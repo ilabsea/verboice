@@ -23,68 +23,61 @@ describe Api2::TrafficsController do
   let(:account) { Account.make role: Account::USER }
 
   describe "index" do
-    context "admin" do
-      context "host is not allowed" do
-        it "unauthorized" do
-          request.stub(:remote_ip).and_return('192.168.1.1')
-          get :index, email: admin.email, token: admin.auth_token
+    context "do not pass start_date or end_date" do
+      it "response 422 when end_date is missed" do
+        get :index, email: admin.email, token: admin.auth_token, start_date: '05/05/2014'
 
-          assert_response :unauthorized
-        end
+        assert_response :unprocessable_entity
       end
 
-      context "host is allowed" do
-        context "do not pass start_date or end_date" do
-          it "response 422 when end_date is missed" do
-            get :index, email: admin.email, token: admin.auth_token, start_date: '05/05/2014'
+      it "response 422 when start_date is missed" do
+        get :index, email: admin.email, token: admin.auth_token, end_date: '05/05/2014'
 
-            assert_response :unprocessable_entity
-          end
+        assert_response :unprocessable_entity
+      end
+    end
 
-          it "response 422 when start_date is missed" do
-            get :index, email: admin.email, token: admin.auth_token, end_date: '05/05/2014'
+    context "pass start_date and end_date" do
+      context "invalid date format" do
+        it "response 422 when start date is invalid" do
+          get :index, email: admin.email, token: admin.auth_token, start_date: '0505/2014', end_date: '05/05/2014'
 
-            assert_response :unprocessable_entity
-          end
+          assert_response :unprocessable_entity
         end
 
-        context "pass start_date and end_date" do
-          context "invalid date format" do
-            it "response 422 when start date is invalid" do
-              get :index, email: admin.email, token: admin.auth_token, start_date: '0505/2014', end_date: '05/05/2014'
+        it "response 422 when end date is invalid" do
+          get :index, email: admin.email, token: admin.auth_token, start_date: '05/05/2014', end_date: '0505/2014'
 
-              assert_response :unprocessable_entity
-            end
-
-            it "response 422 when end date is invalid" do
-              get :index, email: admin.email, token: admin.auth_token, start_date: '05/05/2014', end_date: '0505/2014'
-
-              assert_response :unprocessable_entity
-            end
-          end
-
-          context "valid date format" do
-            it "response 200" do
-              get :index, email: admin.email, token: admin.auth_token, start_date: '05/05/2014', end_date: '05/05/2014'
-
-              assert_response :ok
-            end
-
-            it "response 200" do
-              get :index, email: admin.email, token: admin.auth_token, start_date: '05-05-2014', end_date: '05-05-2014'
-
-              assert_response :ok
-            end
-          end
+          assert_response :unprocessable_entity
         end
       end
     end
 
-    context "normal user" do
-      it "should response 200" do
-        get :index, email: account.email, token: account.auth_token, start_date: '05/05/2014', end_date: '05/05/2014'
+    context "admin" do
+      context "host is allowed" do
+        context "valid date format" do
+        it "response 200" do
+          get :index, email: admin.email, token: admin.auth_token, start_date: '05/05/2014', end_date: '05/05/2014'
 
-        assert_response :unauthorized
+          assert_response :ok
+        end
+
+        it "response 200" do
+          get :index, email: admin.email, token: admin.auth_token, start_date: '05-05-2014', end_date: '05-05-2014'
+
+          assert_response :ok
+        end
+      end
+      end
+    end
+
+    context "normal user" do
+      context "valid date format" do
+        it "response 200" do
+          get :index, email: account.email, token: account.auth_token, start_date: '05/05/2014', end_date: '05/05/2014'
+
+          assert_response :ok
+        end
       end
     end
   end

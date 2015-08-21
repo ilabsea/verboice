@@ -39,7 +39,7 @@ class CustomChannelSerializer < ActiveModel::Serializer
   def traffics
     traffics = []
     @options[:traffics].each do |traffic|
-      traffics.push CustomTrafficSerializer.new(traffic) if traffic.channel_id == id
+      traffics.push CustomTrafficSerializer.new(traffic, address: true, direction: true) if traffic.channel_id == id
     end
     traffics
   end
