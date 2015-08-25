@@ -284,6 +284,7 @@ Verboice::Application.routes.draw do
     post '/auth' => 'sessions#create'
 
     resources :traffics, only: [:index]
+    resources :traffic_details, only: [:index]
   end
 
   get 'permissions' => 'permissions#index'
