@@ -283,8 +283,10 @@ Verboice::Application.routes.draw do
 
     post '/auth' => 'sessions#create'
 
+    # billing and dashboard
     resources :traffics, only: [:index]
     resources :traffic_details, only: [:index]
+    resources :call_flow_traces, only: [:index]
   end
 
   get 'permissions' => 'permissions#index'
