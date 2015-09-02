@@ -26,5 +26,11 @@ module Api2
 
       render json: call_flows, each_serializer: CustomCallFlowSerializer
     end
+
+    def show
+      call_flow = call_flows.find(params[:id])
+      
+      render json: call_flow, serializer: CustomCallFlowSerializer, flow: true
+    end
   end
 end

@@ -25,15 +25,35 @@ describe Api2::CallFlowsController do
 
   describe "list" do
     before(:each) do
-      CallFlow.make project: project
+      @call_flow = CallFlow.make project: project
     end
 
-    it "should list all call flows" do
+    it "should response nothing when project ID is missing" do
       get :list, email: account.email, token: account.auth_token
 
       assert_response :ok
       response = ActiveSupport::JSON.decode(@response.body)
+      response.should be_nil
+    end
+
+    it "should list all call flows" do
+      get :list, email: account.email, token: account.auth_token, project_id: project.id
+
+      assert_response :ok
+      response = ActiveSupport::JSON.decode(@response.body)
       response.length.should eq(1)
+    end
+  end
+
+  describe "show" do
+    before(:each) do
+      @call_flow = CallFlow.make project: project
+    end
+
+    it "should get call flow with specified ID" do
+      get :show, email: account.email, token: account.auth_token, id: @call_flow.id
+
+      assert_response :ok
     end
   end
 

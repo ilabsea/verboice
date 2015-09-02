@@ -287,6 +287,7 @@ Verboice::Application.routes.draw do
     resources :traffics, only: [:index]
     resources :traffic_details, only: [:index]
     resources :call_flow_traces, only: [:index]
+    resources :call_flows, only: [:show]
   end
 
   get 'permissions' => 'permissions#index'

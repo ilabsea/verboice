@@ -16,6 +16,14 @@
 # along with Verboice.  If not, see <http://www.gnu.org/licenses/>.
 
 class CustomCallFlowSerializer < ActiveModel::Serializer
-  attributes :id, :name, :project_id
+  attributes :id, :name, :project_id, :flow
+
+  def flow
+    object.user_flow
+  end
+
+  def include_flow?
+    @options[:flow]
+  end
 
 end
