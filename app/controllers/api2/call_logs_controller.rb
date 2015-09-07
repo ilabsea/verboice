@@ -51,7 +51,7 @@ module Api2
 
     # GET /call_logs/:id
     def show
-      render json: @call_log, serializer: CustomCallLogSerializer
+      render json: @call_log, serializer: CustomCallLogSerializer, include: ['call_log_recorded_audios']
     end
 
     # GET /call_logs/:id/play_audio?key=12344
