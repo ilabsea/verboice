@@ -16,6 +16,7 @@
 # along with Verboice.  If not, see <http://www.gnu.org/licenses/>.
 
 class CustomCallLogRecordedAudioSerializer < ActiveModel::Serializer
+
   attributes :call_log_id, :key, :project_variable_id, :project_variable_name
 
   def project_variable_name

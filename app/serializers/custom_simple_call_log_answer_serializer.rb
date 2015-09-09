@@ -16,7 +16,7 @@
 # along with Verboice.  If not, see <http://www.gnu.org/licenses/>.
 
 class CustomSimpleCallLogAnswerSerializer < ActiveModel::Serializer
-  attributes :id, :value, :project_variable_name
+  attributes :id, :value, :project_variable_id, :project_variable_name
 
   def project_variable_name
     object.project_variable.name
