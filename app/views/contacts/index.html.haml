@@ -8,6 +8,8 @@
 %h2= t('views.contacts.index.title')
 %p.desc= t('views.contacts.index.desc')
 
+= link_to 'Download as CSV', download_project_contacts_path(@project, search: params['search'], format: :csv), class: ' fimport'
+
 .ux-collapsible.collapsed.w40.file_upload{"data-on-expanded" => "box grey"}
   %span
     - if project_admin?
@@ -28,7 +30,6 @@
         %a.button.white.cancel.ux-collapse-trigger= t('views.contacts.index.action.cancel')
       .clear
 
-%br
 %br
 
 %div= page_entries_info @contacts

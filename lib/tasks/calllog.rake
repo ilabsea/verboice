@@ -14,7 +14,6 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with Verboice.  If not, see <http://www.gnu.org/licenses/>.
-
 namespace :call_log do
   desc "Migrate call log trace to step interaction"
   task :migrate_traces => :environment do
@@ -45,6 +44,20 @@ namespace :call_log do
     print "\n! - Failed to migrate ids: [#{failed_ids.join ','}]\n"
   end
 
+  namespace :zombie do
+    desc "Terminate zombie calls those are over than 30 minutes"
+    task :terminate_calls => :environment do
+      call_logs = CallLog.where("state = ? and updated_at <= ?", CallLog::STATE_ACTIVE, 30.minutes.ago)
+      CallLog.transaction do
+        call_logs.find_each do |call_log|
+          call_log.state = CallLog::STATE_FAILED
+          call_log.fail_reason = CallLog::FAIL_REASONS['terminated']
+          call_log.save
+        end
+      end
+    end
+  end
+  
   desc "Import call log variable value"
   task :import_call_log_variable_value, [:path_csv_file] => :environment do |t, args|
     raise "Exception: Missing argument csv file" if args[:path_csv_file].nil?

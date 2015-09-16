@@ -16,7 +16,8 @@
     var project_languages = #{ project_languages_json(@project) };
     var project_id = #{ @project.id };
     var nuntium_configured = #{ nuntium_configured?.to_json };
-    var steps_configured = #{steps_configured?.to_json}
+    var step_impersonate_enabled = #{step_impersonate_enabled?.to_json};
+    var step_asr_enabled = #{step_asr_enabled?.to_json};
 
     var menu_default_time_out_in_seconds = #{Parsers::UserFlowNode::Menu.default_time_out_in_seconds};
     var menu_default_number_of_attempts = #{Parsers::UserFlowNode::Menu.default_number_of_attempts};
@@ -43,7 +44,7 @@
         iframe.src = url;
     }
 
-  - %W(speech_recognition external_step hang_up_step workflow_step capture_step menu_step play_step mark_as_failed_step mark_as_successful_step transfer_step goto_step branch_step record_step language_step text_localized_resource url_localized_resource record_localized_resource upload_localized_resource command_selector call_simulator branch_option external_setting resource_editor hang_up_and_call_back nuntium_step impersonate_step register_step register_option deregister_step datetime_step email_resource_editor email_text_localized_resource).each do |template|
+  - %W(speech_recognition external_step hang_up_step workflow_step capture_step menu_step play_step mark_as_failed_step mark_as_successful_step transfer_step goto_step branch_step record_step language_step text_localized_resource url_localized_resource record_localized_resource upload_localized_resource command_selector call_simulator branch_option external_setting resource_editor hang_up_and_call_back nuntium_step impersonate_step register_step register_option deregister_step datetime_step email_resource_editor email_text_localized_resource personate_step personate_option).each do |template|
     = render "call_flows/#{template}_template"
 
 = render 'shared/project_tabs_and_title', :project => @project, :shared_project => @shared_project

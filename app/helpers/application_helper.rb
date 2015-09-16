@@ -108,6 +108,10 @@ module ApplicationHelper
   def nuntium_configured?
     Pigeon.config.nuntium_configured?
   end
+  
+  def step_asr_enabled?
+    STEP_CONFIG["speech_recognition"] == true
+  end
 
   def format_timestamp(time)
     return nil unless time
@@ -116,6 +120,10 @@ module ApplicationHelper
 
   def steps_configured?
     STEP_CONFIG["speech_recognition"] == true
+  end
+
+  def step_impersonate_enabled?
+    STEP_CONFIG["impersonate"] == true
   end
 
   def datetime_format(datetime, time_zone)

@@ -1,5 +1,5 @@
 -module(session).
--export([start_link/1, new/0, new/1, find/1, answer/2, answer/4, dial/4, reject/2, stop/1, resume/1, default_variables/1, create_default_erjs_context/2]).
+-export([start_link/1, new/0, new/1, find/1, answer/2, answer/4, dial/4, reject/2, stop/1, resume/1, default_variables/1, create_default_erjs_context/2, merge/2]).
 -export([no_ack/1]).
 -export([language/1]).
 -export([new_id/0, set_pointer/2]).
@@ -562,6 +562,11 @@ default_variables(#session{address = Address, contact = Contact, queued_call = Q
   NewJsContext = erjs_context:set(var_call_at, datetime_utils:strftime(datetime_utils:in_zone(TimeZone, StartedAt)), JsContext),
   DefaultContext = default_variables(NewJsContext, ProjectVars, Variables),
   initialize_context(DefaultContext, QueuedCall).
+
+merge(#session{contact = Contact, project = #project{id = ProjectId}}, Context) ->
+  ProjectVars = project_variable:names_for_project(ProjectId),
+  Variables = persisted_variable:find_all({contact_id, Contact#contact.id}),
+  default_variables(Context, ProjectVars, Variables).
 
 create_default_erjs_context(CallLogId, PhoneNumber) ->
   erjs_context:new([

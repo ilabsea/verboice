@@ -1,8 +1,11 @@
 development:
   speech_recognition: true
+  impersonate: true
 
 test:
   speech_recognition: false
+  impersonate: false
 
 production:
   speech_recognition: false
+  impersonate: false

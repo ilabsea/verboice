@@ -1,0 +1,31 @@
+header = [t('views.contacts.index.label.phone_number')]
+
+@implicit_variables.each do |variable|
+  header << variable.key
+end
+
+@project_variables.each do |variable|
+  header << variable.name
+end
+
+csv << header
+
+@contacts.each do |contact|
+  row = []
+  row << addresses_for_contact(contact)
+
+  @implicit_variables.each do |implicit_variable|
+    variable = contact.persisted_variables.detect {|v| v.implicit_key == implicit_variable.key}
+    row << variable.try(:value)
+  end
+
+  @project_variables.each do |project_variable|
+    value = nil
+    contact.persisted_variables.each do |variable|
+      value = variable.try(:value) if variable.project_variable == project_variable
+    end
+    row << "#{value}"
+  end
+
+  csv << row
+end

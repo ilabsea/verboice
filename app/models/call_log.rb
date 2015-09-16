@@ -34,6 +34,7 @@ class CallLog < ActiveRecord::Base
     'hangup'    => 'incompleted',
     'marked_as_failed' => "marked_as_failed",
     'no_ack' => 'no_ack',
+    'terminated' => 'terminated',
     'blocked' => "blocked",
     'disabled' => "disabled"
   }

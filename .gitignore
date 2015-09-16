@@ -20,7 +20,6 @@ nbproject/*
 config/oauth.yml
 config/verboice.yml
 config/nuntium.yml
-config/asterisk.yml
 config/api.yml
 config/application.yml
 config/database.yml
