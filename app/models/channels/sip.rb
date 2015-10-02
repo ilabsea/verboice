@@ -21,7 +21,7 @@ class Channels::Sip < Channel
   validate :server_username_uniqueness
   validate :server_number_uniqueness
 
-  before_create :mark_as_pending
+  before_create :mark_as_pending, if: :require_approval?
 
   config_accessor :username
   config_accessor :password
@@ -113,6 +113,10 @@ class Channels::Sip < Channel
 
   def mark_as_pending
     self.status = STATUS_PENDING if self.kind == Channels::Sip.kind
+  end
+
+  def require_approval?
+    APP_CONFIGS['sip_require_approval']
   end
 
 end

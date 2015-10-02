@@ -1,8 +1,11 @@
 development:
   allow_prefix_called_number: true
+  sip_require_approval: true
 
 test:
   allow_prefix_called_number: false
+  sip_require_approval: true
 
 production:
   allow_prefix_called_number: false
+  sip_require_approval: false
