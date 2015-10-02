@@ -111,7 +111,7 @@ class ProjectsController < ApplicationController
     @call_flows = @project.call_flows.includes(:channels).includes(:queued_calls)
     @project_channels = @call_flows.collect(&:channels).flatten.to_set
     @queued_calls = @call_flows.collect(&:queued_calls).flatten
-    @call_logs = @project.call_logs
+    @total_calls = @project.call_logs.count
   end
 
   def curated_addresses(addresses)
