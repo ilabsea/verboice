@@ -145,8 +145,68 @@ describe Api::ReminderGroupsController do
         assert_response :success
       }.to change(project.ext_reminder_groups, :count).from(1).to(0)
     end
+  end
 
-    
+  describe "put register" do
+    it "should response 404 when it doesn't exists" do
+      put :register, project_id: project.id, id: 9999
+
+      assert_response :not_found
+    end
+
+    it "should response 400 when it's missing address" do
+      put :register, project_id: project.id, id: reminder_group.id
+
+      assert_response :bad_request
+    end
+
+    it "should response 400 when address is string" do
+      put :register, project_id: project.id, id: reminder_group.id, address: 'a1000'
+
+      assert_response :bad_request
+    end
+
+    it "should response 200" do
+      put :register, project_id: project.id, id: reminder_group.id, address: "1000"
+
+      assert_response :success
+      reminder_group.reload.addresses.count.should == 1
+    end
+  end
+
+  describe "put deregister" do
+    it "should response 404 when it doesn't exists" do
+      put :deregister, project_id: project.id, id: 9999
+
+      assert_response :not_found
+    end
+
+    it "should response 400 when it's missing address" do
+      put :deregister, project_id: project.id, id: reminder_group.id
+
+      assert_response :bad_request
+    end
+
+    it "should response 400 when address is string" do
+      put :deregister, project_id: project.id, id: reminder_group.id, address: 'a1000'
+
+      assert_response :bad_request
+    end
+
+    it "should response 204" do
+      put :deregister, project_id: project.id, id: reminder_group.id, address: "9999"
+
+      assert_response :no_content
+    end
+
+    it "should response 200" do
+      reminder_group.register_address "1000"
+
+      put :deregister, project_id: project.id, id: reminder_group.id, address: "1000"
+
+      assert_response :success
+    end
+
   end
 
 end
