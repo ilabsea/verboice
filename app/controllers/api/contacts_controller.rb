@@ -20,7 +20,7 @@ class Api::ContactsController < ApiController
 
   expose(:project) { @project }
 
-  def index    
+  def index
     contacts = project.contacts.includes(:addresses).all
     render json: contacts_to_json(contacts)
   end
