@@ -37,7 +37,7 @@
           %td= call.project.try(:name)
           %td= call.try(:state)
           %td
-            = link_to t('views.call_logs.queued.action.view_log_details'), call_log_path(call.call_log)
+            = link_to t('views.call_logs.queued.action.view_log_details'), call_log_path(call.call_log, project_id: call.try(:project).try(:id))
             = link_to '', [call.channel, call], :confirm => "#{t('views.call_logs.queued.action.confirm_delete')} #{call.address}?", :method => :delete, :class => "button fdelete"
     %br/
     %div= page_entries_info @calls, :entry_name => t('views.call_logs.queued.label.queued_calls')
