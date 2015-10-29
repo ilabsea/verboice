@@ -41,34 +41,41 @@ handle_event({new_session, Pid, Env}, State) ->
             Found -> Found
           end,
 
-          Channel = channel:find(ChannelId),
-          case channel:is_approved(Channel) of
-            true ->
-              case channel:enabled(Channel) of
-                true -> 
-                  CallerId = case proplists:get_value(callerid, Env) of
-                    <<>> -> undefined;
-                    <<"unknown">> -> undefined;
-                    X -> X
-                  end,
+          case channel:find(ChannelId) of
+            undefined ->
+              error_logger:info_msg("Channel (ChannelId: ~p, PeerIp: ~p, SipTo: ~p) was not found", [ChannelId, PeerIp, SipTo]),
+              agi_session:close(Pid),
+              {ok, State};
 
-                  case session:new() of
-                    {ok, SessionPid} ->
-                      session:answer(SessionPid, Pbx, ChannelId, CallerId),
-                      {ok, State};
-                    {error, _Reason} ->
+            Channel ->
+              case channel:is_approved(Channel) of
+                true ->
+                  case channel:enabled(Channel) of
+                    true -> 
+                      CallerId = case proplists:get_value(callerid, Env) of
+                        <<>> -> undefined;
+                        <<"unknown">> -> undefined;
+                        X -> X
+                      end,
+
+                      case session:new() of
+                        {ok, SessionPid} ->
+                          session:answer(SessionPid, Pbx, ChannelId, CallerId),
+                          {ok, State};
+                        {error, _Reason} ->
+                          agi_session:close(Pid),
+                          {ok, State}
+                      end;
+                    _ -> 
+                      error_logger:info_msg("ChannelId: (~p) was disabled", [ChannelId]),
                       agi_session:close(Pid),
                       {ok, State}
                   end;
-                _ -> 
+                _ ->
                   error_logger:info_msg("ChannelId: (~p) was disabled", [ChannelId]),
                   agi_session:close(Pid),
                   {ok, State}
-              end;
-            _ ->
-              error_logger:info_msg("ChannelId: (~p) was disabled", [ChannelId]),
-              agi_session:close(Pid),
-              {ok, State}
+              end
           end
       end
   end;
