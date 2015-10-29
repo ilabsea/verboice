@@ -36,6 +36,7 @@ class Channels::Sip < Channel
   config_accessor :normalized_called_number
   config_accessor :dtmf_mode
   config_accessor :codec_type
+  config_accessor :qualify
 
   attr_accessor :ip_address
 

@@ -32,12 +32,13 @@ generate_config([Channel | Rest], RegFile, ChannelsFile, ResolvCache, ChannelInd
   Number = channel:number(Channel),
   DtmfMode = channel:dtmf_mode(Channel),
   CodecType = channel:codec_type(Channel),
+  Qualify = channel:qualify(Channel),
 
   file:write(ChannelsFile, ["[", Section, "](!)\n"]),
   file:write(ChannelsFile, "type=peer\n"),
   file:write(ChannelsFile, "canreinvite=no\n"),
   file:write(ChannelsFile, "nat=yes\n"),
-  file:write(ChannelsFile, "qualify=yes\n"),
+  file:write(ChannelsFile, ["qualify=", Qualify, "\n"]),
 
   if
     length(DtmfMode) > 0 -> file:write(ChannelsFile, ["dtmfmode=", DtmfMode, "\n"]);
