@@ -4,6 +4,8 @@
 -include_lib("kernel/include/inet.hrl").
 -include("db.hrl").
 
+-define(DNS_RESOLVER_TIMEOUT, 1000).
+
 generate(RegFilePath, ChannelsFilePath) ->
   {ok, RegFile} = file:open(RegFilePath, [write]),
   try file:open(ChannelsFilePath, [write]) of
@@ -131,10 +133,10 @@ expand_domain(Domain, ResolvCache) ->
 
 expand_domain(Domain) ->
   Query = binary_to_list(iolist_to_binary(["_sip._udp.", Domain])),
-  case inet_res:getbyname(Query, srv) of
+  case inet_res:getbyname(Query, srv, ?DNS_RESOLVER_TIMEOUT) of
     {ok, #hostent{h_addr_list = AddrList}} ->
       lists:foldl(fun({_, _, Port, Host}, Out) ->
-        New = case inet_res:gethostbyname(Host) of
+        New = case inet_res:gethostbyname(Host, inet, ?DNS_RESOLVER_TIMEOUT) of
           {ok, #hostent{h_addr_list = IpList}} ->
             IPs = map_ips(IpList),
             {Host, IPs, Port};
@@ -143,7 +145,7 @@ expand_domain(Domain) ->
         [New | Out]
       end, [], AddrList);
     _ ->
-      case inet_res:gethostbyname(Domain) of
+      case inet_res:gethostbyname(Domain, inet, ?DNS_RESOLVER_TIMEOUT) of
         {ok, #hostent{h_addr_list = IpList}} ->
           IPs = map_ips(IpList),
           [{Domain, IPs, undefined}];
