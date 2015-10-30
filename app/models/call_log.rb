@@ -215,7 +215,7 @@ class CallLog < ActiveRecord::Base
   def set_account_to_project_account
     self.project_id = self.call_flow.project_id
     self.account_id = self.project.account_id
-    contact = self.project.contacts.joins(:addresses).where(:contact_addresses => {:address => self.address}).first
+    contact = self.project.contacts.joins(:addresses).where(:contact_addresses => {project_id: self.project.id, address: self.address}).first
     self.contact_id = contact.id unless contact.nil?
   end
 end

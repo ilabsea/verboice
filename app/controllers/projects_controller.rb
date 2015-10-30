@@ -76,7 +76,7 @@ class ProjectsController < ApplicationController
 
     DateTime.parse(options[:not_before]) rescue redirect_to project_path(params[:id]), flash: {error: I18n.t("controllers.projects_controller.enter_valid_date")} and return if options[:not_before]
 
-    addresses = curated_addresses(addresses)
+    #addresses = curated_addresses(addresses)
     addresses.each do |address|
       @channel.call(address.strip, options)
     end
