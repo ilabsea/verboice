@@ -54,7 +54,6 @@ module Ext
         true
       else
         self.addresses.push(address)
-        self.save
       end
     end
 

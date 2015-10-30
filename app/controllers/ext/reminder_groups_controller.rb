@@ -31,6 +31,7 @@ module Ext
               next if !row[0].strip.is_contact?
               @reminder.register_address row[0].to_number
             end
+            @reminder.save!
           else
             raise I18n.t("controllers.ext.reminder_groups_controller.invalid_extension")
           end
