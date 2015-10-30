@@ -12,9 +12,8 @@ run(Args, Session = #session{project = Project, call_log = CallLog, js_context =
     undefined ->
       CallLog:info(io_lib:format("Could not impersonate. Contact not found with address: ~p ", [Address]), []),
       Session#session{js_context = erjs_context:set(impersonated, false, JS2)};
-    Contact ->
-      Addresses = [util:to_string(ContactAddress#contact_address.address) || ContactAddress <- contact_address:find_all([{contact_id, Contact#contact.id}])],
-      CallLog:info(io_lib:format("Impersonating as contact: ~p", [Addresses]), []),
+    {Contact, ContactAddress} ->
+      CallLog:info(io_lib:format("Impersonating as contact: ~p", [ContactAddress#contact_address.address]), []),
       impersonate(Session, Contact)
   end,
   {next, NewSession}.

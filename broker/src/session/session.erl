@@ -128,8 +128,7 @@ ready({answer, Pbx, ChannelId, CallerId}, State = #state{session_id = SessionId}
       Channel = channel:find(ChannelId),
       CallFlow = call_flow:find(Channel#channel.call_flow_id),
       Project = project:find(CallFlow#call_flow.project_id),
-      Contact = get_contact(CallFlow#call_flow.project_id, CallerId, 1),
-      ContactAddress = contact:find_or_create_contact_address(CallerId, Contact),
+      {Contact, ContactAddress} = get_contact(CallFlow#call_flow.project_id, CallerId, 1),
       CallLog = call_log_srv:new(SessionId, #call_log{
         account_id = Channel#channel.account_id,
         project_id = CallFlow#call_flow.project_id,
@@ -194,7 +193,7 @@ ready({dial, RealBroker, Channel, QueuedCall}, _From, State = #state{session_id 
   NewSession = case State#state.session of
     undefined ->
       CallLog = call_log_srv:new(SessionId, call_log:find(QueuedCall#queued_call.call_log_id)),
-      Contact = get_contact(QueuedCall#queued_call.project_id, AddressWithoutVoipPrefix, QueuedCall#queued_call.call_log_id),
+      {Contact, _ContactAddress} = get_contact(QueuedCall#queued_call.project_id, AddressWithoutVoipPrefix, QueuedCall#queued_call.call_log_id),
       Session = QueuedCall:start_session(),
 
       poirot:add_meta([
@@ -549,11 +548,12 @@ flow_result(Result, _) -> Result.
 
 get_contact(ProjectId, undefined, CallLogId) ->
   Address = "Anonymous" ++ integer_to_list(CallLogId),
-  contact:create_anonymous(ProjectId, Address);
+  get_contact(ProjectId, Address, CallLogId);
 get_contact(ProjectId, Address, _) ->
   contact:find_or_create_with_address(ProjectId, Address).
 
 default_variables(#session{address = Address, contact = Contact, queued_call = QueuedCall, project = #project{id = ProjectId, time_zone = TimeZone}, call_log = CallLog, started_at = StartedAt}) ->
+  io:format("Contact: ~p~n", [Contact]),
   CallLogId = util:to_string(CallLog:id()),
   Context = create_default_erjs_context(CallLogId, Address),
   ProjectVars = project_variable:names_for_project(ProjectId),

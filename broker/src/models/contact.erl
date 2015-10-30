@@ -1,16 +1,16 @@
 -module(contact).
 -export([find_or_create_with_address/2, find_or_create_with_address_as_anonymous/2]).
--export([find_or_create_contact_address/2]).
+% -export([find_or_create_contact_address/2]).
 -export([find_by/2]).
 
 -define(TABLE_NAME, "contacts").
 -include_lib("erl_dbmodel/include/model.hrl").
 
 find_by(ProjectId, Address) ->
-  ContactAddresses = contact_address:find_all([{project_id, ProjectId}]),
-  case contact_address(Address, ContactAddresses) of
-    undefined -> undefined;
-    ContactAddress -> contact:find(ContactAddress#contact_address.contact_id)
+  PossibleAddresses = tel:possible_addresses(Address), 
+  case contact_address:find_all([{project_id, ProjectId}, {address, in, PossibleAddresses}]) of
+    [] -> undefined;
+    [ContactAddress|_] -> {contact:find(ContactAddress#contact_address.contact_id), ContactAddress}
   end.
 
 find_or_create_with_address(ProjectId, Address) ->
@@ -23,24 +23,8 @@ find_or_create_with_address(ProjectId, Address, Anonymous) ->
   case find_by(ProjectId, Address) of
     undefined ->
       Contact = contact:create(#contact{project_id = ProjectId, anonymous = Anonymous}),
-      create_contact_address(Address, Contact),
-      Contact;
-    Contact -> Contact
-  end.
-
-find_or_create_contact_address(Address, Contact = #contact{id = ContactId, project_id = ProjectId}) ->
-  ContactAddresses = contact_address:find_all([{project_id, ProjectId}, {contact_id, ContactId}]),
-  case contact_address(Address, ContactAddresses) of
-    undefined -> create_contact_address(Address, Contact);
-    ContactAddress -> ContactAddress
-  end.
-
-%% @private
-contact_address(_Address, []) -> undefined;
-contact_address(Address, [ContactAddress | Rest]) ->
-  case tel:without_prefix(ContactAddress#contact_address.address) == tel:without_prefix(Address) of
-    true -> ContactAddress;
-    _ -> contact_address(Address, Rest)
+      {Contact, create_contact_address(Address, Contact)};
+    ContactAndAddress -> ContactAndAddress
   end.
 
 %% @private
