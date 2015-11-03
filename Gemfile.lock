@@ -34,15 +34,15 @@ GIT
 
 GIT
   remote: https://github.com/instedd/poirot_rails.git
-  revision: 22eb420bf2d170efef118ca57324221e6383fa1c
+  revision: a9d4c5fd413baf1caaf3cd56e805cd3c0268bd8c
   branch: master
   specs:
-    poirot_rails (0.0.1)
+    poirot_rails (0.0.4)
       bertrpc
+      ffi-rzmq (~> 2.0.1)
       guid
       json
       rails (>= 3.2)
-      zmq
 
 GIT
   remote: https://github.com/lchanmann/csv_builder.git
@@ -175,6 +175,11 @@ GEM
     faraday (0.8.0)
       multipart-post (~> 1.1)
     ffaker (1.4.0)
+    ffi (1.9.10)
+    ffi-rzmq (2.0.4)
+      ffi-rzmq-core (>= 1.0.1)
+    ffi-rzmq-core (1.0.4)
+      ffi (~> 1.9)
     foreman (0.63.0)
       dotenv (>= 0.7)
       thor (>= 0.13.6)
@@ -193,7 +198,7 @@ GEM
     hike (1.2.3)
     httpauth (0.1)
     httpclient (2.3.4.1)
-    i18n (0.6.9)
+    i18n (0.7.0)
     ice_cube (0.10.0)
     instedd-pigeon (0.2.2)
       json
@@ -208,7 +213,7 @@ GEM
     jquery-rails (1.0.19)
       railties (~> 3.0)
       thor (~> 0.14)
-    json (1.8.1)
+    json (1.8.3)
     language_list (1.0.0)
     licit (0.2.2)
     mail (2.5.4)
@@ -219,7 +224,7 @@ GEM
     mime-types (1.25.1)
     mocha (0.10.5)
       metaclass (~> 0.0.1)
-    multi_json (1.9.2)
+    multi_json (1.11.2)
     multipart-post (1.1.5)
     mustache (0.99.5)
     mysql2 (0.3.11)
@@ -248,15 +253,15 @@ GEM
     password_strength (1.0.1)
       activerecord
     polyglot (0.3.5)
-    rack (1.4.5)
-    rack-cache (1.2)
+    rack (1.4.7)
+    rack-cache (1.5.1)
       rack (>= 0.4)
     rack-openid (1.3.1)
       rack (>= 1.1.0)
       ruby-openid (>= 2.1.8)
     rack-ssl (1.3.4)
       rack
-    rack-test (0.6.2)
+    rack-test (0.6.3)
       rack (>= 1.0)
     rails (3.2.14)
       actionmailer (= 3.2.14)
@@ -275,7 +280,7 @@ GEM
       rake (>= 0.8.7)
       rdoc (~> 3.4)
       thor (>= 0.14.6, < 2.0)
-    rake (10.2.2)
+    rake (10.4.2)
     rdoc (3.12.2)
       json (~> 1.4)
     recaptcha (0.3.6)
@@ -309,7 +314,7 @@ GEM
       tilt (~> 1.3)
     shoulda-matchers (2.2.0)
       activesupport (>= 3.0.0)
-    sprockets (2.2.2)
+    sprockets (2.2.3)
       hike (~> 1.2)
       multi_json (~> 1.0)
       rack (~> 1.0)
@@ -325,7 +330,7 @@ GEM
       json (>= 1.1.9)
       mime-types (>= 1.16)
       oauth (>= 0.4.1)
-    tzinfo (0.3.39)
+    tzinfo (0.3.45)
     uglifier (1.2.0)
       execjs (>= 0.3.0)
       multi_json (>= 1.0.2)
@@ -338,7 +343,6 @@ GEM
     will_paginate (3.0.3)
     xpath (2.0.0)
       nokogiri (~> 1.3)
-    zmq (2.1.4)
 
 PLATFORMS
   ruby
