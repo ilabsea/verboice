@@ -29,7 +29,8 @@ module Ext
           when '.csv'
             CSV.parse params[:file_name].read do |row|
               next if !row[0].strip.is_contact?
-              @reminder.register_address row[0].to_number
+
+              @reminder.addresses.push(row[0].strip.to_number) unless @reminder.addresses.include?(row[0].strip.to_number)
             end
             @reminder.save!
           else
