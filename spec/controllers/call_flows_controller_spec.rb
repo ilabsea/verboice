@@ -43,26 +43,26 @@ describe CallFlowsController do
       call_log5 = CallLog.make id: 5, address: 1000, call_flow: call_flow, started_at: Time.now, finished_at: Time.now
       call_log6 = CallLog.make id: 6, address: 1000, call_flow: call_flow, started_at: Time.now, finished_at: Time.now
 
-    Hercule::Activity.stub(:search).and_return(hercule_activity_result [
-      { 'call_log_id' => call_log3.id, 'step_id' => 1, 'step_result' => 'timeout' },
-      { 'call_log_id' => call_log1.id, 'step_id' => 1, 'step_result' => 'pressed', 'step_data' => '2' },
-      { 'call_log_id' => call_log2.id, 'step_id' => 1, 'step_result' => 'pressed', 'step_data' => '1' },
-      { 'call_log_id' => call_log2.id, 'step_id' => 593, 'step_result' => 'pressed', 'step_data' => '1' },
-      { 'call_log_id' => call_log4.id, 'step_id' => 1, 'step_result' => 'pressed', 'step_data' => '1' },
-      { 'call_log_id' => call_log4.id, 'step_id' => 593, 'step_result' => 'pressed', 'step_data' => '2' },
-      { 'call_log_id' => call_log5.id, 'step_id' => 1, 'step_result' => 'pressed', 'step_data' => '2' },
-      { 'call_log_id' => call_log5.id, 'step_id' => 737, 'step_result' => 'timeout' },
-      { 'call_log_id' => call_log6.id, 'step_id' => 1, 'step_result' => 'pressed', 'step_data' => '2' },
-      { 'call_log_id' => call_log6.id, 'step_id' => 737, 'step_result' => 'pressed', 'step_data' => '2' },
-      { 'call_log_id' => call_log5.id, 'step_id' => 43212345678, 'step_result' => 'pressed', 'step_data' => '2' },
-    ])
+      Hercule::Activity.stub(:search).and_return(hercule_activity_result [
+        { 'call_log_id' => call_log3.id, 'step_id' => 1, 'step_result' => 'timeout' },
+        { 'call_log_id' => call_log1.id, 'step_id' => 1, 'step_result' => 'pressed', 'step_data' => '2' },
+        { 'call_log_id' => call_log2.id, 'step_id' => 1, 'step_result' => 'pressed', 'step_data' => '1' },
+        { 'call_log_id' => call_log2.id, 'step_id' => 593, 'step_result' => 'pressed', 'step_data' => '1' },
+        { 'call_log_id' => call_log4.id, 'step_id' => 1, 'step_result' => 'pressed', 'step_data' => '1' },
+        { 'call_log_id' => call_log4.id, 'step_id' => 593, 'step_result' => 'pressed', 'step_data' => '2' },
+        { 'call_log_id' => call_log5.id, 'step_id' => 1, 'step_result' => 'pressed', 'step_data' => '2' },
+        { 'call_log_id' => call_log5.id, 'step_id' => 737, 'step_result' => 'timeout' },
+        { 'call_log_id' => call_log6.id, 'step_id' => 1, 'step_result' => 'pressed', 'step_data' => '2' },
+        { 'call_log_id' => call_log6.id, 'step_id' => 737, 'step_result' => 'pressed', 'step_data' => '2' },
+        { 'call_log_id' => call_log5.id, 'step_id' => 43212345678, 'step_result' => 'pressed', 'step_data' => '2' },
+      ])
 
-    response = get :download_results, :format => :csv, id: call_flow.id, project_id: call_flow.project.id
-    response.body.should eq File.read(File.join(Rails.root, 'spec/fixtures/trace.csv'))
+      response = get :download_results, :format => :csv, id: call_flow.id, project_id: call_flow.project.id
+      response.body.should eq File.read(File.join(Rails.root, 'spec/fixtures/trace.csv'))
 
-    Timecop.return
+      Timecop.return
+    end
   end
-
 
   describe "GET index" do
     it "assigns all call_flows as @call_flows" do
