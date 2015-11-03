@@ -1,5 +1,6 @@
 -module(agi_session).
 -export([start_link/1, close/1, get_variable/2, ringing/1, answer/1, hangup/1, stream_file/3, wait_for_digit/2, record_file/6, set_callerid/2, dial/2]).
+-compile([{parse_transform, lager_transform}]).
 
 -behaviour(gen_server).
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2, terminate/2, code_change/3]).
@@ -152,10 +153,13 @@ parse_param(Line) ->
   {util:binary_to_lower_atom(ParamName), ParamValue}.
 
 parse_response(Line) ->
-  {match, Match} = re:run(Line,
-    "^(\\d+)\\s+result=(-?[^\\s]*)(?:\\s+\\((.*)\\))?(?:\\s+endpos=(-?\\d+))?",
-    [{capture, all_but_first, list}]),
-  parse_response(1, Match, #response{}).
+  case re:run(Line,
+              "^(\\d+)\\s+result=(-?[^\\s]*)(?:\\s+\\((.*)\\))?(?:\\s+endpos=(-?\\d+))?",
+              [{capture, all_but_first, list}]) of
+    {match, Match} -> parse_response(1, Match, #response{});
+    true -> lager:error("Could not parse response from Asterisk: ~p~n", [Line]), throw(agi_error)
+  end.
+
 
 parse_response(_, [], Response) -> Response;
 parse_response(1, [Code|R], Response) ->
