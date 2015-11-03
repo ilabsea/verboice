@@ -13,3 +13,6 @@ before_script:
 script:
 - bundle exec rspec
 - make -C broker eunit
+notifications:
+  slack:
+    secure: EaJ6f98RBFAvALstfyXiF396VL6Re1CeVWmaO05ELmQgAXBd71tA6AHxk5jU9Gc0odV14EbKGEtZDSS7UBvLoBZ5YcWhI6Td+o3MMZgrjh4Auwbx6ogIaa+55WSGLdbgJp6+haVPaiSr7blJQJZNF/HAGAYmkzKMScyZyLhtfYk=
