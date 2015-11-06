@@ -13,7 +13,6 @@ run(Args, Session = #session{pbx = Pbx, js_context = JS}) ->
 
   poirot:log(info, "Waiting user input (timeout: ~p, min: ~p, max: ~p, finish: ~s)", [Timeout, Min, Max, FinishOnKey]),
   CaptureResult = Pbx:capture(Caption, Timeout, FinishOnKey, Min, Max),
-  io:format("~n CaptureResult: ~p ", [CaptureResult]),
 
   JS3 = case CaptureResult of
     finish_key ->

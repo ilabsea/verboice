@@ -21,7 +21,6 @@ convert(Input, InType, OutPath) ->
 
 %% @private
 init({}) ->
-  io:format("Sox converter: ~p~n", [self()]),
   {ok, #state{}, ?TIMEOUT}.
 
 %% @private

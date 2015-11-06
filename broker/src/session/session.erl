@@ -185,11 +185,8 @@ ready({dial, _, _, QueuedCall = #queued_call{address = undefined}}, _From, State
 
 ready({dial, RealBroker, Channel, QueuedCall}, _From, State = #state{session_id = SessionId, resume_ptr = ResumePtr}) ->
   lager:info("Session (~p) dial", [SessionId]),
-
+  
   AddressWithoutVoipPrefix = channel:address_without_voip_prefix(Channel, QueuedCall#queued_call.address),
-
-  AddressWithoutVoipPrefix = channel:address_without_voip_prefix(Channel, QueuedCall#queued_call.address),
-
   NewSession = case State#state.session of
     undefined ->
       CallLog = call_log_srv:new(SessionId, call_log:find(QueuedCall#queued_call.call_log_id)),
@@ -553,7 +550,6 @@ get_contact(ProjectId, Address, _) ->
   contact:find_or_create_with_address(ProjectId, Address).
 
 default_variables(#session{address = Address, contact = Contact, queued_call = QueuedCall, project = #project{id = ProjectId, time_zone = TimeZone}, call_log = CallLog, started_at = StartedAt}) ->
-  io:format("Contact: ~p~n", [Contact]),
   CallLogId = util:to_string(CallLog:id()),
   Context = create_default_erjs_context(CallLogId, Address),
   ProjectVars = project_variable:names_for_project(ProjectId),

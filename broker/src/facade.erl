@@ -20,6 +20,8 @@ notify_call_queued(_ChannelId, _NotBefore) ->
   ok.
 
 create_channel(Id, Broker) ->
+  invalidate_cache(channel, Id),
+  channel_queue:reload(Id),
   Broker:create_channel(Id).
 
 destroy_channel(Id, Broker) ->
