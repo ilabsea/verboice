@@ -4,6 +4,7 @@ describe "Call simulation", integration: true do
   before(:all) do
     @account = Account.make
     @channel = Channels::Custom.create! name: "Local", account: @account, dial_string: "Local/{number}@verboice-integration"
+    @channel2 = Channels::Custom.create! name: "Local2", account: @account, dial_string: "Local/{number}@verboice-integration"
     @project = @account.projects.create! name: "Testing", languages: [{
       "language" => "en",
       "voice" => TTS::SystemSynthesizer.instance.voices["en"].first[:id]
@@ -41,7 +42,7 @@ describe "Call simulation", integration: true do
     call_flow = import_call_flow @project, "simulation_interactive_call_flow"
 
     # HACK: make a single call just to make sure resources are generated properly
-    call_log = @channel.call 9999, call_flow_id: call_flow.id
+    call_log = @channel.call 1000, call_flow_id: call_flow.id
     wait_call(call_log)
 
     call_logs = 1000.times.map do |i|
@@ -71,6 +72,59 @@ describe "Call simulation", integration: true do
     call_logs_by_state[:completed].count.should eq(1000)
   end
 
+  it "make a parallel bunch of interactive calls" do
+    @channel.limit = 100
+    @channel.save!
+
+    @channel2.limit = 100
+    @channel2.save!
+
+    call_flow = import_call_flow @project, "many_input_simulation_interactive_call_flow"
+
+    # HACK: make a single call just to make sure resources are generated properly
+    call_log = @channel.call 1000, call_flow_id: call_flow.id
+    wait_call(call_log)
+
+    not_before = Time.now + 2.minute
+
+    call_logs = 1000.times.map do |i|
+      [
+        @channel.call(1000 + i, call_flow_id: call_flow.id, not_before: not_before),
+        @channel2.call(2000 + i, call_flow_id: call_flow.id, not_before: not_before)
+      ]
+    end.flatten
+
+    # just keep it waits till the time arrived
+    while Time.now < not_before
+      sleep 5
+    end
+
+    zero = 0
+
+    loop do
+      channel1_active_calls = @channel.active_calls
+      channel2_active_calls = @channel2.active_calls
+      puts "Active calls: channel1: #{channel1_active_calls}, channel2: #{channel2_active_calls}"      
+      if channel1_active_calls + channel2_active_calls == 0
+        zero += 1
+      else
+        zero = 0
+      end
+
+      break if zero == 5
+
+      sleep 3
+    end
+
+    call_logs.map &:reload
+    call_logs_by_state = call_logs.group_by(&:state)
+    call_logs_by_state.each do |state, calls|
+      puts "#{state}: #{calls.count}"
+    end
+
+    call_logs_by_state[:completed].count.should eq(2000)
+  end
+
   def import_call_flow(project, call_flow_name)
     call_flow = project.call_flows.find_by_name(call_flow_name)
     unless call_flow
@@ -93,7 +147,7 @@ describe "Call simulation", integration: true do
   end
 
   def wait_call(call_log)
-    20.times do
+    60.times do
       sleep 0.5
       call_log.reload
       break if call_log.state == :completed
