@@ -60,8 +60,12 @@ namespace :contact_address do
             
             existing_contact_addresses = ContactAddress.where(project_id: project_id, address: address_with_zero_prefix)
             if existing_contact_addresses.count > 0
-              contact_address.contact.destroy
-              next
+              if PersistedVariable.where(contact_id: contact_address.contact_id).count == 0
+                contact_address.contact.destroy
+                next
+              else
+                existing_contact_addresses.first.contact.destroy
+              end
             end
 
             contact_address.address = address_with_zero_prefix
