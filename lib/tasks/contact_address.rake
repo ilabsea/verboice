@@ -43,4 +43,33 @@ namespace :contact_address do
       puts
     end
   end
+
+  desc "Replace country code with zero"
+  task :replace_country_code_with_zero, [:project_id, :country_code] => :environment do |t, args|
+    log("Replacing country code to zero in contact address\n") do
+      project_id = args[:project_id]
+      country_code = args[:country_code]
+
+      contact_addresses = ContactAddress.where(project_id: project_id)
+      
+      ContactAddress.transaction do
+        contact_addresses.each_with_index do |contact_address, i|
+          print "Processing #{i + 1}/#{contact_addresses.count}\r"
+          if contact_address.address.start_with?(country_code)
+            address_with_zero_prefix = contact_address.address.gsub(/^#{country_code}/, "0")
+            
+            existing_contact_addresses = ContactAddress.where(project_id: project_id, address: address_with_zero_prefix)
+            if existing_contact_addresses.count > 0
+              contact_address.contact.destroy
+              next
+            end
+
+            contact_address.address = address_with_zero_prefix
+            contact_address.save!
+          end
+        end
+      end
+
+    end
+  end
 end
