@@ -18,7 +18,7 @@
 namespace :reminder_group do
   desc "Replace country code with zero"
   task :replace_country_code_with_zero, [:project_id, :country_code] => :environment do |t, args|
-    log("Replacing country code to zero in contact address\n") do
+    log("Replacing country code to zero of address in reminder group\n") do
       project_id = args[:project_id]
       country_code = args[:country_code]
 
