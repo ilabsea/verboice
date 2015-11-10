@@ -28,8 +28,10 @@ namespace :reminder_group do
         reminder_groups.each_with_index do |reminder_group, i|
           print "Processing #{i + 1}/#{reminder_groups.count}\r"
           reminder_group.addresses.each_with_index do |address, k|
-            address_with_zero_prefix = address.gsub(/^#{country_code}/, "0")
-            reminder_group.addresses[k] = address_with_zero_prefix
+            if address.start_with?(country_code)
+              address_with_zero_prefix = address.gsub(/^#{country_code}/, "0")
+              reminder_group.addresses[k] = address_with_zero_prefix
+            end
           end
           reminder_group.save!
         end
