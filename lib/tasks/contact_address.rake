@@ -64,7 +64,9 @@ namespace :contact_address do
                 contact_address.contact.destroy
                 next
               else
-                existing_contact_addresses.first.contact.destroy
+                if PersistedVariable.where(contact_id: existing_contact_addresses.first.contact.id).count == 0
+                  existing_contact_addresses.first.contact.destroy
+                end
               end
             end
 
