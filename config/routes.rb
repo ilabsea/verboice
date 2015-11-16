@@ -77,8 +77,10 @@ Verboice::Application.routes.draw do
 
       resources :contacts, except: [:show] do
         collection do
-          post :search, :action => :index, :as => 'search'
+          get :search, :action => :index, :as => 'search'
           get :invitable
+          post :upload_csv
+          post :import_csv
         end
         member do
           get :calls
@@ -125,17 +127,15 @@ Verboice::Application.routes.draw do
     end
   end
 
-  resources :call_logs, path: :calls do
+  resources :call_logs, path: :calls, only: [:index, :show] do
     member do
       get :progress
       get 'results/:key', :action => :play_result, :as => 'result'
       get :download_details
     end
     collection do
-      get :queued
       put :queued_paused
       put :queued_resumed
-      get :download
     end
   end
 
@@ -314,4 +314,6 @@ Verboice::Application.routes.draw do
   get 'terms_and_conditions', :to => redirect('/')
 
   match '/hub/*path' => 'hub#api', format: false
+
+  mount Listings::Engine => "/listings"
 end

@@ -75,8 +75,5 @@ module Verboice
       Rails.application.eager_load!
     end
 
-    # set per_page globally
-    WillPaginate.per_page = 10
-    
   end
 end

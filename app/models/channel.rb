@@ -62,15 +62,8 @@ class Channel < ActiveRecord::Base
     super
   end
 
-  def new_session(options = {})
-    session = Session.new options
-    session.call_flow ||= call_flow
-    session.channel = self
-    unless session.call_log
-      session.call_log = call_logs.create! :direction => :incoming, :call_flow => session.call_flow, :account => account, :project => session.call_flow.project, :started_at => Time.now.utc
-    end
-    session.commands = session.call_flow.commands.dup
-    session
+  def self.enabled
+    true
   end
 
   def call(address, options = {})
@@ -79,12 +72,6 @@ class Channel < ActiveRecord::Base
     queued_call = enqueue_call_to address, options
     call_log = queued_call.call_log
 
-    notify_call_queued queued_call
-
-    call_log
-  end
-
-  def notify_call_queued queued_call
     begin
       if queued_call.not_before?
         BrokerClient.notify_call_queued id, queued_call.not_before
@@ -92,10 +79,12 @@ class Channel < ActiveRecord::Base
         BrokerClient.notify_call_queued id
       end
     rescue Exception => ex
-      queued_call.call_log.warn "Unable to notify the broker about this new call. The call might be delayed"
+      call_log.warn "Unable to notify the broker about this new call. The call might be delayed"
     end
-  end
 
+    call_log
+  end
+  
   def address_with_prefix_called_number address
     prefix_called_number = config["prefix_called_number"]
     "#{prefix_called_number}#{address}"
@@ -132,7 +121,7 @@ class Channel < ActiveRecord::Base
     if current_call_flow
       project = current_call_flow.project
     elsif options[:project_id]
-      project = Project.find_by_id(options[:project_id])
+      project = account.find_project_by_id(options[:project_id])
     else
       project = self.project
     end
@@ -188,7 +177,7 @@ class Channel < ActiveRecord::Base
         project_variable = project.project_variables.find_by_name(name)
         CallLogAnswer.create! :call_log_id => call_log.id, :project_variable_id => project_variable.id, :value => value if project_variable
 
-        variables[name] = (value =~ /^\d+$/ ? value.to_i : value)
+        variables[name] = (value =~ /^(0|[1-9]\d*)$/ ? value.to_i : value)
       end
     end
 

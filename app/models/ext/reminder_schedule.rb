@@ -148,12 +148,13 @@ module Ext
 			not_before = Ext::Parser::TimeParser.parse(call_time_string, DateTime::DEFAULT_FORMAT_WITHOUT_TIMEZONE, self.project.time_zone)
 			not_before = not_before > Time.now ? not_before : Time.now
 			
-			options = { 
-				:call_flow_id => self.call_flow_id,
-				:project_id => self.project_id,
-				# :time_zone => self.project.time_zone,
-				:not_before => not_before
+			options = {
+				call_flow_id: self.call_flow_id,
+				project_id: self.project_id,
+				# time_zone: self.project.time_zone,
+				not_before: not_before
 			}
+			options[:account] = self.project.account if self.project
 			options[:schedule_id] = self.retries_schedule.id if self.retries_schedule
 			options
 		end

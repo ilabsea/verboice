@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20150310185051) do
+ActiveRecord::Schema.define(:version => 20150805201540) do
 
   create_table "accounts", :force => true do |t|
     t.string   "email",                               :default => "", :null => false
@@ -139,6 +139,8 @@ ActiveRecord::Schema.define(:version => 20150310185051) do
     t.integer  "parent_id"
     t.datetime "not_after"
     t.integer  "contact_id"
+    t.string   "fail_details"
+    t.string   "fail_code"
   end
 
   add_index "call_logs", ["account_id", "id"], :name => "index_call_logs_on_account_id_and_id"
@@ -182,6 +184,7 @@ ActiveRecord::Schema.define(:version => 20150310185051) do
   end
 
   add_index "contact_addresses", ["contact_id"], :name => "index_contact_addresses_on_contact_id"
+  add_index "contact_addresses", ["project_id", "address"], :name => "index_contact_addresses_on_project_id_and_address", :unique => true
   add_index "contact_addresses", ["project_id"], :name => "index_contact_addresses_on_project_id"
 
   create_table "contact_scheduled_calls", :force => true do |t|
@@ -251,9 +254,9 @@ ActiveRecord::Schema.define(:version => 20150310185051) do
   create_table "ext_reminder_groups", :force => true do |t|
     t.string   "name"
     t.integer  "project_id"
-    t.binary   "addresses"
-    t.datetime "created_at", :null => false
-    t.datetime "updated_at", :null => false
+    t.binary   "addresses",  :limit => 16777215
+    t.datetime "created_at",                     :null => false
+    t.datetime "updated_at",                     :null => false
   end
 
   add_index "ext_reminder_groups", ["project_id"], :name => "index_ext_reminder_groups_on_project_id"
@@ -457,6 +460,8 @@ ActiveRecord::Schema.define(:version => 20150310185051) do
     t.string   "implicit_key"
   end
 
+  add_index "persisted_variables", ["contact_id", "implicit_key", "value"], :name => "index_vars_on_contact_id_and_key_and_value"
+  add_index "persisted_variables", ["contact_id", "project_variable_id", "value"], :name => "index_vars_on_contact_id_and_var_id_and_value"
   add_index "persisted_variables", ["contact_id"], :name => "index_persisted_variables_on_contact_id"
   add_index "persisted_variables", ["project_variable_id"], :name => "index_persisted_variables_on_project_variable_id"
 

@@ -45,8 +45,13 @@ prepare_text_resource(Text, Language, #session{pbx = Pbx, project = Project, js_
           poirot:log(info, "Audio file already exists, no need to synthesize"),
           ok;
         false ->
-          poirot:log(info, "Synthesizing"),
-          ok = tts:synthesize(ReplacedText, Project, Language, TargetPath)
+          poirot:log(info, "Synthesizing to ~s", [TargetPath]),
+          case tts:synthesize(ReplacedText, Project, Language, TargetPath) of
+            ok -> ok;
+            Error ->
+              poirot:log(warn, "Error synthesizing audio resource: ~p", [Error]),
+              throw({error, "Could not synthesize audio resource"})
+          end
       end,
       {file, Name};
     true ->
@@ -72,7 +77,8 @@ prepare_blob_resource(BlobName, UpdatedAt, Blob, Extension, #session{pbx = Pbx, 
       {A, B, C} = now(),
       FileName = lists:flatten(io_lib:format("/tmp/verboice-resource-~p~p~p~s", [A, B, C, Extension])),
       file:write_file(FileName, Blob),
-      convert_and_delete(FileName, TargetPath)
+      Quality = Pbx:sound_quality(),
+      convert_and_delete_with_quality(FileName, Quality, TargetPath)
   end,
   {file, Name}.
 
@@ -94,9 +100,6 @@ prepare_url_resource(Url, #session{pbx = Pbx}) ->
       {file, Name}
   end.
 
-convert_and_delete(TempFile, TargetPath) ->
-  convert_and_delete(TempFile, undefined, TargetPath).
-
 convert_and_delete(TempFile, Type, TargetPath) ->
   try
     SoxResult = case Type of
@@ -111,6 +114,16 @@ convert_and_delete(TempFile, Type, TargetPath) ->
     file:delete(TempFile)
   end.
 
+convert_and_delete_with_quality(TempFile, Quality, TargetPath) ->
+  try
+    SoxResult = sox:convert_with_quality(TempFile, Quality, TargetPath),
+    case SoxResult of
+      error -> throw("Failed to convert audio file");
+      _ -> ok
+    end
+  after
+    file:delete(TempFile)
+  end.
 
 guess_type(Url, Headers) ->
   case proplists:get_value("content-type", Headers) of

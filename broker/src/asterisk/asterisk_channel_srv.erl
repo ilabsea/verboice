@@ -50,6 +50,7 @@ init({}) ->
 
 %% @private
 handle_call({find_channel, PeerIp, Number}, _From, State) ->
+  io:format("channels: ~p~n", [State#state.channels]),
   case dict:find({PeerIp, Number}, State#state.channels) of
     {ok, [ChannelId]} ->
       {reply, ChannelId, State};

@@ -18,6 +18,7 @@
 //= require namespace
 //= require global
 //= require hub_client
+//= require listings
 //= require call_flow
 //= require_directory .
 
@@ -25,3 +26,30 @@
 //= require_directory ./custom_bindings
 //= require_directory ./devise
 //= require_directory ./password
+$(function(){
+  $('.listing').on('change', 'select', function(){
+    var select = $(this);
+    var listing = $(this).closest('.listing');
+    var key = select.attr('name');
+    var value = select.val();
+    if (value == '') {
+      listing.trigger("listings:filter:key:clear", key);
+    } else {
+      listing.trigger("listings:filter:key:set", [key, value]);
+    }
+  }).on('listings:loaded', function(){
+    var listing = $(this);
+    var filters = listing.data('search').filters;
+
+    $('.filter select', listing).each(function(){
+      var select = $(this);
+      var key = select.attr('name');
+      var value = filters[key];
+      if (value) {
+        select.val(value);
+      } else {
+        select.val('');
+      }
+    });
+  });
+});

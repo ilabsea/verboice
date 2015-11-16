@@ -1,5 +1,5 @@
 -module(session).
--export([start_link/1, new/0, new/1, find/1, answer/2, answer/4, dial/4, reject/2, stop/1, resume/1, default_variables/1, create_default_erjs_context/2]).
+-export([start_link/1, new/0, new/1, find/1, answer/2, answer/4, dial/4, reject/2, stop/1, resume/1, default_variables/1, create_default_erjs_context/2, id/1]).
 -export([no_ack/1]).
 -export([language/1]).
 -export([new_id/0, set_pointer/2]).
@@ -109,6 +109,9 @@ language(#session{js_context = JsContext, default_language = DefaultLanguage}) -
 set_pointer(SessionPid, Ptr) ->
   gen_fsm:sync_send_event(SessionPid, {set_pointer, Ptr}).
 
+id(SessionPid) ->
+  gen_fsm:sync_send_all_state_event(SessionPid, id).
+
 %% @private
 init(HibernatedSession = #hibernated_session{ data = #hibernated_session_data{resume_ptr = ResumePtr, poirot_activity = Activity }}) ->
   poirot:set_current(Activity),
@@ -182,7 +185,7 @@ ready({set_pointer, Ptr}, _From, State) ->
 ready({dial, _, _, QueuedCall = #queued_call{address = undefined}}, _From, State) ->
   lager:error("Refusing to make a call to an undefined address (queued call id ~p)", [QueuedCall#queued_call.id]),
   CallLog = call_log:find(QueuedCall#queued_call.call_log_id),
-  CallLog:update([{state, "failed"}, {fail_reason, "invalid address"}, {finished_at, calendar:universal_time()}]),
+  CallLog:update([{state, "failed"}, {fail_reason, "undefined address"}, {finished_at, calendar:universal_time()}]),
   {stop, normal, error, State};
 
 ready({dial, RealBroker, Channel, QueuedCall}, _From, State = #state{session_id = SessionId, resume_ptr = ResumePtr}) ->
@@ -428,6 +431,9 @@ session_vars(JS) ->
 
 handle_event(stop, _, State) ->
   {stop, normal, State}.
+
+handle_sync_event(id, _From, StateName, State = #state{session_id = SessionId}) ->
+  {reply, SessionId, StateName, State};
 
 handle_sync_event({matches, Criteria}, _From, StateName, State = #state{session = Session}) ->
   MatchResult = case Session of

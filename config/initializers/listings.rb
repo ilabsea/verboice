@@ -15,11 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Verboice.  If not, see <http://www.gnu.org/licenses/>.
 
-module Asterisk
-  class CallManager
-    Port = Rails.configuration.asterisk_configuration[:call_manager_port].to_i
-    SoundsDir = Rails.configuration.asterisk_configuration[:sounds_dir]
-    SoundsPath = "#{SoundsDir}/verboice/"
-    AgiSeparator = Rails.configuration.asterisk_configuration[:agi_use_pipe_separator] == true ? '|' : ','
-  end
+Listings.configure do |config|
+  config.theme = 'instedd'
+  config.push_url = true
 end

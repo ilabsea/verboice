@@ -12,6 +12,7 @@
 .DS_Store
 tmp/*
 spec/reports/*
+spec/tmp
 public/assets
 public/applications
 data
@@ -33,6 +34,8 @@ broker/rel/verboice
 broker/erl_crash.dump
 
 vendor/ruby
-
+vendor/bundle
+admin/backups/verboice*
 script/sphinx3
 config/recaptcha.yml
+config/aws.yml

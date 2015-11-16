@@ -6,14 +6,11 @@
 
 -unless @logs.empty?
   %p
-    / - if render_csv_download? @project, @search
-    /   = link_to t('views.call_logs.index.action.download_csv'), download_project_call_logs_path(format: :csv, search: @search), :class => "button fimport download-call_logs"
-    / - else
     = link_to t('views.call_logs.index.action.download_csv'), download_project_call_logs_path(search: @search), :class => %w(button fimport download-call_logs)
-%br/
-= paginate_for @logs
+
+= page_entries_info @logs
+
 - if @logs.present?
-  %br/
   %table.GralTable
     %tr
       %th= t('views.projects.call_logs.index.label.id')
@@ -85,6 +82,21 @@
             %td
         %td= link_to(t('views.projects.call_logs.index.action.view_details'), call_log_path(log, project_id: @project.id)) if log.store_log_entries
   %br/
-  = paginate_for @logs
+%br/
+
+%div#call_logs_paginator
+  = form_tag project_call_logs_path(@project.id), method: :get do
+    - total_pages = (@total_records/@per_page) + ((@total_records % @per_page) > 0 ? 1 : 0)
+
+    - previous_btn_class = 'pprevious' + (if (@page.to_i - 1) < 1 then " disabled" else '' end)
+    = link_to '', project_call_logs_path(@project.id, page: @page.to_i-1), class: previous_btn_class
+
+    - next_btn_class = 'pnext' + (if (@page.to_i + 1) > total_pages then " disabled" else '' end)
+    = link_to '', project_call_logs_path(@project.id, page: @page.to_i+1), class: next_btn_class
+
+    = text_field_tag 'page', @page.to_i
+    %span.label-info="of #{total_pages}"
+    = submit_tag '', class: 'hidden'
+
 %br/
 

@@ -12,23 +12,45 @@
 .tablewrapp.no-wrap.scroll.contacts-table
   %table.GralTable
     %tr
-      %th ID
-      %th Channel
-      %th Direction
-      %th Schedule
-      %th Started
-      %th Duration
-      %th State
+      %th= t('views.call_logs.index.label.id')
+      %th= t('views.call_logs.index.label.channel')
+      %th= t('views.call_logs.index.label.direction')
+      %th= t('views.call_logs.index.label.schedule')
+      %th= t('views.call_logs.index.label.started')
+      %th= t('views.call_logs.index.label.finished')
+      %th= t('views.call_logs.index.label.duration')
+      %th= t('views.call_logs.index.label.call_flow')
+      %th= t('views.call_logs.index.label.status')
+      - @project_variables.each do |variable|
+        %th= variable.name
       %th
+
       - @logs.each do |call|
+        - answers = Hash[call.call_log_answers.map {|c| [c.project_variable_id, c.value] }]
+        - recorded_audios = Hash[call.call_log_recorded_audios.map {|r| [r.project_variable_id, r.key] }]
         %tr
           %td= call.id
-          %td= call.channel.name
+          %td= call.channel.try(:name)
           %td= call.direction
           %td= call.schedule.try(:name)
           %td= raw time_ago call.started_at
-          %td= distance_of_time_in_words(call.finished_at, call.started_at, true) if call.finished_at
-          %td= call.state
+          %td= raw time_ago call.finished_at
+          %td= call.duration if call.duration
+          %td= call.call_flow.try(:name)
+          %td
+            - if call.state == CallLog::STATE_COMPLETED
+              = call.state
+            - else
+              = CallLog::FAIL_REASONS[call.fail_reason]
+
+          - @project_variables.each do |variable|
+            - if answers.has_key? variable.id
+              %td= answers[variable.id]
+            - elsif recorded_audios.has_key? variable.id
+              %td= link_to '', result_call_log_path(log, key: recorded_audios[variable.id]), :class => 'fimport'
+            - else
+              %td &nbsp;
+
           %td= link_to 'view details', call_log_path(call, project_id: call.try(:project).try(:id))
 
 

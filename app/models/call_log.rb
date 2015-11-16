@@ -17,7 +17,7 @@
 
 class CallLog < ActiveRecord::Base
   include CallLogSearch
-
+  
   CSV_MAX_ROWS = 262144 # 2 ^ 18
   
   STATE_ACTIVE = :active

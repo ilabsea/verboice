@@ -9,7 +9,6 @@ gem 'mysql2'
 gem 'nokogiri'
 gem 'guid'
 gem 'devise'
-gem "will_paginate", "~> 3.0"
 gem "daemons"
 gem "instedd-rails"
 gem 'decent_exposure'
@@ -17,7 +16,8 @@ gem 'attr_encrypted'
 gem 'foreman'
 gem 'oauth2', :require => 'oauth2'
 gem 'delayed_job_active_record'
-gem 'rubyzip', require: 'zip/zip'
+gem 'rubyzip'
+gem 'zip-zip'
 gem 'rest-client'
 gem 'enumerated_attribute', :git => "https://github.com/edave/enumerated_attribute.git"
 gem 'csv_builder', :git => "https://github.com/lchanmann/csv_builder.git"
@@ -27,7 +27,6 @@ gem 'language_list'
 gem 'bertrpc'
 gem 'whenever', :require => false
 gem 'formatted_rails_logger'
-gem 'fabrication'
 gem 'instedd-pigeon', :require => 'pigeon'
 gem 'poirot_rails', git: 'https://github.com/instedd/poirot_rails.git', branch: 'master'
 gem 'hercule', git: 'https://github.com/instedd/poirot.git', branch: 'master'
@@ -37,6 +36,7 @@ gem 'ruby-openid'
 gem 'omniauth'
 gem 'omniauth-openid'
 gem 'recurring_select', git: "https://github.com/instedd/recurring_select", branch: 'instedd'
+gem 'listings'
 gem 'ice_cube'
 gem 'aws-sdk-v1'
 gem 'rails_config'
@@ -64,7 +64,7 @@ group :development, :test do
   gem 'pry-debugger'
   gem 'syntax'
   gem 'timecop'
-
+  gem 'quiet_assets'
   gem 'capybara'
   gem 'database_cleaner'
 
@@ -73,12 +73,13 @@ group :development, :test do
 end
 
 group :development do
-  gem 'capistrano'
-  gem 'rvm'
-  gem 'rvm-capistrano', require: false
-  gem 'licit'
+ gem 'capistrano'
+ gem 'rvm'
+ gem 'rvm-capistrano', require: false
+ gem 'licit'
 end
 
 group :test do
   gem 'webmock'
+  gem 'fakefs', :require => 'fakefs/safe'
 end

@@ -92,7 +92,7 @@ module ApplicationHelper
     return '' unless end_time.present?
     (end_time - start_time).to_i.to_s
   end
-  
+
   def project_owner?
     @project.account_id == current_account.id
   end
@@ -118,6 +118,26 @@ module ApplicationHelper
     STEP_CONFIG["speech_recognition"] == true
   end
 
+  def download_call_logs_path(options)
+    listings.listing_export_path(:call_logs, format: options[:format], s: options[:search])
+  end
+
+  def queued_call_logs_path(options = {})
+    search = "state:queued"
+    if options[:project_id]
+      search = "#{search} project_id:#{options[:project_id]}"
+    end
+    if options[:channel_id]
+      search = "#{search} channel_id:#{options[:channel_id]}"
+    end
+    call_logs_path(s: search)
+  end
+
+  def chrome_do_not_autocomplete_hack
+    # Chrome autocompletes user/pass inputs regardless of autocomplete=off attributes
+    # See here for an explanation of this hack http://stackoverflow.com/a/22694173/12791
+    '<input style="display:none"><input type="password" style="display:none">'.html_safe
+  end
   def datetime_format(datetime, time_zone)
     datetime_format_csv(datetime, time_zone, Time::DEFAULT_FORMAT)
   end
@@ -125,14 +145,14 @@ module ApplicationHelper
   def tip_info text
     image_tag "info.png", class: "icon-info tooltip", title: text
   end
-  
+
   def datetime_format_csv(datetime, time_zone, format)
     return '' unless datetime
     date_format = format || Time::DEFAULT_FORMAT
     datetime_with_zone = datetime.in_time_zone(time_zone || 'UTC')
     datetime_with_zone.strftime(date_format)
   end
-  
+
   def paginate_for records
     per_page = params[:per_page] || 10
     select_options = [10, 20, 30, 50].map{|n| [n, n]}
@@ -143,13 +163,13 @@ module ApplicationHelper
                 end
 
       counter = content_tag :div, class: 'counter' do
-                  select_tag(:page, options_for_select(select_options, per_page), 
+                  select_tag(:page, options_for_select(select_options, per_page),
                               class: 'page_counter')
-                end          
+                end
 
-      nav = will_paginate(records) 
+      nav = will_paginate(records)
 
-      entry + counter + nav          
+      entry + counter + nav
     end
   end
 
