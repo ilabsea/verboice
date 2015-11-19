@@ -24,7 +24,7 @@ class CustomCallLogSerializer < ActiveModel::Serializer
   has_one :channel, serializer: CustomChannelSerializer
 
   has_many :call_log_recorded_audios, serializer: CustomCallLogRecordedAudioSerializer
-
+  has_many :call_log_answers, serializer: CustomSimpleCallLogAnswerSerializer
 
   def called_at
     return self.not_before if self.direction == 'outgoing' && self.not_before
