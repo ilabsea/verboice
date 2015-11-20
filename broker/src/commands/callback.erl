@@ -1,4 +1,4 @@
- -module(callback).
+-module(callback).
 -export([run/2]).
 -include("session.hrl").
 -include("db.hrl").
@@ -13,12 +13,14 @@ run(Args, Session = #session{js_context = JS, call_log = CallLog, call_flow = Ca
   ResponseType = proplists:get_value(response_type, Args, flow),
   Params = proplists:get_value(params, Args, []),
   Variables = proplists:get_value(variables, Args, []),
+  
   Method = util:to_string(proplists:get_value(method, Args, "post")),
   Async = proplists:get_value(async, Args),
 
   Call = call_log:find(CallLog:id()),
-  
-  QueryString = prepare_params(Params ++ Variables, [{"address", Call#call_log.address}, {"channel_id", Call#call_log.channel_id}, {"CallSid", util:to_string(CallLog:id())} | CallbackParams], JS),
+
+  VariablesParams = get_variable_params(Variables, JS),
+  QueryString = prepare_params(Params ++ VariablesParams, [{"address", Call#call_log.address}, {"channel_id", Call#call_log.channel_id}, {"CallSid", util:to_string(CallLog:id())} | CallbackParams], JS),
   RequestUrl = interpolate(Url, Args, Session),
   PoirotMeta = [
     {url, iolist_to_binary(RequestUrl)},
@@ -83,6 +85,27 @@ prepare_params([{Name, Expr} | Rest], QueryString, JS) ->
   {Value, _} = erjs:eval(Expr, JS),
   NewQueryString = assign_from_js(QueryString, Name, Value, JS),
   prepare_params(Rest, NewQueryString, JS).
+
+get_variable_params([], _JS) -> [];
+get_variable_params([{Name, [{_Required, Required}, {_Value, Expr} | _Rest]} | Rest], JS) ->
+  case validate_reqired_param(Expr, Required, JS) of
+    error ->
+      throw("external_step_broken");
+    _ -> lists:flatten([{Name, Expr}, get_variable_params(Rest, JS)])
+  end.
+
+validate_reqired_param(Expr, Required, JS) ->
+  case Required of
+    "true" ->
+      {Value, _} = erjs:eval(Expr, JS),
+      case Value of
+        null -> error;
+        "null" -> error;
+        "" -> error;
+        _ -> ok
+      end;
+    _ -> ok
+  end.
 
 assign_from_js(QueryString, _, undefined, _) -> QueryString;
 assign_from_js(QueryString, Prefix, Value, JS) ->

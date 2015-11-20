@@ -91,6 +91,7 @@ module Parsers
         var.name = node.attr('name')
         var.display_name = node.attr('display-name')
         var.type = node.attr('type')
+        var.required = node.attr('required')
       end
     end
 

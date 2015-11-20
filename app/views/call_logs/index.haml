@@ -42,7 +42,7 @@
           %td= log.call_flow.try(:name)
           %td
             - if log.state == CallLog::STATE_FAILED
-              = CallLog::FAIL_REASONS[log.fail_reason]
+              = CallLog::FAIL_REASONS[log.fail_reason.gsub(/\"/, "")]
             - else
               = log.state
             

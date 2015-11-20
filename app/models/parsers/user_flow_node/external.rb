@@ -76,7 +76,9 @@ module Parsers
         HashWithIndifferentAccess.new.tap do |hash|
           if @settings.present?
             @settings.each do |setting|
-              hash[setting['name']] = InputSetting.new(setting).expression
+              hash[setting['name']] = {}
+              hash[setting['name']]['value'] = InputSetting.new(setting).expression
+              hash[setting['name']]['required'] = setting['required'] ? "true" : "false"
             end
           end
           if service_step.session_variables.present?
