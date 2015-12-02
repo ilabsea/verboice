@@ -87,7 +87,7 @@ class ApplicationController < ActionController::Base
   private
   def set_locale
     if params[:recaptcha_response_field].nil?
-      I18n.locale = current_account.nil? ? I18n.default_locale : current_account.locale
+      I18n.locale = current_account.try(:locale) || I18n.default_locale
     else
       I18n.locale = I18n.default_locale
     end
