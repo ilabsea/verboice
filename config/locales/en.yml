@@ -543,6 +543,15 @@ en:
           command: "Command"
           action: "Action"
           detail: "Detail"
+          started_at: "Started at"
+          finished_at: "Finished at"
+          duration: "Duration"
+          direction: "Direction"
+          retries: "Retries"
+          channel: "Channel"
+          project: "Project"
+          call_flow: "Call flow"
+          status: "Status"
       download_details_csv:
         label:
           call_id: "Call ID"

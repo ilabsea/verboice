@@ -542,6 +542,15 @@ kh:
           command: "ពាក្យ​បញ្ជា"
           action: "សកម្មភាព"
           detail: "សេចក្ដី​លម្អិត"
+          started_at: "ពេលចាប់ផ្ដើម"
+          finished_at: "ពេលបញ្ចប់"
+          duration: "រយៈពេល"
+          direction: "ទិសដៅ"
+          retries: ព្យាយាម​ម្ដង​ទៀត
+          channel: "ឆានែល"
+          project: "គម្រោង"
+          call_flow: "លំហូរ​ការ​ហៅ"
+          status: "ស្ថានភាព"
       download_details_csv:
         label:
           call_id: "លេខ​សម្គាល់​ហៅ"

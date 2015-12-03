@@ -1,13 +1,6 @@
-csv << [t('views.call_logs.download_csv.label.call_id'), t('views.call_logs.download_csv.label.phone_number'), t('views.call_logs.download_csv.label.time'), t('views.call_logs.download_csv.label.severity'), t('views.call_logs.download_csv.label.step_name'), t('views.call_logs.download_csv.label.step_id'), t('views.call_logs.download_csv.label.command'), t('views.call_logs.download_csv.label.action'), t('views.call_logs.download_csv.label.detail')]
-@entries = CallLogEntry.joins('RIGHT JOIN call_logs ON call_logs.id = call_log_entries.call_id')
-@entries = @entries.joins('LEFT JOIN projects on call_logs.project_id = projects.id')
-@entries = @entries.where('call_logs.account_id = ?', current_account.id).where('severity <> "trace" OR severity IS NULL').order('call_logs.id DESC, call_log_entries.id')
-@entries = @entries.search params[:search], :account => current_account if params[:search].present?
-@entries = @entries.select('IFNULL(call_log_entries.created_at, call_logs.created_at), severity, details, call_logs.id as call_id, call_logs.address as call_address, projects.time_zone')
+csv << [t('views.call_logs.download_csv.label.call_id'), t('views.call_logs.download_csv.label.started_at'), t('views.call_logs.download_csv.label.finished_at'), t('views.call_logs.download_csv.label.duration'), t('views.call_logs.download_csv.label.phone_number'), t('views.call_logs.download_csv.label.direction'), t('views.call_logs.download_csv.label.retries'), t('views.call_logs.download_csv.label.channel'), t('views.call_logs.download_csv.label.project'), t('views.call_logs.download_csv.label.call_flow'), t('views.call_logs.download_csv.label.status')]
 
-@entries = ActiveRecord::Base.connection.execute(@entries.to_sql)
-
-@entries.each do |entry|
-  details = SerializableHash.load(entry[2]) || {}
-  csv << [entry[3], entry[4], datetime_format(entry[0], entry[5]), entry[1], details[:step_name], details[:step_id], details[:command], details[:action], details[:description]]
+@logs.each do |log|
+  fail_reason = log.state.to_s + (log.state == CallLog::STATE_FAILED ? "(#{log.fail_reason})" : "")
+  csv << [log.id, datetime_format(log.started_at, log.project_time_zone), datetime_format(log.finished_at, log.project_time_zone), log.duration, log.address, log.direction, log.retries, log.channel.try(:name), log.project.try(:name), log.call_flow.try(:name), fail_reason]
 end

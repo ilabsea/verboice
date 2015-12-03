@@ -1,6 +1,6 @@
 steps = @call_flow.step_names
 ids = steps.keys
-time_zone = @call_flows.try(:project).try(:time_zone)
+time_zone = @call_flow.try(:project).try(:time_zone)
 header = ['Call ID', 'Phone Number', 'Channel', 'Direction', 'Start Time', 'End Time']
 step_labels = steps.values.map {|label| ["#{label} (Result)", "#{label} (Data)"]}.flatten
 csv << header + step_labels
