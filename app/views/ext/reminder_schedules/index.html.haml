@@ -85,7 +85,7 @@
         %input{ko(checked: '$parent.repeat'), :type=>"radio", :name=>"type", :value=>"1", style:"float:left;"}
         = ko_number_field_tag :value, css: {error: '$parent.condition_value_error()'}, html: {class: "w10", style: "float:left;margin-left:4px;"}, attr: {disabled: '$parent.is_repeat()==false'}
         %select.w10.select{ko(options: '$root.data_types', optionsText: "'name'", value: :data_type, css: {error: '$parent.condition_data_type_error()'}, attr: {disabled: '$parent.is_repeat()==false'}), style: "float:left;margin-left:6px;"}
-        .left-side{style:"margin-left:6px;"}=t('view.ext.reminder_schedules.label.after')
+        .left-side{style:"margin-left:6px;"}=t('views.ext.reminder_schedules.label.after')
 
       .clear
     

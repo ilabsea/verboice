@@ -7,11 +7,11 @@
       %br/
       = select_tag :call_flow_id, options_from_collection_for_select(call_flows, 'id', 'name'), :prompt => t('views.projects._enqueue_new_call.label.select_call_flow'), :class => 'w30'
     %p
-      = label_tag :channel_id, t('projects._enqueue_new_call.label.channel')
+      = label_tag :channel_id, t('views.projects._enqueue_new_call.label.channel')
       %br/
       = select_tag :channel_id, options_from_collection_for_select(channels, 'id', 'name'), :prompt => t('views.projects._enqueue_new_call.label.select_channel'), :class => 'w30'
     %p
-      = label_tag :schedule_id, t('projects._enqueue_new_call.label.schedule')
+      = label_tag :schedule_id, t('views.projects._enqueue_new_call.label.schedule')
       %br/
       = select_tag :schedule_id, options_from_collection_for_select(schedules, 'id', 'name'), :prompt => t('views.projects._enqueue_new_call.label.select_schedule'), :class => 'w30'
     %p
