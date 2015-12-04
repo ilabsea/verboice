@@ -66,7 +66,7 @@ namespace :deploy do
   end
 
   task :symlink_configs, :roles => :app do
-    %W(asterisk credentials freeswitch verboice voxeo newrelic nuntium aws log_file app_config step_config api recaptcha login).each do |file|
+    %W(database asterisk credentials freeswitch verboice voxeo newrelic nuntium aws log_file app_config step_config api recaptcha login).each do |file|
       run "ln -nfs #{shared_path}/#{file}.yml #{release_path}/config/"
     end
   end
