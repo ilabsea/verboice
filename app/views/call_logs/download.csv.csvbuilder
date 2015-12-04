@@ -1,6 +1,6 @@
 csv << [t('views.call_logs.download_csv.label.call_id'), t('views.call_logs.download_csv.label.started_at'), t('views.call_logs.download_csv.label.finished_at'), t('views.call_logs.download_csv.label.duration'), t('views.call_logs.download_csv.label.phone_number'), t('views.call_logs.download_csv.label.direction'), t('views.call_logs.download_csv.label.retries'), t('views.call_logs.download_csv.label.channel'), t('views.call_logs.download_csv.label.project'), t('views.call_logs.download_csv.label.call_flow'), t('views.call_logs.download_csv.label.status')]
 
 @logs.each do |log|
-  fail_reason = log.state.to_s + (log.state == CallLog::STATE_FAILED ? "(#{log.fail_reason})" : "")
+  fail_reason = log.state == CallLog::STATE_FAILED ? CallLog::FAIL_REASONS[log.fail_reason.gsub(/\"/, "")] : log.state
   csv << [log.id, datetime_format(log.started_at, log.project_time_zone), datetime_format(log.finished_at, log.project_time_zone), log.duration, log.address, log.direction, log.retries, log.channel.try(:name), log.project.try(:name), log.call_flow.try(:name), fail_reason]
 end
