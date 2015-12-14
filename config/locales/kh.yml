@@ -301,7 +301,7 @@ kh:
           remove_this_step: "លុប​ជំហាន​នេះ"
       _capture_step_template:
         label:
-          message: "សារ"
+          messages: "សារ"
           instructions: "ការ​ណែនាំ៖"
           invalid: "មិន​ត្រឹមត្រូវ"
           attempts: "ការ​ព្យាយាម"
@@ -461,7 +461,7 @@ kh:
           enter_message_name: "បញ្ចូល​ឈ្មោះ​សារ"
           select_existing_one: "ជ្រើស​សារ​មាន​ស្រាប់"
           name: "ឈ្មោះ"
-        languages: "ភាសា"
+          languages: "ភាសា"
         action:
           next: "បន្ទាប់"
           cancel: "បោះបង់"

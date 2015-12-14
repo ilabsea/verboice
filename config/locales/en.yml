@@ -303,7 +303,7 @@ en:
           remove_this_step: "Remove this step"
       _capture_step_template:
         label:
-          message: "Messages"
+          messages: "Messages"
           instructions: "Instructions:"
           invalid: "Invalid:"
           attempts: "Attempts"
@@ -462,7 +462,7 @@ en:
           enter_message_name: "Enter message name"
           select_existing_one: "Select an existing one"
           name: "Name"
-        languages: "Languages"
+          languages: "Languages"
         action:
           next: "Next"
           cancel: "Cancel"
