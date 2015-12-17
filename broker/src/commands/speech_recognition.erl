@@ -48,7 +48,7 @@ run(Args, Session = #session{pbx = Pbx, js_context = JS, call_log = CallLog, con
   SpeechDecode = decode_audio_speech(Filename, CallLogId),
   Confidence1Value = store_result_from_speech(MinConfidence, SpeechDecode, VariableList, Session),
 
-  LogInfo = "Speech recognition given confidence: " ++ float_to_list(Confidence1Value, [{decimals,2}]) ++ ", min confidence required: " ++ MinConfidence,
+  LogInfo = "Speech recognition given confidence: " ++ util:to_string(Confidence1Value) ++ ", min confidence required: " ++ MinConfidence,
   CallLog:info(LogInfo, [{command, "speech_recognition"}, {action, "comparing value"}]),
   CallLog:info("Speech recognition finished", [{command, "speech_recognition"}, {action, "finish"}]),
   CallLog:info("Recording saved", [{command, "speech_recognition"}, {action, "finish"}]),
