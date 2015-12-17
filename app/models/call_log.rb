@@ -37,7 +37,8 @@ class CallLog < ActiveRecord::Base
     'terminated' => 'terminated',
     'blocked' => "blocked",
     'disabled' => "disabled",
-    'external_step_broken' => 'error (external step is broken)'
+    'external_step_broken' => 'error (external step was broken)',
+    'unknown_resource' => 'error (step was broken)'
   }
 
   DATE_FORMAT_EXPORT = [
