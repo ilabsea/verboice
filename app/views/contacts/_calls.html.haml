@@ -35,7 +35,7 @@
           %td= answers[variable.id]
 
         - elsif recorded_audios.has_key? variable.id
-          %td= link_to '', result_call_log_path(log, key: recorded_audios[variable.id]), :class => 'fimport'
+          %td= link_to '', result_project_call_log_path(@project.id, log, key: recorded_audios[variable.id]), :class => 'fimport'
 
         - else
           %td &nbsp;

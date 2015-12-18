@@ -56,7 +56,7 @@
         - @project.project_variables.each do |variable|
           - existed = false
           - log.call_log_answers.each do |answer|
-            - if answer.project_variable && answer.project_variable.id == variable.id
+            - if answer.project_variable.try(:id) == variable.id
               - existed = true
               %td= answer.try(:value)
               - break
@@ -68,7 +68,7 @@
                   .modal{ id: "audio_annotation_#{recorded_audio.id}" }
                     %h2= t('views.call_logs.index.label.annotation')
                     %audio.recorded-audio{ controls: "", data: { audio_id: recorded_audio.id } }
-                      %source{ src: result_call_log_path(recorded_audio.call_log, { key: recorded_audio.key }) + ".wav", type: "audio/wav" }
+                      %source{ src: result_project_call_log_path(@project.id, recorded_audio.call_log, { key: recorded_audio.key }) + ".wav", type: "audio/wav" }
                         Your browser does not support the audio element.
                     %br/
                     %textarea{ rows: 5, data: { annotation: recorded_audio.annotation } }= recorded_audio.annotation
@@ -79,7 +79,7 @@
                   .div_left
                     %a.fplay.audio-control{ href: "Javascript:void(0);" }
                   .div_right
-                    %a.fimport{ href: result_call_log_path(recorded_audio.call_log, {:key => recorded_audio.key}) }
+                    %a.fimport{ href: result_project_call_log_path(@project.id, recorded_audio.call_log, {:key => recorded_audio.key}) }
                     %a.fancybox.icon_button{ class: recorded_audio.annotation.present? ? "fedit-blue" : "fedit", href: "#audio_annotation_#{recorded_audio.id}" }
           - unless existed
             %td

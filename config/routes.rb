@@ -105,6 +105,7 @@ Verboice::Application.routes.draw do
 
         member do
           get :download_details
+          get 'results/:key', :action => :play_result, :as => 'result'
         end
       end
 

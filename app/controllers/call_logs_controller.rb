@@ -63,7 +63,8 @@ class CallLogsController < ApplicationController
   end
 
   def play_result
-    @log = current_account.call_logs.find params[:id]
+    load_project
+    @log = @project.call_logs.find params[:id]
     send_file RecordingManager.for(@log).result_path_for(params[:key]), :type => "audio/x-wav"
   end
 
