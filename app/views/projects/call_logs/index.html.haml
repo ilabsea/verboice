@@ -53,13 +53,17 @@
             = log.state
 
         %td= log.parent ? "ref_id:#{log.parent.id};#{log.step_interaction}" : log.step_interaction
+
+        - recorded_audios = log.call_log_recorded_audios
+
         - @project.project_variables.each do |variable|
           - existed = false
           - log.call_log_answers.each do |answer|
             - if answer.project_variable.try(:id) == variable.id
-              - existed = true
-              %td= answer.try(:value)
-              - break
+              - if recorded_audios.where(project_variable_id: variable.id).count == 0
+                - existed = true
+                %td= answer.try(:value)
+                - break
           - log.call_log_recorded_audios.each do |recorded_audio|
             - if recorded_audio.project_variable_id == variable.id
               - existed = true

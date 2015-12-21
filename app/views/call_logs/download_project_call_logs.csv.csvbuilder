@@ -78,7 +78,7 @@ csv << header
     when :input then [data.first]
     when :audio
       [
-        data[1] && (@custom_audio_path ? "audios/#{log_id}_#{data[1]}.wav" : result_call_log_url(log.first, { key: data[1] })) ,
+        data[1] && (@custom_audio_path ? "audios/#{log_id}_#{data[1]}.wav" : result_project_call_log_url(@project.id, log.first, { key: data[1] })) ,
         data[2]
       ]
     end
