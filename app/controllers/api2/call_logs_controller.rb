@@ -51,7 +51,13 @@ module Api2
 
     # GET /call_logs/:id
     def show
-      render json: @call_log, serializer: CustomCallLogSerializer
+      render json: @call_log, serializer: CustomCallLogSerializer, include: ['call_log_recorded_audios']
+    end
+
+    # GET /call_logs/:id/play_audio?key=12344
+    def play_audio
+      @log = current_account.call_logs.find params[:id]
+      send_file RecordingManager.for(@log).result_path_for(params[:key]), :type => "audio/x-wav"
     end
 
     # GET /call_logs/:id/play_audio?key=12344
