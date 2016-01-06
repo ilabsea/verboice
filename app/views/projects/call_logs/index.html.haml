@@ -16,7 +16,7 @@
 %br/
 
 - if @logs.present?
-  #call_logs.tablewrapp{style: 'box-shadow: none !important'}
+  #call_logs.tablewrapp.no-wrap.scroll
     %table.GralTable.ButtonTable.w-pagination
       %tr
         %th= t('views.projects.call_logs.index.label.id')
