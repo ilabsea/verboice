@@ -25,7 +25,7 @@ onWorkflow ->
       if not @is_datatype_date() and @content_kind() is "value" then true else false
 
     date_types: ->
-      ['Day', 'Week']
+      ['Day', 'Week', 'Month']
 
     is_required: ->
       if @required == 'true' then true else false
