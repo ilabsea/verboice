@@ -17,7 +17,7 @@
 
 class Channels::Sip < Channel
 
-  before_create :mark_as_pending
+  before_create :mark_as_pending, if: :require_approval?
   
   validate :server_username_uniqueness
 
@@ -34,6 +34,7 @@ class Channels::Sip < Channel
   config_accessor :normalized_called_number
   config_accessor :dtmf_mode
   config_accessor :codec_type
+  config_accessor :qualify
 
   attr_accessor :ip_address
 
@@ -78,6 +79,10 @@ class Channels::Sip < Channel
 
   def mark_as_pending
     self.status = STATUS_PENDING if self.kind == Channels::Sip.kind
+  end
+
+  def require_approval?
+    APP_CONFIGS['sip_require_approval']
   end
 
 end

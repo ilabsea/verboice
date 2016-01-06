@@ -206,7 +206,7 @@ describe Api2::ChannelsController do
     end
   end
 
-  describe "mark_as_approved" do
+  describe "activate" do
     before(:each) do
       @channel1 = Channels::Custom.make account: account, status: Channel::STATUS_PENDING
       Channels::Custom.make account: admin
@@ -215,13 +215,13 @@ describe Api2::ChannelsController do
     context "sign in as admin" do
       it "unauthorized when the host is not allowed" do
         request.stub(:remote_ip).and_return('192.168.1.1')
-        get :mark_as_approved, id: @channel1.id, email: admin.email, token: admin.auth_token
+        get :activate, id: @channel1.id, email: admin.email, token: admin.auth_token
 
         assert_response :unauthorized
       end
 
       it "update status of channel to approved" do
-        get :mark_as_approved, id: @channel1.id, email: admin.email, token: admin.auth_token, account_id: admin.id
+        get :activate, id: @channel1.id, email: admin.email, token: admin.auth_token, account_id: admin.id
 
         assert_response :ok
         response = JSON.parse(@response.body)
@@ -231,14 +231,14 @@ describe Api2::ChannelsController do
 
     context "sign in as normal user" do
       it "list all channels those belongs to the account" do
-        get :mark_as_approved, id: @channel1.id, email: account.email, token: account.auth_token
+        get :activate, id: @channel1.id, email: account.email, token: account.auth_token
 
         assert_response :unauthorized
       end
     end
   end
 
-  describe "mark_as_pending" do
+  describe "deactivate" do
     before(:each) do
       @channel1 = Channels::Custom.make account: account, status: Channel::STATUS_APPROVED
       Channels::Custom.make account: admin
@@ -247,13 +247,13 @@ describe Api2::ChannelsController do
     context "sign in as admin" do
       it "unauthorized when the host is not allowed" do
         request.stub(:remote_ip).and_return('192.168.1.1')
-        get :mark_as_pending, id: @channel1.id, email: admin.email, token: admin.auth_token
+        get :deactivate, id: @channel1.id, email: admin.email, token: admin.auth_token
 
         assert_response :unauthorized
       end
 
       it "update status of channel to approved" do
-        get :mark_as_pending, id: @channel1.id, email: admin.email, token: admin.auth_token, account_id: admin.id
+        get :deactivate, id: @channel1.id, email: admin.email, token: admin.auth_token, account_id: admin.id
 
         assert_response :ok
         response = JSON.parse(@response.body)
@@ -263,7 +263,7 @@ describe Api2::ChannelsController do
 
     context "sign in as normal user" do
       it "list all channels those belongs to the account" do
-        get :mark_as_pending, id: @channel1.id, email: account.email, token: account.auth_token
+        get :deactivate, id: @channel1.id, email: account.email, token: account.auth_token
 
         assert_response :unauthorized
       end

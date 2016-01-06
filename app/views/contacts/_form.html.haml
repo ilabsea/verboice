@@ -41,7 +41,7 @@
         = f.label description
         - audios.each do |recorded_audio|
           = recorded_audio.created_at
-          = link_to '', result_call_log_path(recorded_audio.call_log, {:key => recorded_audio.key}), :class => 'button fimport'
+          = link_to '', result_project_call_log_path(@project.id, recorded_audio.call_log, {:key => recorded_audio.key}), :class => 'button fimport'
 
 
   %hr/

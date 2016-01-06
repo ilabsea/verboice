@@ -19,5 +19,3 @@ lookup(Address, [ExistingAddress | Rest]) ->
     true -> ExistingAddress;
     _ -> lookup(Address, Rest)
   end.
-
-

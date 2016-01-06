@@ -94,7 +94,7 @@ class CallLogsListing < Listings::Base
   end
   column '' do |log|
     if format == :html
-      details_link = link_to('View details', call_log_path(log, project_id: log.project.id))
+      details_link = link_to('View details', call_log_path(log, project_id: log.project.id)) if log.store_log_entries
       if log.state == :queued
         call = listing_account.queued_calls.where(call_log_id: log.id).first
         if call

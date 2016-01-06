@@ -33,7 +33,6 @@ handle_event({originateresponse, Packet}, State) ->
 
 handle_event({newchannel, Packet}, State) ->
   NewChannel = ami_client:decode_packet(Packet),
-  io:format("New channel: ~p~n", [NewChannel]),
   Channel = proplists:get_value(channel, NewChannel),
   asterisk_pbx_log_srv:start_link(Channel),
   {ok, State};

@@ -289,8 +289,20 @@ a.audio_tool{
   background-position: 0px 0px;
 }
 
+.impersonate{
+  background-image: url("../assets/impersonate.png");
+  height: 59px;
+  width: 59px;
+}
+
 .register{
   background-image: url("../assets/register.png");
+  height: 59px;
+  width: 59px;
+}
+
+.deregister{
+  background-image: url("../assets/unregister.png");
   height: 59px;
   width: 59px;
 }
@@ -309,13 +321,6 @@ a.audio_tool{
     width: 48px;
 }
 
-
-.deregister{
-  background-image: url("../assets/unregister.png");
-  height: 59px;
-  width: 59px;
-}
-
 .to-left{
   align: left;
 }
@@ -326,6 +331,14 @@ a.audio_tool{
 
 .control_step:active{
   background-position: 0 -120px;
+}
+
+.i48grad-impersonate {
+    background: url("../assets/call_flow_impersonate.png") no-repeat scroll center top transparent;
+    display: inline-block;
+    height: 48px;
+    vertical-align: middle;
+    width: 48px;
 }
 
 .i48grad-register {

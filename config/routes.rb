@@ -78,6 +78,7 @@ Verboice::Application.routes.draw do
       resources :contacts, except: [:show] do
         collection do
           get :search, :action => :index, :as => 'search'
+          get :download, as: 'download'
           get :invitable
           post :upload_csv
           post :import_csv
@@ -120,6 +121,7 @@ Verboice::Application.routes.draw do
 
         member do
           get :download_details
+          get 'results/:key', :action => :play_result, :as => 'result'
         end
       end
 
@@ -214,9 +216,10 @@ Verboice::Application.routes.draw do
       end
 
       resources :reminder_groups, only: [:index, :create, :update, :destroy]
-    end
 
-    post 'reminder_groups/:id/contacts' => 'reminder_groups#contacts', as: 'register_contact_to_reminder_group'
+      post 'reminder_groups/:id/contacts' => 'reminder_groups#contacts', as: 'register_contact_to_reminder_group'
+      
+    end
 
     resources :logs, only: [] do
       collection do
@@ -287,7 +290,17 @@ Verboice::Application.routes.draw do
 
     get '/channels/:channel_id/call_logs' => "call_logs#list_by_channel"
     get '/contacts/:address/call_logs', controller: :call_logs, action: :index
-    resources :call_logs, only: [:index, :show]
+    resources :call_logs, only: [:index, :show] do
+      member do
+        get 'play_audio'
+      end
+      
+      resources :recorded_audios, path: :audios, only: [:index] do
+        collection do
+          get ':filename', action: :play
+        end
+      end
+    end
 
     get "call_flows" => "call_flows#list"
 

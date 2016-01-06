@@ -1,5 +1,5 @@
 -module(session).
--export([start_link/1, new/0, new/1, find/1, answer/2, answer/4, dial/4, reject/2, stop/1, resume/1, default_variables/1, create_default_erjs_context/2, id/1]).
+-export([start_link/1, new/0, new/1, find/1, answer/2, answer/4, dial/4, reject/2, stop/1, resume/1, default_variables/1, create_default_erjs_context/2, id/1, merge/2]).
 -export([no_ack/1]).
 -export([language/1]).
 -export([new_id/0, set_pointer/2]).
@@ -131,8 +131,7 @@ ready({answer, Pbx, ChannelId, CallerId}, State = #state{session_id = SessionId}
       Channel = channel:find(ChannelId),
       CallFlow = call_flow:find(Channel#channel.call_flow_id),
       Project = project:find(CallFlow#call_flow.project_id),
-      Contact = get_contact(CallFlow#call_flow.project_id, CallerId, 1),
-      ContactAddress = contact:find_or_create_contact_address(CallerId, Contact),
+      {Contact, ContactAddress} = get_contact(CallFlow#call_flow.project_id, CallerId, 1),
       CallLog = call_log_srv:new(SessionId, #call_log{
         account_id = Channel#channel.account_id,
         project_id = CallFlow#call_flow.project_id,
@@ -190,15 +189,12 @@ ready({dial, _, _, QueuedCall = #queued_call{address = undefined}}, _From, State
 
 ready({dial, RealBroker, Channel, QueuedCall}, _From, State = #state{session_id = SessionId, resume_ptr = ResumePtr}) ->
   lager:info("Session (~p) dial", [SessionId]),
-
+  
   AddressWithoutVoipPrefix = channel:address_without_voip_prefix(Channel, QueuedCall#queued_call.address),
-
-  AddressWithoutVoipPrefix = channel:address_without_voip_prefix(Channel, QueuedCall#queued_call.address),
-
   NewSession = case State#state.session of
     undefined ->
       CallLog = call_log_srv:new(SessionId, call_log:find(QueuedCall#queued_call.call_log_id)),
-      Contact = get_contact(QueuedCall#queued_call.project_id, AddressWithoutVoipPrefix, QueuedCall#queued_call.call_log_id),
+      {Contact, _ContactAddress} = get_contact(QueuedCall#queued_call.project_id, AddressWithoutVoipPrefix, QueuedCall#queued_call.call_log_id),
       Session = QueuedCall:start_session(),
 
       poirot:add_meta([
@@ -598,7 +594,7 @@ flow_result(Result, _) -> Result.
 
 get_contact(ProjectId, undefined, CallLogId) ->
   Address = "Anonymous" ++ integer_to_list(CallLogId),
-  contact:create_anonymous(ProjectId, Address);
+  get_contact(ProjectId, Address, CallLogId);
 get_contact(ProjectId, Address, _) ->
   contact:find_or_create_with_address(ProjectId, Address).
 
@@ -611,6 +607,11 @@ default_variables(#session{address = Address, contact = Contact, queued_call = Q
   NewJsContext = erjs_context:set(var_call_at, datetime_utils:strftime(datetime_utils:in_zone(TimeZone, StartedAt)), JsContext),
   DefaultContext = default_variables(NewJsContext, ProjectVars, Variables),
   initialize_context(DefaultContext, QueuedCall).
+
+merge(#session{contact = Contact, project = #project{id = ProjectId}}, Context) ->
+  ProjectVars = project_variable:names_for_project(ProjectId),
+  Variables = persisted_variable:find_all({contact_id, Contact#contact.id}),
+  default_variables(Context, ProjectVars, Variables).
 
 create_default_erjs_context(CallLogId, PhoneNumber) ->
   erjs_context:new([

@@ -14,10 +14,11 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with Verboice.  If not, see <http://www.gnu.org/licenses/>.
-class Api::ProjectVariablesController < ApiController
-  expose(:project) { current_account.projects.find params[:project_id] }
 
-  def index
-    render json: project.project_variables.all.map(&:to_json)
+class CustomSimpleCallLogAnswerSerializer < ActiveModel::Serializer
+  attributes :id, :value, :project_variable_id, :project_variable_name
+
+  def project_variable_name
+    object.project_variable.name
   end
 end

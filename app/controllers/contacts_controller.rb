@@ -125,6 +125,11 @@ class ContactsController < ApplicationController
     render json: @contacts.pluck(:address)
   end
 
+  def download
+    load_contacts
+    load_dependencies
+  end
+
   def queued_calls
     @calls = @project.queued_calls.includes(:channel, :call_log, :schedule)
       .where(address: @contact.addresses.map(&:address))
@@ -215,5 +220,22 @@ class ContactsController < ApplicationController
   def load_recorded_audio_descriptions
     @recorded_audio_descriptions = RecordedAudio.select(:description).where(:contact_id => @contacts.collect(&:id)).collect(&:description).to_set
   end
-  
+
+  def load_dependencies
+    @project_variables = @project.project_variables
+    @recorded_audio_descriptions = RecordedAudio.select(:description).where(:contact_id => @contacts.collect(&:id)).collect(&:description).to_set
+    @implicit_variables = ImplicitVariable.subclasses
+  end
+
+  def load_contacts
+    @contacts = @project.contacts.includes(:addresses).includes(:recorded_audios).includes(:persisted_variables).includes(:project_variables)
+    @search = params[:search]
+
+    if !@search.blank?
+      @contacts = @contacts.where(["contact_addresses.address like :address", :address => "#{@search}%" ])
+    end
+
+    @contacts
+  end
+
 end

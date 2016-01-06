@@ -22,4 +22,8 @@ class RecordedAudio < ActiveRecord::Base
 
   attr_accessible :call_log, :description, :key
   validates_presence_of :call_log, :contact, :key, :description
+
+  def url
+    RecordingManager.for(call_log).result_path_for(key)
+  end
 end

@@ -1,6 +1,6 @@
 -module(tel).
 
--export([without_prefix/1]).
+-export([without_prefix/1, possible_addresses/1]).
 
 -define(PREFIXES, [
   "855",
@@ -25,3 +25,10 @@ without_prefix(Address, [Prefix | Rest]) ->
     true ->
       string:substr(Address, Length + 1)
   end.
+
+possible_addresses(Address) ->
+  possible_addresses(without_prefix(Address), ?PREFIXES).
+
+possible_addresses(AddressWithoutPrefix, []) -> [AddressWithoutPrefix];
+possible_addresses(AddressWithoutPrefix, [Prefix | Rest]) ->
+  [Prefix ++ AddressWithoutPrefix | possible_addresses(AddressWithoutPrefix, Rest)].

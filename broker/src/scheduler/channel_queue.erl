@@ -1,5 +1,5 @@
 -module(channel_queue).
--export([start_link/1, whereis_channel/1, enqueue/1, wakeup/1, unmonitor_session/2]).
+-export([start_link/1, whereis_channel/1, enqueue/1, wakeup/1, reload/1, unmonitor_session/2]).
 
 -behaviour(gen_server).
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2, terminate/2, code_change/3]).
@@ -22,6 +22,10 @@ enqueue(QueuedCall = #queued_call{channel_id = ChannelId}) ->
 wakeup(ChannelId) ->
   ensure_exists(ChannelId),
   gen_server:cast(?QUEUE(ChannelId), wakeup).
+
+%% Reload channel configuration
+reload(ChannelId) ->
+  gen_server:cast(?QUEUE(ChannelId), reload).
 
 %% Remove a session from monitored list
 unmonitor_session(ChannelId, SessionPid) ->
@@ -64,6 +68,11 @@ handle_cast(wakeup, State) ->
 
 handle_cast({unmonitor, Pid}, State) ->
   exit_state(remove_session(Pid, State));
+
+handle_cast(reload, State) ->
+  Channel = channel:find(State#state.channel#channel.id),
+  NewState = State#state{channel = Channel, max_calls = Channel:limit()},
+  {noreply, do_dispatch(NewState)};
 
 handle_cast(_Msg, State) ->
   {noreply, State}.

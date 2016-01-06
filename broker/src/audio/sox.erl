@@ -25,7 +25,6 @@ convert_with_quality(Input, Quality, OutPath) ->
 
 %% @private
 init({}) ->
-  io:format("Sox converter: ~p~n", [self()]),
   {ok, #state{}, ?TIMEOUT}.
 
 %% @private

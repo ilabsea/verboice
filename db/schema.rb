@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20150805201540) do
+ActiveRecord::Schema.define(:version => 20151030102826) do
 
   create_table "accounts", :force => true do |t|
     t.string   "email",                               :default => "", :null => false
@@ -68,15 +68,15 @@ ActiveRecord::Schema.define(:version => 20150805201540) do
     t.binary   "user_flow"
     t.string   "callback_url"
     t.integer  "project_id"
-    t.text     "encrypted_config"
-    t.datetime "created_at",              :null => false
-    t.datetime "updated_at",              :null => false
+    t.text     "encrypted_config",        :limit => 16777215
+    t.datetime "created_at",                                  :null => false
+    t.datetime "updated_at",                                  :null => false
     t.string   "mode"
-    t.text     "variables"
+    t.text     "variables",               :limit => 16777215
     t.string   "fusion_table_name"
     t.string   "current_fusion_table_id"
     t.boolean  "store_in_fusion_tables"
-    t.text     "resource_guids"
+    t.text     "resource_guids",          :limit => 16777215
     t.binary   "broker_flow"
   end
 
@@ -91,6 +91,7 @@ ActiveRecord::Schema.define(:version => 20150805201540) do
   end
 
   add_index "call_log_answers", ["call_log_id"], :name => "index_call_log_answers_on_call_log_id"
+  add_index "call_log_answers", ["project_variable_id", "call_log_id"], :name => "index_call_log_answers_on_project_variable_id_and_call_log_id", :unique => true
 
   create_table "call_log_entries", :force => true do |t|
     t.integer  "call_id"
@@ -164,9 +165,9 @@ ActiveRecord::Schema.define(:version => 20150805201540) do
     t.integer  "account_id"
     t.integer  "call_flow_id"
     t.string   "name"
-    t.text     "config"
-    t.datetime "created_at",                           :null => false
-    t.datetime "updated_at",                           :null => false
+    t.text     "config",       :limit => 16777215
+    t.datetime "created_at",                                               :null => false
+    t.datetime "updated_at",                                               :null => false
     t.string   "type"
     t.string   "guid"
     t.boolean  "enabled",      :default => true
@@ -210,8 +211,8 @@ ActiveRecord::Schema.define(:version => 20150805201540) do
   create_table "delayed_jobs", :force => true do |t|
     t.integer  "priority",          :default => 0
     t.integer  "attempts",          :default => 0
-    t.text     "handler"
-    t.text     "last_error"
+    t.text     "handler",    :limit => 16777215
+    t.text     "last_error", :limit => 16777215
     t.datetime "run_at"
     t.datetime "locked_at"
     t.datetime "failed_at"
@@ -286,7 +287,7 @@ ActiveRecord::Schema.define(:version => 20150805201540) do
     t.integer  "call_flow_id"
     t.integer  "project_id"
     t.integer  "channel_id"
-    t.string   "queue_call_id"
+    t.text     "queue_call_id"
     t.string   "time_from"
     t.string   "time_to"
     t.string   "conditions"
@@ -305,15 +306,15 @@ ActiveRecord::Schema.define(:version => 20150805201540) do
     t.string   "icon"
     t.string   "kind"
     t.string   "callback_url"
-    t.text     "variables"
-    t.datetime "created_at",          :null => false
-    t.datetime "updated_at",          :null => false
+    t.text     "variables",           :limit => 16777215
+    t.datetime "created_at",                              :null => false
+    t.datetime "updated_at",                              :null => false
     t.string   "response_type"
-    t.text     "response_variables"
+    t.text     "response_variables",  :limit => 16777215
     t.string   "guid"
     t.integer  "external_service_id"
-    t.text     "script"
-    t.text     "session_variables"
+    t.text     "script",              :limit => 16777215
+    t.text     "session_variables",   :limit => 16777215
     t.boolean  "async"
   end
 
@@ -324,10 +325,10 @@ ActiveRecord::Schema.define(:version => 20150805201540) do
     t.integer  "project_id"
     t.string   "name"
     t.string   "url"
-    t.text     "xml"
-    t.datetime "created_at",      :null => false
-    t.datetime "updated_at",      :null => false
-    t.text     "global_settings"
+    t.text     "xml",             :limit => 16777215
+    t.datetime "created_at",                          :null => false
+    t.datetime "updated_at",                          :null => false
+    t.text     "global_settings", :limit => 16777215
     t.string   "guid"
     t.string   "base_url"
   end
@@ -380,7 +381,7 @@ ActiveRecord::Schema.define(:version => 20150805201540) do
     t.string   "type"
     t.datetime "created_at",                           :null => false
     t.datetime "updated_at",                           :null => false
-    t.text     "extras"
+    t.text     "extras",         :limit => 16777215
     t.binary   "uploaded_audio", :limit => 2147483647
     t.string   "guid"
     t.integer  "resource_id"
@@ -480,9 +481,9 @@ ActiveRecord::Schema.define(:version => 20150805201540) do
     t.datetime "updated_at",                                :null => false
     t.integer  "account_id"
     t.string   "status_callback_url"
-    t.text     "encrypted_config"
-    t.string   "time_zone",              :default => "UTC"
-    t.text     "languages"
+    t.text     "encrypted_config",       :limit => 16777215
+    t.string   "time_zone",                                  :default => "UTC"
+    t.text     "languages",              :limit => 16777215
     t.string   "default_language"
     t.boolean  "store_call_log_entries", :default => true
   end

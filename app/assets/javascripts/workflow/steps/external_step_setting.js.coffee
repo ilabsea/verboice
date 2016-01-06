@@ -8,12 +8,14 @@ onWorkflow ->
       @name = attrs.name
       @display_name = attrs.display_name
       @type = attrs.type
+      @required = attrs.required
       @parent = parent
 
     to_hash: () =>
       $.extend super(), {
         name: @name
         display_name: @display_name
+        required: @required
       }
 
     is_datatype_date: ->
@@ -23,7 +25,17 @@ onWorkflow ->
       if not @is_datatype_date() and @content_kind() is "value" then true else false
 
     date_types: ->
-      ['Day', 'Week', 'Month', 'Year']
+      ['Day', 'Week']
+
+    is_required: ->
+      if @required == 'true' then true else false
+
+    is_invalid: () =>
+      @is_required() and !@has_value()
+      
+    has_value: () =>
+      setting = @to_hash()
+      !(setting['value'] == null or setting['value'] == undefined) or !(setting['step'] == null or setting['step'] == undefined) or !(setting['variable'] == null or setting['variable'] == undefined) or !(setting['response'] == null or setting['response'] == undefined)
 
     content_kinds: () =>
       return [{text: 'Variable', value: 'variable'},

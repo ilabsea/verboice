@@ -8,6 +8,7 @@ md5hex(Data) ->
 to_string(Value) when is_atom(Value) -> atom_to_list(Value);
 to_string(Value) when is_binary(Value) -> binary_to_list(Value);
 to_string(Value) when is_integer(Value) -> integer_to_list(Value);
+to_string(Value) when is_float(Value) -> float_to_list(Value, [{decimals,2}]);
 to_string(Value) when is_list(Value) ->
   case lists:all(fun(X) -> is_integer(X) end, Value) of
     true -> Value;

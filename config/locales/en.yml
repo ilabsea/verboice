@@ -303,7 +303,7 @@ en:
           remove_this_step: "Remove this step"
       _capture_step_template:
         label:
-          message: "Messages"
+          messages: "Messages"
           instructions: "Instructions:"
           invalid: "Invalid:"
           attempts: "Attempts"
@@ -462,7 +462,7 @@ en:
           enter_message_name: "Enter message name"
           select_existing_one: "Select an existing one"
           name: "Name"
-        languages: "Languages"
+          languages: "Languages"
         action:
           next: "Next"
           cancel: "Cancel"
@@ -482,6 +482,11 @@ en:
           phone_number: "Phone number:"
           channel: "Channel:"
           use_current_channel: "Use current channel"
+        action:
+          remove_this_step: "Remove this step"
+      _impersonate_step_template:
+        label:
+          transfer_data_to: "Transfer data to"
         action:
           remove_this_step: "Remove this step"
       _upload_localized_resource_template:
@@ -538,6 +543,15 @@ en:
           command: "Command"
           action: "Action"
           detail: "Detail"
+          started_at: "Started at"
+          finished_at: "Finished at"
+          duration: "Duration"
+          direction: "Direction"
+          retries: "Retries"
+          channel: "Channel"
+          project: "Project"
+          call_flow: "Call flow"
+          status: "Status"
       download_details_csv:
         label:
           call_id: "Call ID"
@@ -867,6 +881,7 @@ en:
           description: "Description"
           time_zone: "Time zone"
           start_on: "Start on"
+          after: "After"
           date_format: "(dd/mm/yy)"
           time_format: "(HH:MM)"
           call_time: "Schedule call time"
@@ -948,9 +963,9 @@ en:
 
     home:
       download_brochure: Download brochure
-      listen_and_response: Listen and response
-      listen_and_response_sub: to the voice of your community.
-      listen_and_response_body: "Voice is the most universal and inclusive means of communication, and it's an ideal way to expand the reach and impact of health and humanitarian technologies. Verboice is a free and open-source tool that makes it easy for anyone to create and run projects that interact via voice, allowing your users to listen and record messages in their own language and dialect or answer questions with a phone keypad. Verboice projects can start small and scale up, making it possible to improve lives even in communities previously closed off by literacy and technological barriers."
+      listen_and_respond: Listen and respond
+      listen_and_respond_sub: to the voice of your community.
+      listen_and_respond_body: "Voice is the most universal and inclusive means of communication, and it's an ideal way to expand the reach and impact of health and humanitarian technologies. Verboice is a free and open-source tool that makes it easy for anyone to create and run projects that interact via voice, allowing your users to listen and record messages in their own language and dialect or answer questions with a phone keypad. Verboice projects can start small and scale up, making it possible to improve lives even in communities previously closed off by literacy and technological barriers."
       get_started: Get started
       view_your_project: View your projects
       create_an_account: Create an account
@@ -1022,6 +1037,7 @@ en:
         index:
           title: "Here you can see the details of incoming and outgoing calls."
           label:
+            calls: "Calls"
             desc: "Here you can see the details of incoming and outgoing calls."
             select_call_flow: "Please select call flow to filter your call log."
             id: "ID"

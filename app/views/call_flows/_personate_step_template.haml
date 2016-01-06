@@ -1,0 +1,15 @@
+%script{type: "text/html", id: "personate_step_template"}
+  .feditor-sidebar.right.box.w28.iblock.h65
+
+    .tableheader
+      %span.left.i48grad-impersonate{ ko(css: '{ "orange": is_invalid }') }
+      %input.ux-text.w20.right{ ko(value: 'name', valueUpdate: '"afterkeydown"', css: '{ "error": is_name_invalid }')}
+
+    .content
+      %hr
+      %div{style: "padding-bottom:10px;"}
+        %label= t('views.call_flows._impersonate_step_template.label.transfer_data_to') + ":"
+      %div{ko(:template => "{name: 'personate_option_template', data: option}")}
+
+    .bottom-actions
+      %button.fdelete{ 'data-bind' => 'click: remove_with_confirm' }= t('views.call_flows._impersonate_step_template.action.remove_this_step')

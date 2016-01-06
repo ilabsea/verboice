@@ -41,7 +41,7 @@ filename(CallLogId, Key) ->
 
 create_call_log_recorded_audio(OldVarName, VarName, Key, Description, ProjectId, CallLogId) ->
   case VarName of
-    undefined -> io:format("do nothing");
+    undefined -> io:format("do nothing ~n");
     _ ->
       ExistingProjectVariables = project_variable:find_all([{project_id, ProjectId}, {name, OldVarName}]),
       ProjectVariableOld = case length(ExistingProjectVariables) of
@@ -66,7 +66,7 @@ create_call_log_recorded_audio(OldVarName, VarName, Key, Description, ProjectId,
         _ -> 
           if 
             OldVarName /= VarName -> ProjectVariableOld:update([{name, VarName}]);
-            true -> io:format("do nothing")
+            true -> io:format("do nothing ~n")
           end,
           ProjectVariableOld
       end,

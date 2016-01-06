@@ -1,5 +1,4 @@
-set :user, 'ilab'
-set :server, "192.168.1.53"
-set :branch, 'development'
+set :user, 'deploy'
+set :branch, 'release-2.0'
 
-server "192.168.1.53", :app, :web, :db, primary: true
+server '192.168.1.134', :app, :web, :db, primary: true

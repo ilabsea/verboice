@@ -166,7 +166,6 @@ class Channel < ActiveRecord::Base
         :not_after => not_after,
         :contact_id => contact_id
       )
-      call_log.save!
       call_log.info "Received via #{via}: call #{address}"
     end
 
@@ -174,12 +173,14 @@ class Channel < ActiveRecord::Base
       variables = {}
       options[:vars].each do |name, value|
         # add call log answer for default context variables
-        project_variable = project.project_variables.find_by_name(name)
-        CallLogAnswer.create! :call_log_id => call_log.id, :project_variable_id => project_variable.id, :value => value if project_variable
+        project_variable = project.project_variables.find {|v| v.name == name}
+        call_log.call_log_answers << CallLogAnswer.new(project_variable_id: project_variable.id, value: value) if project_variable
 
         variables[name] = (value =~ /^(0|[1-9]\d*)$/ ? value.to_i : value)
       end
     end
+
+    call_log.save!
 
     callback_params = options[:callback_params] if options[:callback_params].is_a?(Hash)
 

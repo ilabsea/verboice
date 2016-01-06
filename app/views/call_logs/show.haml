@@ -43,7 +43,7 @@
       = call_log_fail_info(@log)
 %br/
 %p
-  = link_to 'Download CSV', download_details_project_call_log_path(@project, @log, :format => :csv), :class => "button fimport"
+  = link_to 'Download CSV', download_details_call_log_path(@log, project_id: @log.try(:project).try(:id), :format => :csv), :class => "button fimport"
 
 .tablewrapp.user-flow-log
   %table
@@ -76,4 +76,3 @@
         %td.call-log-pbx-details
           %span= pbx_log.details
   %br
-

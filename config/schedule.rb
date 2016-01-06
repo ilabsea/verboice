@@ -10,3 +10,7 @@ end
 every :day, :at => '3:00 am' do
   rake "backup:incremental"
 end
+
+every "1,31 * * * *" do
+  rake "call_log:zombie:terminate_calls"
+end

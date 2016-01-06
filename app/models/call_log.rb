@@ -34,8 +34,11 @@ class CallLog < ActiveRecord::Base
     'hangup'    => 'incompleted',
     'marked_as_failed' => "marked_as_failed",
     'no_ack' => 'no_ack',
+    'terminated' => 'terminated',
     'blocked' => "blocked",
-    'disabled' => "disabled"
+    'disabled' => "disabled",
+    'external_step_broken' => 'error (external step was broken)',
+    'unknown_resource' => 'error (step was broken)'
   }
 
   DATE_FORMAT_EXPORT = [
@@ -219,7 +222,7 @@ class CallLog < ActiveRecord::Base
   def set_account_to_project_account
     self.project_id = self.call_flow.project_id
     self.account_id = self.project.account_id
-    contact = self.project.contacts.joins(:addresses).where(:contact_addresses => {:address => self.address}).first
+    contact = self.project.contacts.joins(:addresses).where(:contact_addresses => {project_id: self.project.id, address: self.address}).first
     self.contact_id = contact.id unless contact.nil?
   end
 end

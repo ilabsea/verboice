@@ -20,25 +20,17 @@ class CallLogsController < ApplicationController
   before_filter :prepare_log_detail, only: [:show, :download_details]
 
   before_filter :initial_paginate_params, only: [:index]
-  before_filter :search, only: [:index, :download_project_call_logs, :generate_zip]
+  before_filter :search, only: [:index, :download, :download_project_call_logs, :generate_zip]
   before_filter :check_max_row, only: [:download_project_call_logs]
   before_filter :csv_settings, only: [:download, :download_details, :download_project_call_logs]
 
   def index
-    @total_records = @logs.count
     @logs = @logs.page(@page).per(@per_page)
     render "projects/call_logs/index" if @project
   end
 
   def show
     set_fixed_width_content
-    if params[:project_id].present?
-      load_project
-      @log = @project.call_logs.find params[:id]
-    else
-      @log = current_account.call_logs.find params[:id]
-    end
-
   end
 
   def progress
@@ -57,7 +49,8 @@ class CallLogsController < ApplicationController
   end
 
   def play_result
-    @log = current_account.call_logs.find params[:id]
+    load_project
+    @log = @project.call_logs.find params[:id]
     send_file RecordingManager.for(@log).result_path_for(params[:key]), :type => "audio/x-wav"
   end
 
@@ -68,8 +61,6 @@ class CallLogsController < ApplicationController
 
 
   def download_details
-    load_project
-    @log = @project.call_logs.includes(:entries).find params[:id]
   end
 
   def generate_zip
@@ -120,7 +111,15 @@ class CallLogsController < ApplicationController
   end
 
   def prepare_log_detail
-    @log = CallLog.for_account(current_account).find params[:id]
+    @log = CallLog.for_account(current_account).find_by_id params[:id]
+      
+    if params[:project_id].present?
+      load_project
+      @log = @project.call_logs.find params[:id]
+    else
+      @log = current_account.call_logs.find params[:id]
+    end unless @log
+
     @activities = CallLog.poirot_activities(@log.id).sort_by(&:start)
   end
 
