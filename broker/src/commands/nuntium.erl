@@ -27,8 +27,7 @@ run(Args, Session = #session{project = Project}) ->
               case resource:prepare(ResourceGuid, Session#session{pbx = nuntium}) of
                 {text, _Lang, Body} ->
                   case Kind of
-                    undefined -> {error, "Missing channel type"};
-                    _ ->
+                    ?QST_SERVER ->
                       NuntiumArgs = [
                         {from, SenderAddress},
                         {to, RecipientAddress},
@@ -44,7 +43,14 @@ run(Args, Session = #session{project = Project}) ->
                       case nuntium_api:send_ao(NuntiumArgs1) of
                         ok -> {info, "Sent"};
                         {error, Reason} -> {error, Reason}
-                      end
+                      end;
+                    ?SMTP ->
+                      poirot:log(debug, "Sending an email to: ~p", [util:to_string(RecipientAddress)]),
+                      case sendmail:send(util:to_string(RecipientAddress), util:to_string(SenderAddress), util:to_string(Subject), util:to_string(Body)) of
+                        {0, _} -> {info, "Email sent"};
+                        _ -> {error, "Email can't be sent"}
+                      end;
+                    _ -> {error, "Missing channel type"}
                   end;
                 _ -> {error, "Missing text to send"}
               end
@@ -63,6 +69,7 @@ rcpt_address(Kind, RcptType, Expr, Session) ->
   case rcpt_address_from_session(RcptType, Expr, Session) of
     undefined -> undefined;
     "" -> undefined;
+    <<>> -> undefined;
     Address -> recipient(Kind, Address)
   end.
 
