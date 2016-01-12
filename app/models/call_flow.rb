@@ -94,7 +94,7 @@ class CallFlow < ActiveRecord::Base
     resources = []
     user_flow.each do |step| 
       guids += guids_from_step(step)
-    end
+    end if user_flow
     project.resources.each do |resource|
       resources << resource if guids.include?(resource.guid)
     end
