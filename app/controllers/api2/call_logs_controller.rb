@@ -44,7 +44,7 @@ module Api2
       @call_logs = @call_logs.between(params[:start_date], params[:end_date]) if params[:start_date].present? && params[:end_date].present?
       @call_logs - @call_logs.where(status: params[:status]) if params[:status].present?
 
-      @call_logs = @call_logs.order('channel_id').includes([:account, :channel, :project])
+      @call_logs = @call_logs.order('channel_id').includes([:account, :channel, :project => [:project_variables]], :call_log_recorded_audios, :call_log_answers)
 
       render json: @call_logs, each_serializer: CustomCallLogSerializer
     end

@@ -19,6 +19,6 @@ class CustomSimpleCallLogAnswerSerializer < ActiveModel::Serializer
   attributes :id, :value, :project_variable_id, :project_variable_name
 
   def project_variable_name
-    object.project_variable.name
+    object.try(:project_variable).try(:name)
   end
 end
