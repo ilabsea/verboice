@@ -42,7 +42,7 @@ gem 'aws-sdk-v1'
 gem 'rails_config'
 gem 'awesome_print'
 
-gem "active_model_serializers"
+gem "active_model_serializers", '~> 0.8.3'
 gem "recaptcha", :require => "recaptcha/rails"
 gem "password_strength"
 
