@@ -127,12 +127,12 @@ describe Api2::ReminderGroupsController do
   end
 
     it "should response 200" do
-      # expect{
+      expect{
         put :update, email: account_one.email, token: account_one.auth_token, id: reminder_group.id, reminder_group: { addresses: [1000, 1001, "1000", "1001"] }
 
         assert_response :success
         reminder_group.reload.addresses.count.should == 2
-      # }.to change(reminder_group.addresses, :count).by(2)
+      }.to change(reminder_group.addresses, :count).by(0)
     end
   end
 

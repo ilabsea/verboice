@@ -20,7 +20,7 @@ describe Api2Controller do
 
   controller described_class do
 
-    before_filter :authenticate_account_from_token!
+    before_filter :authenticate_guisso_account!
 
     def index
       render text: "I am logged-in"

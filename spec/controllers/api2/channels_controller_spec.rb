@@ -122,7 +122,9 @@ describe Api2::ChannelsController do
         }
       }
       @request.env['RAW_POST_DATA'] = data.to_json
+
       put :update, email: account.email, token: account.auth_token, name: chan.name, format: :json
+      
       assert_response :ok
 
       chan = chan.reload
@@ -136,6 +138,7 @@ describe Api2::ChannelsController do
 
       data = {:name => ''}
       @request.env['RAW_POST_DATA'] = data.to_json
+
       put :update, email: account.email, token: account.auth_token, name: chan.name, format: :json
 
       assert_response :ok
@@ -158,6 +161,7 @@ describe Api2::ChannelsController do
       chan = Channel.all_leaf_subclasses.sample.make :call_flow => call_flow, :name => 'foo', :account => account
 
       delete :destroy, email: account.email, token: account.auth_token, :name => chan.name
+      
       assert_response :ok
 
       account.channels.count.should == 0
@@ -173,6 +177,7 @@ describe Api2::ChannelsController do
     context "sign in as admin" do
       it "unauthorized when the host is not allowed" do
         request.stub(:remote_ip).and_return('192.168.1.1')
+
         get :index, email: admin.email, token: admin.auth_token
 
         assert_response :unauthorized
@@ -183,7 +188,7 @@ describe Api2::ChannelsController do
 
         assert_response :ok
         response = JSON.parse(@response.body)
-        expect(response.length).to eq 2
+        response.length.should eq 2
       end
 
       it "list only channels that belongs to the account" do
@@ -191,7 +196,7 @@ describe Api2::ChannelsController do
 
         assert_response :ok
         response = JSON.parse(@response.body)
-        expect(response.length).to eq 1
+        response.length.should eq 1
       end
     end
 
@@ -225,7 +230,7 @@ describe Api2::ChannelsController do
 
         assert_response :ok
         response = JSON.parse(@response.body)
-        expect(response['status']).to eq Channel::STATUS_APPROVED
+        response['status'].should eq Channel::STATUS_APPROVED
       end
     end
 
@@ -257,7 +262,7 @@ describe Api2::ChannelsController do
 
         assert_response :ok
         response = JSON.parse(@response.body)
-        expect(response['status']).to eq Channel::STATUS_PENDING
+        response['status'].should eq Channel::STATUS_PENDING
       end
     end
 
