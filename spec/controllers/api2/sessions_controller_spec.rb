@@ -17,6 +17,11 @@
 require 'spec_helper'
 
 describe Api2::SessionsController do
+
+  before(:each) do
+    AltoGuissoRails.stub!(:valid_credentials?).with(anything(), anything()).and_return(true)
+  end
+
   describe 'create' do
 
     let(:admin_user) { Account.make role: Account::ADMIN, password: 'admin_123', password_confirmation: 'admin_123'}
@@ -27,9 +32,8 @@ describe Api2::SessionsController do
         post :create
         body = ActiveSupport::JSON.decode(response.body)
 
-        expect(response.status).to eq 422
-        expect(body).to eq "success" => false, "message" => "missing user_login parameter"
-
+        response.status.should eq 422
+        body.should eq "success" => false, "message" => "missing user_login parameter"
       end
     end
 
@@ -38,8 +42,8 @@ describe Api2::SessionsController do
         post :create, account: {email: 'test@test.com', password: 'foo'}
         body = ActiveSupport::JSON.decode(response.body)
 
-        expect(response.status).to eq 401
-        expect(body).to eq "success" => false, "message" => "Error with your login or password"
+        response.status.should eq 401
+        body.should eq "success" => false, "message" => "Error with your login or password"
       end
     end
 
@@ -48,8 +52,8 @@ describe Api2::SessionsController do
         post :create, account: { email: admin_user.email , password: 'admin_123'}
         body = ActiveSupport::JSON.decode(response.body)
 
-        expect(response.status).to eq 200
-        expect(body).to eq({"success" => true, "auth_token" => admin_user.auth_token, "email" => admin_user.email, "role" => admin_user.role})
+        response.status.should eq 200
+        body.should eq({"success" => true, "auth_token" => admin_user.auth_token, "email" => admin_user.email, "role" => admin_user.role})
       end
     end
   end

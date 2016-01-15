@@ -20,7 +20,7 @@ class Api2::SessionsController < Api2Controller
 
   def create
     account = Account.find_by_email(params[:account][:email])
-    if account && account.valid_password?(params[:account][:password])
+    if account && valid_guisso_credentials?(params[:account][:email], params[:account][:password])
       render :json=> {:success=>true, :auth_token => account.auth_token, :email=> account.email, role: account.role}
     else
       response_with_invalid_credential
@@ -37,4 +37,9 @@ class Api2::SessionsController < Api2Controller
   def response_with_invalid_credential
     render :json=> {:success=>false, :message=>"Error with your login or password"}, :status=>401
   end
+
+  def valid_guisso_credentials? email, password
+    AltoGuissoRails.valid_credentials?(email, password)
+  end
+  
 end
