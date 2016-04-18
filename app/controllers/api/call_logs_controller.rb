@@ -22,7 +22,18 @@ module Api
     # GET /call_logs
     def index
       @call_logs = current_account.call_logs
-      @call_logs = @call_logs.where(address: params[:address]) if params[:address]
+      
+      @call_logs = @call_logs.where(project_id: params[:project_id]) if params[:project_id].present?
+      @call_logs = @call_logs.where(call_flow_id: params[:call_flow_id]) if params[:call_flow_id].present?
+      
+      @call_logs = @call_logs.where("created_at >= ?", params[:from_date]) if params[:from_date].present?
+      @call_logs = @call_logs.where("finished_at <= ?", params[:to_date]) if params[:to_date].present?
+      @call_logs = @call_logs.where("duration >= ?", params[:duration]) if params[:duration].present?
+      @call_logs = @call_logs.where(direction: params[:direction]) if params[:direction].present?
+
+      @call_logs = @call_logs.where(state: params[:state]) if params[:state].present?
+      @call_logs = @call_logs.where(address: params[:address]) if params[:address].present?
+
       render json: @call_logs, root: false
     end
 
