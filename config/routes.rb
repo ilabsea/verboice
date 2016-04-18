@@ -198,6 +198,8 @@ Verboice::Application.routes.draw do
         end
       end
 
+      resources :call_flows, only: [:index]
+
       resources :reminder_groups, only: [:index, :create, :update, :destroy]
 
       post 'reminder_groups/:id/contacts' => 'reminder_groups#contacts', as: 'register_contact_to_reminder_group'
@@ -213,7 +215,7 @@ Verboice::Application.routes.draw do
     get '/contacts/:address/call_logs', controller: :call_logs, action: :index
     resources :call_logs, only: [:index, :show]
 
-    get "call_flows" => "call_flows#list"
+    resources :call_flows, only: [:index]
   end
 
   namespace :api2, defaults: {format: 'json'} do

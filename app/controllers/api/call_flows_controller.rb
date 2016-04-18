@@ -17,8 +17,17 @@
 
 module Api
   class CallFlowsController < ApiController
-    def list
-      call_flows = current_account.call_flows
+
+    # GET /api/call_flows
+    # GET /api/projects/:project_id/call_flows
+    def index
+      if params[:project_id].present?
+        project = current_account.projects.includes(:call_flows).find(params[:project_id])
+        call_flows = project.call_flows
+      else
+        call_flows = current_account.call_flows
+      end
+
       render json: call_flows, each_serializer: CustomCallFlowSerializer
     end
   end
