@@ -167,14 +167,15 @@ Verboice::Application.routes.draw do
 
   namespace :api, defaults: {format: 'json'} do
     match "call" => "calls#call"
+
     resources :calls, only: [] do
       member do
         match :state
         match :redirect
       end
     end
-    get "channels" => "channels#list"
-    resources :channels, only: [:create] do
+
+    resources :channels, only: [:index, :create] do
       collection do
         get ":name", :action => "get"
         put ":name", :action => "update"

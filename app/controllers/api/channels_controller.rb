@@ -17,6 +17,11 @@
 module Api
   class ChannelsController < ApiController
 
+    def index
+      channels = current_account.channels
+      render json: channels, each_serializer: CustomChannelSerializer
+    end
+
     def get
       channel = current_account.channels.find_by_name params[:name]
 
@@ -66,11 +71,6 @@ module Api
       else
         head :not_found
       end
-    end
-
-    def list
-      channels = current_account.channels
-      render json: channels, each_serializer: CustomChannelSerializer
     end
 
   end
