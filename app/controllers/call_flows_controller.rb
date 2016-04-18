@@ -81,14 +81,13 @@ class CallFlowsController < ApplicationController
     if @call_flow.save
       redirect_to edit_workflow_project_call_flow_path(@project, @call_flow), :notice => I18n.t("controllers.call_flows_controller.call_flow_successfully_updated", :call_flow_name => @call_flow.name)
     else
+      load_dependencies
       render :action => "edit_workflow"
     end
   end
 
   def edit_workflow
-    @variables = @project.defined_variables
-    @external_steps = @call_flow.project.external_service_steps.includes(:external_service)
-    @call_flows = @project.call_flows.select{|call_flow| call_flow.id != params[:id].to_i}
+    load_dependencies
   end
 
   def import
@@ -152,4 +151,11 @@ class CallFlowsController < ApplicationController
     load_project
     @call_flows = @project.call_flows.all
   end
+
+  def load_dependencies
+    @variables = @project.defined_variables
+    @external_steps = @call_flow.project.external_service_steps.includes(:external_service)
+    @call_flows = @project.call_flows.select{|call_flow| call_flow.id != params[:id].to_i}
+  end
+
 end
