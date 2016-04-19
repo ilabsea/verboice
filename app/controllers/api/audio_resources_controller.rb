@@ -16,19 +16,19 @@
 # along with Verboice.  If not, see <http://www.gnu.org/licenses/>.
 
 module Api
-  class CallFlowsController < ApiController
+  class AudioResourcesController < ApiController
 
-    # GET /api/call_flows
-    # GET /api/projects/:project_id/call_flows
+    # GET /api/call_flows/:id/audio_resources
     def index
-      if params[:project_id].present?
-        project = current_account.find_project_by_id(params[:project_id])
-        call_flows = project.call_flows
-      else
-        call_flows = current_account.call_flows
-      end
+      call_flow = current_account.find_call_flow_by_id(params[:call_flow_id])
+      resources = {
+        project_id: call_flow.project.id,
+        call_flow_id: call_flow.id,
+        call_flow_name: call_flow.name,
+        resources: call_flow.audio_resources
+      }
 
-      render json: call_flows, each_serializer: CustomCallFlowSerializer
+      render json: resources
     end
 
   end

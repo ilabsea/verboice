@@ -105,6 +105,17 @@ class CallFlow < ActiveRecord::Base
     resources
   end
 
+  def audio_resources
+    custom_resources = []
+    resources.each do |resource|
+      localized_resource = resource.localized_resources.last
+      if localized_resource.kind_of? UploadLocalizedResource
+        custom_resources.push(Resource::Custom.new({guid: resource.guid, name: resource.name, filename: localized_resource.extras[:filename]}))
+      end
+    end
+    custom_resources
+  end
+
   def guids_from_step step
     guids = []
     step.each do |key, value|

@@ -216,7 +216,9 @@ Verboice::Application.routes.draw do
     get '/contacts/:address/call_logs', controller: :call_logs, action: :index
     resources :call_logs, only: [:index, :show]
 
-    resources :call_flows, only: [:index]
+    resources :call_flows, only: [:index] do
+      resources :audio_resources, only: [:index]
+    end
   end
 
   namespace :api2, defaults: {format: 'json'} do

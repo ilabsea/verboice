@@ -57,4 +57,15 @@ class Resource < ActiveRecord::Base
       localized_resource.language == language
     end
   end
+
+  class Custom
+    attr_accessor :guid, :name, :filename
+
+    def initialize(options = {})
+      @guid = options[:guid]
+      @name = options[:name]
+      @filename = options[:filename]
+    end
+
+  end
 end
