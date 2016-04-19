@@ -59,10 +59,10 @@ class Resource < ActiveRecord::Base
   end
 
   class Custom
-    attr_accessor :guid, :name, :filename
+    attr_accessor :id, :name, :filename
 
     def initialize(options = {})
-      @guid = options[:guid]
+      @id = options[:id]
       @name = options[:name]
       @filename = options[:filename]
     end

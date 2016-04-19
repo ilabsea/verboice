@@ -108,9 +108,10 @@ class CallFlow < ActiveRecord::Base
   def audio_resources
     custom_resources = []
     resources.each do |resource|
-      localized_resource = resource.localized_resources.last
-      if localized_resource.kind_of? UploadLocalizedResource
-        custom_resources.push(Resource::Custom.new({guid: resource.guid, name: resource.name, filename: localized_resource.extras[:filename]}))
+      resource.localized_resources.each do |localized_resource|
+        if localized_resource.kind_of? UploadLocalizedResource
+          custom_resources.push(Resource::Custom.new({id: localized_resource.id, name: resource.name, filename: localized_resource.extras[:filename]}))
+        end
       end
     end
     custom_resources

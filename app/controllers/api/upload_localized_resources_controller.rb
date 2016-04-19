@@ -16,9 +16,11 @@
 # along with Verboice.  If not, see <http://www.gnu.org/licenses/>.
 
 module Api
-  class AudioResourcesController < ApiController
+  class UploadLocalizedResourcesController < ApiController
 
-    # GET /api/call_flows/:id/audio_resources
+    include AudioUtils
+
+    # GET /api/call_flows/:call_flow_id/audio_resources
     def index
       call_flow = current_account.find_call_flow_by_id(params[:call_flow_id])
       resources = {
@@ -29,6 +31,24 @@ module Api
       }
 
       render json: resources
+    end
+
+    # PUT /api/call_flows/:call_flow_id/audio_resources/:id
+    def update
+      call_flow = current_account.find_call_flow_by_id(params[:call_flow_id])
+
+      localized_resource = call_flow.project.localized_resources.find(params[:id])
+
+      localized_resource.filename = "#{params[:filename]}" if params[:filename].present?
+      localized_resource.uploaded_audio = convert_to_8000_hz_wav(request.body.read, request.content_type)
+
+      localized_resource.save
+
+      if params[:filename].present? && request.content_type.audio_mime_type?
+        render json: {success: true, error_message: ""}
+      else
+        render json: {success: false, error_message: I18n.t("controllers.localized_resources_controller.invalid_audio_file")}
+      end
     end
 
   end

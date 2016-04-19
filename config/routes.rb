@@ -217,7 +217,7 @@ Verboice::Application.routes.draw do
     resources :call_logs, only: [:index, :show]
 
     resources :call_flows, only: [:index] do
-      resources :audio_resources, only: [:index]
+      resources :upload_localized_resources, only: [:index, :update]
     end
   end
 
