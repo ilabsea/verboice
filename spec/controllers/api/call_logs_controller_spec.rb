@@ -110,4 +110,50 @@ describe Api::CallLogsController do
     end
   end
 
+  describe "Destroy collection of calls" do
+    context "when from date is missing" do
+      it "response 422" do
+        delete :destroy_collection, to_date: '2016-01-01'
+        
+        assert_response :unprocessable_entity
+      end
+    end
+
+    context "when to date is missing" do
+      it "response 422" do
+        delete :destroy_collection, from_date: '2016-01-01'
+        
+        assert_response :unprocessable_entity
+      end
+    end
+
+    context "response a list of call collection that were destroyed with a specific date range" do
+      before(:each) do
+        @now = Time.new(2016,1,1, 9,0,0, "+07:00")
+        Time.stub(:now).and_return(@now)
+
+        @call_log.created_at = Time.now
+        @call_log.save
+
+        @another_call_log.created_at = Time.now + 1.day
+        @another_call_log.save
+      end
+
+      it "response 200" do
+        delete :destroy_collection, from_date: '2016-01-01', to_date: '2016-01-02'
+        
+        assert_response :ok
+      end
+
+      it "destroy every call logs those are match date range" do
+        delete :destroy_collection, from_date: '2016-01-01', to_date: '2016-01-02'
+
+        response = ActiveSupport::JSON.decode(@response.body)
+        response.should be_kind_of(Array)
+        response.size.should eq(1)
+      end
+    end
+  end
+
+
 end

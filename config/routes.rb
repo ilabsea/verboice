@@ -214,7 +214,9 @@ Verboice::Application.routes.draw do
     end
 
     get '/contacts/:address/call_logs', controller: :call_logs, action: :index
+    
     resources :call_logs, only: [:index, :show]
+    delete 'call_logs', controller: :call_logs, action: :destroy_collection
 
     resources :call_flows, only: [:index] do
       resources :upload_localized_resources, only: [:index, :update]

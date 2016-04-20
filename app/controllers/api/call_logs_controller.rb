@@ -16,7 +16,7 @@
 # along with Verboice.  If not, see <http://www.gnu.org/licenses/>.
 module Api
   class CallLogsController < ApiController
-    before_filter :verify_request, :except => [:index]
+    before_filter :verify_request, :only => [:show]
 
     # GET /contacts/:address/call_logs
     # GET /call_logs
@@ -40,6 +40,23 @@ module Api
     # GET /call_logs/:id
     def show
       render json: @call_log
+    end
+
+    # DELETE /api/call_logs
+    def destroy_collection
+      unless (params[:from_date].present? and params[:to_date].present?)
+        render json: "From date and to date parameters are required", status: :unprocessable_entity
+        return
+      end
+
+      call_logs = current_account.call_logs.where("created_at >= ? and created_at <= ?", params[:from_date], params[:to_date])
+
+      call_logs = call_logs.where(project_id: params[:project_id]) if params[:project_id].present?
+      call_logs = call_logs.where(call_flow_id: params[:call_flow_id]) if params[:call_flow_id].present?
+
+      affected_call_logs = call_logs.destroy_all
+
+      render json: affected_call_logs.map(&:id), status: :ok
     end
 
     private
