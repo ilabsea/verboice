@@ -81,7 +81,7 @@ module Api
         end
       end
 
-      render :json => call_logs.map { |call_log| {call_id: call_log.id, state: call_log.state} }
+      render :json => call_logs.map { |call_log| {call_log_id: call_log.id, state: call_log.state} }
     end
 
     def redirect
