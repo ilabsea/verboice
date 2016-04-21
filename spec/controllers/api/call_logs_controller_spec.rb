@@ -127,6 +127,36 @@ describe Api::CallLogsController do
       end
     end
 
+    context "when from date format is invalid" do
+      it "response 422" do
+        delete :destroy_collection, from_date: '2016-01', to_date: '2016-02-01'
+        
+        assert_response :unprocessable_entity
+
+        @response.body.should eq("Invalid date format of from date or to date")
+      end
+    end
+
+    context "when to date format is invalid" do
+      it "response 422" do
+        delete :destroy_collection, from_date: '2016-01-01', to_date: '2016-02'
+        
+        assert_response :unprocessable_entity
+
+        @response.body.should eq("Invalid date format of from date or to date")
+      end
+    end
+
+    context "date range is greater than or equal a month" do
+      it "response 422" do
+        delete :destroy_collection, from_date: '2016-01-01', to_date: '2016-02-01'
+        
+        assert_response :unprocessable_entity
+
+        @response.body.should eq("Date range is too big")
+      end
+    end
+
     context "response a list of call collection that were destroyed with a specific date range" do
       before(:each) do
         @now = Time.new(2016,1,1, 9,0,0, "+07:00")

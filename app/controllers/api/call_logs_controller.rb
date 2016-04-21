@@ -49,13 +49,26 @@ module Api
         return
       end
 
-      call_logs = current_account.call_logs.where("created_at >= ? and created_at <= ?", params[:from_date], params[:to_date])
+      begin
+        from_date = Date.strptime(params[:from_date], "%Y-%m-%d")
+        to_date = Date.strptime(params[:to_date], "%Y-%m-%d")
+      rescue
+        render json: "Invalid date format of from date or to date", status: :unprocessable_entity
+        return
+      end
+
+      if (to_date - 1.month).greater_or_equal? from_date
+        render json: "Date range is too big", status: :unprocessable_entity
+        return
+      end
+
+      call_logs = current_account.call_logs.where("created_at >= ? and created_at <= ?", from_date, to_date)
 
       call_logs = call_logs.where(project_id: params[:project_id]) if params[:project_id].present?
       call_logs = call_logs.where(call_flow_id: params[:call_flow_id]) if params[:call_flow_id].present?
 
       affected_call_logs = []
-      
+
       CallLog.transaction do
         affected_call_logs = call_logs.destroy_all
       end
