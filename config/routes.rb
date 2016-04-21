@@ -167,6 +167,7 @@ Verboice::Application.routes.draw do
 
   namespace :api, defaults: {format: 'json'} do
     match "call" => "calls#call"
+    post "bulk_call" => "calls#bulk_call"
 
     resources :calls, only: [] do
       member do

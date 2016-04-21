@@ -84,4 +84,124 @@ describe Api::CallsController do
     result['call_id'].should == call_log.id
     result['state'].should == call_log.state.to_s
   end
+
+  context 'bulk_call' do
+    before(:each) do
+      @reminder_group = Ext::ReminderGroup.make project: project, addresses: ["1000", "2000"]
+    end
+
+    it "missing parameter channel_id" do
+      post :bulk_call, call_flow_id: 9999
+      
+      assert_response :unprocessable_entity
+
+      @response.body.should eq("Parameter channel_id is required")
+    end
+
+    it "channel ID doesn't exists" do
+      post :bulk_call, channel_id: 9999
+      
+      assert_response :unprocessable_entity
+
+      @response.body.should eq("Channel ID 9999 is not found")
+    end
+
+    it "missing parameter call_flow_id" do
+      post :bulk_call, channel_id: channel.id
+      
+      assert_response :unprocessable_entity
+
+      @response.body.should eq("Parameter call_flow_id is required")
+    end
+
+    it "call flow ID doesn't exists" do
+      post :bulk_call, channel_id: channel.id, call_flow_id: 9999
+      
+      assert_response :unprocessable_entity
+
+      @response.body.should eq("Call flow ID 9999 is not found")
+    end
+
+    it "missing parameter reminder_group_id or addresses to enqueued call" do
+      post :bulk_call, channel_id: channel.id, call_flow_id: call_flow.id
+      
+      assert_response :unprocessable_entity
+
+      @response.body.should eq("Parameter reminder_group_id or addresses is required")
+    end
+
+    it "invalid parameter addresses" do
+      post :bulk_call, channel_id: channel.id, call_flow_id: call_flow.id, addresses: ""
+      
+      assert_response :unprocessable_entity
+      
+      @response.body.should eq("Parameter reminder_group_id or addresses is required")
+    end
+
+    it "reminder group ID doesn't exists" do
+      post :bulk_call, channel_id: channel.id, call_flow_id: call_flow.id, reminder_group_id: 9999
+      
+      assert_response :unprocessable_entity
+
+      @response.body.should eq("Reminder group ID 9999 is not found")
+    end
+
+    it "Empty addresses to enqueued call" do
+      post :bulk_call, channel_id: channel.id, call_flow_id: call_flow.id, addresses: []
+      
+      assert_response :unprocessable_entity
+
+      @response.body.should eq("Missing addresses(phone numbers) to enqueued call")
+    end
+
+    it "enqueued call to every addresses in reminder group" do
+      post :bulk_call, channel_id: channel.id, call_flow_id: call_flow.id, reminder_group_id: @reminder_group.id
+
+      assert_response :ok
+
+      response = ActiveSupport::JSON.decode(@response.body)
+      
+      response.size.should eq(2)
+
+      CallLog.count.should eq(2)
+    end
+
+    it "enqueued call to list of phone numbers" do
+      post :bulk_call, channel_id: channel.id, call_flow_id: call_flow.id, addresses: [1000, 2000, 3000, 9999]
+
+      assert_response :ok
+
+      response = ActiveSupport::JSON.decode(@response.body)
+      
+      response.size.should eq(4)
+      
+      CallLog.count.should eq(4)
+    end
+
+    it "ignore duplicate enqueued call to list of phone numbers(numeric)" do
+      post :bulk_call, channel_id: channel.id, call_flow_id: call_flow.id, addresses: [1000, 1000, 2000, 2000]
+
+      assert_response :ok
+
+      response = ActiveSupport::JSON.decode(@response.body)
+      
+      response.size.should eq(2)
+      
+      CallLog.count.should eq(2)
+    end
+
+    it "ignore duplicate enqueued call to list of phone numbers(string)" do
+      post :bulk_call, channel_id: channel.id, call_flow_id: call_flow.id, addresses: ['01000', '01000', '2000', '2000']
+
+      assert_response :ok
+
+      response = ActiveSupport::JSON.decode(@response.body)
+      
+      response.size.should eq(2)
+      
+      CallLog.count.should eq(2)
+    end
+
+  end
+
 end

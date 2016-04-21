@@ -27,6 +27,58 @@ module Api
       end
     end
 
+    # POST /api/calls/bulk_call
+    def bulk_call
+      unless params[:channel_id].present?
+        render json: "Parameter channel_id is required", status: :unprocessable_entity
+        return
+      end
+
+      channel = current_account.find_channel_by_id(params[:channel_id])
+
+      if channel.nil?
+        render json: "Channel ID #{params[:channel_id]} is not found", status: :unprocessable_entity
+        return
+      end
+
+      unless params[:call_flow_id].present?
+        render json: "Parameter call_flow_id is required", status: :unprocessable_entity
+        return
+      end
+
+      call_flow = current_account.find_call_flow_by_id(params[:call_flow_id])
+      if call_flow.nil?
+        render json: "Call flow ID #{params[:call_flow_id]} is not found", status: :unprocessable_entity
+        return
+      end
+
+      if params[:reminder_group_id].present?
+        reminder_group = current_account.find_reminder_group_by_id(params[:reminder_group_id])
+        if reminder_group.nil?
+          render json: "Reminder group ID #{params[:reminder_group_id]} is not found", status: :unprocessable_entity
+          return
+        else
+          addresses = reminder_group.addresses
+        end
+      elsif params[:addresses].kind_of?(Array)
+        addresses = params[:addresses]
+      else
+        render json: "Parameter reminder_group_id or addresses is required", status: :unprocessable_entity
+        return
+      end
+
+      if addresses.empty?
+        render json: "Missing addresses(phone numbers) to enqueued call", status: :unprocessable_entity
+        return
+      end
+
+      call_logs = addresses.uniq.map do |address|
+        channel.call(address, params)
+      end
+
+      render :json => call_logs.map { |call_log| {call_id: call_log.id, state: call_log.state} }
+    end
+
     def redirect
       options = {}
       if request.post?

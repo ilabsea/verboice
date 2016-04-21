@@ -96,23 +96,46 @@ class Account < ActiveRecord::Base
 
   def find_call_flow
     call_flow = yield
-    project = call_flow.project
 
-    if project.account_id == id
-      return call_flow
-    end
+    if call_flow
+      project = call_flow.project
 
-    if shared_projects.where(model_id: project.id).exists?
-      return call_flow
+      if project.account_id == id
+        return call_flow
+      end
+
+      if shared_projects.where(model_id: project.id).exists?
+        return call_flow
+      end
     end
 
     nil
+  end
+
+  def find_channel_by_id(channel_id)
+    channel = channels.find_by_id(channel_id)
+    channel ||= shared_channels.all.map(&:channel).find { |c| c.id == channel_id }
+    channel
   end
 
   def find_channel_by_name(channel_name)
     channel = channels.find_by_name(channel_name)
     channel ||= shared_channels.all.map(&:channel).find { |c| c.name == channel_name }
     channel
+  end
+
+  def find_reminder_group_by_id(reminder_group_id)
+    reminder_group = ext_reminder_groups.find_by_id(reminder_group_id)
+    if reminder_group.nil?
+      shared_projects.all.map(&:project).each do |project|
+        share_reminder_group = project.ext_reminder_groups.find_by_id(reminder_group_id)
+        if share_reminder_group
+          reminder_group = share_reminder_group
+          break
+        end
+      end
+    end
+    reminder_group
   end
 
   def call(options = {})
