@@ -54,7 +54,11 @@ module Api
       call_logs = call_logs.where(project_id: params[:project_id]) if params[:project_id].present?
       call_logs = call_logs.where(call_flow_id: params[:call_flow_id]) if params[:call_flow_id].present?
 
-      affected_call_logs = call_logs.destroy_all
+      affected_call_logs = []
+      
+      CallLog.transaction do
+        affected_call_logs = call_logs.destroy_all
+      end
 
       render json: affected_call_logs.map(&:id), status: :ok
     end

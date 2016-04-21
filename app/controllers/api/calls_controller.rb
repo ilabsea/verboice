@@ -72,8 +72,13 @@ module Api
         return
       end
 
-      call_logs = addresses.uniq.map do |address|
-        channel.call(address, params)
+      call_logs = []
+      CallLog.transaction do
+        QueuedCall.transaction do
+          call_logs = addresses.uniq.map do |address|
+            channel.call(address, params)
+          end
+        end
       end
 
       render :json => call_logs.map { |call_log| {call_id: call_log.id, state: call_log.state} }
