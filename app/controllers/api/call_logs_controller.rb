@@ -71,6 +71,9 @@ module Api
 
       CallLog.transaction do
         affected_call_logs = call_logs.destroy_all
+        QueuedCall.transaction do
+          QueuedCall.where(call_log_id: affected_call_logs).destroy_all
+        end
       end
 
       render json: affected_call_logs.map(&:id), status: :ok
