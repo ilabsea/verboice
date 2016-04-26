@@ -27,7 +27,7 @@ module Api
       @call_logs = @call_logs.where(call_flow_id: params[:call_flow_id]) if params[:call_flow_id].present?
       
       @call_logs = @call_logs.where("created_at >= ?", params[:from_date]) if params[:from_date].present?
-      @call_logs = @call_logs.where("finished_at <= ?", params[:to_date]) if params[:to_date].present?
+      @call_logs = @call_logs.where("created_at <= ?", params[:to_date]) if params[:to_date].present?
       @call_logs = @call_logs.where("duration >= ?", params[:duration]) if params[:duration].present?
       @call_logs = @call_logs.where(direction: params[:direction]) if params[:direction].present?
 
