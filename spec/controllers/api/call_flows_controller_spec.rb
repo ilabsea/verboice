@@ -27,13 +27,13 @@ describe Api::CallFlowsController do
     sign_in account
   end
 
-  describe "list" do
+  describe "index" do
     before(:each) do
       CallFlow.make project: project
     end
 
     it "should list all call flows" do
-      get :list
+      get :index
 
       assert_response :ok
       response = ActiveSupport::JSON.decode(@response.body)
