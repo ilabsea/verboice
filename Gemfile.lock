@@ -45,6 +45,15 @@ GIT
       rails (>= 3.2)
 
 GIT
+  remote: https://github.com/instedd/telemetry_rails.git
+  revision: 8ddfee2b94a2c1bef837b0a583538dfa72781948
+  specs:
+    instedd_telemetry (0.0.1)
+      global_phone
+      global_phone_dbgen
+      rails
+
+GIT
   remote: https://github.com/lchanmann/csv_builder.git
   revision: 93300fe8141839eb3ca58f1e5617c7d65ad5dccb
   specs:
@@ -136,6 +145,7 @@ GEM
     chronic (0.9.0)
     ci_reporter (1.6.5)
       builder (>= 2.1.2)
+    coderay (1.0.9)
     coffee-rails (3.2.2)
       coffee-script (>= 2.2.0)
       railties (~> 3.2.0)
@@ -143,8 +153,15 @@ GEM
       coffee-script-source
       execjs
     coffee-script-source (1.3.1)
+    columnize (0.9.0)
     daemons (1.1.3)
     database_cleaner (1.2.0)
+    debugger (1.6.1)
+      columnize (>= 0.3.1)
+      debugger-linecache (~> 1.2.0)
+      debugger-ruby_core_source (~> 1.2.3)
+    debugger-linecache (1.2.0)
+    debugger-ruby_core_source (1.2.3)
     decent_exposure (1.0.1)
     delayed_job (4.0.1)
       activesupport (>= 3.0, < 4.2)
@@ -186,6 +203,9 @@ GEM
     formatted_rails_logger (0.3.0)
       rails (~> 3.2.0)
     github-markdown (0.6.5)
+    global_phone (1.0.1)
+    global_phone_dbgen (1.0.0)
+      nokogiri (~> 1.5)
     guid (0.1.1)
     haml (3.1.6)
     haml-rails (0.3.4)
@@ -221,6 +241,7 @@ GEM
       treetop (~> 1.4.8)
     meta_programming (0.2.2)
     metaclass (0.0.1)
+    method_source (0.8.2)
     mime-types (1.25.1)
     mocha (0.10.5)
       metaclass (~> 0.0.1)
@@ -236,7 +257,7 @@ GEM
     net-ssh-gateway (1.2.0)
       net-ssh (>= 2.6.5)
     newrelic_rpm (3.7.3.204)
-    nokogiri (1.4.4)
+    nokogiri (1.5.11)
     oauth (0.4.7)
     oauth2 (0.7.1)
       faraday (~> 0.8)
@@ -253,6 +274,13 @@ GEM
     password_strength (1.0.1)
       activerecord
     polyglot (0.3.5)
+    pry (0.9.12.2)
+      coderay (~> 1.0.5)
+      method_source (~> 0.8)
+      slop (~> 3.4)
+    pry-debugger (0.2.2)
+      debugger (~> 1.3)
+      pry (~> 0.9.10)
     rack (1.4.7)
     rack-cache (1.5.1)
       rack (>= 0.4)
@@ -314,6 +342,7 @@ GEM
       tilt (~> 1.3)
     shoulda-matchers (2.2.0)
       activesupport (>= 3.0.0)
+    slop (3.4.5)
     sprockets (2.2.3)
       hike (~> 1.2)
       multi_json (~> 1.0)
@@ -377,6 +406,7 @@ DEPENDENCIES
   ice_cube
   instedd-pigeon
   instedd-rails
+  instedd_telemetry!
   jquery-rails
   language_list
   licit
@@ -390,6 +420,7 @@ DEPENDENCIES
   omniauth-openid
   password_strength
   poirot_rails!
+  pry-debugger (~> 0.2.2)
   rack-oauth2!
   rails (= 3.2.14)
   rails_config

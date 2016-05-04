@@ -11,7 +11,10 @@ gem 'guid'
 gem 'devise'
 gem "will_paginate", "~> 3.0"
 gem "daemons"
+
 gem "instedd-rails"
+gem 'instedd_telemetry', git: 'https://github.com/instedd/telemetry_rails.git'
+
 gem 'decent_exposure'
 gem 'attr_encrypted'
 gem 'foreman'
@@ -59,7 +62,7 @@ group :development, :test do
   gem "shoulda-matchers"
   gem 'ci_reporter'
   gem 'equivalent-xml'
-  # gem 'pry-debugger', '~> 0.2.2'
+  gem 'pry-debugger', '~> 0.2.2'
   gem 'syntax'
   gem 'timecop'
 

@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20151030102826) do
+ActiveRecord::Schema.define(:version => 20160504025619) do
 
   create_table "accounts", :force => true do |t|
     t.string   "email",                               :default => "", :null => false
@@ -68,15 +68,15 @@ ActiveRecord::Schema.define(:version => 20151030102826) do
     t.binary   "user_flow"
     t.string   "callback_url"
     t.integer  "project_id"
-    t.text     "encrypted_config",        :limit => 16777215
-    t.datetime "created_at",                                  :null => false
-    t.datetime "updated_at",                                  :null => false
+    t.text     "encrypted_config"
+    t.datetime "created_at",              :null => false
+    t.datetime "updated_at",              :null => false
     t.string   "mode"
-    t.text     "variables",               :limit => 16777215
+    t.text     "variables"
     t.string   "fusion_table_name"
     t.string   "current_fusion_table_id"
     t.boolean  "store_in_fusion_tables"
-    t.text     "resource_guids",          :limit => 16777215
+    t.text     "resource_guids"
     t.binary   "broker_flow"
   end
 
@@ -160,13 +160,13 @@ ActiveRecord::Schema.define(:version => 20151030102826) do
     t.integer  "account_id"
     t.integer  "call_flow_id"
     t.string   "name"
-    t.text     "config",       :limit => 16777215
-    t.datetime "created_at",                                               :null => false
-    t.datetime "updated_at",                                               :null => false
+    t.text     "config"
+    t.datetime "created_at",                           :null => false
+    t.datetime "updated_at",                           :null => false
     t.string   "type"
     t.string   "guid"
-    t.boolean  "enabled",                          :default => true
-    t.string   "status",                           :default => "approved"
+    t.boolean  "enabled",      :default => true
+    t.string   "status",       :default => "approved"
   end
 
   add_index "channels", ["call_flow_id"], :name => "index_channels_on_call_flow_id"
@@ -193,17 +193,17 @@ ActiveRecord::Schema.define(:version => 20151030102826) do
   add_index "contacts", ["project_id"], :name => "index_contacts_on_project_id"
 
   create_table "delayed_jobs", :force => true do |t|
-    t.integer  "priority",                       :default => 0
-    t.integer  "attempts",                       :default => 0
-    t.text     "handler",    :limit => 16777215
-    t.text     "last_error", :limit => 16777215
+    t.integer  "priority",   :default => 0
+    t.integer  "attempts",   :default => 0
+    t.text     "handler"
+    t.text     "last_error"
     t.datetime "run_at"
     t.datetime "locked_at"
     t.datetime "failed_at"
     t.string   "locked_by"
     t.string   "queue"
-    t.datetime "created_at",                                    :null => false
-    t.datetime "updated_at",                                    :null => false
+    t.datetime "created_at",                :null => false
+    t.datetime "updated_at",                :null => false
   end
 
   add_index "delayed_jobs", ["priority", "run_at"], :name => "delayed_jobs_priority"
@@ -289,15 +289,15 @@ ActiveRecord::Schema.define(:version => 20151030102826) do
     t.string   "icon"
     t.string   "kind"
     t.string   "callback_url"
-    t.text     "variables",           :limit => 16777215
-    t.datetime "created_at",                              :null => false
-    t.datetime "updated_at",                              :null => false
+    t.text     "variables"
+    t.datetime "created_at",          :null => false
+    t.datetime "updated_at",          :null => false
     t.string   "response_type"
-    t.text     "response_variables",  :limit => 16777215
+    t.text     "response_variables"
     t.string   "guid"
     t.integer  "external_service_id"
-    t.text     "script",              :limit => 16777215
-    t.text     "session_variables",   :limit => 16777215
+    t.text     "script"
+    t.text     "session_variables"
     t.boolean  "async"
   end
 
@@ -308,10 +308,10 @@ ActiveRecord::Schema.define(:version => 20151030102826) do
     t.integer  "project_id"
     t.string   "name"
     t.string   "url"
-    t.text     "xml",             :limit => 16777215
-    t.datetime "created_at",                          :null => false
-    t.datetime "updated_at",                          :null => false
-    t.text     "global_settings", :limit => 16777215
+    t.text     "xml"
+    t.datetime "created_at",      :null => false
+    t.datetime "updated_at",      :null => false
+    t.text     "global_settings"
     t.string   "guid"
   end
 
@@ -344,6 +344,53 @@ ActiveRecord::Schema.define(:version => 20151030102826) do
     t.datetime "updated_at", :null => false
   end
 
+  create_table "instedd_telemetry_counters", :force => true do |t|
+    t.integer "period_id"
+    t.string  "bucket"
+    t.text    "key_attributes"
+    t.integer "count",               :default => 0
+    t.string  "key_attributes_hash"
+  end
+
+  add_index "instedd_telemetry_counters", ["bucket", "key_attributes_hash", "period_id"], :name => "instedd_telemetry_counters_unique_fields", :unique => true
+
+  create_table "instedd_telemetry_periods", :force => true do |t|
+    t.datetime "beginning"
+    t.datetime "end"
+    t.datetime "stats_sent_at"
+    t.datetime "created_at",      :null => false
+    t.datetime "updated_at",      :null => false
+    t.string   "lock_owner"
+    t.datetime "lock_expiration"
+  end
+
+  create_table "instedd_telemetry_set_occurrences", :force => true do |t|
+    t.integer "period_id"
+    t.string  "bucket"
+    t.text    "key_attributes"
+    t.string  "element"
+    t.string  "key_attributes_hash"
+  end
+
+  add_index "instedd_telemetry_set_occurrences", ["bucket", "key_attributes_hash", "element", "period_id"], :name => "instedd_telemetry_set_occurrences_unique_fields", :unique => true
+
+  create_table "instedd_telemetry_settings", :force => true do |t|
+    t.string "key"
+    t.string "value"
+  end
+
+  add_index "instedd_telemetry_settings", ["key"], :name => "index_instedd_telemetry_settings_on_key", :unique => true
+
+  create_table "instedd_telemetry_timespans", :force => true do |t|
+    t.string   "bucket"
+    t.text     "key_attributes"
+    t.datetime "since"
+    t.datetime "until"
+    t.string   "key_attributes_hash"
+  end
+
+  add_index "instedd_telemetry_timespans", ["bucket", "key_attributes_hash"], :name => "instedd_telemetry_timespans_unique_fields", :unique => true
+
   create_table "localized_resources", :force => true do |t|
     t.string   "language"
     t.text     "text"
@@ -352,7 +399,7 @@ ActiveRecord::Schema.define(:version => 20151030102826) do
     t.string   "type"
     t.datetime "created_at",                           :null => false
     t.datetime "updated_at",                           :null => false
-    t.text     "extras",         :limit => 16777215
+    t.text     "extras"
     t.binary   "uploaded_audio", :limit => 2147483647
     t.string   "guid"
     t.integer  "resource_id"
@@ -446,15 +493,15 @@ ActiveRecord::Schema.define(:version => 20151030102826) do
 
   create_table "projects", :force => true do |t|
     t.string   "name"
-    t.datetime "created_at",                                                    :null => false
-    t.datetime "updated_at",                                                    :null => false
+    t.datetime "created_at",                                :null => false
+    t.datetime "updated_at",                                :null => false
     t.integer  "account_id"
     t.string   "status_callback_url"
-    t.text     "encrypted_config",       :limit => 16777215
-    t.string   "time_zone",                                  :default => "UTC"
-    t.text     "languages",              :limit => 16777215
+    t.text     "encrypted_config"
+    t.string   "time_zone",              :default => "UTC"
+    t.text     "languages"
     t.string   "default_language"
-    t.boolean  "store_call_log_entries",                     :default => true
+    t.boolean  "store_call_log_entries", :default => true
   end
 
   create_table "queued_calls", :force => true do |t|

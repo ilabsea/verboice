@@ -17,6 +17,7 @@
 
 class CallFlow < ActiveRecord::Base
   include FusionTablesPush
+  include Telemetry::ProjectTracking
 
   attr_accessible :name, :error_flow, :flow, :user_flow, :callback_url, :mode, :callback_url_user, :callback_url_password, :store_in_fusion_tables, :fusion_table_name, :current_fusion_table_id
 

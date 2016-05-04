@@ -271,3 +271,8 @@ LoginTracker.blueprint do
   status { 'ACTIVE' }
   marked_as { 'FAILED' }
 end
+
+Feed.blueprint do
+  name
+  project
+end
