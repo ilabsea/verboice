@@ -168,13 +168,13 @@ describe Api::ChannelsController do
     end
   end
 
-  describe "list" do
+  describe "index" do
     before(:each) do
       Channels::Custom.make account: @account
     end
 
     it "should list all channels" do
-      get :list
+      get :index
 
       assert_response :ok
       response = ActiveSupport::JSON.decode(@response.body)
