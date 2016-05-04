@@ -19,6 +19,8 @@ require 'api_constraints'
 
 Verboice::Application.routes.draw do
 
+  mount InsteddTelemetry::Engine => '/instedd_telemetry'
+
   match '/' => 'home#index',  :as => 'home'
 
   devise_for :accounts, controllers: { registrations: 'registrations', sessions: 'sessions' }

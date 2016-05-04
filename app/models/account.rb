@@ -51,6 +51,7 @@ class Account < ActiveRecord::Base
   USER = 2
 
   before_save :ensure_auth_token
+  after_save :telemetry_track_activity
  
   def ensure_auth_token
     if !self.auth_token
@@ -123,6 +124,10 @@ class Account < ActiveRecord::Base
     else
       raise "Channel not found: #{options[:channel]}"
     end
+  end
+
+  def telemetry_track_activity
+    InsteddTelemetry.timespan_since_creation_update(:account_lifespan, {account_id: self.id}, self)
   end
 
   def clear_downloads

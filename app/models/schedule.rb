@@ -16,6 +16,8 @@
 # along with Verboice.  If not, see <http://www.gnu.org/licenses/>.
 
 class Schedule < ActiveRecord::Base
+  include Telemetry::ProjectTracking
+  
   scope :enabled, -> { where :disabled => false }
   scope :disabled, -> { where disabled => true }
 

@@ -34,6 +34,15 @@ GIT
       rails (>= 3.2)
 
 GIT
+  remote: https://github.com/instedd/telemetry_rails.git
+  revision: 8ddfee2b94a2c1bef837b0a583538dfa72781948
+  specs:
+    instedd_telemetry (0.0.1)
+      global_phone
+      global_phone_dbgen
+      rails
+
+GIT
   remote: https://github.com/lchanmann/csv_builder.git
   revision: 93300fe8141839eb3ca58f1e5617c7d65ad5dccb
   specs:
@@ -178,6 +187,10 @@ GEM
       thor (>= 0.13.6)
     formatted_rails_logger (0.3.0)
       rails (~> 3.2.0)
+    github-markdown (0.6.5)
+    global_phone (1.0.1)
+    global_phone_dbgen (1.0.0)
+      nokogiri (~> 1.5)
     guid (0.1.1)
     haml (3.1.6)
     haml-rails (0.3.4)
@@ -228,7 +241,7 @@ GEM
     net-ssh-gateway (1.2.0)
       net-ssh (>= 2.6.5)
     newrelic_rpm (3.7.3.204)
-    nokogiri (1.4.4)
+    nokogiri (1.5.11)
     oauth (0.4.7)
     oauth2 (0.7.1)
       faraday (~> 0.8)
@@ -373,6 +386,7 @@ DEPENDENCIES
   ice_cube
   instedd-pigeon
   instedd-rails
+  instedd_telemetry!
   jquery-rails
   language_list
   licit

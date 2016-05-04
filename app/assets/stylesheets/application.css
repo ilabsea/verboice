@@ -5,4 +5,5 @@
  *= require_self
  *= require pigeon
  *= require_tree .
+ *= require instedd_telemetry
 */
