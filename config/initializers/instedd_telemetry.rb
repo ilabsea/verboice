@@ -8,6 +8,7 @@ InsteddTelemetry.setup do |config|
   config.process_run_interval = custom_config[:run_interval_minutes].minutes if custom_config.include? :run_interval_minutes
   config.application          = (custom_config.include? :application) ? custom_config[:application] : 'verboice'
 
+  config.api_port = 8089
   config.remote_api_enabled = true
 
   # Verboice custom collectors
