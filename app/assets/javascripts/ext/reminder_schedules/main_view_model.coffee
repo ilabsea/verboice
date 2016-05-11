@@ -46,13 +46,17 @@ onReminderSchedules ->
       @currentReminderSchedule(null)
 
     saveReminderSchedule: =>
+      $("#body-loading").css("visibility", "visible")
+
       @savingReminderSchedule(true)
       json = {ext_reminder_schedule: @currentReminderSchedule().toJSON()}
       if @currentReminderSchedule().id()
         json._method = 'put'
-        $.post "/ext/projects/#{@project_id()}/reminder_schedules/#{@currentReminderSchedule().id()}.json", json, @saveReminderScheduleCallback
+        $.post("/ext/projects/#{@project_id()}/reminder_schedules/#{@currentReminderSchedule().id()}.json", json, @saveReminderScheduleCallback).always ->
+          $(".body-loading").css("visibility", "hidden")
       else
-        $.post "/ext/projects/#{@project_id()}/reminder_schedules.json", json, @saveReminderScheduleCallback
+        $.post("/ext/projects/#{@project_id()}/reminder_schedules.json", json, @saveReminderScheduleCallback).always ->
+          $(".body-loading").css("visibility", "hidden")
 
     saveReminderScheduleCallback: (data) =>
       #if reminder schedule is new, we need to set id
@@ -61,6 +65,7 @@ onReminderSchedules ->
 
       @currentReminderSchedule(null)
       @savingReminderSchedule(false)
+
       window.location.href = "/ext/projects/#{@project_id()}/reminder_schedules";
 
     deleteReminderSchedule: (reminderSchedule) =>
