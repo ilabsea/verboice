@@ -329,4 +329,5 @@ Verboice::Application.routes.draw do
   match '/hub/*path' => 'hub#api', format: false
 
   mount Listings::Engine => "/listings"
+  mount InsteddTelemetry::Engine => "/instedd_telemetry"
 end

@@ -45,14 +45,15 @@ describe Api::ProjectsController do
     before(:each) do
       sign_in @account
     end
-  let!(:variable) { project.project_variables.make }
+    let!(:variable) { project.project_variables.make }
 
     it "should list all projects" do
       get :index
 
       response = JSON.parse(@response.body)
       response.length.should == 1
-    assert_project_json response[0]
+      assert_project_json response[0]
+    end
   end
 
   it "should show one projects" do

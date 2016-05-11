@@ -1,6 +1,6 @@
 source 'http://rubygems.org'
 
-gem 'rails', '3.2.18'
+gem 'rails', '3.2.22'
 
 gem 'haml-rails'
 gem "jquery-rails"
@@ -8,7 +8,7 @@ gem "jquery-rails"
 gem 'mysql2'
 gem 'nokogiri'
 gem 'guid'
-gem 'devise'
+gem 'devise', '3.4.1'
 gem "daemons"
 gem "instedd-rails"
 gem 'decent_exposure'
@@ -37,10 +37,12 @@ gem 'omniauth'
 gem 'omniauth-openid'
 gem 'recurring_select', git: "https://github.com/instedd/recurring_select", branch: 'instedd'
 gem 'listings'
+gem 'instedd_telemetry', git: "https://github.com/instedd/telemetry_rails", branch: 'master'
 gem 'ice_cube'
 gem 'aws-sdk-v1'
 gem 'rails_config'
 gem 'awesome_print'
+gem 'fabrication'
 
 gem "active_model_serializers", '~> 0.8.3'
 gem "recaptcha", :require => "recaptcha/rails"
@@ -56,8 +58,8 @@ group :development, :test do
   gem 'machinist', git: 'https://github.com/tbuehl/machinist.git', branch: '1.0-maintenance'
   gem 'ffaker'
   gem 'mocha', :require => false
-  gem 'rspec'
-  gem 'rspec-rails'
+  gem 'rspec', '~> 2.14.1'
+  gem 'rspec-rails', '~> 2.14.1'
   gem "shoulda-matchers"
   gem 'ci_reporter'
   gem 'equivalent-xml'
@@ -66,20 +68,18 @@ group :development, :test do
   gem 'timecop'
   gem 'quiet_assets'
   gem 'capybara'
-  gem 'database_cleaner'
-
-  gem 'rspec_api_documentation', github: 'zipmark/rspec_api_documentation'
-  gem 'apitome'
 end
 
 group :development do
- gem 'capistrano'
- gem 'rvm'
- gem 'rvm-capistrano', require: false
- gem 'licit'
+  gem 'capistrano'
+  gem 'rvm'
+  gem 'rvm-capistrano', require: false
+  gem 'licit'
+  gem 'thin'
 end
 
 group :test do
   gem 'webmock'
   gem 'fakefs', :require => 'fakefs/safe'
+  gem 'database_cleaner'
 end

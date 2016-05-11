@@ -19,7 +19,7 @@ require 'bundler/capistrano'
 
 if ENV['RVM']
   require 'rvm/capistrano'
-  set :rvm_ruby_string, '1.9.3-p484'
+  set :rvm_ruby_string, '1.9.3-p550'
   set :rvm_type, :system
 else
   default_run_options[:shell] = "/bin/bash --login"
@@ -64,7 +64,7 @@ namespace :deploy do
   end
 
   task :symlink_configs, :roles => :app do
-    %W(asterisk credentials freeswitch verboice voxeo newrelic oauth nuntium poirot guisso database aws log_file app_config step_config api recaptcha login hub).each do |file|
+    %W(asterisk credentials freeswitch verboice voxeo newrelic oauth nuntium poirot guisso database aws log_file app_config step_config api recaptcha login hub telemetry).each do |file|
       run "ln -nfs #{shared_path}/#{file}.yml #{release_path}/config/"
     end
   end
@@ -113,7 +113,7 @@ end
 before 'deploy:finalize_update', "deploy:symlink_configs"
 before "deploy:start", "deploy:migrate"
 before "deploy:restart", "deploy:migrate"
-# after "deploy:update_code", "deploy:symlink_configs"
+after "deploy:update_code", "deploy:symlink_configs"
 after "deploy:update_code", "deploy:symlink_data"
 after "deploy:update_code", "deploy:symlink_help"
 after "deploy:update_code", "deploy:prepare_broker"

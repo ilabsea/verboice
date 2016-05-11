@@ -32,6 +32,7 @@ describe Contact do
     contact = Contact.make :project => project, :addresses_attributes => [{:address => '123'}, {:address => '456'}]
     contact.semicolon_separated_addresses.should eq("123;456")
   end
+  
   describe ".register" do
     before(:each) do
       @project = Project.make
