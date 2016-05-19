@@ -9,7 +9,7 @@
 //= require jquery
 //= require jquery_ujs
 //= require jquery.migrate
-//= require jquery.fancybox-1.3.4.pack
+//= require jquery.fancybox-2.1.5
 //= require jquery.control-key-.1.0
 //= require jquery.tooltipster
 //= require underscore

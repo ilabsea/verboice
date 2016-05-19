@@ -18,18 +18,25 @@ verboice.ProjectCallLogs = ProjectCallLogs = {
     // hook fancybox
     $(".fancybox").fancybox({
       modal: true,
+      helpers: {
+        overlay: {
+          locked: false
+        }
+      },
       // onClosed callback
-      onClosed: function() {
+      afterClose: function() {
         var audio       = $(this.href).find("audio")[0],
             textarea    = $(this.href).find("textarea");
 
         _self.stopAudio(audio);
         textarea.val(textarea.data("annotation"));
 
+        var audioId = $(audio).attr('data-audio-id');
+
         // edit annotation button
         var hasAnnotation = textarea.val().length > 0;
-        this.orig.toggleClass("fedit", !hasAnnotation);
-        this.orig.toggleClass("fedit-blue", hasAnnotation);
+        $("a[data-audio-id=" + audioId +"]").toggleClass("fedit", !hasAnnotation);
+        $("a[data-audio-id=" + audioId +"]").toggleClass("fedit-blue", hasAnnotation);
       }
     });
 
@@ -52,7 +59,7 @@ verboice.ProjectCallLogs = ProjectCallLogs = {
         textarea  = $(button).siblings("textarea");
 
     $.ajax({
-      url     : "/call_log_recorded_audios/" + audio.data("audio_id"),
+      url     : "/call_log_recorded_audios/" + audio.data("audio-id"),
       type    : "PUT",
       data    : {
         call_log_recorded_audio : {

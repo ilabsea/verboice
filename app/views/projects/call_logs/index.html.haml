@@ -87,7 +87,7 @@
                       %a.fplay.audio-control{ href: "Javascript:void(0);" }
                     .div_right
                       %a.fimport{ href: result_project_call_log_path(@project.id, recorded_audio.call_log, {:key => recorded_audio.key}) }
-                      %a.fancybox.icon_button{ class: recorded_audio.annotation.present? ? "fedit-blue" : "fedit", href: "#audio_annotation_#{recorded_audio.id}" }
+                      %a.fancybox.icon_button{ class: recorded_audio.annotation.present? ? "fedit-blue" : "fedit", href: "#audio_annotation_#{recorded_audio.id}", data: { audio_id: recorded_audio.id } }
             - unless existed
               %td
           %td= link_to(t('views.projects.call_logs.index.action.view_details'), call_log_path(log, project_id: @project.id)) if log.store_log_entries
