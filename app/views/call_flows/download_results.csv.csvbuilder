@@ -17,8 +17,8 @@ csv << header + step_labels
     traces.each do |trace|
       begin
         index = header.size + 2 * ids.index(trace.fields['step_id'])
-        line[index] = trace.fields['step_result']
-        line[index + 1] = trace.fields['step_data']
+        line[index] = trace.fields['step_result'] if trace.fields
+        line[index + 1] = trace.fields['step_data'] if trace.fields
       rescue Exception => e
         # If the Trace belongs to a deleted step, there is no way to represent it.
         # This should be fixed when the call flow stores it's different flow versions.
