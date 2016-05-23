@@ -30,32 +30,34 @@ class ImportFlowFromZip
         if key.match(/resource/) && guid=value['guid']
 
           attributes = resources_attributes[guid]
-          new_resource =  @project.resources.build attributes.slice("name")
+          if attributes
+            new_resource =  @project.resources.build attributes.slice("name")
 
-          if new_resource.save!
-            value["guid"] = new_resource.guid
+            if new_resource.save!
+              value["guid"] = new_resource.guid
 
-            localized_resources_attributes.each do |l_guid, l_attributes|
-              r_guid = l_attributes['resource_guid']
+              localized_resources_attributes.each do |l_guid, l_attributes|
+                r_guid = l_attributes['resource_guid']
 
-              if r_guid == guid
-                localized_resource_class = l_attributes['type'].constantize
-                localized_resource = localized_resource_class.new(l_attributes.except("guid"))
-    
-                localized_resource.resource = new_resource
-                localized_resource.save!
+                if r_guid == guid
+                  localized_resource_class = l_attributes['type'].constantize
+                  localized_resource = localized_resource_class.new(l_attributes.except("guid"))
+      
+                  localized_resource.resource = new_resource
+                  localized_resource.save!
 
-                audios_entry.each do |entry|
-                  al_guid =  File.basename(entry.name).split.last.gsub('.wav', '')
-                  if l_guid == al_guid
-                     localized_resource.audio = @zip.read(entry)
-                     localized_resource.save!
-                     # break
+                  audios_entry.each do |entry|
+                    al_guid =  File.basename(entry.name).split.last.gsub('.wav', '')
+                    if l_guid == al_guid
+                       localized_resource.audio = @zip.read(entry)
+                       localized_resource.save!
+                       # break
+                    end
                   end
-                end
-                # break
-              end 
+                  # break
+                end 
 
+              end
             end
           end
         end

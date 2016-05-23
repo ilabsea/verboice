@@ -38,7 +38,6 @@ class LocalizedResourcesController < ApplicationController
   end
 
   def save_file
-    RecordingManager.remove_audio(localized_resource.guid)
     localized_resource.filename = "#{params[:filename]}" if params[:filename].present?
     localized_resource.uploaded_audio = convert_to_8000_hz_wav(request.body.read, request.content_type)
     localized_resource.save

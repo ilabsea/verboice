@@ -28,9 +28,11 @@ module Parsers
         @id = params['id']
         @name = params['name'] || ''
         @kind = params['kind'] || QST_SERVER
-        @recipient = params['recipient']
         @subject = Resource.new params['subject']
         @resource = Resource.new params['resource']
+        @recipient = params['recipient']
+        # ensure channel belongs to account
+        @channel_id = call_flow.account.nuntium_channels.find_by_id(params['channel_id']).try(:id)
         @call_flow = call_flow
         @next = params['next']
         @root_index = params['root']
@@ -50,11 +52,11 @@ module Parsers
           compiler.StartUserStep :nuntium, @id, @name
           if @resource.guid
             if @recipient['caller']
-              compiler.Nuntium @kind, rcpt_type: :caller, resource_guid: @resource.guid
+              compiler.Nuntium @kind, @channel_id, rcpt_type: :caller, resource_guid: @resource.guid
             else
               options = {rcpt_type: :expr, expr: InputSetting.new(@recipient).expression(), resource_guid: @resource.guid}
               options[:subject_guid] = @subject.guid if @kind == SMTP
-              compiler.Nuntium @kind, options
+              compiler.Nuntium @kind, @channel_id, options
             end
           end
           compiler.Trace context_for '"Sent text message."'

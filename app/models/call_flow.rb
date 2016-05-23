@@ -17,6 +17,7 @@
 
 class CallFlow < ActiveRecord::Base
   include FusionTablesPush
+  include Telemetry::ProjectTracking
 
   attr_accessible :name, :error_flow, :flow, :user_flow, :callback_url, :mode, :callback_url_user, :callback_url_password, :store_in_fusion_tables, :fusion_table_name, :current_fusion_table_id
 
@@ -28,6 +29,7 @@ class CallFlow < ActiveRecord::Base
   has_many :traces, :dependent => :destroy
   has_many :call_flow_external_services, :dependent => :destroy
   has_many :external_services, :through => :call_flow_external_services
+  has_many :impersonate_records, :dependent => :destroy
 
   has_one :account, :through => :project
   has_one :google_oauth_token, :through => :account
@@ -48,7 +50,7 @@ class CallFlow < ActiveRecord::Base
   before_save :clear_flow, :if => lambda { mode_callback_url?}
   before_save :clear_callback_url, :if => lambda { mode_flow? }
   before_save :update_flow_with_user_flow
-
+  
   enum_attr :mode, %w(callback_url ^flow)
   config_accessor :callback_url_user, :callback_url_password
   attr_encrypted :config, :key => ENCRYPTION_KEY, :marshal => true
@@ -84,11 +86,6 @@ class CallFlow < ActiveRecord::Base
     Commands::TraceCommand.new call_flow_id: id, step_id: 'current_step', step_name: '', store: '"User hung up."'
   end
 
-  def get_fusion_table_url
-    fusion_table = self.get_fusion_table
-    fusion_table ? "#{CallFlow::FusionTablesPush::Pusher::FUSION_TABLE_URL}?docid=#{fusion_table[:table_id]}" : nil
-  end
-
   def push_results(call_log)
     self.push_to_fusion_tables(call_log)
   end
@@ -98,7 +95,7 @@ class CallFlow < ActiveRecord::Base
     resources = []
     user_flow.each do |step| 
       guids += guids_from_step(step)
-    end
+    end if user_flow
     project.resources.each do |resource|
       resources << resource if guids.include?(resource.guid)
     end
@@ -152,6 +149,10 @@ class CallFlow < ActiveRecord::Base
     BrokerClient.active_calls_by_call_flow(id)
   end
 
+  def force_update_flow_with_user_flow!
+    @force_update_flow_with_user_flow = true
+  end
+
   private
 
   def set_name_to_callback_url
@@ -159,7 +160,7 @@ class CallFlow < ActiveRecord::Base
   end
 
   def update_flow_with_user_flow
-    if user_flow_changed?
+    if @force_update_flow_with_user_flow || (user_flow.presence && user_flow_changed?)
       parser  = Parsers::UserFlow.new self, user_flow
       self.broker_flow = self.flow = parser.equivalent_flow
       self.variables = parser.variables.to_a.uniq

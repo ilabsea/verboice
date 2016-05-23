@@ -1,5 +1,6 @@
 -module(agi_session).
 -export([start_link/1, close/1, get_variable/2, ringing/1, answer/1, hangup/1, stream_file/3, wait_for_digit/2, record_file/6, set_callerid/2, dial/2]).
+-compile([{parse_transform, lager_transform}]).
 
 -behaviour(gen_server).
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2, terminate/2, code_change/3]).
@@ -94,8 +95,13 @@ handle_call({execute, _}, _From, State = #state{closed = true}) ->
   {reply, hangup, State};
 
 handle_call({execute, Cmd}, From, State = #state{sock = Sock}) ->
-  gen_tcp:send(Sock, [Cmd | "\n"]),
-  {noreply, State#state{caller = From}};
+  case gen_tcp:send(Sock, [Cmd | "\n"]) of
+    ok ->
+      {noreply, State#state{caller = From}};
+    {error, Reason} ->
+      lager:warning("Error sending AGI command: ~p", [Reason]),
+      {reply, hangup, State#state{closed = true}, ?TIMEOUT}
+  end;
 
 handle_call(close, _From, State) ->
   {stop, normal, ok, State#state{closed = true}};
@@ -108,9 +114,9 @@ handle_cast(_Msg, State) ->
   {noreply, State}.
 
 %% @private
-handle_info({tcp, _, <<"HANGUP", _/binary>>}, State = #state{sock = Sock}) ->
-  gen_tcp:close(Sock),
-  {noreply, State#state{closed = true}};
+handle_info({tcp, _, <<"HANGUP", _/binary>>}, State = #state{caller = From}) ->
+  reply_caller(From, hangup),
+  {noreply, State#state{closed = true, caller = undefined}, ?TIMEOUT};
 
 handle_info({tcp, _, Line}, State = #state{caller = From}) ->
   Response = parse_response(Line),
@@ -120,8 +126,9 @@ handle_info({tcp, _, Line}, State = #state{caller = From}) ->
 handle_info(timeout, State) ->
   {stop, timeout, State#state{closed = true}};
 
-handle_info({tcp_closed, _}, State) ->
-  {stop, closed, State#state{closed = true}};
+handle_info({tcp_closed, _}, State = #state{caller = From}) ->
+  reply_caller(From, hangup),
+  {stop, closed, State#state{closed = true, caller = undefined}};
 
 handle_info(_Info, State) ->
   {noreply, State}.
@@ -134,6 +141,10 @@ terminate(_Reason, #state{sock = Sock}) ->
 %% @private
 code_change(_OldVsn, State, _Extra) ->
   {ok, State}.
+
+reply_caller(undefined, _) -> ok;
+reply_caller(From, Response) ->
+  gen_server:reply(From, Response).
 
 read_params(Sock, Params) ->
   case gen_tcp:recv(Sock, 0) of
@@ -152,10 +163,13 @@ parse_param(Line) ->
   {util:binary_to_lower_atom(ParamName), ParamValue}.
 
 parse_response(Line) ->
-  {match, Match} = re:run(Line,
-    "^(\\d+)\\s+result=(-?[^\\s]*)(?:\\s+\\((.*)\\))?(?:\\s+endpos=(-?\\d+))?",
-    [{capture, all_but_first, list}]),
-  parse_response(1, Match, #response{}).
+  case re:run(Line,
+              "^(\\d+)\\s+result=(-?[^\\s]*)(?:\\s+\\((.*)\\))?(?:\\s+endpos=(-?\\d+))?",
+              [{capture, all_but_first, list}]) of
+    {match, Match} -> parse_response(1, Match, #response{});
+    true -> lager:error("Could not parse response from Asterisk: ~p~n", [Line]), throw(agi_error)
+  end.
+
 
 parse_response(_, [], Response) -> Response;
 parse_response(1, [Code|R], Response) ->

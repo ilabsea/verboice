@@ -1,7 +1,10 @@
 -module(asterisk_call_manager).
+-compile([{parse_transform, lager_transform}]).
 
 -behaviour(gen_event).
 -export([init/1, handle_event/2, handle_call/2, handle_info/2, terminate/2, code_change/3]).
+
+-define(DEVELOPMENT, "development").
 
 %% @private
 init(_) ->
@@ -32,43 +35,56 @@ handle_event({new_session, Pid, Env}, State) ->
           end;
 
         _ ->
-          % Incoming call
-          agi_session:ringing(Pid),
+          % Incoming call, find called channel
           {ok, PeerIp} = agi_session:get_variable(Pid, "CHANNEL(peerip)"),
           SipTo = binary_to_list(proplists:get_value(dnid, Env)),
+          AsteriskChannelId = proplists:get_value(channel, Env),
           ChannelId = case asterisk_channel_srv:find_channel(PeerIp, SipTo) of
-            not_found -> list_to_integer(binary_to_list(proplists:get_value(arg_2, Env)));
+            not_found ->
+              {ok, Environment} = application:get_env(environment),
+              case Environment of
+                ?DEVELOPMENT -> list_to_integer(binary_to_list(proplists:get_value(arg_2, Env)));
+                _ -> undefined
+              end;
             Found -> Found
           end,
 
-          Channel = channel:find(ChannelId),
-          case channel:is_approved(Channel) of
-            true ->
-              case channel:enabled(Channel) of
-                true -> 
-                  CallerId = case proplists:get_value(callerid, Env) of
-                    <<>> -> undefined;
-                    <<"unknown">> -> undefined;
-                    X -> X
-                  end,
+          case ChannelId of
+            undefined -> 
+              lager:info("Could not find associated channel to peer IP ~s and number ~s", [PeerIp, SipTo]),
+              agi_session:close(Pid),
+              {ok, State};
+            _ ->
+              Channel = channel:find(ChannelId),
+              case channel:is_approved(Channel) of
+                true ->
+                  case channel:enabled(Channel) of
+                    true -> 
+                      CallerId = case proplists:get_value(callerid, Env) of
+                        <<>> -> undefined;
+                        <<"unknown">> -> undefined;
+                        X -> X
+                      end,
 
-                  case session:new() of
-                    {ok, SessionPid} ->
-                      session:answer(SessionPid, Pbx, ChannelId, CallerId),
-                      {ok, State};
-                    {error, _Reason} ->
+                      case session:new() of
+                        {ok, SessionPid} ->
+                          session:answer(SessionPid, Pbx, ChannelId, CallerId),
+                          asterisk_pbx_log_srv:associate_call_log(AsteriskChannelId, session:id(SessionPid)),
+                          {ok, State};
+                        {error, _Reason} ->
+                          agi_session:close(Pid),
+                          {ok, State}
+                      end;
+                    _ -> 
+                      error_logger:info_msg("ChannelId: (~p) was disabled", [ChannelId]),
                       agi_session:close(Pid),
                       {ok, State}
                   end;
-                _ -> 
+                _ ->
                   error_logger:info_msg("ChannelId: (~p) was disabled", [ChannelId]),
                   agi_session:close(Pid),
                   {ok, State}
-              end;
-            _ ->
-              error_logger:info_msg("ChannelId: (~p) was disabled", [ChannelId]),
-              agi_session:close(Pid),
-              {ok, State}
+              end
           end
       end
   end;

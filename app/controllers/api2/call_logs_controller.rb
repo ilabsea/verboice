@@ -44,14 +44,20 @@ module Api2
       @call_logs = @call_logs.between(params[:start_date], params[:end_date]) if params[:start_date].present? && params[:end_date].present?
       @call_logs - @call_logs.where(status: params[:status]) if params[:status].present?
 
-      @call_logs = @call_logs.order('channel_id').includes([:account, :channel, :project])
+      @call_logs = @call_logs.order('channel_id').includes([:account, :channel, :project => [:project_variables]], :call_log_recorded_audios, :call_log_answers)
 
       render json: @call_logs, each_serializer: CustomCallLogSerializer
     end
 
     # GET /call_logs/:id
     def show
-      render json: @call_log, serializer: CustomCallLogSerializer
+      render json: @call_log, serializer: CustomCallLogSerializer, include: ['call_log_recorded_audios']
+    end
+
+    # GET /call_logs/:id/play_audio?key=12344
+    def play_audio
+      @log = current_account.call_logs.find params[:id]
+      send_file RecordingManager.for(@log).result_path_for(params[:key]), :type => "audio/x-wav"
     end
 
     # GET /call_logs/:id/play_audio?key=12344

@@ -57,6 +57,9 @@ module CallLogSearch
         result = result.where "call_logs.created_at <= ?", before.end_of_day if before
       end
 
+      if search[:channel_id]
+        result = result.where 'call_logs.channel_id = ?', search[:channel_id]
+      end
 
       if search[:channel]
         if options[:account]
@@ -72,6 +75,9 @@ module CallLogSearch
       end
       if search[:project_id]
         result = result.where 'call_logs.project_id = ?', search[:project_id]
+      end
+      if search[:channel_id]
+        result = result.where 'channel_id = ?', search[:channel_id]
       end
       if search[:project]
         if options[:account]

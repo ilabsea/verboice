@@ -14,12 +14,30 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with Verboice.  If not, see <http://www.gnu.org/licenses/>.
-
-module Api
-  class CallFlowsController < ApiController
-    def list
-      call_flows = current_account.call_flows
-      render json: call_flows, each_serializer: CustomCallFlowSerializer
+class Api::CallFlowsController < ApiController
+  def index
+    call_flows = current_account.projects.includes(:call_flows).find(params[:project_id]).call_flows.map do |call_flow|
+      call_flow_as_json(call_flow)
     end
+    render json: call_flow
+  end
+
+  def show
+    call_flow = current_account.projects.includes(:call_flows).find(params[:project_id]).call_flows.find(params[:id])
+    render json: call_flow_as_json(call_flow)
+  end
+  
+  def list
+    call_flows = current_account.call_flows
+    render json: call_flows, each_serializer: CustomCallFlowSerializer
+  end
+
+  private
+
+  def call_flow_as_json(call_flow)
+    {
+      id: call_flow.id,
+      name: call_flow.name
+    }
   end
 end

@@ -23,6 +23,15 @@ module Parsers
 
       let(:call_flow) { CallFlow.make }
 
+      before :each do
+        account = double('account')
+        nuntium_channels = double('nuntium_channels')
+        channel = double('channel', id: 7)
+        call_flow.should_receive(:account).and_return(account)
+        account.should_receive(:nuntium_channels).and_return(nuntium_channels)
+        nuntium_channels.should_receive(:find_by_id).with(7).and_return(channel)
+      end
+
       it "should compile to a verboice equivalent flow" do
         File.stub(:exists?).and_return{true}
         nuntium = Nuntium.new call_flow, 'id' => 1,
@@ -34,13 +43,14 @@ module Parsers
           },
           'recipient' => {
             'caller' => true
-          }
+          },
+          'channel_id' => 7
 
         nuntium.equivalent_flow.first.should eq(
           Compiler.parse do |c|
             c.Label 1
             c.StartUserStep :nuntium, 1, "Nuntium"
-          c.Nuntium('qst_server', rcpt_type: :caller, resource_guid: 5)
+            c.Nuntium 5, 7, :caller
             c.Trace call_flow_id: call_flow.id, step_id: 1, step_name: 'Nuntium', store: '"Sent text message."'
           end.first
         )
@@ -57,7 +67,8 @@ module Parsers
           },
           'recipient' => {
             'caller' => true
-          }
+          },
+          'channel_id' => 7
 
         nuntium.equivalent_flow.first.should eq(
           Compiler.parse do |c|
@@ -79,13 +90,14 @@ module Parsers
             'name' => 'Nuntium',
             'kind' => 'qst_server',
             'resource' => { "guid" => 42 },
-            'recipient' => recipient
+            'recipient' => recipient,
+            'channel_id' => 7
 
           nuntium.equivalent_flow.first.should eq(
             Compiler.parse do |c|
               c.Label 1
               c.StartUserStep :nuntium, 1, "Nuntium"
-              c.Nuntium 'qst_server', rcpt_type: :expr, expr: expr, resource_guid: 42
+              c.Nuntium 42, 7, :expr, expr
               c.Trace call_flow_id: call_flow.id, step_id: 1, step_name: 'Nuntium', store: '"Sent text message."'
             end.first
           )

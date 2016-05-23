@@ -1,3 +1,5 @@
+<%= telemetry_warning %>
+<div id="body-loading"></div>
 <% content_for :navigation do %>
   <%= section t('views.layouts.action.home'), home_path, :home %>
   <% if account_signed_in? %>
@@ -24,12 +26,12 @@
           <%=current_account.email%><br><br>
           <div class="container">
             <ul>
-              <li><%= link_to t('views.layouts.action.settings'), edit_account_registration_path %></li>
+              <li><%= link_to t('views.layouts.action.settings'), guisso_settings_path(:account) %></li>
             </ul>
             <hr/>
             <ul>
               <li><a href="mailto:support@instedd.org?subject=[<%= application_name.underscore %>-bug]"><%=t('views.layouts.action.report_bug') %></a></li>
-              <li><%= link_to t('views.layouts.action.sign_out'), destroy_account_session_path, method: :delete %></li>
+              <li><%= link_to t('views.layouts.action.sign_out'), guisso_sign_out_path_for(:account, after_sign_out_url: root_url), method: :delete %></li>
             </ul>
           </div>
         </div>
@@ -48,14 +50,14 @@
         </div>
       </li>
       <li>
-        <%= link_to '', edit_account_registration_path, :class => 'fsettings' %>
+        <%= link_to '', guisso_settings_path(:account), :class => 'fsettings' %>
       </li>
     <% else %>
       <li>
-        <%= link_to t('views.layouts.action.create_account'), new_account_registration_path, :class => 'fedit' %>
+        <%= link_to t('views.layouts.action.create_account'), guisso_sign_up_path_for(:account), :class => 'fedit' %>
       </li>
       <li>
-        <%= link_to t('views.layouts.action.log_in'), new_account_session_path, :class => 'fuser' %>
+        <%= link_to t('views.layouts.action.log_in'), guisso_sign_in_path_for(:account), :class => 'fuser' %>
       </li>
     <% end %>
   </ul>

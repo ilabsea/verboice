@@ -34,6 +34,9 @@ Verboice::Application.configure do
   config.action_mailer.default_url_options = { :host => 'localhost:3000' }
   config.action_mailer.asset_host = 'http://localhost:3000'
 
+  # explain query
+  config.active_record.auto_explain_threshold_in_seconds = 0.1
+
   # Don't care if the mailer can't send
   config.action_mailer.raise_delivery_errors = false
 
@@ -57,3 +60,8 @@ end
 ActionDispatch::Reloader.to_prepare do
   class_reloader.execute_if_updated
 end
+
+# Silence deprecation warnings for IceCube: serializing with compat 11
+# produces start_date fields for IceCube schedules, which later produce
+# warnings when deserializing.
+IceCube.compatibility = 12

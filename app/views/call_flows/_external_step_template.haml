@@ -18,7 +18,7 @@
         %table.GralTable.TwoColumn.CleanTable.NoHead
           %tbody{ko(foreach: 'settings')}
             %tr
-              %td
+              %td{ko(css: "{ orange: is_invalid() }")}
                 &larr;
                 %span{ko(text: 'display_name')}
                 %span.greytext{ko(text: 'description()')}

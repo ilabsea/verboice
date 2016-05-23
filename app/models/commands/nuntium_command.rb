@@ -17,22 +17,29 @@
 
 class Commands::NuntiumCommand < Command
 
-  def initialize(kind, options = {})
+  def initialize(kind, channel_id, options = {})
     @kind = kind
     @rcpt_type = options[:rcpt_type] || nil
     @expr = options[:expr] || nil
     @subject_guid = options[:subject_guid] || nil
     @resource_guid = options[:resource_guid]
+    @channel_id = channel_id
   end
 
   def serialize_parameters
-    {
+    params = {
       kind: @kind,
       rcpt_type: @rcpt_type,
       expr: @expr,
       subject_guid: @subject_guid,
       resource_guid: @resource_guid
     }
+
+    if @channel_id.present?
+      params[:channel_id] = @channel_id
+    end
+
+    params
   end
 
 end

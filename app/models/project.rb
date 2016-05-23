@@ -37,6 +37,7 @@ class Project < ActiveRecord::Base
   has_many :feeds
   has_many :recorded_audios
   has_many :project_permissions, :foreign_key => "model_id", :dependent => :destroy
+  has_many :scheduled_calls, :dependent => :destroy
 
   accepts_nested_attributes_for :project_variables,
     :reject_if => lambda { |attributes| attributes[:name].blank?},
@@ -58,6 +59,8 @@ class Project < ActiveRecord::Base
   validates_presence_of :tts_ispeech_api_key, :if => ->{ tts_engine == 'ispeech' }
 
   broker_cached
+
+  after_save :telemetry_track_activity
 
   def defined_variables
     project_variables.collect(&:name)
@@ -117,6 +120,11 @@ class Project < ActiveRecord::Base
   
   def active_calls
     BrokerClient.active_calls_by_project(id)
+  end
+
+  def telemetry_track_activity
+    InsteddTelemetry.timespan_since_creation_update(:project_lifespan, {project_id: self.id}, self)
+    account.telemetry_track_activity
   end
 
   private

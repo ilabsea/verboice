@@ -17,11 +17,9 @@
 
 class Channels::Sip < Channel
 
-  validate :validate_domain
-  validate :server_username_uniqueness
-  validate :server_number_uniqueness
-
   before_create :mark_as_pending, if: :require_approval?
+  
+  validate :server_username_uniqueness
 
   config_accessor :username
   config_accessor :password
@@ -36,6 +34,7 @@ class Channels::Sip < Channel
   config_accessor :normalized_called_number
   config_accessor :dtmf_mode
   config_accessor :codec_type
+  config_accessor :qualify
 
   attr_accessor :ip_address
 
@@ -65,45 +64,12 @@ class Channels::Sip < Channel
     direction == 'inbound' || direction == 'both'
   end
 
-  def asterisk_address_string_for broker, address
-    broker.sip_address_string_for self, address
-  end
-
-  def validate_domain
-    ip_address = self.domain
-    if domain_valid? self.domain
-      ip_address = Resolv.getaddress self.domain
-    else
-      errors.add(:base, I18n.t("activerecord.errors.models.channel.domain_not_found"))
-    end if Settings.channel.validate_domain
-  end
-
   def server_username_uniqueness
     return unless self.username.present?
-    
-    conflicting_channels = Channels::CustomSip
+    conflicting_channels = Channels::Sip
     conflicting_channels = conflicting_channels.where('id != ?', id) if id
-    conflicting_channels = conflicting_channels.all.any? { |c| c.username == self.username && domain_valid?(c.domain) && Resolv.getaddress(c.domain) == ip_address }
+    conflicting_channels = conflicting_channels.all.any? { |c| c.domain == self.domain && c.username == self.username }
     errors.add(:base, 'Username and domain have already been taken') if conflicting_channels
-  end
-
-  def server_number_uniqueness
-    return unless self.number.present?
-    
-    conflicting_channels = Channels::CustomSip
-    conflicting_channels = conflicting_channels.where('id != ?', id) if id
-    conflicting_channels = conflicting_channels.all.any? { |c| c.number == self.number && domain_valid?(c.domain) && Resolv.getaddress(c.domain) == ip_address }
-    errors.add(:base, 'Number and domain have already been taken') if conflicting_channels
-  end
-
-  def domain_valid? domain
-    is_domain_valid = true
-    begin
-      Resolv.getaddress domain
-    rescue
-      is_domain_valid = false
-    end
-    is_domain_valid
   end
 
   def errors_count

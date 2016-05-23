@@ -1,0 +1,12 @@
+= render 'shared/project_tabs_and_title', :project => @project, :shared_project => @shared_project
+
+%h2 Calls
+%p.desc Calls made and received from this number
+
+= render 'tabs'
+
+%br
+= render 'call_selector'
+%br
+
+= render 'calls'

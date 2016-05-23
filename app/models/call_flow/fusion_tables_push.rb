@@ -72,7 +72,7 @@ module CallFlow::FusionTablesPush
       ids = call_flow.step_names.keys
       values = [call_log.id, call_log.address, call_log.state, time_in_zone(call_log.started_at), time_in_zone(call_log.finished_at) ]
 
-      call_log.step_activities.each do |trace|
+      CallLog.poirot_activities(call_log.id).each do |trace|
         begin
           index = ids.index(trace.fields['step_id']) * 2 + 5
           values[index] = trace.fields['step_result']

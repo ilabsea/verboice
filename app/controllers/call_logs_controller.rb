@@ -17,39 +17,25 @@
 
 class CallLogsController < ApplicationController
   before_filter :authenticate_account!
-  
-  before_filter :paginate, only: [:index, :queued]
-  before_filter :search, only: [:index, :download_project_call_logs, :generate_zip]
+  before_filter :prepare_log_detail, only: [:show, :download_details]
+
+  before_filter :initial_paginate_params, only: [:index]
+  before_filter :search, only: [:index, :download, :download_project_call_logs, :generate_zip]
   before_filter :check_max_row, only: [:download_project_call_logs]
   before_filter :csv_settings, only: [:download, :download_details, :download_project_call_logs]
 
-  helper_method :paginate
-
   def index
-    @logs = @logs.paginate :page => @page, :per_page => @per_page
+    @logs = @logs.page(@page).per(@per_page)
     render "projects/call_logs/index" if @project
   end
 
   def show
     set_fixed_width_content
-    if params[:project_id].present?
-      load_project
-      @log = @project.call_logs.find params[:id]
-    else
-      @log = current_account.call_logs.find params[:id]
-    end
-    
-    @activities = @log.step_activities.sort_by(&:start)
   end
 
   def progress
     @log = current_account.call_logs.find params[:id]
     render :layout => false
-  end
-
-  def queued
-    @calls = current_account.queued_calls.includes(:channel).includes(:call_log).includes(:schedule).order('id DESC')
-    @calls = @calls.paginate :page => @page, :per_page => @per_page
   end
 
   def queued_paused
@@ -63,7 +49,8 @@ class CallLogsController < ApplicationController
   end
 
   def play_result
-    @log = current_account.call_logs.find params[:id]
+    load_project
+    @log = @project.call_logs.find params[:id]
     send_file RecordingManager.for(@log).result_path_for(params[:key]), :type => "audio/x-wav"
   end
 
@@ -72,9 +59,8 @@ class CallLogsController < ApplicationController
     render layout: false
   end
 
+
   def download_details
-    load_project
-    @log = @project.call_logs.includes(:entries).find params[:id]
   end
 
   def generate_zip
@@ -88,42 +74,58 @@ class CallLogsController < ApplicationController
   end
 
   private
-    def search
-      @search = params[:search] || ""
-      if params[:project_id].present?
-        %w(phone_number after before call_flow_id).each do |key|
-          @search << search_by_key(key)
-        end
 
-        load_project
-        @logs = @project.call_logs.includes(project: :project_variables).includes(:call_log_answers).includes(:call_log_recorded_audios).order('call_logs.id DESC')
-      else
-        @logs = current_account.call_logs.includes(:project).includes(:channel).includes(:call_flow).order('call_logs.id DESC')
+  def search
+    @search = params[:search] || ""
+    if params[:project_id].present?
+      %w(phone_number after before call_flow_id).each do |key|
+        @search << search_by_key(key)
       end
-      @logs = @logs.search @search, :account => current_account if @search.present?
-    end
-    
-    def search_by_key(key)
-      params[key].present? ? " #{key}:\"#{params[key]}\"" : ""
+
+      load_project
+      @logs = @project.call_logs.includes(project: :project_variables).includes(:call_log_answers).includes(:call_log_recorded_audios).order('call_logs.id DESC')
+    else
+      @logs = current_account.call_logs.includes(:project).includes(:channel).includes(:call_flow).order('call_logs.id DESC')
     end
 
-    def check_max_row
-      if @logs.count > CallLog::CSV_MAX_ROWS
-        flash[:error] = I18n.t("controllers.call_logs_controller.csv_is_too_big",
-          max: CallLog::CSV_MAX_ROWS, count: @logs.count)
-        redirect_to :back
-      end
-    end
+    @logs = @logs.search(@search, :account => current_account) if @search.present?
+  end
 
-    def csv_settings
-      @filename = "Call_logs_(#{Time.now.to_s.gsub(' ', '_')}).csv"
-      @output_encoding = 'UTF-8'
-      @streaming = true
-      @csv_options = { :col_sep => ',' }
-    end
+  def search_by_key(key)
+    params[key].present? ? " #{key}:\"#{params[key]}\"" : ""
+  end
 
-    def paginate
-      @page = params[:page] || 1
-      @per_page = params[:per_page] || 10
+  def check_max_row
+    if @logs.count > CallLog::CSV_MAX_ROWS
+      flash[:error] = I18n.t("controllers.call_logs_controller.csv_is_too_big",
+        max: CallLog::CSV_MAX_ROWS, count: @logs.count)
+      redirect_to :back
     end
+  end
+
+  def csv_settings
+    @filename = "Call_logs_(#{Time.now.to_s.gsub(' ', '_')}).csv"
+    @output_encoding = 'UTF-8'
+    @streaming = true
+    @csv_options = { :col_sep => ',' }
+  end
+
+  def prepare_log_detail
+    @log = CallLog.for_account(current_account).find_by_id params[:id]
+      
+    if params[:project_id].present?
+      load_project
+      @log = @project.call_logs.find params[:id]
+    else
+      @log = current_account.call_logs.find params[:id]
+    end unless @log
+
+    @activities = CallLog.poirot_activities(@log.id).sort_by(&:start)
+  end
+
+  def initial_paginate_params
+    @page = params[:page] || 1
+    @per_page = params[:per_page] || 10
+  end
+
 end

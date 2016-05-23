@@ -1,5 +1,5 @@
 -module(channel_queue).
--export([start_link/1, whereis_channel/1, enqueue/1, wakeup/1, unmonitor_session/2]).
+-export([start_link/1, whereis_channel/1, enqueue/1, wakeup/1, reload/1, unmonitor_session/2]).
 
 -behaviour(gen_server).
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2, terminate/2, code_change/3]).
@@ -22,6 +22,10 @@ enqueue(QueuedCall = #queued_call{channel_id = ChannelId}) ->
 wakeup(ChannelId) ->
   ensure_exists(ChannelId),
   gen_server:cast(?QUEUE(ChannelId), wakeup).
+
+%% Reload channel configuration
+reload(ChannelId) ->
+  gen_server:cast(?QUEUE(ChannelId), reload).
 
 %% Remove a session from monitored list
 unmonitor_session(ChannelId, SessionPid) ->
@@ -65,6 +69,11 @@ handle_cast(wakeup, State) ->
 handle_cast({unmonitor, Pid}, State) ->
   exit_state(remove_session(Pid, State));
 
+handle_cast(reload, State) ->
+  Channel = channel:find(State#state.channel#channel.id),
+  NewState = State#state{channel = Channel, max_calls = Channel:limit()},
+  {noreply, do_dispatch(NewState)};
+
 handle_cast(_Msg, State) ->
   {noreply, State}.
 
@@ -102,7 +111,8 @@ remove_session(SessionPid, State = #state{current_calls = C, sessions = Sessions
   case ordsets:is_element(SessionPid, Sessions) of
     true ->
       NewSessions = ordsets:del_element(SessionPid, Sessions),
-      timer:apply_after(timer:seconds(2), gen_server, cast, [self(), wakeup]),
+      WaitTime = application:get_env(verboice, seconds_between_calls, 2),
+      timer:apply_after(timer:seconds(WaitTime), gen_server, cast, [self(), wakeup]),
       State#state{sessions = NewSessions, current_calls = C - 1};
     false ->
       State
@@ -121,6 +131,7 @@ do_dispatch(State = #state{current_calls = C, queued_calls = Q, sessions = S}) -
               true ->
                 case broker:dispatch(State#state.channel, Call) of
                   {ok, SessionPid} ->
+              contact_scheduled_call:record_last_call(Call),
                     Call:delete(),
                     monitor(process, SessionPid),
                     NewSessions = ordsets:add_element(SessionPid, S),

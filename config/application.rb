@@ -69,14 +69,11 @@ module Verboice
     config.assets.version = '1.0'
 
     config.google_analytics = ''
-    config.version_name = Rails.env == "production" ? (`git describe --tags`.try(:strip).try(:split, "-").try(:first) rescue 'Development') : "Development"
+    config.version_name = Rails.env == "production" ? (File.read(".hgtags").try(:split, "\n").try(:last).try(:split, " ").try(:last).try(:strip) rescue 'Development') : "Development"
 
     config.after_initialize do
       Rails.application.eager_load!
     end
 
-    # set per_page globally
-    WillPaginate.per_page = 10
-    
   end
 end

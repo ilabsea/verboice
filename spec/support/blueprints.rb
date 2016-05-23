@@ -21,13 +21,13 @@ require 'sham'
 require 'ffaker'
 
 Sham.define do
-  name { Faker::Name.name }
-  email { Faker::Internet.email }
-  username { Faker::Internet.user_name }
-  password { Faker::Name.name[0..10] }
+  name { FFaker::Name.name }
+  email { FFaker::Internet.email }
+  username { FFaker::Internet.user_name }
+  password { FFaker::Name.name[0..10] }
   guid { Guid.new.to_s }
-  url { "http://" + Faker::Internet.domain_name }
-  result { Faker::Lorem.sentence}
+  url { "http://" + FFaker::Internet.domain_name }
+  result { FFaker::Lorem.sentence}
   phone_number { 
     phone = "85512000000"
     generate = Fabricate.sequence.to_s
@@ -36,12 +36,12 @@ Sham.define do
   client_start_date {
     date_time = DateTime.now().to_string
   }
-  address { Faker::PhoneNumber.phone_number }
+  address { FFaker::PhoneNumber.phone_number }
   addresses {
     [address]
   }
   number8 { (1..8).map { ('1'..'9').to_a.sample }.join }
-  ip { Faker::Internet.ip_v4_address }
+  ip { FFaker::Internet.ip_v4_address }
 end
 
 Account.blueprint do
@@ -88,6 +88,13 @@ Channels::CustomSip.blueprint do
   domain { Sham.url }
   direction { 'both' }
   register { true }
+end
+
+Channels::SipServer.blueprint do
+  call_flow
+  account { call_flow.project.account }
+  name
+  direction { 'both' }
 end
 
 Channels::Voxeo.blueprint do
@@ -139,7 +146,14 @@ end
 RecordedAudio.blueprint do
   call_log
   contact
-  description { Faker::Name.name }
+  description { FFaker::Name.name }
+  key { Sham.guid }
+end
+
+CallLogRecordedAudio.blueprint do
+  call_log
+  project_variable
+  description { FFaker::Name.name }
   key { Sham.guid }
 end
 
@@ -181,8 +195,8 @@ end
 
 OAuthToken.blueprint do
   account
-  access_token { Faker::Name.name }
-  refresh_token { Faker::Name.name }
+  access_token { FFaker::Name.name }
+  refresh_token { FFaker::Name.name }
   service { :google }
   expires_at { DateTime.now.utc + 3600.seconds }
 end
@@ -198,7 +212,7 @@ UploadLocalizedResource.blueprint do
   language { 'en' }
   guid
   uploaded_audio { Guid.new.to_s }
-  filename { Faker::Name.name }
+  filename { FFaker::Name.name }
 end
 
 TextLocalizedResource.blueprint do
@@ -224,6 +238,27 @@ end
 CallFlowExternalService.blueprint do
   call_flow
   external_service
+end
+
+ScheduledCall.blueprint do
+  enabled { true }
+  channel { Channel.all_leaf_subclasses.sample.make }
+  call_flow { channel.call_flow }
+  project { call_flow.project }
+  name
+  time_zone { 'Athens' }
+  from_time { 10 * 60 }
+  to_time { 15 * 60 }
+end
+
+ContactScheduledCall.blueprint do
+  contact
+  scheduled_call
+end
+
+Feed.blueprint do
+  name
+  project
 end
 
 Ext::ReminderPhoneBook.blueprint do
@@ -265,7 +300,7 @@ CallLogAnswer.blueprint do
 end
 
 LoginTracker.blueprint do
-  origin_ip { Faker::Internet.ip_v4_address }
+  origin_ip { FFaker::Internet.ip_v4_address }
   email
   logged_in_at { DateTime.now }
   status { 'ACTIVE' }

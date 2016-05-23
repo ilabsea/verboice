@@ -52,7 +52,7 @@ module Ext
       term = params[:term] || ''
       channels = []
       current_account.available_channels.map do |channel|
-        channels.push({label: channel.name, value: channel.name}) if channel.name.start_with?(term)
+        channels.push({label: channel.name, value: channel.name}) if channel.name.downcase.start_with?(term.downcase)
       end
       render :json => channels
     end

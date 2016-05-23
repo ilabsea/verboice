@@ -52,6 +52,11 @@ class ApplicationController < ActionController::Base
     head :unauthorized unless @project_permission == "admin"
   end
 
+  def check_project_reader
+    load_project
+    head :unauthorized unless @project_permission == "read" || @project_permission == "admin"
+  end
+
   def load_channel
     return @channel if @channel
 
@@ -87,7 +92,7 @@ class ApplicationController < ActionController::Base
   private
   def set_locale
     if params[:recaptcha_response_field].nil?
-      I18n.locale = current_account.nil? ? I18n.default_locale : current_account.locale
+      I18n.locale = current_account.try(:locale) || I18n.default_locale
     else
       I18n.locale = I18n.default_locale
     end

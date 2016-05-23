@@ -4,6 +4,8 @@
 -include_lib("kernel/include/inet.hrl").
 -include("db.hrl").
 
+-define(DNS_RESOLVER_TIMEOUT, 1000).
+
 generate(RegFilePath, ChannelsFilePath) ->
   {ok, RegFile} = file:open(RegFilePath, [write]),
   try file:open(ChannelsFilePath, [write]) of
@@ -17,6 +19,15 @@ generate(RegFilePath, ChannelsFilePath) ->
     file:close(RegFile)
   end.
 
+% returns a tuple with the channels index and registrations index for the generated files
+%
+% ChannelIndex = dict({ip, number}, [channel_id])
+% RegistryIndex = dict({username, domain}, channel_id)
+%
+% ChannelIndex's values are lists since after DNS resolution there might be
+% domain names mapped to identical IP addresses. A list of more than one
+% element might indicate someone attempting to steal SIP calls from another
+% user.
 generate_config(RegFile, ChannelsFile) ->
   Channels = channel:find_all_sip(),
   generate_config(Channels, RegFile, ChannelsFile, dict:new(), dict:new(), dict:new()).
@@ -32,12 +43,28 @@ generate_config([Channel | Rest], RegFile, ChannelsFile, ResolvCache, ChannelInd
   Number = channel:number(Channel),
   DtmfMode = channel:dtmf_mode(Channel),
   CodecType = channel:codec_type(Channel),
+  Qualify = channel:qualify(Channel),
 
-  file:write(ChannelsFile, ["[", Section, "](!)\n"]),
-  file:write(ChannelsFile, "type=peer\n"),
-  file:write(ChannelsFile, "canreinvite=no\n"),
-  file:write(ChannelsFile, "nat=yes\n"),
-  file:write(ChannelsFile, "qualify=yes\n"),
+  case Domain of
+    [] ->
+      file:write(ChannelsFile, ["[", Section, "]\n"]),
+      file:write(ChannelsFile, "type=friend\n"),
+      file:write(ChannelsFile, "canreinvite=no\n"),
+      file:write(ChannelsFile, "nat=yes\n"),
+      file:write(ChannelsFile, "qualify=yes\n"),
+      file:write(ChannelsFile, ["secret=", Password, "\n"]),
+      file:write(ChannelsFile, "insecure=no\n"),
+      file:write(ChannelsFile, "context=verboice\n"),
+      file:write(ChannelsFile, "host=dynamic\n"),
+      file:write(ChannelsFile, "\n"),
+      generate_config(Rest, RegFile, ChannelsFile, ResolvCache, ChannelIndex, RegistryIndex);
+
+    _ ->
+      file:write(ChannelsFile, ["[", Section, "](!)\n"]),
+      file:write(ChannelsFile, "type=peer\n"),
+      file:write(ChannelsFile, "canreinvite=no\n"),
+      file:write(ChannelsFile, "nat=yes\n"),
+      file:write(ChannelsFile, ["qualify=", Qualify, "\n"]),
 
   if
     length(DtmfMode) > 0 -> file:write(ChannelsFile, ["dtmfmode=", DtmfMode, "\n"]);
@@ -49,15 +76,15 @@ generate_config([Channel | Rest], RegFile, ChannelsFile, ResolvCache, ChannelInd
     true -> ok
   end,
 
-  if length(Username) > 0 andalso length(Password) > 0 ->
-    file:write(ChannelsFile, ["fromuser=", Username, "\n"]),
-    file:write(ChannelsFile, ["defaultuser=", Username, "\n"]),
-    file:write(ChannelsFile, ["secret=", Password, "\n"]);
-    true -> ok
-  end,
+      if length(Username) > 0 andalso length(Password) > 0 ->
+        file:write(ChannelsFile, ["fromuser=", Username, "\n"]),
+        file:write(ChannelsFile, ["defaultuser=", Username, "\n"]),
+        file:write(ChannelsFile, ["secret=", Password, "\n"]);
+        true -> ok
+      end,
 
-  file:write(ChannelsFile, "insecure=invite,port\n"),
-  file:write(ChannelsFile, "context=verboice\n"),
+      file:write(ChannelsFile, "insecure=invite,port\n"),
+      file:write(ChannelsFile, "context=verboice\n"),
 
   if length(SipPort) > 0 ->
     file:write(ChannelsFile, ["port=", SipPort, "\n"]);
@@ -71,48 +98,49 @@ generate_config([Channel | Rest], RegFile, ChannelsFile, ResolvCache, ChannelInd
     _ -> ok
   end,
 
-  file:write(ChannelsFile, "\n"),
+      file:write(ChannelsFile, "\n"),
 
-  case channel:is_outbound(Channel) of
-    true ->
-      file:write(ChannelsFile, ["[", Section, "-outbound](", Section, ")\n"]),
-      file:write(ChannelsFile, ["host=", Domain, "\n"]),
-      file:write(ChannelsFile, ["domain=", Domain, "\n"]),
-      file:write(ChannelsFile, ["fromdomain=", Domain, "\n"]),
-      file:write(ChannelsFile, ["type=peer\n"]),
-      file:write(ChannelsFile, "\n");
-    _ -> ok
-  end,
+      case channel:is_outbound(Channel) of
+        true ->
+          file:write(ChannelsFile, ["[", Section, "-outbound](", Section, ")\n"]),
+          file:write(ChannelsFile, ["host=", Domain, "\n"]),
+          file:write(ChannelsFile, ["domain=", Domain, "\n"]),
+          file:write(ChannelsFile, ["fromdomain=", Domain, "\n"]),
+          file:write(ChannelsFile, ["type=peer\n"]),
+          file:write(ChannelsFile, "\n");
+        _ -> ok
+      end,
 
-  {Expanded, NewCache} = expand_domain(Domain, ResolvCache),
-  {NewChannelIndex, _} = lists:foldl(fun ({Host, IPs, Port}, {R1, I}) ->
-    file:write(ChannelsFile, ["[", Section, "-inbound-", integer_to_list(I), "](", Section, ")\n"]),
-    file:write(ChannelsFile, ["host=", Host, "\n"]),
-    case Port of
-      undefined -> ok;
-      _ ->
-        file:write(ChannelsFile, ["port=", integer_to_list(Port), "\n"])
-    end,
-    file:write(ChannelsFile, ["domain=", Host, "\n"]),
-    file:write(ChannelsFile, ["fromdomain=", Host, "\n"]),
-    file:write(ChannelsFile, "type=user\n"),
-    file:write(ChannelsFile, "\n"),
+      {Expanded, NewCache} = expand_domain(Domain, ResolvCache),
+      {NewChannelIndex, _} = lists:foldl(fun ({Host, IPs, Port}, {R1, I}) ->
+        file:write(ChannelsFile, ["[", Section, "-inbound-", integer_to_list(I), "](", Section, ")\n"]),
+        file:write(ChannelsFile, ["host=", Host, "\n"]),
+        case Port of
+          undefined -> ok;
+          _ ->
+            file:write(ChannelsFile, ["port=", integer_to_list(Port), "\n"])
+        end,
+        file:write(ChannelsFile, ["domain=", Host, "\n"]),
+        file:write(ChannelsFile, ["fromdomain=", Host, "\n"]),
+        file:write(ChannelsFile, "type=user\n"),
+        file:write(ChannelsFile, "\n"),
 
-    R3 = lists:foldl(fun (IP, R2) ->
-      dict:store({util:to_string(IP), Number}, Channel#channel.id, R2)
-    end, R1, IPs),
-    {R3, I + 1}
-  end, {ChannelIndex, 0}, Expanded),
+        R3 = lists:foldl(fun (IP, R2) ->
+          dict:append({util:to_string(IP), Number}, Channel#channel.id, R2)
+        end, R1, IPs),
+        {R3, I + 1}
+      end, {ChannelIndex, 0}, Expanded),
 
-  NewRegistryIndex = case channel:register(Channel) of
-    true ->
-      file:write(RegFile, ["register => ", Username, ":", Password, "@", Domain, "/", Number, "\n"]),
-      dict:store({Username, Domain}, Channel#channel.id, RegistryIndex);
-    _ ->
-      RegistryIndex
-  end,
+      NewRegistryIndex = case channel:register(Channel) of
+        true ->
+          file:write(RegFile, ["register => ", Username, ":", Password, "@", Domain, "/", Number, "\n"]),
+          dict:store({Username, Domain}, Channel#channel.id, RegistryIndex);
+        _ ->
+          RegistryIndex
+      end,
 
-  generate_config(Rest, RegFile, ChannelsFile, NewCache, NewChannelIndex, NewRegistryIndex).
+      generate_config(Rest, RegFile, ChannelsFile, NewCache, NewChannelIndex, NewRegistryIndex)
+  end.
 
 expand_domain(<<>>, ResolvCache) -> {[], ResolvCache};
 expand_domain(Domain, ResolvCache) ->
@@ -130,10 +158,10 @@ expand_domain(Domain, ResolvCache) ->
 
 expand_domain(Domain) ->
   Query = binary_to_list(iolist_to_binary(["_sip._udp.", Domain])),
-  case inet_res:getbyname(Query, srv) of
+  case inet_res:getbyname(Query, srv, ?DNS_RESOLVER_TIMEOUT) of
     {ok, #hostent{h_addr_list = AddrList}} ->
       lists:foldl(fun({_, _, Port, Host}, Out) ->
-        New = case inet_res:gethostbyname(Host) of
+        New = case inet_res:gethostbyname(Host, inet, ?DNS_RESOLVER_TIMEOUT) of
           {ok, #hostent{h_addr_list = IpList}} ->
             IPs = map_ips(IpList),
             {Host, IPs, Port};
@@ -142,7 +170,7 @@ expand_domain(Domain) ->
         [New | Out]
       end, [], AddrList);
     _ ->
-      case inet_res:gethostbyname(Domain) of
+      case inet_res:gethostbyname(Domain, inet, ?DNS_RESOLVER_TIMEOUT) of
         {ok, #hostent{h_addr_list = IpList}} ->
           IPs = map_ips(IpList),
           [{Domain, IPs, undefined}];

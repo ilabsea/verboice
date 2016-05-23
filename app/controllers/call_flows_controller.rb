@@ -34,7 +34,7 @@ class CallFlowsController < ApplicationController
     @csv_options = { :col_sep => ',' }
 
     @call_logs = @call_flow.call_logs
-    @activities = CallLog.step_activities_for(@call_logs)
+    @activities = CallLog.poirot_activities(@call_logs.map(&:id)).group_by { |x| x.fields['call_log_id'] }
   end
 
   def index
@@ -57,7 +57,6 @@ class CallFlowsController < ApplicationController
   end
 
   def destroy
-    Channel.update_all({:call_flow_id => nil}, {:call_flow_id => @call_flow.id.to_i})
     @call_flow.destroy
     redirect_to project_call_flows_path(@project)
   end
@@ -88,6 +87,7 @@ class CallFlowsController < ApplicationController
   def edit_workflow
     @variables = @project.defined_variables
     @external_steps = @call_flow.project.external_service_steps.includes(:external_service)
+    @sms_channels = current_account.nuntium_channels.order(:name)
     @call_flows = @project.call_flows.select{|call_flow| call_flow.id != params[:id].to_i}
   end
 

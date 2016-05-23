@@ -1,5 +1,5 @@
 -module(session).
--export([start_link/1, new/0, new/1, find/1, answer/2, answer/4, dial/4, reject/2, stop/1, resume/1, default_variables/1, create_default_erjs_context/2, merge/2]).
+-export([start_link/1, new/0, new/1, find/1, answer/2, answer/4, dial/4, reject/2, stop/1, resume/1, default_variables/1, create_default_erjs_context/2, id/1, merge/2]).
 -export([no_ack/1]).
 -export([language/1]).
 -export([new_id/0, set_pointer/2]).
@@ -109,6 +109,9 @@ language(#session{js_context = JsContext, default_language = DefaultLanguage}) -
 set_pointer(SessionPid, Ptr) ->
   gen_fsm:sync_send_event(SessionPid, {set_pointer, Ptr}).
 
+id(SessionPid) ->
+  gen_fsm:sync_send_all_state_event(SessionPid, id).
+
 %% @private
 init(HibernatedSession = #hibernated_session{ data = #hibernated_session_data{resume_ptr = ResumePtr, poirot_activity = Activity }}) ->
   poirot:set_current(Activity),
@@ -128,8 +131,7 @@ ready({answer, Pbx, ChannelId, CallerId}, State = #state{session_id = SessionId}
       Channel = channel:find(ChannelId),
       CallFlow = call_flow:find(Channel#channel.call_flow_id),
       Project = project:find(CallFlow#call_flow.project_id),
-      Contact = get_contact(CallFlow#call_flow.project_id, CallerId, 1),
-      ContactAddress = contact:find_or_create_contact_address(CallerId, Contact),
+      {Contact, ContactAddress} = get_contact(CallFlow#call_flow.project_id, CallerId, 1),
       CallLog = call_log_srv:new(SessionId, #call_log{
         account_id = Channel#channel.account_id,
         project_id = CallFlow#call_flow.project_id,
@@ -139,6 +141,7 @@ ready({answer, Pbx, ChannelId, CallerId}, State = #state{session_id = SessionId}
         address = ContactAddress#contact_address.address,
         started_at = calendar:universal_time(),
         call_flow_id = CallFlow#call_flow.id,
+        contact_id = Contact#contact.id,
         store_log_entries = Project#project.store_call_log_entries
       }),
       Flow = call_flow:flow(CallFlow),
@@ -157,7 +160,7 @@ ready({answer, Pbx, ChannelId, CallerId}, State = #state{session_id = SessionId}
         status_callback_url = StatusUrl,
         status_callback_user = StatusUser,
         status_callback_password = StatusPass,
-        started_at = {datetime, calendar:universal_time()}
+        started_at = calendar:universal_time()
       };
     Session -> Session#session{pbx = Pbx}
   end,
@@ -181,20 +184,17 @@ ready({set_pointer, Ptr}, _From, State) ->
 ready({dial, _, _, QueuedCall = #queued_call{address = undefined}}, _From, State) ->
   lager:error("Refusing to make a call to an undefined address (queued call id ~p)", [QueuedCall#queued_call.id]),
   CallLog = call_log:find(QueuedCall#queued_call.call_log_id),
-  CallLog:update([{state, "failed"}, {fail_reason, "invalid address"}, {finished_at, calendar:universal_time()}]),
+  CallLog:update([{state, "failed"}, {fail_reason, "undefined address"}, {finished_at, calendar:universal_time()}]),
   {stop, normal, error, State};
 
 ready({dial, RealBroker, Channel, QueuedCall}, _From, State = #state{session_id = SessionId, resume_ptr = ResumePtr}) ->
   lager:info("Session (~p) dial", [SessionId]),
-
+  
   AddressWithoutVoipPrefix = channel:address_without_voip_prefix(Channel, QueuedCall#queued_call.address),
-
-  AddressWithoutVoipPrefix = channel:address_without_voip_prefix(Channel, QueuedCall#queued_call.address),
-
   NewSession = case State#state.session of
     undefined ->
       CallLog = call_log_srv:new(SessionId, call_log:find(QueuedCall#queued_call.call_log_id)),
-      Contact = get_contact(QueuedCall#queued_call.project_id, AddressWithoutVoipPrefix, QueuedCall#queued_call.call_log_id),
+      {Contact, _ContactAddress} = get_contact(QueuedCall#queued_call.project_id, AddressWithoutVoipPrefix, QueuedCall#queued_call.call_log_id),
       Session = QueuedCall:start_session(),
 
       poirot:add_meta([
@@ -210,7 +210,7 @@ ready({dial, RealBroker, Channel, QueuedCall}, _From, State = #state{session_id 
         channel = Channel,
         call_log = CallLog,
         contact = Contact,
-        started_at = {datetime, calendar:universal_time()}
+        started_at = calendar:universal_time()
       };
 
     Session ->
@@ -302,13 +302,13 @@ dialing(timeout, State = #state{session = Session}) ->
       {next_state, dialing, State, ?TIMEOUT_DIALING}
   end.
 
-in_progress({completed, ok}, State = #state{session = Session}) ->
-  notify_status(completed, Session),
-  finalize(completed, State);
+in_progress({completed, NewSession, ok}, State) ->
+  notify_status(completed, NewSession),
+  finalize(completed, State#state{session = NewSession});
 
-in_progress({completed, {failed, Reason}}, State = #state{session = Session}) ->
-  notify_status(failed, Session),
-  finalize({failed, Reason}, State);
+in_progress({completed, NewSession, {failed, Reason}}, State) ->
+  notify_status(failed, NewSession),
+  finalize({failed, Reason}, State#state{session = NewSession});
 
 in_progress(timeout, State = #state{session = Session = #session{pbx = Pbx}}) ->
   IsTimeout = is_timeout(Session, ?TIMEOUT_SESSION),
@@ -329,7 +329,7 @@ in_progress({suspend, NewSession, Ptr}, _From, State = #state{session = Session 
   lager:info("Session (~p) suspended", [SessionId]),
   channel_queue:unmonitor_session(Session#session.channel#channel.id, self()),
   {reply, ok, ready, State#state{pbx_pid = undefined, flow_pid = undefined, resume_ptr = Ptr, session = NewSession}};
-  
+
 in_progress({hibernate, NewSession, Ptr}, _From, State = #state{session = _Session = #session{session_id = SessionId}}) ->
   lager:info("Session (~p) hibernated", [SessionId]),
   Data = #hibernated_session_data{
@@ -352,7 +352,7 @@ in_progress({hibernate, NewSession, Ptr}, _From, State = #state{session = _Sessi
   HibernatedSession = #hibernated_session{session_id = SessionId, data = Data},
   HibernatedSession:create(),
   {stop, normal, ok, State#state{hibernated = true}};
-
+  
 in_progress({respawn, NewSessionPid, Ptr}, _From, State = #state{session = Session}) ->
   session:set_pointer(NewSessionPid, Ptr),
   
@@ -361,7 +361,11 @@ in_progress({respawn, NewSessionPid, Ptr}, _From, State = #state{session = Sessi
   notify_status(completed, Session),
   finalize(completed, State).
 
-notify_status(Status, Session = #session{call_log = CallLog, address = Address, callback_params = CallbackParams, started_at = StartedAt}) ->
+notify_status(Status, Session) ->
+  notify_status_to_callback_url(Status, Session),
+  notify_status_to_hub(Status, Session).
+
+notify_status_to_callback_url(Status, Session = #session{call_log = CallLog, address = Address, callback_params = CallbackParams, started_at = StartedAt}) ->
   case Session#session.status_callback_url of
     undefined -> ok;
     <<>> -> ok;
@@ -371,9 +375,10 @@ notify_status(Status, Session = #session{call_log = CallLog, address = Address, 
         Uri = uri:parse(binary_to_list(Url)),
         Duration = case StartedAt of
           undefined -> 0;
-          {_, StartedAtValue} ->
+          _ ->
+            StartedAtSeconds = calendar:datetime_to_gregorian_seconds(StartedAt),
             Now = calendar:universal_time(),
-            calendar:datetime_to_gregorian_seconds(Now) - calendar:datetime_to_gregorian_seconds(StartedAtValue)
+            calendar:datetime_to_gregorian_seconds(Now) - StartedAtSeconds
         end,
         QueryString = [{"CallSid", CallSid}, {"CallStatus", Status}, {"From", Address}, {"CallDuration", erlang:integer_to_list(Duration)} | CallbackParams],
         AuthOptions = case Session#session.status_callback_user of
@@ -386,8 +391,45 @@ notify_status(Status, Session = #session{call_log = CallLog, address = Address, 
       end)
   end.
 
+notify_status_to_hub(Status, Session = #session{call_log = CallLog, js_context = JS, project = Project}) ->
+  case Status of
+    completed ->
+      HubEnabled = application:get_env(verboice, hub_enabled, false),
+      case HubEnabled of
+        false ->
+          ok;
+        true ->
+          Task = [
+            {payload, [
+              {call_id, CallLog:id()},
+              {project_id, Project:id()},
+              {call_flow_id, case Session#session.call_flow of
+                undefined -> undefined;
+                #call_flow{id = Id} -> Id
+              end},
+              {address, Session#session.address},
+              {vars, {map, session_vars(JS)}}
+            ]}
+          ],
+          delayed_job:enqueue("Jobs::HubJob", Task)
+      end;
+    _ ->
+       ok
+  end.
+
+session_vars(JS) ->
+  lists:foldl(fun({Name, Value}, Vars) ->
+    case Name of
+      <<"var_", VarName/binary>> -> [{binary_to_list(VarName), Value} | Vars];
+      _ -> Vars
+    end
+  end, [], erjs_context:to_list(JS)).
+
 handle_event(stop, _, State) ->
   {stop, normal, State}.
+
+handle_sync_event(id, _From, StateName, State = #state{session_id = SessionId}) ->
+  {reply, SessionId, StateName, State};
 
 handle_sync_event({matches, Criteria}, _From, StateName, State = #state{session = Session}) ->
   MatchResult = case Session of
@@ -440,12 +482,12 @@ code_change(_OldVsn, StateName, State, _Extra) ->
   {ok, StateName, State}.
 
 push_results(#session{call_flow = #call_flow{id = CallFlowId, store_in_fusion_tables = 1}, call_log = CallLog}) ->
-  Task = ["--- !ruby/struct:CallFlow::FusionTablesPush::Pusher\ncall_flow_id: ", integer_to_list(CallFlowId),
-    "\ncall_log_id: ", integer_to_list(CallLog:id()), "\n"],
-  delayed_job:enqueue(Task, ?PUSH_DELAY_SECONDS);
+  Task = [{call_flow_id, CallFlowId}, {call_log_id, CallLog:id()}],
+  delayed_job:enqueue({struct, "CallFlow::FusionTablesPush::Pusher"}, Task, ?PUSH_DELAY_SECONDS);
 push_results(_) -> ok.
 
 finalize(completed, State = #state{session = Session =  #session{call_log = CallLog}}) ->
+  verboice_telemetry:track_call_finished(Session),
   Retries = case Session#session.queued_call of
     undefined -> 0;
     QueuedCall -> QueuedCall#queued_call.retries
@@ -457,6 +499,7 @@ finalize(completed, State = #state{session = Session =  #session{call_log = Call
   {stop, normal, State};
 
 finalize({failed, Reason}, State = #state{session = Session = #session{call_log = CallLog}}) ->
+  verboice_telemetry:track_call_finished(Session),
   StopReason = case Reason of
     {error, Error} -> Error;
     _ ->
@@ -474,6 +517,9 @@ finalize({failed, Reason}, State = #state{session = Session = #session{call_log 
             true -> 
               case NewQueuedCall:reschedule() of
                 no_schedule -> {NewRetries, failed};
+                overdue ->
+                  CallLog:error("'Not Before' date exceeded", []),
+                  {NewRetries, "failed"};
                 max_retries ->
                   CallLog:error("Max retries exceeded", []),
                   {NewRetries, "failed"};
@@ -512,7 +558,7 @@ spawn_run(Session, undefined) ->
 spawn_run(Session = #session{pbx = Pbx}, Ptr) ->
   SessionPid = self(),
   SessionActivity = poirot:current(),
-  spawn_monitor(fun() ->
+  {Pid, _Ref} = spawn_monitor(fun() ->
     poirot:new_inside(SessionActivity, "Session worker process", async, fun() ->
       lager:info("Start"),
       try run(Session, Ptr) of
@@ -532,13 +578,14 @@ spawn_run(Session = #session{pbx = Pbx}, Ptr) ->
             {failed, "marked as failed"} ->
               notify_status(marked_as_failed, NewSession),
               finalize({failed, marked_as_failed}, #state{session = NewSession});
-            _ -> gen_fsm:send_event(SessionPid, {completed, FlowResult})
+            _ -> gen_fsm:send_event(SessionPid, {completed, NewSession, FlowResult})
           end
       after
         catch Pbx:terminate()
       end
     end)
-  end).
+  end),
+  Pid.
 
 close_user_step_activity(#session{in_user_step_activity = true}) -> poirot:pop();
 close_user_step_activity(_) -> ok.
@@ -549,7 +596,7 @@ flow_result(Result, _) -> Result.
 
 get_contact(ProjectId, undefined, CallLogId) ->
   Address = "Anonymous" ++ integer_to_list(CallLogId),
-  contact:create_anonymous(ProjectId, Address);
+  get_contact(ProjectId, Address, CallLogId);
 get_contact(ProjectId, Address, _) ->
   contact:find_or_create_with_address(ProjectId, Address).
 
@@ -583,12 +630,24 @@ create_default_erjs_context(CallLogId, PhoneNumber) ->
         _ -> Value
       end
     end},
-    {'split_digits', fun(Value) ->
-      Result = re:replace(Value,"\\d"," &",[{return,list}, global]),
-      io:format("result: ~p~n", [Result]),
-      Result
-    end},
-    {phone_number, util:to_string(PhoneNumber)}
+    {'split_digits', fun
+      (undefined) ->
+        [];
+      (Value) ->
+        StringValue = if
+          is_integer(Value) -> integer_to_list(Value);
+          true -> Value
+        end,
+        Result = re:replace(StringValue,"\\d"," &",[{return,list}, global]),
+        Result
+      end},
+    {phone_number, util:to_string(PhoneNumber)},
+    {<<"hub_url">>, begin
+      case application:get_env(verboice, hub_url) of
+        {ok, HubUrl} -> HubUrl;
+        _ -> ""
+      end
+    end}
   ]).
 
 initialize_context(Context, QueuedCall = #queued_call{}) ->
@@ -644,12 +703,12 @@ run(Session = #session{flow = Flow, stack = Stack}, Ptr) ->
       end
   catch
     hangup ->
-      lager:warning("The user hang up"),
-      poirot:add_meta([{error, <<"The user hang up">>}]),
+      lager:warning("The user hung up"),
+      poirot:add_meta([{error, <<"The user hung up">>}]),
       {{failed, hangup}, Session};
     {hangup, NewSession} ->
-      lager:warning("The user hang up"),
-      poirot:add_meta([{error, <<"The user hang up">>}]),
+      lager:warning("The user hung up"),
+      poirot:add_meta([{error, <<"The user hung up">>}]),
       {{failed, hangup}, NewSession};
     Reason when is_list(Reason) ->
       poirot:add_meta([{error, iolist_to_binary(io_lib:format("~s", [Reason]))}]),

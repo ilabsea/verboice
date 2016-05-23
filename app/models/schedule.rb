@@ -16,6 +16,7 @@
 # along with Verboice.  If not, see <http://www.gnu.org/licenses/>.
 
 class Schedule < ActiveRecord::Base
+  include Telemetry::ProjectTracking
   scope :enabled, -> { where :disabled => false }
   scope :disabled, -> { where disabled => true }
 
@@ -30,13 +31,13 @@ class Schedule < ActiveRecord::Base
   validates_presence_of :time_from
   validates_presence_of :time_to
   validates_uniqueness_of :name, :case_sensitive => false, :scope => :project_id
-  validates_format_of :retries, :with => /^[0-9\.]+(,[0-9\.]+)*$/, :allow_blank => true
+  validate :validate_retries
   validates_format_of :weekdays, :with => /^[0-6](,[0-6])*$/, :allow_blank => true
 
   validate :time_from_is_before_time_to
 
   before_destroy :cancel_calls_and_destroy_queued_calls
-
+  
   broker_cached
 
   def time_from_is_before_time_to
@@ -76,7 +77,8 @@ class Schedule < ActiveRecord::Base
   end
 
   def next_available_time(t)
-    t = Time.now.utc if t.past?
+    t = Time.now if t.past?
+    t = t.utc
 
     if time_from.present? && time_to.present?
       from = get_seconds(time_from)
@@ -127,7 +129,10 @@ class Schedule < ActiveRecord::Base
     days_desc = (weekdays || '').split(',').map{|d| Date::DAYNAMES[d.to_i]}
     desc = "#{days_desc.to_sentence} from #{time_from_str} to #{time_to_str}."
     if retries.present?
-      retries_desc = (retries || '').split(',').map{|r| "#{r} #{'hour'.pluralize(r.to_f)}"}
+      retries_desc = retries.split(",").map(&:strip).map do |piece|
+        parsed = parse_retry(piece)
+        "#{parsed[0]} #{parsed[1].to_s.pluralize(parsed[0].to_f)}" if parsed
+      end.compact
       desc << " Retry after #{retries_desc.to_sentence}."
     end
     desc
@@ -157,6 +162,33 @@ class Schedule < ActiveRecord::Base
   def time_str(time)
     return '' unless time
     "#{time.hour}:#{'%02d' % time.min}"
+  end
+
+  def validate_retries
+    return if retries.blank?
+
+    pieces = retries.split(",").map(&:strip)
+    pieces.each do |piece|
+      unless parse_retry(piece)
+        errors[:retries] << "invalid retry: #{piece}"
+      end
+    end
+  end
+
+  def parse_retry(piece)
+    case piece
+    when /\A(\d+)\s*da?y?s?\Z/
+      [$1.to_i, :day]
+    when /\A(\d+)\s*ho?u?r?s?\Z/
+      [$1.to_i, :hour]
+    when /\A(\d+)\s*mi?n?u?t?e?s?\Z/
+      [$1.to_i, :minute]
+    when /\A\d+(\.\d+)?\Z/
+      # Ok: old format just supporting hours and fractions of hours
+      [piece.to_f, :hour]
+    else
+      nil
+    end
   end
 
 end

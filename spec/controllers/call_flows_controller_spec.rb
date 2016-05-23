@@ -23,44 +23,68 @@ describe CallFlowsController do
   before(:each) do
     sign_in account
   end
+
   let!(:account) { Account.make }
   let!(:project) { Project.make account: account }
   let!(:call_flow) { CallFlow.make project: project }
+  let!(:channel) { Channels::Custom.make account: account, name: "Channel1" }
 
-  context "render_views" do
-    render_views
+  describe "Download call results" do
+    def download_equals(file)
+      response = get :download_results, :format => :csv, id: call_flow.id, project_id: call_flow.project.id
+      response.body.should eq File.read(File.join(Rails.root, file))
+    end
+
+    before(:each) { Timecop.freeze(Time.utc(2012, 1, 1, 0, 0, 0)) }
+    after(:each) { Timecop.return }
+
+    let!(:flow) do
+      f = [{"id"=>1, "name"=>"Initial menu", "type"=>"menu", "root"=>true, "options"=>[{"number"=>1, "next"=>593}, {"number"=>2, "next"=>737}], "end_call_message"=>{"name"=>"Bye", "type"=>"recording", "duration"=>"00:00"}, "invalid_message"=>{"name"=>"Wrong number!", "type"=>"recording", "duration"=>"00:00"}, "explanation_message"=>{"name"=>"Welcome to test call_flow 01", "type"=>"recording", "duration"=>"00:00"}, "options_message"=>{"name"=>"Press 1 for foo, press 2 for bar", "type"=>"recording", "duration"=>"00:00"}}, {"id"=>593, "name"=>"Menu Foo", "type"=>"menu", "root"=>false, "options"=>[{"number"=>1, "next"=>509}, {"number"=>2, "next"=>897}], "end_call_message"=>{}, "invalid_message"=>{}, "explanation_message"=>{"name"=>"You pressed Foo", "type"=>"recording", "duration"=>"00:00"}, "options_message"=>{"name"=>"Press 1 if it's ok, if not, 2", "type"=>"recording", "duration"=>"00:00"}}, {"id"=>737, "name"=>"Menu Bar", "type"=>"menu", "root"=>false, "options"=>[{"number"=>2, "next"=>2}, {"number"=>3, "next"=>3}], "end_call_message"=>{"name"=>"Goodbye", "type"=>"recording", "duration"=>"00:00"}, "invalid_message"=>{}, "explanation_message"=>{"name"=>"You chosed Bar", "type"=>"recording", "duration"=>"00:00"}, "options_message"=>{"name"=>"Press 2 if it's ok, 3 if not", "type"=>"recording", "duration"=>"00:00"}}, {"id"=>509, "name"=>"Menu Ok", "type"=>"menu", "root"=>false, "options"=>[], "end_call_message"=>{"name"=>"Goodbye", "type"=>"recording", "duration"=>"00:00"}, "invalid_message"=>{}, "explanation_message"=>{"name"=>"Thank you for chosing foo", "type"=>"recording", "duration"=>"00:00"}, "options_message"=>{}}, {"id"=>897, "name"=>"Menu not ok", "type"=>"menu", "root"=>false, "options"=>[], "end_call_message"=>{"name"=>"Bye", "type"=>"recording", "duration"=>"00:00"}, "invalid_message"=>{}, "explanation_message"=>{"name"=>"We will call you back later", "type"=>"recording", "duration"=>"00:00"}, "options_message"=>{}}, {"id"=>2, "name"=>"Menu Ok", "type"=>"menu", "root"=>false, "options"=>[], "end_call_message"=>{}, "invalid_message"=>{}, "explanation_message"=>{"name"=>"Ok. Thank you for choosing bar", "type"=>"recording", "duration"=>"00:00"}, "options_message"=>{}}, {"id"=>3, "name"=>"Menu Not ok", "type"=>"menu", "root"=>false, "options"=>[], "end_call_message"=>{}, "invalid_message"=>{}, "explanation_message"=>{"name"=>"Goodbye", "type"=>"recording", "duration"=>"00:00"}, "options_message"=>{}}] 
+
+      call_flow.user_flow = f
+      call_flow.save!
+      f
+    end
 
     it 'Should retrieve a csv with the call traces' do
-      Timecop.freeze(Time.utc(2012, 1, 1, 0, 0, 0))
+      call_log1 = CallLog.make id: 1, address: 1000, call_flow: call_flow, channel: channel, direction: :incoming, started_at: Time.now, finished_at: Time.now
+      call_log2 = CallLog.make id: 2, address: 1000, call_flow: call_flow, channel: channel, direction: :outgoing, started_at: Time.now, finished_at: Time.now
+      call_log3 = CallLog.make id: 3, address: 1000, call_flow: call_flow, channel: channel, direction: :incoming, started_at: Time.now, finished_at: Time.now
+      call_log4 = CallLog.make id: 4, address: 1000, call_flow: call_flow, channel: channel, direction: :outgoing, started_at: Time.now, finished_at: Time.now
+      call_log5 = CallLog.make id: 5, address: 1000, call_flow: call_flow, channel: channel, direction: :incoming, started_at: Time.now, finished_at: Time.now
+      call_log6 = CallLog.make id: 6, address: 1000, call_flow: call_flow, channel: channel, direction: :outgoing, started_at: Time.now, finished_at: Time.now
 
-      call_flow.user_flow = [{"id"=>1, "name"=>"Initial menu", "type"=>"menu", "root"=>true, "options"=>[{"number"=>1, "next"=>593}, {"number"=>2, "next"=>737}], "end_call_message"=>{"name"=>"Bye", "type"=>"recording", "duration"=>"00:00"}, "invalid_message"=>{"name"=>"Wrong number!", "type"=>"recording", "duration"=>"00:00"}, "explanation_message"=>{"name"=>"Welcome to test call_flow 01", "type"=>"recording", "duration"=>"00:00"}, "options_message"=>{"name"=>"Press 1 for foo, press 2 for bar", "type"=>"recording", "duration"=>"00:00"}}, {"id"=>593, "name"=>"Menu Foo", "type"=>"menu", "root"=>false, "options"=>[{"number"=>1, "next"=>509}, {"number"=>2, "next"=>897}], "end_call_message"=>{}, "invalid_message"=>{}, "explanation_message"=>{"name"=>"You pressed Foo", "type"=>"recording", "duration"=>"00:00"}, "options_message"=>{"name"=>"Press 1 if it's ok, if not, 2", "type"=>"recording", "duration"=>"00:00"}}, {"id"=>737, "name"=>"Menu Bar", "type"=>"menu", "root"=>false, "options"=>[{"number"=>2, "next"=>2}, {"number"=>3, "next"=>3}], "end_call_message"=>{"name"=>"Goodbye", "type"=>"recording", "duration"=>"00:00"}, "invalid_message"=>{}, "explanation_message"=>{"name"=>"You chosed Bar", "type"=>"recording", "duration"=>"00:00"}, "options_message"=>{"name"=>"Press 2 if it's ok, 3 if not", "type"=>"recording", "duration"=>"00:00"}}, {"id"=>509, "name"=>"Menu Ok", "type"=>"menu", "root"=>false, "options"=>[], "end_call_message"=>{"name"=>"Goodbye", "type"=>"recording", "duration"=>"00:00"}, "invalid_message"=>{}, "explanation_message"=>{"name"=>"Thank you for chosing foo", "type"=>"recording", "duration"=>"00:00"}, "options_message"=>{}}, {"id"=>897, "name"=>"Menu not ok", "type"=>"menu", "root"=>false, "options"=>[], "end_call_message"=>{"name"=>"Bye", "type"=>"recording", "duration"=>"00:00"}, "invalid_message"=>{}, "explanation_message"=>{"name"=>"We will call you back later", "type"=>"recording", "duration"=>"00:00"}, "options_message"=>{}}, {"id"=>2, "name"=>"Menu Ok", "type"=>"menu", "root"=>false, "options"=>[], "end_call_message"=>{}, "invalid_message"=>{}, "explanation_message"=>{"name"=>"Ok. Thank you for choosing bar", "type"=>"recording", "duration"=>"00:00"}, "options_message"=>{}}, {"id"=>3, "name"=>"Menu Not ok", "type"=>"menu", "root"=>false, "options"=>[], "end_call_message"=>{}, "invalid_message"=>{}, "explanation_message"=>{"name"=>"Goodbye", "type"=>"recording", "duration"=>"00:00"}, "options_message"=>{}}]
-      call_flow.save!
+      Hercule::Activity.stub(:search).and_return(hercule_activity_result [
+        { 'call_log_id' => call_log3.id, 'step_id' => 1, 'step_result' => 'timeout' },
+        { 'call_log_id' => call_log1.id, 'step_id' => 1, 'step_result' => 'pressed', 'step_data' => '2' },
+        { 'call_log_id' => call_log2.id, 'step_id' => 1, 'step_result' => 'pressed', 'step_data' => '1' },
+        { 'call_log_id' => call_log2.id, 'step_id' => 593, 'step_result' => 'pressed', 'step_data' => '1' },
+        { 'call_log_id' => call_log4.id, 'step_id' => 1, 'step_result' => 'pressed', 'step_data' => '1' },
+        { 'call_log_id' => call_log4.id, 'step_id' => 593, 'step_result' => 'pressed', 'step_data' => '2' },
+        { 'call_log_id' => call_log5.id, 'step_id' => 1, 'step_result' => 'pressed', 'step_data' => '2' },
+        { 'call_log_id' => call_log5.id, 'step_id' => 737, 'step_result' => 'timeout' },
+        { 'call_log_id' => call_log6.id, 'step_id' => 1, 'step_result' => 'pressed', 'step_data' => '2' },
+        { 'call_log_id' => call_log6.id, 'step_id' => 737, 'step_result' => 'pressed', 'step_data' => '2' },
+        { 'call_log_id' => call_log5.id, 'step_id' => 43212345678, 'step_result' => 'pressed', 'step_data' => '2' },
+      ])
 
-      call_log1 = CallLog.make id: 1, address: 1000, call_flow: call_flow, started_at: Time.now, finished_at: Time.now
-      call_log2 = CallLog.make id: 2, address: 1000, call_flow: call_flow, started_at: Time.now, finished_at: Time.now
-      call_log3 = CallLog.make id: 3, address: 1000, call_flow: call_flow, started_at: Time.now, finished_at: Time.now
-      call_log4 = CallLog.make id: 4, address: 1000, call_flow: call_flow, started_at: Time.now, finished_at: Time.now
-      call_log5 = CallLog.make id: 5, address: 1000, call_flow: call_flow, started_at: Time.now, finished_at: Time.now
-      call_log6 = CallLog.make id: 6, address: 1000, call_flow: call_flow, started_at: Time.now, finished_at: Time.now
+      download_equals 'spec/fixtures/trace.csv'
+    end
 
-    Hercule::Activity.stub(:search).and_return(hercule_activity_result [
-      { 'call_log_id' => call_log3.id, 'step_id' => 1, 'step_result' => 'timeout' },
-      { 'call_log_id' => call_log1.id, 'step_id' => 1, 'step_result' => 'pressed', 'step_data' => '2' },
-      { 'call_log_id' => call_log2.id, 'step_id' => 1, 'step_result' => 'pressed', 'step_data' => '1' },
-      { 'call_log_id' => call_log2.id, 'step_id' => 593, 'step_result' => 'pressed', 'step_data' => '1' },
-      { 'call_log_id' => call_log4.id, 'step_id' => 1, 'step_result' => 'pressed', 'step_data' => '1' },
-      { 'call_log_id' => call_log4.id, 'step_id' => 593, 'step_result' => 'pressed', 'step_data' => '2' },
-      { 'call_log_id' => call_log5.id, 'step_id' => 1, 'step_result' => 'pressed', 'step_data' => '2' },
-      { 'call_log_id' => call_log5.id, 'step_id' => 737, 'step_result' => 'timeout' },
-      { 'call_log_id' => call_log6.id, 'step_id' => 1, 'step_result' => 'pressed', 'step_data' => '2' },
-      { 'call_log_id' => call_log6.id, 'step_id' => 737, 'step_result' => 'pressed', 'step_data' => '2' },
-      { 'call_log_id' => call_log5.id, 'step_id' => 43212345678, 'step_result' => 'pressed', 'step_data' => '2' },
-    ])
+    it 'should include call state' do
+      active_call = CallLog.make id: 1, address: 1000, call_flow: call_flow, channel: channel, direction: :incoming, started_at: Time.now, finished_at: Time.now, state: :active
+      failed_call = CallLog.make id: 2, address: 1000, call_flow: call_flow, channel: channel, direction: :outgoing, started_at: Time.now, finished_at: Time.now, state: :failed
+      completed_call = CallLog.make id: 3, address: 1000, call_flow: call_flow, channel: channel, direction: :incoming, started_at: Time.now, finished_at: Time.now, state: :completed
 
-    response = get :download_results, :format => :csv, id: call_flow.id, project_id: call_flow.project.id
-    response.body.should eq File.read(File.join(Rails.root, 'spec/fixtures/trace.csv'))
+      Hercule::Activity.stub(:search).and_return(hercule_activity_result [
+        { 'call_log_id' => completed_call.id, 'step_id' => 1, 'step_result' => 'timeout' },
+        { 'call_log_id' => active_call.id, 'step_id' => 1, 'step_result' => 'pressed', 'step_data' => '2' },
+        { 'call_log_id' => failed_call.id, 'step_id' => 1, 'step_result' => 'pressed', 'step_data' => '1' },
+        { 'call_log_id' => failed_call.id, 'step_id' => 593, 'step_result' => 'pressed', 'step_data' => '1' },
+      ])
 
-    Timecop.return
+      download_equals 'spec/fixtures/trace_state.csv'
+    end
   end
 
 
@@ -159,11 +183,6 @@ describe CallFlowsController do
       expect {
         delete :destroy, {:id => call_flow.to_param, :project_id => project.to_param}
       }.to change(CallFlow, :count).by(-1)
-    end
-
-    it "should update call_flow_id in channel that use this call_flow to nil" do      
-      Channel.should_receive(:update_all).with({:call_flow_id => nil}, {:call_flow_id => call_flow.to_param.to_i})
-      delete :destroy, {:id => call_flow.to_param, :project_id => project.to_param}
     end
 
     it "redirects to the call_flows list" do

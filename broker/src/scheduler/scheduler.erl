@@ -42,6 +42,9 @@ init({}) ->
   {ok, #state{last_id = 0, waiting_calls = gb_sets:empty()}}.
 
 %% @private
+handle_call(get_queued_calls, _From, State = #state{waiting_calls = WaitingCalls}) ->
+  {reply, gb_sets:to_list(WaitingCalls), State};
+
 handle_call(_Request, _From, State) ->
   {reply, {error, unknown_call}, State}.
 
@@ -85,8 +88,16 @@ load_queued_calls(State = #state{last_id = LastId}) ->
 process_call(Call, State = #state{last_id = LastId, waiting_calls = WaitingCalls}) ->
   NewWaitingCalls = case Call:should_trigger() of
     true ->
-      channel_queue:enqueue(Call),
-      WaitingCalls;
+      case should_skip(Call) of
+        false ->
+          channel_queue:enqueue(Call),
+          WaitingCalls;
+        true ->
+          poirot:log(info, "Call 'not after' date overdue ~p", [Call#queued_call.id]),
+          Call:delete(),
+          io:format("call: ~p~n", [Call]),
+          WaitingCalls
+      end;
     false ->
       enqueue(Call, WaitingCalls)
   end,
@@ -109,3 +120,8 @@ dispatch(Queue) ->
           Queue
       end
   end.
+
+should_skip(#queued_call{not_after = undefined}) -> false;
+should_skip(#queued_call{not_after = {datetime, NotAfter}}) ->
+  NotAfter =< calendar:universal_time();
+should_skip(_) -> false.

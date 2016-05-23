@@ -8,51 +8,51 @@
 -define(SMTP, "smtp").
 
 run(Args, Session = #session{project = Project}) ->
-  Kind = proplists:get_value(kind, Args),
+  Kind = proplists:get_value(kind, Args, undefined),
   RcptType = proplists:get_value(rcpt_type, Args),
   Expr = proplists:get_value(expr, Args),
   SubjectGuid = proplists:get_value(subject_guid, Args),
   ResourceGuid = proplists:get_value(resource_guid, Args),
+  ChannelId = proplists:get_value(channel_id, Args),
 
   {Result, Message} = case rcpt_address(Kind, RcptType, Expr, Session) of
     undefined -> {error, "Missing recipient"};
     RecipientAddress ->
-      case sender_address(Kind, Session) of
+      case sender_address(Kind) of
         undefined -> {error, "Missing sender address"};
         SenderAddress ->
-          case subject_message(SubjectGuid, Session) of
+          case message(SubjectGuid, Session) of
             error -> {error, "Missing subject"};
-            Subject -> 
-              case body_message(ResourceGuid, Session) of
-                undefined -> {error, "Missing text to send"};
-                error -> {error, "Can't play text message"};
-                Body ->
+            Subject ->
+              case resource:prepare(ResourceGuid, Session#session{pbx = nuntium}) of
+                {text, _Lang, Body} ->
                   case Kind of
                     ?QST_SERVER ->
-                      case nuntium_channel:find([{default, 1}, {account_id, Project#project.account_id}]) of
-                        undefined -> {error, "No default SMS channel available"};
-                        DefaultChannel -> 
-                          NuntiumArgs = [
-                            {from, SenderAddress},
-                            {to, RecipientAddress},
-                            {subject, Subject},
-                            {body, Body},
-                            {account_id, Project#project.account_id},
-                            {suggested_channel, DefaultChannel#nuntium_channel.channel_name}
-                          ],
-                          poirot:log(debug, "Sending to nuntium: ~p", [NuntiumArgs]),
-                          case nuntium_api:send_ao(NuntiumArgs) of
-                            ok -> {info, "SMS sent"};
-                            {error, Reason} -> {error, Reason}
-                          end
+                      NuntiumArgs = [
+                        {from, SenderAddress},
+                        {to, RecipientAddress},
+                        {subject, Subject},
+                        {body, Body},
+                        {account_id, Project#project.account_id}
+                      ],
+                      NuntiumArgs1 = case channel_name(ChannelId) of
+                        undefined -> NuntiumArgs;
+                        ChannelName -> [{suggested_channel, ChannelName} | NuntiumArgs]
+                      end,
+                      poirot:log(debug, "Sending to nuntium: ~p", [NuntiumArgs1]),
+                      case nuntium_api:send_ao(NuntiumArgs1) of
+                        ok -> {info, "Sent"};
+                        {error, Reason} -> {error, Reason}
                       end;
-                    ?SMTP -> 
+                    ?SMTP ->
+                      poirot:log(debug, "Sending an email to: ~p", [util:to_string(RecipientAddress)]),
                       case sendmail:send(util:to_string(RecipientAddress), util:to_string(SenderAddress), util:to_string(Subject), util:to_string(Body)) of
                         {0, _} -> {info, "Email sent"};
                         _ -> {error, "Email can't be sent"}
                       end;
                     _ -> {error, "Missing channel type"}
-                  end
+                  end;
+                _ -> {error, "Missing text to send"}
               end
           end
       end
@@ -60,7 +60,7 @@ run(Args, Session = #session{project = Project}) ->
 
   case Result of
     info -> poirot:log(info, Message);
-    error -> poirot:add_meta([{error, iolist_to_binary(io_lib:format("~p", [Message]))}])
+    error -> poirot:log(error, Message)
   end,
 
   {next, Session}.
@@ -69,6 +69,7 @@ rcpt_address(Kind, RcptType, Expr, Session) ->
   case rcpt_address_from_session(RcptType, Expr, Session) of
     undefined -> undefined;
     "" -> undefined;
+    <<>> -> undefined;
     Address -> recipient(Kind, Address)
   end.
 
@@ -86,6 +87,17 @@ rcpt_address_from_session(expr, Expr, #session{js_context = JS}) ->
     _ -> list_to_binary(util:to_string(Value))
   end.
 
+channel_name(ChannelId) ->
+  case ChannelId of
+    undefined -> undefined;
+    _ ->
+      Channel = nuntium_channel:find(ChannelId),
+      case Channel of
+        undefined -> undefined;
+        _ -> Channel#nuntium_channel.channel_name
+      end
+  end.
+
 recipient(Kind, Address) ->
   case Kind of
     ?QST_SERVER ->
@@ -97,35 +109,20 @@ recipient(Kind, Address) ->
     _ -> undefined
   end.
 
-sender_address(Kind, #session{call_log = CallLog}) ->
+sender_address(Kind) ->
   case Kind of
     ?QST_SERVER -> <<"sms://verboice">>;
-    ?SMTP -> 
-      Call = call_log:find(CallLog:id()),
-      case account:find(Call#call_log.account_id) of
-        undefined -> <<"noreply@verboice.org">>;
-        Account -> Account#account.email
-      end;
+    ?SMTP -> <<"noreply@verboice.org">>;
     _ -> undefined
   end.
 
-subject_message(Guid, Session) ->
+message(Guid, Session) ->
   case Guid of
     undefined -> <<>>;
     "" -> <<>>;
     _ -> case resource:prepare(Guid, Session#session{pbx = nuntium}) of
       {text, _Lang, Subject} -> Subject;
       _ -> error
-    end
-  end.
-
-body_message(Guid, Session) ->
-  case Guid of
-    undefined -> undefined;
-    "" -> undefined;
-    _ -> case resource:prepare(Guid, Session#session{pbx = nuntium}) of
-        {text, _Lang, Body} -> Body;
-        _ -> error
     end
   end.
 

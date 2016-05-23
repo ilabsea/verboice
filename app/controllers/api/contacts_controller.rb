@@ -15,13 +15,44 @@
 # You should have received a copy of the GNU General Public License
 # along with Verboice.  If not, see <http://www.gnu.org/licenses/>.
 class Api::ContactsController < ApiController
-  before_filter :validate_project, only: [:create, :unregistration]
+  before_filter :check_project_admin, :except => [:index, :show_by_address]
+  before_filter :check_project_reader, :only => [:index, :show_by_address]
 
-  expose(:project) { current_account.projects.find params[:project_id] }
+  expose(:project) { @project }
 
-  def index
+  def index    
     contacts = project.contacts.includes(:addresses).all
-    render json: contacts_to_json(contacts), root: false
+    render json: contacts_to_json(contacts)
+  end
+
+  def create
+    # normalize address parameter in case we get a single address
+    if params[:address].present?
+      params[:addresses] = [params[:address]]
+    end
+    params[:addresses] = Array.wrap(params[:addresses])
+
+    contact = project.contacts.build
+    params[:addresses].each do |address|
+      contact.addresses.build address: address
+    end
+
+    project_vars = project.project_variables.all
+    project_vars = project_vars.index_by &:name
+
+    (params[:vars] || {}).each do |key, value|
+      project_var = project_vars[key]
+      unless project_var
+        return render text: "No such variable: #{key}", status: :bad_reqeust
+      end
+      contact.persisted_variables.build project_variable_id: project_var.id, value: value
+    end
+
+    if contact.save
+      render json: contacts_to_json([contact])[0]
+    else
+      render json: contact.errors, status: :bad_request
+    end
   end
 
   def show_by_address
@@ -152,14 +183,4 @@ class Api::ContactsController < ApiController
       }
     end
   end
-
-  def validate_project
-    begin
-      current_account.projects.find(params[:project_id])
-    rescue
-      render json: "The project is not found".to_json, status: :not_found
-      return
-    end
-  end
-
 end

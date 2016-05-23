@@ -69,19 +69,20 @@ class ProjectsController < ApplicationController
     options[:account] = current_account
     options[:schedule_id] = params[:schedule_id] if params[:schedule_id].present?
     options[:not_before] = "#{params[:not_before_date]} #{params[:not_before_time]}" if params[:not_before_date].present? && params[:not_before].present?
+    options[:not_after] = "#{params[:not_after_date]} #{params[:not_after_time]}" if params[:not_after_date].present? && params[:not_after].present?
     options[:time_zone] = params[:time_zone] if params[:time_zone].present?
     options[:call_flow_id] = params[:call_flow_id] if params[:call_flow_id].present?
     options[:project_id] = params[:id]
     options[:vars] = params[:vars]
 
-    DateTime.parse(options[:not_before]) rescue redirect_to project_path(params[:id]), flash: {error: I18n.t("controllers.projects_controller.enter_valid_date")} and return if options[:not_before]
-
-    addresses = curated_addresses(addresses)
+    #addresses = curated_addresses(addresses)
     addresses.each do |address|
       @channel.call(address.strip, options)
     end
 
     redirect_to project_path(params[:id]), {:notice => I18n.t("controllers.projects_controller.enqueued_call_to_on_channel", :pluralize => pluralize(addresses.count, 'address'), :channel_name => @channel.name)}
+  rescue CallQueuingError => e
+    redirect_to project_path(params[:id]), flash: {error: e.message}
   end
 
   def destroy

@@ -1,0 +1,27 @@
+= render 'shared/project_tabs_and_title', :project => @project, :shared_project => @shared_project
+
+%h2 Queued calls
+%p.desc Calls scheduled to be made
+= render 'tabs'
+
+%br
+= render 'call_selector'
+%br
+
+.tablewrapp.no-wrap.scroll.contacts-table
+  %table.GralTable
+    %tr
+      %th ID
+      %th Channel
+      %th Date
+      %th Schedule
+      %th
+      - @calls.each do |call|
+        %tr
+          %td= call.id
+          %td= call.channel.name
+          %td= call.not_before
+          %td= call.schedule.try(:name)
+          %td= link_to t('views.call_logs.index.action.view_details'), call_log_path(call, project_id: @project.id) if call.store_log_entries
+
+    = paginate @calls

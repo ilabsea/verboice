@@ -6,8 +6,8 @@
 .sbox.grey.StateDisplay.w30
   .values
     .U
-      %span.big= @channel.call_logs.size
-      %span= t('views.channels.show.label.registerd', :count => @channel.call_logs.size)
+      - calls_count = @channel.call_logs.for_account(current_account).count
+      %span.big= t('views.channels.show.label.registerd', :count => @channel.call_logs.size)
       
   = link_to t('views.channels.show.action.download_as_csv'), download_call_logs_path(:format => :csv, :search => "channel_id:\"#{@channel.id}\""), :class => "button white"
 
@@ -35,8 +35,8 @@
   %li
     .i48grad-time
     %div
-      %span= t('views.channels.show.label.queued_call', :count => @channel.queued_calls.size)
-    = link_to t('views.channels.show.action.view_calls'), queued_call_logs_path, :class => "button farrow"
+      %span= pluralize @channel.queued_calls.for_account(current_account).count, 'queued call'
+    = link_to t('views.channels.show.action.view_calls'), queued_call_logs_path(channel_id: @channel.id), :class => "button farrow"
   - if @channel.is_a?(Channels::Sip)
     %li
       .i48grad-dataBase

@@ -46,6 +46,8 @@ class Account < ActiveRecord::Base
 
   has_one :google_oauth_token, :class_name => 'OAuthToken', :conditions => {:service => :google}, :dependent => :destroy
 
+  after_save :telemetry_track_activity
+
   # CONSTANT ROLE
   ADMIN = 1
   USER = 2
@@ -84,6 +86,10 @@ class Account < ActiveRecord::Base
     return shared_project.project if shared_project
 
     nil
+  end
+
+  def readable_project_ids
+    projects.pluck(:id) + ProjectPermission.where(account_id: id).pluck(:model_id)
   end
 
   def find_call_flow_by_id(flow_id)
@@ -125,6 +131,10 @@ class Account < ActiveRecord::Base
     end
   end
 
+  def telemetry_track_activity
+    InsteddTelemetry.timespan_since_creation_update(:account_lifespan, {account_id: self.id}, self)
+  end
+  
   def clear_downloads
     Dir[File.join RecordingManager.for(self).path_for('downloads'), '*.zip'].each do |file|
       File.delete file if (Time.now - File.ctime(file)).to_i > 7.days

@@ -21,7 +21,8 @@ Verboice::Application.routes.draw do
 
   match '/' => 'home#index',  :as => 'home'
 
-  devise_for :accounts, controllers: { registrations: 'registrations', sessions: 'sessions' }
+  devise_for :accounts, controllers: {omniauth_callbacks: "omniauth_callbacks"}
+  guisso_for :account
   
   resources :call_log_recorded_audios, only: [:update]
 
@@ -75,8 +76,17 @@ Verboice::Application.routes.draw do
       resources :schedules
 
       resources :contacts, except: [:show] do
-        get :invitable, on: :collection
-        get :download, on: :collection, as: 'download'
+        collection do
+          get :search, :action => :index, :as => 'search'
+          get :download, as: 'download'
+          get :invitable
+          post :upload_csv
+          post :import_csv
+        end
+        member do
+          get :calls
+          get :queued_calls
+        end
       end
 
       resources :resources do
@@ -95,6 +105,12 @@ Verboice::Application.routes.draw do
       end
 
       resources :feeds
+
+      resources :scheduled_calls do
+        collection do
+          post :from_filter, :action => :new, :as => 'from_filter'
+        end
+      end
       
       resources :call_logs, :path => :calls, :only => :index do |r|
         collection do
@@ -105,6 +121,7 @@ Verboice::Application.routes.draw do
 
         member do
           get :download_details
+          get 'results/:key', :action => :play_result, :as => 'result'
         end
       end
 
@@ -112,16 +129,15 @@ Verboice::Application.routes.draw do
     end
   end
 
-  resources :call_logs, path: :calls do
+  resources :call_logs, path: :calls, only: [:index, :show] do
     member do
       get :progress
       get 'results/:key', :action => :play_result, :as => 'result'
+      get :download_details
     end
     collection do
-      get :queued
       put :queued_paused
       put :queued_resumed
-      get :download
     end
   end
 
@@ -180,7 +196,9 @@ Verboice::Application.routes.draw do
         delete ":name", :action => "destroy"
       end
     end
-    resources :projects, only: [:index] do
+    resources :projects, only: [:index, :show] do
+      resources :project_variables, only: :index
+      resources :call_flows, only: [:index, :show]
       resources :contacts, only: [:index, :create] do
         collection do
           get 'by_address/:address', :action => "show_by_address"
@@ -198,9 +216,10 @@ Verboice::Application.routes.draw do
       end
 
       resources :reminder_groups, only: [:index, :create, :update, :destroy]
-    end
 
-    post 'reminder_groups/:id/contacts' => 'reminder_groups#contacts', as: 'register_contact_to_reminder_group'
+      post 'reminder_groups/:id/contacts' => 'reminder_groups#contacts', as: 'register_contact_to_reminder_group'
+      
+    end
 
     resources :logs, only: [] do
       collection do
@@ -275,6 +294,12 @@ Verboice::Application.routes.draw do
       member do
         get 'play_audio'
       end
+      
+      resources :recorded_audios, path: :audios, only: [:index] do
+        collection do
+          get ':filename', action: :play
+        end
+      end
     end
 
     get "call_flows" => "call_flows#list"
@@ -304,4 +329,9 @@ Verboice::Application.routes.draw do
   root :to => 'home#index'
 
   get 'terms_and_conditions', :to => redirect('/')
+
+  match '/hub/*path' => 'hub#api', format: false
+
+  mount Listings::Engine => "/listings"
+  mount InsteddTelemetry::Engine => "/instedd_telemetry"
 end

@@ -172,7 +172,7 @@ describe Ext::ReminderSchedule  do
       }
 
       reminder = Ext::ReminderSchedule.create params
-      reminder.save.should be_true
+      reminder.save.should eq true
       reminder.reminder_channels.count.should eq 0
 
       reminder.update_attributes(@attr)
@@ -664,15 +664,15 @@ describe Ext::ReminderSchedule  do
 
     it "should reset repeat every wday to one time schedule" do
       # before
-      @reminder_schedule.in_schedule_date?(Date.new(2012,10,25)).should be_true
-      @reminder_schedule.in_schedule_date?(Date.new(2012,10,26)).should be_true
+      @reminder_schedule.in_schedule_date?(Date.new(2012,10,25)).should eq true
+      @reminder_schedule.in_schedule_date?(Date.new(2012,10,26)).should eq true
 
       @reminder_schedule.reset_repeat_everyday_to_one_time!
 
       # after
       @reminder_schedule.schedule_type.should eq(Ext::ReminderSchedule::TYPE_ONE_TIME)
-      @reminder_schedule.in_schedule_date?(Date.new(2012,10,25)).should be_true
-      @reminder_schedule.in_schedule_date?(Date.new(2012,10,26)).should be_false
+      @reminder_schedule.in_schedule_date?(Date.new(2012,10,25)).should eq true
+      @reminder_schedule.in_schedule_date?(Date.new(2012,10,26)).should eq false
     end
   end
 

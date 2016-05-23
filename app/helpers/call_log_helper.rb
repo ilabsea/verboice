@@ -23,4 +23,23 @@ module CallLogHelper
 
     logs.count > CallLog::CSV_MAX_ROWS || audios.count == 0
   end
+  
+  def call_log_fail_info(call_log, link=true)
+    return nil if call_log.fail_reason.nil?
+    info = content_tag(:span, "#{call_log.fail_reason.capitalize}. ")
+    if call_log.fail_code
+      fail_details = call_log.fail_details ? "#{call_log.fail_details} (#{call_log.fail_code})" : "Code #{call_log.fail_code}."
+      info << link_to_if(link, fail_details, error_code_url(call_log.fail_code), class: 'call-log-fail-info')
+    elsif call_log.fail_details
+      info << content_tag(:span, "#{call_log.fail_details}.")
+    end
+    info
+  end
+
+  def error_code_url(code)
+    url = "https://github.com/instedd/verboice/wiki/Error-codes"
+    url << "##{code.gsub(':', '').downcase}" if code
+    url
+  end
+  
 end

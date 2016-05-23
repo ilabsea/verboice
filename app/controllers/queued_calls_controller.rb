@@ -18,18 +18,8 @@
 class QueuedCallsController < ApplicationController
   before_filter :authenticate_account!
 
-  def index
-    @page = params[:page] || 1
-    @per_page = 10
-    @channel = current_account.channels.find params[:channel_id]
-    @queued_calls = @channel.queued_calls.paginate :page => @page, :per_page => @per_page
-
-    render :layout => false
-  end
-
   def destroy
-    @channel = current_account.channels.includes(:queued_calls).find params[:channel_id]
-    @call = @channel.queued_calls.find(params[:id])
+    @call = QueuedCall.for_account(current_account).find(params[:id])
     @call.cancel_call!
     @call.destroy
 

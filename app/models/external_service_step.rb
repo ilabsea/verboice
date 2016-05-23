@@ -19,7 +19,7 @@ class ExternalServiceStep < ActiveRecord::Base
   belongs_to :external_service
 
   has_one :project, through: :external_service
-  attr_accessible :callback_url, :display_name, :icon, :name, :kind, :variables, :response_variables, :session_variables, :guid, :script, :external_service_id, :async
+  attr_accessible :callback_url, :display_name, :icon, :name, :kind, :variables, :response_variables, :session_variables, :guid, :script, :external_service_id, :async, :response_type
 
   serialize :variables, Array
   serialize :response_variables, Array
@@ -41,7 +41,11 @@ class ExternalServiceStep < ActiveRecord::Base
     true
   end
 
-  class Variable < Struct.new(:name, :display_name, :type)
+  def absolute_callback_url
+    external_service.to_absolute_url callback_url
+  end
+
+  class Variable < Struct.new(:name, :display_name, :type, :required)
     def valid?(parent, field)
       unless self.name =~ /^[a-zA-Z_][a-zA-Z0-9_]*$/
         parent.errors.add(field, "contain invalid name #{self.name}")

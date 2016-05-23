@@ -33,7 +33,6 @@ handle_event({originateresponse, Packet}, State) ->
 
 handle_event({newchannel, Packet}, State) ->
   NewChannel = ami_client:decode_packet(Packet),
-  io:format("New channel: ~p~n", [NewChannel]),
   Channel = proplists:get_value(channel, NewChannel),
   asterisk_pbx_log_srv:start_link(Channel),
   {ok, State};
@@ -48,6 +47,20 @@ handle_event({hangup, Packet}, State) ->
   Event = ami_client:decode_packet(Packet),
   Channel = proplists:get_value(channel, Event),
   asterisk_pbx_log_srv:hangup(Channel, Event),
+  {ok, State};
+
+handle_event({peerstatus, Packet}, State) ->
+  Event = ami_client:decode_packet(Packet),
+  case proplists:get_value(peerstatus, Event) of
+    <<"Registered">> ->
+      case proplists:get_value(peer, Event) of
+        <<"SIP/verboice_", ChannelId/binary>> ->
+          [IP | _] = binary:split(proplists:get_value(address, Event), <<$:>>),
+          asterisk_channel_srv:register_channel(binary_to_integer(ChannelId), binary_to_list(IP));
+        _ -> ok
+      end;
+    _ -> ok
+  end,
   {ok, State};
 
 handle_event(_Event, State) ->

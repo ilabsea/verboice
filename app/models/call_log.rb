@@ -17,7 +17,7 @@
 
 class CallLog < ActiveRecord::Base
   include CallLogSearch
-
+  
   CSV_MAX_ROWS = 262144 # 2 ^ 18
   
   STATE_ACTIVE = :active
@@ -36,7 +36,9 @@ class CallLog < ActiveRecord::Base
     'no_ack' => 'no_ack',
     'terminated' => 'terminated',
     'blocked' => "blocked",
-    'disabled' => "disabled"
+    'disabled' => "disabled",
+    'external_step_broken' => 'error (external step was broken)',
+    'unknown_resource' => 'error (step was broken)'
   }
 
   DATE_FORMAT_EXPORT = [
@@ -51,12 +53,17 @@ class CallLog < ActiveRecord::Base
   belongs_to :call_flow
   belongs_to :channel
   belongs_to :schedule
+  belongs_to :contact
   has_many :traces, :foreign_key => 'call_id'
   has_many :entries, :foreign_key => 'call_id', :class_name => "CallLogEntry"
   has_many :call_log_answers, :dependent => :destroy
   has_many :recorded_audios, :dependent => :destroy
   has_many :call_log_recorded_audios, :dependent => :destroy
   has_many :pbx_logs, :foreign_key => :guid, :primary_key => :pbx_logs_guid
+
+  scope :for_account, ->(account) {
+    joins(:channel).where('call_logs.project_id IN (?) OR call_logs.account_id = ? OR channels.account_id = ?', account.readable_project_ids, account.id, account.id)
+  }
 
   before_validation :set_account_to_project_account, :if => :call_flow_id?
 
@@ -169,22 +176,12 @@ class CallLog < ActiveRecord::Base
     self.entries.order('created_at DESC, id DESC').first
   end
 
-  def step_activities
-    Hercule::Activity.search({size: 1000, filter: {
-      and: [
-        {term: {call_log_id: id}},
-        {exists: {field: "step_type"}}
-      ]
-    }}).items
-  end
-
-  def self.step_activities_for(call_logs)
-    Hercule::Activity.search({size: 1000000, filter: {
-      and: [
-        {terms: {call_log_id: call_logs.map(&:id)}},
-        {exists: {field: "step_type"}}
-      ]
-    }}).items.group_by { |x| x.fields['call_log_id'] }
+  def self.poirot_activities(id_or_ids)
+    entries = CallLogEntry.where(call_id: id_or_ids)
+    activities = entries.select { |x| x.details.has_key?(:activity) }.map do |x|
+      activity = JSON.load(x.details[:activity])
+      Hercule::Activity.new({'_source' => activity["body"]})
+    end
   end
 
   def self.audios_size
@@ -215,7 +212,7 @@ class CallLog < ActiveRecord::Base
   def set_account_to_project_account
     self.project_id = self.call_flow.project_id
     self.account_id = self.project.account_id
-    contact = self.project.contacts.joins(:addresses).where(:contact_addresses => {:address => self.address}).first
+    contact = self.project.contacts.joins(:addresses).where(:contact_addresses => {project_id: self.project.id, address: self.address}).first
     self.contact_id = contact.id unless contact.nil?
   end
 end

@@ -19,8 +19,8 @@ class Api2::SessionsController < Api2Controller
   before_filter :ensure_params_exist
 
   def create
-    account = Account.find_by_email(params[:account][:email])
-    if account && account.valid_password?(params[:account][:password])
+    if AltoGuissoRails.valid_credentials?(params[:account][:email], params[:account][:password])
+      account = Account.find_by_email(params[:account][:email])
       render :json=> {:success=>true, :auth_token => account.auth_token, :email=> account.email, role: account.role}
     else
       response_with_invalid_credential

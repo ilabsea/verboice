@@ -14,6 +14,8 @@
     = link_to t('views.shared._project_tabs_and_title.action.resources'), project_resources_path(project)
   %li{ :class =>"#{"active" if params[:controller] == "schedules"}" }
     = link_to t('views.shared._project_tabs_and_title.action.schedules'), project_schedules_path(project)
+  %li{ :class =>"#{"active" if params[:controller] == "scheduled_calls"}" }
+    = link_to "Scheduled Calls", project_scheduled_calls_path(project)
   %li{ :class =>"#{"active" if params[:controller] == "contacts"}" }
     = link_to t('views.shared._project_tabs_and_title.action.phone_book'), project_contacts_path(project)
   %li{ :class =>"#{"active" if params[:controller] == "external_services"}"}

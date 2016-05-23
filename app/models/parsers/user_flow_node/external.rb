@@ -55,7 +55,7 @@ module Parsers
               external_service_guid: service.guid,
             }
             options[:async] = true if service_step.async
-            compiler.Callback service_step.callback_url, options
+            compiler.Callback service_step.absolute_callback_url, options
             assign_responses(compiler, service_step)
           when 'script'
             compiler.Trace context_for %("Executing External Service #{service.name}.")
@@ -76,7 +76,9 @@ module Parsers
         HashWithIndifferentAccess.new.tap do |hash|
           if @settings.present?
             @settings.each do |setting|
-              hash[setting['name']] = InputSetting.new(setting).expression
+              hash[setting['name']] = {}
+              hash[setting['name']]['value'] = InputSetting.new(setting).expression
+              hash[setting['name']]['required'] = setting['required'] ? "true" : "false"
             end
           end
           if service_step.session_variables.present?

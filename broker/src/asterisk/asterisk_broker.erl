@@ -34,8 +34,11 @@ dial_address(#channel{type = <<"Channels::Custom">>, config = Config}, Address) 
     end
   end);
 
-dial_address(#channel{id = Id}, Address) ->
-  ["SIP/verboice_", integer_to_list(Id), "-outbound/", util:to_string(Address)].
+dial_address(Channel = #channel{id = Id}, Address) ->
+  case channel:domain(Channel) of
+    [] -> ["SIP/verboice_", integer_to_list(Id), "/", Address];
+    _ -> ["SIP/verboice_", integer_to_list(Id), "-outbound/", Address]
+  end.
 
 dispatch(#session{session_id = SessionId, channel = Channel, address = Address}) ->
   CallerId = channel:number(Channel),
@@ -48,5 +51,6 @@ dispatch(#session{session_id = SessionId, channel = Channel, address = Address})
     {data, ["agi://localhost:", integer_to_list(BrokerPort), ",", SessionId]},
     {async, true},
     {actionid, SessionId},
+    {timeout, 60000},
     {variable, ["verboice_session_id=", SessionId]}
   ]).

@@ -1,6 +1,6 @@
 -module(twilio_pbx).
 -compile([{parse_transform, lager_transform}]).
--export([pid/1, answer/1, hangup/1, can_play/2, play/2, capture/6, terminate/1, sound_path_for/2, dial/4, record/4]).
+-export([pid/1, answer/1, hangup/1, can_play/2, play/2, capture/6, terminate/1, sound_path_for/2, sound_quality/1, dial/4, record/4]).
 -behaviour(pbx).
 
 -export([start_link/1, find/1, new/1, resume/2, user_hangup/1]).
@@ -33,7 +33,8 @@ pid(?PBX) -> Pid.
 
 answer(?PBX(_)) -> ok.
 
-hangup(?PBX(_)) -> throw(not_implemented).
+hangup(?PBX) ->
+  gen_server:call(Pid, hangup).
 
 can_play(url, _) -> true;
 can_play({text, Lang}, _) -> lists:member(util:to_string(Lang), ["en", "es", "fr", "de", "it"]);
@@ -60,6 +61,9 @@ terminate(?PBX) ->
 sound_path_for(Name, ?PBX(_)) ->
   {ok, Dir} = file:get_cwd(),
   filename:join([Dir, "tmp/www", Name ++ ".mp3"]).
+
+sound_quality(?PBX(_)) ->
+  "44100".
 
 dial(_Channel, Number, CallerId, ?PBX(Pid)) ->
   case gen_server:call(Pid, {dial, Number, CallerId}, timer:minutes(60)) of
@@ -152,6 +156,10 @@ handle_call(user_hangup, _From, State) ->
     Session -> gen_server:reply(Session, hangup)
   end,
   {reply, ok, State, timer:seconds(5)};
+
+handle_call(hangup, _From, State) ->
+  {noreply, HangupState} = flush(undefined, append('Hangup', State)),
+  {reply, ok, HangupState};
 
 handle_call(terminate, _From, State) ->
   {stop, normal, ok, State}.

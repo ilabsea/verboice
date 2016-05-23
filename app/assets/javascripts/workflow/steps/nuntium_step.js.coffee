@@ -21,8 +21,11 @@ onWorkflow ->
       @is_subject_invalid = ko.computed () => not @subject.is_valid() or not @subject.is_text()
 
       @kind = ko.observable attrs.kind || "qst_server"
-      @recipient = new NuntiumRecipient((if @is_sms_channel() then attrs.recipient) || { caller: true })
-      @email_to = new NuntiumRecipient((if @is_smtp_channel() then attrs.recipient) || { value: "" })
+      @recipient = new NuntiumRecipient(attrs.recipient || { caller: true })
+
+      @channel_id = ko.observable(attrs.channel_id || window.last_selected_channel_id)
+      @channel_id.subscribe (new_id) ->
+        window.last_selected_channel_id = new_id
 
       @is_invalid = ko.computed () => @is_name_invalid() or @is_resource_invalid() or @is_sms_configured_invalid() or @is_smtp_configured_invalid()
 
@@ -30,7 +33,7 @@ onWorkflow ->
     is_smtp_channel: -> @kind() is "smtp"
 
     is_sms_configured_invalid: -> if (@is_sms_channel() and @recipient.is_invalid()) then true else false
-    is_smtp_configured_invalid: -> if (@is_smtp_channel() and (@email_to.is_invalid() or @is_subject_invalid())) then true else false
+    is_smtp_configured_invalid: -> if (@is_smtp_channel() and (@recipient.is_invalid() or @is_subject_invalid())) then true else false
 
     button_class: () =>
       'lmessage'
@@ -48,9 +51,9 @@ onWorkflow ->
     to_hash: () =>
       $.extend(super,
         kind: @kind(),
-        recipient: if @is_sms_channel() then @recipient.to_hash() else @email_to.to_hash(),
+        recipient: @recipient.to_hash(),
         subject: @subject.to_hash(),
-        resource: @resource.to_hash(),
+        resource: @resource.to_hash()
       )
 
     show_resource: () =>

@@ -18,12 +18,21 @@
 require 'spec_helper'
 
 describe Contact do
+
+  let!(:project) do 
+    account = Account.make
+    account.projects.make
+  end
   
-  let(:project) { Project.make }
   let(:contact) { Contact.make project: project }
   let(:project_var1) { project.project_variables.make :name => "var1" }
   let(:project_var2) { project.project_variables.make :name => "var2" }
 
+  it '#semicolon_separated_addresses' do
+    contact = Contact.make :project => project, :addresses_attributes => [{:address => '123'}, {:address => '456'}]
+    contact.semicolon_separated_addresses.should eq("123;456")
+  end
+  
   describe ".register" do
     before(:each) do
       @project = Project.make

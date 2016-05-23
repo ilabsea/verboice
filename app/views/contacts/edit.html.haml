@@ -2,7 +2,6 @@
 
 %h2= t('views.contacts.edit.label.title')
 
-%table
-  %tr
-    %td{ valign: 'top', width: '30%' }= render 'form'
-    %td{ valign: 'top' }= render 'calls'
+= render 'tabs'
+
+= render 'form'

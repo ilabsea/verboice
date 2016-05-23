@@ -51,5 +51,23 @@ class String
   def to_date_regex()
     "^" + self.gsub("%Y", "[0-9]{4}").gsub("%m", "[0-9]{2}").gsub("%d", "[0-9]{2}") + "$"
   end
+  
+  def is_integer?
+    return true if Integer(self) rescue false
+  end
+
+  def is_number?
+    is_integer? || (true if Float(self) rescue false)
+  end
+
+  def try_as_number
+    if is_integer?
+      Integer(self)
+    elsif is_number?
+      Float(self)
+    else
+      self
+    end
+  end
 
 end

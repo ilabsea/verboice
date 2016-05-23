@@ -64,7 +64,7 @@ describe Ext::Condition do
       describe "date time" do
         before(:each) do
           @today = Date.new(2013, 03, 22)
-          Date.stub!(:today).and_return(@today)
+          Date.stub(:today).and_return(@today)
         end
 
         it "should today is '22/03/2013'" do

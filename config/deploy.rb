@@ -19,7 +19,7 @@ require 'bundler/capistrano'
 
 if ENV['RVM']
   require 'rvm/capistrano'
-  set :rvm_ruby_string, '1.9.3'
+  set :rvm_ruby_string, '1.9.3-p550'
   set :rvm_type, :system
 else
   default_run_options[:shell] = "/bin/bash --login"
@@ -33,9 +33,7 @@ set :default_stage, :staging
 require 'capistrano/ext/multistage'
 
 set :application, "verboice"
-set :use_sudo , false
-
-set :repository, "https://bitbucket.org/ilab/verboice"
+set :repository,  "https://github.com/ilabsea/verboice"
 set :scm, :git
 set :deploy_via, :remote_cache
 
@@ -66,7 +64,7 @@ namespace :deploy do
   end
 
   task :symlink_configs, :roles => :app do
-    %W(asterisk credentials freeswitch verboice voxeo newrelic nuntium aws log_file app_config step_config api recaptcha login).each do |file|
+    %W(asterisk credentials freeswitch verboice voxeo newrelic oauth nuntium poirot guisso database aws log_file app_config step_config api recaptcha login hub telemetry).each do |file|
       run "ln -nfs #{shared_path}/#{file}.yml #{release_path}/config/"
     end
   end
@@ -88,10 +86,10 @@ namespace :foreman do
   desc 'Export the Procfile to Ubuntu upstart scripts'
   task :export, :roles => :app do
     if ENV['RVM']
-      run "echo -e \"PATH=$PATH\\nGEM_HOME=$GEM_HOME\\nGEM_PATH=$GEM_PATH\\nRAILS_ENV=production\" >  #{current_path}/.env"
+      run "echo -e \"HOME=$HOME\\nPATH=$PATH\\nGEM_HOME=$GEM_HOME\\nGEM_PATH=$GEM_PATH\\nRAILS_ENV=production\" >  #{current_path}/.env"
       run "cd #{current_path} && rvmsudo bundle exec foreman export upstart /etc/init -f #{current_path}/Procfile -a #{application} -u #{user} --concurrency=\"broker=1,delayed=1\""
     else
-      run "echo -e \"PATH=$PATH\\nRAILS_ENV=production\" >  #{current_path}/.env"
+      run "echo -e \"HOME=$HOME\\nPATH=$PATH\\nRAILS_ENV=production\" >  #{current_path}/.env"
       run "cd #{current_path} && #{try_sudo} `which bundle` exec foreman export upstart /etc/init -f #{current_path}/Procfile -a #{application} -u #{user} --concurrency=\"broker=1,delayed=1\""
     end
   end
@@ -115,7 +113,7 @@ end
 before 'deploy:finalize_update', "deploy:symlink_configs"
 before "deploy:start", "deploy:migrate"
 before "deploy:restart", "deploy:migrate"
-# after "deploy:update_code", "deploy:symlink_configs"
+after "deploy:update_code", "deploy:symlink_configs"
 after "deploy:update_code", "deploy:symlink_data"
 after "deploy:update_code", "deploy:symlink_help"
 after "deploy:update_code", "deploy:prepare_broker"

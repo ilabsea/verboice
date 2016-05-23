@@ -97,5 +97,5 @@ not_before(When, Args) ->
       Seconds = util:parse_short_time(Delay),
       datetime_utils:time_from_now(Seconds);
     _ ->
-      datetime_utils:time_from_now(15)
+      datetime_utils:time_from_now(application:get_env(verboice, seconds_for_call_back, 15))
   end.

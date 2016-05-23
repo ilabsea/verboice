@@ -37,22 +37,22 @@
     .i48grad-call-flow
     %div
       %span="#{pluralize @call_flows.size, 'Call flow'} #{t('views.projects.show.label.in_this_project')}"
-    = link_to t('views.projects.show.action.edit_call_flows'), project_call_flows_path(@project), :class => "button faccept"
+    = link_to t('views.projects.show.action.edit_call_flows'), project_call_flows_path(@project), :class => "button farrow"
   %li
     .i48grad-channel
     %div
       %span= "#{pluralize @project_channels.size, 'channel'} #{t('views.projects.show.label.in_this_project')}"
-    = link_to t('views.projects.show.action.manage_channels'), channels_path, :class => "button faccept"
+    = link_to t('views.projects.show.action.manage_channels'), channels_path, :class => "button farrow"
 
   %li
     .i48grad-time
     %div
       %span= pluralize @queued_calls.size, 'queued call'
-    = link_to t('views.projects.show.action.view_calls'), queued_call_logs_path, :class => "button faccept"
+    = link_to t('views.projects.show.action.view_calls'), queued_call_logs_path(project_id: @project.id), :class => "button farrow"
 
 %br{ :clear => 'left'}
 
-= link_to t('views.projects.show.action.edit_settings'), edit_project_path(@project), :class => "button faccept"
+= link_to t('views.projects.show.action.edit_settings'), edit_project_path(@project), :class => "button farrow"
 %hr
 
 - if project_owner?

@@ -12,6 +12,7 @@
 .DS_Store
 tmp/*
 spec/reports/*
+spec/tmp
 public/assets
 public/applications
 data
@@ -27,11 +28,18 @@ broker/deps
 broker/ebin
 broker/verboice.config
 broker/.eunit
+broker/.rebar
 broker/*.plt
 broker/rel/verboice
 broker/erl_crash.dump
 
 vendor/ruby
+vendor/bundle
+admin/backups/verboice*
+
+*.sublime-project
+*.sublime-workspace
 
 script/sphinx3
 config/recaptcha.yml
+config/aws.yml
