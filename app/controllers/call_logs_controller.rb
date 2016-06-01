@@ -76,6 +76,9 @@ class CallLogsController < ApplicationController
   def download_details
     load_project
     @log = @project.call_logs.includes(:entries).find params[:id]
+    @activities = @log.step_activities.sort_by(&:start)
+
+    @filename = "Call details #{@log.id} (#{Time.now}).csv"
   end
 
   def generate_zip
