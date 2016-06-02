@@ -28,22 +28,22 @@ describe Account do
 
   describe 'save' do
     it 'generate auth_token for user' do
-      expect(super_user.auth_token.empty?).to be false
+      super_user.auth_token.empty?.should be false
     end
   end
 
   describe "#admin?" do
-    it { expect(super_user.admin?).to be true }
-    it { expect(user.admin?).to be false }
+    it { super_user.admin?.should be true }
+    it { user.admin?.should be false }
   end
 
   describe "#user?" do
-    it { expect(super_user.user?).to be false }
-    it { expect(user.user?).to be true }
+    it { super_user.user?.should be false }
+    it { user.user?.should be true }
   end
   
   describe "#has_access_from?" do
-    it { expect(super_user.has_access_from?("192.192.192.192")).to be false }
-    it { expect(super_user.has_access_from?("127.0.0.1")).to be true }
+    it { super_user.has_access_from?("192.192.192.192").should be false }
+    it { super_user.has_access_from?("127.0.0.1").should be true }
   end
 end

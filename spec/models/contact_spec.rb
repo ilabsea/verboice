@@ -106,7 +106,7 @@ describe Contact do
         PersistedVariable.make contact: @contact1, project: project, project_variable: project_var1, updated_at: Time.now
       end
 
-      it { expect(@contact1.last_updated_value_than?(@contact2, project_var1)).to eq(true) }
+      it { @contact1.last_updated_value_than?(@contact2, project_var1).should eq(true) }
     end
 
     context "return false when the left variable value is nil" do
@@ -117,7 +117,7 @@ describe Contact do
         PersistedVariable.make contact: @contact2, project: project, project_variable: project_var1, updated_at: Time.now
       end
 
-      it { expect(@contact1.last_updated_value_than?(@contact2, project_var1)).to eq(false) }
+      it { @contact1.last_updated_value_than?(@contact2, project_var1).should eq(false) }
     end
 
     context "return true when the left variable value is last modified" do
@@ -129,7 +129,7 @@ describe Contact do
         PersistedVariable.make contact: @contact2, project: project, project_variable: project_var1, updated_at: Time.now
       end
 
-      it { expect(@contact1.last_updated_value_than?(@contact2, project_var1)).to eq(true) }
+      it { @contact1.last_updated_value_than?(@contact2, project_var1).should eq(true) }
     end
 
     context "return false when the right variable value is last modified" do
@@ -141,7 +141,7 @@ describe Contact do
         PersistedVariable.make contact: @contact2, project: project, project_variable: project_var1, updated_at: Time.now + 1.days
       end
 
-      it { expect(@contact1.last_updated_value_than?(@contact2, project_var1)).to eq(false) }
+      it { @contact1.last_updated_value_than?(@contact2, project_var1).should eq(false) }
     end
     
   end
@@ -153,18 +153,18 @@ describe Contact do
         @contact11 = Contact.make project: project, addresses: [ContactAddress.create(project: project, address: "1000")]
       end
 
-      it { expect(Contact.count).to eq(2)}
+      it { Contact.count.should eq(2)}
 
       it "should remove duplicated contacts when it has only one address" do
         Contact.remove_duplicate_address_and_keep_last_update(project, project_var1)
 
-        expect(Contact.count).to eq(1)
+        Contact.count.should eq(1)
       end
 
       it "should keep the first one" do
         Contact.remove_duplicate_address_and_keep_last_update(project, project_var1)
 
-        expect(Contact.last.id).to eq(@contact1.id)
+        Contact.last.id.should eq(@contact1.id)
       end
     end
 
@@ -175,24 +175,24 @@ describe Contact do
         @contact3 = Contact.make project: project, addresses: [ContactAddress.create(project: project, address: "8551000"), ContactAddress.create(project: project, address: "3000")]
       end
 
-      it { expect(Contact.count).to eq(3) }
+      it { Contact.count.should eq(3) }
 
       it "should remove contact11" do
         Contact.remove_duplicate_address_and_keep_last_update(project, project_var1)
 
-        expect(Contact.count).to eq(2)
+        Contact.count.should eq(2)
       end
 
       it "should keep the first one" do
         Contact.remove_duplicate_address_and_keep_last_update(project, project_var1)
 
-        expect(Contact.first.id).to eq(@contact1.id)
+        Contact.first.id.should eq(@contact1.id)
       end
 
       it "should remove contact address of the contact3" do
         Contact.remove_duplicate_address_and_keep_last_update(project, project_var1)
 
-        expect(Contact.last.id).to eq(@contact3.id)
+        Contact.last.id.should eq(@contact3.id)
       end
     end
 
@@ -208,7 +208,7 @@ describe Contact do
         it "should the last when it has variable value" do
           Contact.remove_duplicate_address_and_keep_last_update(project, project_var1)
 
-          expect(Contact.last.id).to eq(@contact11.id)
+          Contact.last.id.should eq(@contact11.id)
         end
       end
 
@@ -221,9 +221,9 @@ describe Contact do
 
           Contact.remove_duplicate_address_and_keep_last_update(project, project_var1)
 
-          expect(Contact.first.id).to eq(@contact1.id)
-          expect(@contact1.reload.addresses.count).to eq(1)
-          expect(Contact.last.id).to eq(@contact11.id)
+          Contact.first.id.should eq(@contact1.id)
+          @contact1.reload.addresses.count.should eq(1)
+          Contact.last.id.should eq(@contact11.id)
         end
 
         it "should remove the first contact when it has variable value" do
@@ -234,9 +234,9 @@ describe Contact do
 
           Contact.remove_duplicate_address_and_keep_last_update(project, project_var1)
 
-          expect(Contact.count).to eq(1)
-          expect(Contact.last.id).to eq(@contact11.id)  
-          expect(@contact11.reload.addresses.count).to eq(2)
+          Contact.count.should eq(1)
+          Contact.last.id.should eq(@contact11.id)  
+          @contact11.reload.addresses.count.should eq(2)
         end
       end
     end
@@ -251,13 +251,13 @@ describe Contact do
           PersistedVariable.make contact: @contact2, project: project, project_variable: project_var1, updated_at: Time.now + 1.days
         end
 
-        it { expect(Contact.count).to eq(2)}
+        it { Contact.count.should eq(2)}
 
         it "should remove contact that is not last modified" do
           Contact.remove_duplicate_address_and_keep_last_update(project, project_var1)
 
-          expect(Contact.count).to eq(1)
-          expect(Contact.last.id).to eq(@contact2.id)
+          Contact.count.should eq(1)
+          Contact.last.id.should eq(@contact2.id)
         end
       end
 
@@ -270,17 +270,17 @@ describe Contact do
           PersistedVariable.make contact: @contact2, project: project, project_variable: project_var1, updated_at: Time.now + 1.days
         end
 
-        it { expect(Contact.count).to eq(2)}
+        it { Contact.count.should eq(2)}
 
         it "should remove address that has duplicated" do
           Contact.remove_duplicate_address_and_keep_last_update(project, project_var1)
 
-          expect(Contact.count).to eq(2)
+          Contact.count.should eq(2)
 
-          expect(Contact.first.id).to eq(@contact1.id)
-          expect(@contact1.addresses.count).to eq(1)
-          expect(Contact.last.id).to eq(@contact2.id)
-          expect(@contact2.addresses.count).to eq(2)
+          Contact.first.id.should eq(@contact1.id)
+          @contact1.addresses.count.should eq(1)
+          Contact.last.id.should eq(@contact2.id)
+          @contact2.addresses.count.should eq(2)
         end
       end
     end

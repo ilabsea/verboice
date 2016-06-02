@@ -20,12 +20,12 @@ require 'spec_helper'
 describe Tel do
   describe '.without_prefix' do
     context "remove country code and zero leading" do
-      it { expect(Tel.without_prefix("+85510999999")).to eq("10999999") }
-      it { expect(Tel.without_prefix("85510999999")).to eq("10999999") }
-      it { expect(Tel.without_prefix("010999999")).to eq("10999999") }
-      it { expect(Tel.without_prefix("+010999999")).to eq("10999999") }
-      it { expect(Tel.without_prefix("+10999999")).to eq("10999999") }
-      it { expect(Tel.without_prefix("10999999")).to eq("10999999") }
+      it { Tel.without_prefix("+85510999999").should eq("10999999") }
+      it { Tel.without_prefix("85510999999").should eq("10999999") }
+      it { Tel.without_prefix("010999999").should eq("10999999") }
+      it { Tel.without_prefix("+010999999").should eq("10999999") }
+      it { Tel.without_prefix("+10999999").should eq("10999999") }
+      it { Tel.without_prefix("10999999").should eq("10999999") }
     end
   end
 end

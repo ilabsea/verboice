@@ -59,14 +59,14 @@ describe Api2::CallLogsController do
 
           response = JSON.parse(@response.body)
 
-          expect(response.length).to eq 3
+          response.length.should eq 3
         end
 
         it "list only call logs that belongs to the account" do
           get :index, email: admin.email, token: admin.auth_token, account_id: account.id
 
           response = JSON.parse(@response.body)
-          expect(response.length).to eq 2
+          response.length.should eq 2
         end
       end
     end
@@ -147,7 +147,7 @@ describe Api2::CallLogsController do
         get :list_by_channel, email: admin.email, token: admin.auth_token, channel_id: @channel_admin.id
 
         response = ActiveSupport::JSON.decode(@response.body)
-        expect(response.length).to eq(1)
+        response.length.should eq(1)
       end
     end
 
@@ -168,7 +168,7 @@ describe Api2::CallLogsController do
         get :list_by_channel, email: account.email, token: account.auth_token, channel_id: @channel_user.id
 
         response = ActiveSupport::JSON.decode(@response.body)
-        expect(response.length).to eq(2)
+        response.length.should eq(2)
       end
     end
   end
