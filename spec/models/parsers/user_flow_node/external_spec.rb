@@ -60,9 +60,9 @@ module Parsers
               c.StartUserStep :external_service, 1, 'External Service', external_step_guid: external_service_step.guid
               c.Trace call_flow_id: call_flow.id, step_id: 1, step_name: 'External Service', store: %("Calling External Service #{external_service.name}.")
               c.Callback external_service_step.callback_url, {:response_type => :variables, :variables => {
-                'variable_with_step' => 'value_20',
-                'variable_with_variable' => 'var_foobar',
-                'variable_with_value' => "'fixed value'"
+                'variable_with_step' => {'value' => 'value_20', 'required' => 'false'},
+                'variable_with_variable' => {'value' => 'var_foobar', 'required' => 'false'},
+                'variable_with_value' => {'value' => "'fixed value'", 'required' => 'false'}
               }, :external_service_guid => external_service.guid}
             end.first
           )
