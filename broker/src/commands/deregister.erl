@@ -21,6 +21,7 @@ run(Args, Session = #session{project = Project, call_log = CallLog, js_context =
         end,
         Groups
       ),
+      poirot:log(info, " has been deregistered from every reminders under project: ~p", [Project#project.name]),
       CallLog:info([Address, " has been deregistered from every reminders under project: ", Project#project.name], []);
     TheGroupName ->
       case reminder_group:find([{project_id, Project#project.id}, {name, TheGroupName}]) of
@@ -30,6 +31,8 @@ run(Args, Session = #session{project = Project, call_log = CallLog, js_context =
         Group ->
           ExistingGroup = Group:deregister_address(Address),
           ExistingGroup:save(),
+
+          poirot:log(info, " has been deregistered from ~p", [TheGroupName]),
           CallLog:info([Address, " has been deregistered from ", TheGroupName], [])
       end
     end,

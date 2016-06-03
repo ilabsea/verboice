@@ -42,6 +42,7 @@ module Parsers
           register.equivalent_flow.first.should eq(
             Compiler.parse do |c|
               c.Label 1
+              c.StartUserStep :register, 1, 'Register Step'
               c.AssignValue "current_step", 1
               c.AssignValue "current_step_name", "Register Step"
               c.Register nil, "pregnancy"
@@ -60,6 +61,7 @@ module Parsers
           register.equivalent_flow.first.should eq(
               Compiler.parse do |c|
                 c.Label 1
+                c.StartUserStep :register, 1, 'Register Step'
                 c.AssignValue "current_step", 1
                 c.AssignValue "current_step_name", "Register Step"
                 c.Register "value_9999", "pregnancy"
@@ -78,6 +80,7 @@ module Parsers
           register.equivalent_flow.first.should eq(
               Compiler.parse do |c|
                 c.Label 1
+                c.StartUserStep :register, 1, 'Register Step'
                 c.AssignValue "current_step", 1
                 c.AssignValue "current_step_name", "Register Step"
                 c.Register "var_foo", "pregnancy"
