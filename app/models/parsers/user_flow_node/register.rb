@@ -46,10 +46,12 @@ module Parsers
       def equivalent_flow
         Compiler.parse do |compiler|
           compiler.Label @id
+          compiler.StartUserStep :register, @id, @name
           compiler.AssignValue "current_step", @id
           compiler.AssignValue "current_step_name", "#{@name}"
           compiler.Register number, @reminder_group
           compiler.PersistVariable @persisted_variable_name, "value_#{@id}", REGISTER_CURRENT_DATE if @persisted_variable_name
+          compiler.SetStepResult :registration_date, @persisted_variable_name if @persisted_variable_name
           compiler.Trace context_for %("Register contact to #{@reminder_group}.")
           compiler.append @confirmation_resource.equivalent_flow
           compiler.append @next.equivalent_flow if @next

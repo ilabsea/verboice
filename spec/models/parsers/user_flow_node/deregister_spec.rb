@@ -34,6 +34,7 @@ module Parsers
         step.equivalent_flow.first.should eq(
           Compiler.parse do |c|
             c.Label 1
+            c.StartUserStep :deregister, 1, 'Deregister Step'
             c.AssignValue "current_step", 1
             c.AssignValue "current_step_name", "Deregister Step"
             c.Deregister "pregnancy"
