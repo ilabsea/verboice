@@ -387,6 +387,3 @@ DEPENDENCIES
   uglifier (>= 1.0.3)
   whenever
   will_paginate (~> 3.0)
-
-BUNDLED WITH
-   1.11.2
