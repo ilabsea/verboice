@@ -93,7 +93,7 @@ describe ContactsController do
       it "re-renders the 'new' template" do
         Contact.any_instance.stub(:save).and_return(false)
         post :create, {:project_id => @project.id, :contact => {}}
-        response.should render_template("new")
+        response.should redirect_to new_project_contact_path(@project)
       end
     end
   end
@@ -126,7 +126,7 @@ describe ContactsController do
       it "re-renders the 'edit' template" do
         Contact.any_instance.stub(:save).and_return(false)
         put :update, {:project_id => @project.id, :id => contact.to_param, :contact => {}}
-        response.should render_template("edit")
+        response.should redirect_to edit_project_contact_path(@project)
       end
     end
 
