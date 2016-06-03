@@ -44,14 +44,15 @@ describe CallLogSearch do
 
   describe "search by date" do
     let(:search_date) { '2013-11-14' }
-    let(:date) { Time.smart_parse(search_date).utc.strftime "%F %X" }    
+    let(:beginning_date) { Time.smart_parse(search_date).utc.strftime("%F %X") }
+    let(:end_of_date) { Time.smart_parse(search_date).end_of_day.utc.strftime("%F %X")}
 
     it "should search by after" do
-      assert_search("after:#{search_date}").should match /started_at >= '#{date}'/
+      assert_search("after:#{search_date}").should match /created_at >= '#{beginning_date}'/
     end
 
     it "should search by before" do
-      assert_search("before:#{search_date}").should match /started_at <= '#{date}'/
+      assert_search("before:#{search_date}").should match /created_at <= '#{end_of_date}'/
     end
   end
 

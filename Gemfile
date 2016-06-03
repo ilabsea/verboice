@@ -57,8 +57,8 @@ group :development, :test do
   gem 'machinist', git: 'https://github.com/tbuehl/machinist.git', branch: '1.0-maintenance'
   gem 'ffaker'
   gem 'mocha', :require => false
-  gem 'rspec'
-  gem 'rspec-rails'
+  gem 'rspec', '~>2.9.0'
+  gem 'rspec-rails', '~>2.9.0'
   gem "shoulda-matchers"
   gem 'ci_reporter'
   gem 'equivalent-xml'
@@ -68,9 +68,6 @@ group :development, :test do
 
   gem 'capybara'
   gem 'database_cleaner'
-
-  gem 'rspec_api_documentation', github: 'zipmark/rspec_api_documentation'
-  gem 'apitome'
 end
 
 group :development do

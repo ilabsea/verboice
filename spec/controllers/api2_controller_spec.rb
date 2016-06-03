@@ -33,9 +33,9 @@ describe Api2Controller do
         get :index
         body = ActiveSupport::JSON.decode(response.body)
 
-        expect(response.header['Content-Type']).to eq 'application/json; charset=utf-8'        
-        expect(response.status).to eq 401
-        expect(body).to eq({ 'success' => false, 'message' => "Not authorized access"})
+        response.header['Content-Type'].should eq 'application/json; charset=utf-8'        
+        response.status.should eq 401
+        body.should eq({ 'success' => false, 'message' => "Not authorized access"})
       end
     end
 
@@ -44,7 +44,7 @@ describe Api2Controller do
         admin = Account.make role: Account::ADMIN
         get :index, email: admin.email , token: admin.auth_token
 
-        expect(response.body).to eq "I am logged-in"
+        response.body.should eq "I am logged-in"
       end
     end
   end

@@ -19,8 +19,8 @@ require 'spec_helper'
 
 describe Api2 do
   context ".allow_hosts" do
-    it { expect(Api2.allow_hosts['allow_hosts'].include?("0.0.0.0")).to be true }
-    it { expect(Api2.allow_hosts['allow_hosts'].include?("127.0.0.1")).to be true }
+    it { Api2.allow_hosts['allow_hosts'].include?("0.0.0.0").should be true }
+    it { Api2.allow_hosts['allow_hosts'].include?("127.0.0.1").should be true }
   end
 
   context ".host_allowed?" do
