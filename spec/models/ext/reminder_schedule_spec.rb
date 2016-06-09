@@ -11,7 +11,7 @@ describe Ext::ReminderSchedule  do
     @reminder_group = Ext::ReminderGroup.make
   end
 
-  it "should project time zone is 'Bangkok' +0070" do
+  it "should project time zone is 'Bangkok' +0700" do
     @project.time_zone.should eq 'Bangkok'
 	(ActiveSupport::TimeZone.new(@project.time_zone).utc_offset / (60 * 60)).should eq 7
   end
@@ -548,7 +548,7 @@ describe Ext::ReminderSchedule  do
 
     it "create options not_before as now if time is in the past" do
       calling_at = Time.new(2012, 10, 25, 7, 0, 0)
-      now        = Time.new(2012, 10, 25, 10, 0, 0) # use the same timezone as reminder schedule
+      now        = Time.new(2012, 10, 25, 10, 0, 0, "+07:00") # use the same timezone as reminder schedule
       Time.stub(:now).and_return(now)
 
       options = @reminder.call_options calling_at
@@ -562,10 +562,10 @@ describe Ext::ReminderSchedule  do
 
 		it "should create options for schedule enqueued call " do
       calling_at = Time.new(2012, 10, 25, 7, 0, 0)
-      now        = Time.new(2012, 10, 25, 7, 30, 0) # use the same timezone as reminder schedule
+      now        = Time.new(2012, 10, 25, 7, 30, 0, "+07:00") # use the same timezone as reminder schedule
       Time.stub(:now).and_return(now)
 
-      future_time = Time.new(2012, 10, 25, 8, 30, 0)
+      future_time = Time.new(2012, 10, 25, 8, 30, 0, "+07:00")
 
 			options = @reminder.call_options calling_at
 			options[:call_flow_id].should eq @reminder.call_flow_id
@@ -574,6 +574,70 @@ describe Ext::ReminderSchedule  do
 			options[:not_before].should eq future_time
 			options[:schedule_id].should eq @schedule.id
 		end
+
+    it "should create options for schedule enqueued call with a timezone ahead server" do
+      @project.time_zone = "Sydney"
+      calling_at = Time.new(2012, 10, 25, 10, 0, 0)
+      now        = Time.new(2012, 10, 25, 7, 30, 0, "+07:00") # use the same timezone as reminder schedule
+      Time.stub(:now).and_return(now)
+
+      future_time = Time.new(2012, 10, 25, 11, 30, 0, "+10:00")
+
+      options = @reminder.call_options calling_at
+      options[:call_flow_id].should eq @reminder.call_flow_id
+      options[:project_id].should eq @reminder.project_id
+
+      options[:not_before].should eq future_time
+      options[:schedule_id].should eq @schedule.id
+    end
+
+    it "should create options for schedule enqueued call with a timezone far ahead server" do
+      @project.time_zone = "Wellington"
+      calling_at = Time.new(2012, 10, 25, 10, 0, 0)
+      now        = Time.new(2012, 10, 25, 7, 30, 0, "+07:00") # use the same timezone as reminder schedule
+      Time.stub(:now).and_return(now)
+
+      future_time = Time.new(2012, 10, 25, 14, 30, 0, "+13:00")
+
+      options = @reminder.call_options calling_at
+      options[:call_flow_id].should eq @reminder.call_flow_id
+      options[:project_id].should eq @reminder.project_id
+
+      options[:not_before].should eq future_time
+      options[:schedule_id].should eq @schedule.id
+    end
+
+    it "should create options for schedule enqueued call with a timezone behind server" do
+      @project.time_zone = "Buenos Aires"
+      calling_at = Time.new(2012, 10, 25, 7, 0, 0)
+      now        = Time.new(2012, 10, 25, 7, 30, 0, "+07:00") # use the same timezone as reminder schedule
+      Time.stub(:now).and_return(now)
+
+      future_time = Time.new(2012, 10, 24, 22, 30, 0, "-03:00")
+
+      options = @reminder.call_options calling_at
+      options[:call_flow_id].should eq @reminder.call_flow_id
+      options[:project_id].should eq @reminder.project_id
+
+      options[:not_before].should eq future_time
+      options[:schedule_id].should eq @schedule.id
+    end
+
+    it "should create options for schedule enqueued call when hour is close to change to the previous day" do
+      @reminder.time_from = "05:30"
+      calling_at = Time.new(2012, 10, 25, 0, 0, 0)
+      now        = Time.new(2012, 10, 25, 0, 30, 0, "+07:00") # use the same timezone as reminder schedule
+      Time.stub(:now).and_return(now)
+
+      future_time = Time.new(2012, 10, 25, 5, 30, 0, "+07:00")
+
+      options = @reminder.call_options calling_at
+      options[:call_flow_id].should eq @reminder.call_flow_id
+      options[:project_id].should eq @reminder.project_id
+
+      options[:not_before].should eq future_time
+      options[:schedule_id].should eq @schedule.id
+    end
 	end
 
 	describe "#callers_matches_conditions" do
