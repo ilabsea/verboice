@@ -318,45 +318,45 @@ to_hex_char(N) when N >= 10, N =< 15 -> N + $A - 10.
 %% ------------------------------------------------------------------------
 %% eunit test cases
 
-mk_text_header_test_() ->
-    [
-     %% based on Thunderbird output
-     ?_assertEqual("Subject: =?ISO-8859-1?Q?=E5=E4=F6?=",
-                   mk_text_header("Subject", "���")),
+% mk_text_header_test_() ->
+%     [
+%      %% based on Thunderbird output
+%      ?_assertEqual("Subject: =?ISO-8859-1?Q?=E5=E4=F6?=",
+%                    mk_text_header("Subject", "���")),
 
-     ?_assertEqual(
-        "Subject: =?ISO-8859-1?Q?=E5=E4=F6twequiiiirrrweyqruyqitrrqw"
-        "eruitwqeeerwqe?=\n"
-        " =?ISO-8859-1?Q?urtwuietrriqweeeeeqeiu"
-        "urrrrrrrweuiqtruiwetriweeeeyiirrrrr?=\n"
-        " =?ISO-8859-1?Q?rrrrrrrruiweqtrweertwe"
-        "uitr?=",
-        mk_text_header(
-          "Subject",
-          "���twequiiiirrrweyqruyqitrrqw"
-          "eruitwqeeerwqeurtwuietrriqweeeeeqeiuurrrrrrrweuiqtruiwetriwee"
-          "eeyiirrrrrrrrrrrrruiweqtrweertweuitr")),
+%      ?_assertEqual(
+%         "Subject: =?ISO-8859-1?Q?=E5=E4=F6twequiiiirrrweyqruyqitrrqw"
+%         "eruitwqeeerwqe?=\n"
+%         " =?ISO-8859-1?Q?urtwuietrriqweeeeeqeiu"
+%         "urrrrrrrweuiqtruiwetriweeeeyiirrrrr?=\n"
+%         " =?ISO-8859-1?Q?rrrrrrrruiweqtrweertwe"
+%         "uitr?=",
+%         mk_text_header(
+%           "Subject",
+%           "���twequiiiirrrweyqruyqitrrqw"
+%           "eruitwqeeerwqeurtwuietrriqweeeeeqeiuurrrrrrrweuiqtruiwetriwee"
+%           "eeyiirrrrrrrrrrrrruiweqtrweertweuitr")),
      
-     %% based on RFC 1522
-     %%   =  S?  ?  _  =  =  S?  S_
-     ?_assertEqual("XXX: =?ISO-8859-1?Q?=3D_=3F=3F=5F=3D=3D_=3F_=5F?=",
-                   mk_text_header("XXX", "= ??_== ? _")),
+%      %% based on RFC 1522
+%      %%   =  S?  ?  _  =  =  S?  S_
+%      ?_assertEqual("XXX: =?ISO-8859-1?Q?=3D_=3F=3F=5F=3D=3D_=3F_=5F?=",
+%                    mk_text_header("XXX", "= ??_== ? _")),
      
-     ?_assertEqual("XXX: ",
-                   mk_text_header("XXX", "")),
+%      ?_assertEqual("XXX: ",
+%                    mk_text_header("XXX", "")),
      
-     %% 1 char on new line
-     ?_assertEqual("Subject: =?ISO-8859-1?Q?=E5=E4=F6twequ"
-                   "iiiirrrweyqruyqitrrqweruitwqeeerwqe?=\n"
-                   " =?ISO-8859-1?Q?u?=",
-                   mk_text_header(
-                     "Subject",
-                     "���twequiiiirrrweyqruyqitrrqweruitwqeeerwqeu")),
+%      %% 1 char on new line
+%      ?_assertEqual("Subject: =?ISO-8859-1?Q?=E5=E4=F6twequ"
+%                    "iiiirrrweyqruyqitrrqweruitwqeeerwqe?=\n"
+%                    " =?ISO-8859-1?Q?u?=",
+%                    mk_text_header(
+%                      "Subject",
+%                      "���twequiiiirrrweyqruyqitrrqweruitwqeeerwqeu")),
      
-     %% fits on 1 line
-     ?_assertEqual("Subject: =?ISO-8859-1?Q?=E5=E4=F6twequ"
-                   "iiiirrrweyqruyqitrrqweruitwqeeerwqe?=",
-                   mk_text_header(
-                     "Subject",
-                     "���twequiiiirrrweyqruyqitrrqweruitwqeeerwqe"))
-    ].
+%      %% fits on 1 line
+%      ?_assertEqual("Subject: =?ISO-8859-1?Q?=E5=E4=F6twequ"
+%                    "iiiirrrweyqruyqitrrqweruitwqeeerwqe?=",
+%                    mk_text_header(
+%                      "Subject",
+%                      "���twequiiiirrrweyqruyqitrrqweruitwqeeerwqe"))
+%     ].
