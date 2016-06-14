@@ -12,6 +12,8 @@ make(project, _) -> [
 
 make(channel, _) -> [
   {name, fun make_ref/0 },
+  {status, <<"approved">>},
+  {enabled, 1},
   {config, []}
 ];
 
