@@ -12,6 +12,8 @@ make(project, _) -> [
 
 make(channel, _) -> [
   {name, fun make_ref/0 },
+  {status, <<"approved">>},
+  {enabled, 1},
   {config, []}
 ];
 
@@ -33,6 +35,9 @@ make(localized_resource, text) -> [
   {language, "en"},
   {resource_id, resource},
   {guid, uuid()}
+];
+
+make(nuntium_channel, _) -> [
 ];
 
 make(Model, _) -> throw({missing_blueprint, Model}).
