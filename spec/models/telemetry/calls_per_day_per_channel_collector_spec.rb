@@ -57,11 +57,12 @@ describe Telemetry::CallsPerDayPerChannelCollector do
   end
 
   it "doesn't count queued or active calls" do
+    period = InsteddTelemetry::Period.current
+
     3.times { CallLog.make started_at: Time.now, channel: channel_1, state: :active }
     4.times { CallLog.make started_at: Time.now, channel: channel_1, state: :completed }
     5.times { CallLog.make started_at: Time.now, channel: channel_1, state: :queued }
 
-    period = InsteddTelemetry::Period.current
     counters = stats(period)["counters"]
     counters.should have(1).item
 

@@ -13,10 +13,11 @@ describe Telemetry::CallFlowsPerProjectCollector do
     5.times { p1.call_flows.make }
 
     Timecop.travel(d1)
-    5.times  { p1.call_flows.make }
-    30.times { p2.call_flows.make }
 
     period  = InsteddTelemetry.current_period
+
+    5.times  { p1.call_flows.make }
+    30.times { p2.call_flows.make }
 
     Timecop.travel(d2)
     p1.call_flows.make
