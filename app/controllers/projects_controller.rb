@@ -75,7 +75,7 @@ class ProjectsController < ApplicationController
     options[:project_id] = params[:id]
     options[:vars] = params[:vars]
 
-    #addresses = curated_addresses(addresses)
+    addresses = curated_addresses(addresses)
     addresses.each do |address|
       @channel.call(address.strip, options)
     end

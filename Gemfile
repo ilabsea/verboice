@@ -10,7 +10,10 @@ gem 'nokogiri'
 gem 'guid'
 gem 'devise', '3.4.1'
 gem "daemons"
+
 gem "instedd-rails"
+gem 'instedd_telemetry', git: 'https://github.com/instedd/telemetry_rails.git'
+
 gem 'decent_exposure'
 gem 'attr_encrypted'
 gem 'foreman'
@@ -37,7 +40,6 @@ gem 'omniauth'
 gem 'omniauth-openid'
 gem 'recurring_select', git: "https://github.com/instedd/recurring_select", branch: 'instedd'
 gem 'listings'
-gem 'instedd_telemetry', git: "https://github.com/instedd/telemetry_rails", branch: 'master'
 gem 'ice_cube'
 gem 'aws-sdk-v1'
 gem 'rails_config'
@@ -58,12 +60,12 @@ group :development, :test do
   gem 'machinist', git: 'https://github.com/tbuehl/machinist.git', branch: '1.0-maintenance'
   gem 'ffaker'
   gem 'mocha', :require => false
-  gem 'rspec', '~> 2.14.1'
-  gem 'rspec-rails', '~> 2.14.1'
+  gem 'rspec', '~>2.9.0'
+  gem 'rspec-rails', '~>2.9.0'
   gem "shoulda-matchers"
   gem 'ci_reporter'
   gem 'equivalent-xml'
-  gem 'pry-debugger'
+  gem 'pry-debugger', '~> 0.2.3'
   gem 'syntax'
   gem 'timecop'
   gem 'quiet_assets'

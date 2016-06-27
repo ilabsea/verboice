@@ -46,7 +46,7 @@ run_queued_call() ->
   Project = project:make(),
   Flow = call_flow:make([{project_id, Project}, {broker_flow, [answer, hangup]}]),
   Channel = channel:make([{call_flow_id, Flow}]),
-  QueuedCall = queued_call:make([{project_id, Project}, {channel_id, Channel}, {call_flow_id, Flow}, {address, <<"123">>}]),
+  QueuedCall = queued_call:make([{project_id, Project}, {channel_id, Channel}, {call_flow_id, Flow}, {address, <<"123">>}, {state, <<"queued">>}]),
   scheduler:load(),
 
   SessionPid = mock_broker:wait_dispatch(QueuedCall#queued_call.id),
@@ -153,8 +153,8 @@ run_concurrent_calls() ->
   Project = project:make(),
   Flow = call_flow:make([{project_id, Project}, {broker_flow, [answer, hangup]}]),
   Channel = channel:make([{call_flow_id, Flow}, {config, [{"limit", "2"}]}]),
-  QueuedCall1 = queued_call:make([{project_id, Project}, {channel_id, Channel}, {call_flow_id, Flow}, {address, <<"123">>}]),
-  QueuedCall2 = queued_call:make([{project_id, Project}, {channel_id, Channel}, {call_flow_id, Flow}, {address, <<"124">>}]),
+  QueuedCall1 = queued_call:make([{project_id, Project}, {channel_id, Channel}, {call_flow_id, Flow}, {address, <<"123">>}, {state, <<"queued">>}]),
+  QueuedCall2 = queued_call:make([{project_id, Project}, {channel_id, Channel}, {call_flow_id, Flow}, {address, <<"124">>}, {state, <<"queued">>}]),
   scheduler:load(),
 
   mock_broker:wait_dispatch(QueuedCall1#queued_call.id),
@@ -168,7 +168,7 @@ unanswered_call() ->
   Project = project:make(),
   Flow = call_flow:make([{project_id, Project}, {broker_flow, [answer, hangup]}]),
   Channel = channel:make([{call_flow_id, Flow}]),
-  QueuedCall = queued_call:make([{project_id, Project}, {channel_id, Channel}, {call_flow_id, Flow}, {address, <<"123">>}]),
+  QueuedCall = queued_call:make([{project_id, Project}, {channel_id, Channel}, {call_flow_id, Flow}, {address, <<"123">>}, {state, <<"queued">>}]),
   scheduler:load(),
 
   SessionPid = mock_broker:wait_dispatch(QueuedCall#queued_call.id),

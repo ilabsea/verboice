@@ -1,4 +1,5 @@
 csv << ['Start', 'Stop', 'Step type', 'Step ID', 'Step name', 'Step result', 'Step data', 'Error']
+
 @activities.each do |activity|
   activity_start = activity.start.present? ? Time.parse(activity.start) : ''
   activity_end = activity.stop.present? ? Time.parse(activity.stop) : ''

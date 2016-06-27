@@ -1,0 +1,4 @@
+server_url: "http://telemetry-stg.instedd.org"
+period_size_hours: 168
+run_interval_minutes: 120
+application: "verboice"

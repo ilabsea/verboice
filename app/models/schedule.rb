@@ -17,6 +17,7 @@
 
 class Schedule < ActiveRecord::Base
   include Telemetry::ProjectTracking
+  
   scope :enabled, -> { where :disabled => false }
   scope :disabled, -> { where disabled => true }
 

@@ -115,31 +115,6 @@ class Api::ContactsController < ApiController
     index
   end
   
-  # POST /projects/:project_id/contact
-  def create
-    if params[:addresses].nil?
-      render json: "Addresses is missing".to_json, status: :bad_request
-      return
-    else
-      unless params[:addresses].kind_of?(Array)
-        render json: "Addresses was supposed to be a Array, but was a String".to_json, status: :bad_request
-        return
-      end
-    end
-
-    import = { "success" => [], "existing" => [], "project_id" => project.id }
-    params[:addresses].map do |address|
-      contact = project.contacts.build
-      contact.addresses.build(:address => address)
-      if contact.save
-        import["success"].push(address.to_s)
-      else
-        import["existing"].push(address.to_s)
-      end
-    end
-    render json: import
-  end
-
   # DELETE /projects/:project_id/contacts/unregistration
   def unregistration
     if params[:addresses].nil?

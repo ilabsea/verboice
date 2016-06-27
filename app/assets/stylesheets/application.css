@@ -8,4 +8,5 @@
  *= require listings
  *= require instedd_telemetry
  *= require_tree .
+ *= require instedd_telemetry
 */

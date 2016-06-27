@@ -144,7 +144,7 @@ module Ext
 		end
 
 		def call_options at_time
-			call_time_string = "#{at_time.to_string(Date::DEFAULT_FORMAT)} #{time_from}"
+			call_time_string = "#{at_time.strftime(Date::DEFAULT_FORMAT)} #{time_from}"
 			not_before = Ext::Parser::TimeParser.parse(call_time_string, DateTime::DEFAULT_FORMAT_WITHOUT_TIMEZONE, self.project.time_zone)
 			not_before = not_before > Time.now ? not_before : Time.now
 			

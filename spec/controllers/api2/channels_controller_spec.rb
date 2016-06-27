@@ -183,7 +183,7 @@ describe Api2::ChannelsController do
 
         assert_response :ok
         response = JSON.parse(@response.body)
-        expect(response.length).to eq 2
+        response.length.should eq 2
       end
 
       it "list only channels that belongs to the account" do
@@ -191,7 +191,7 @@ describe Api2::ChannelsController do
 
         assert_response :ok
         response = JSON.parse(@response.body)
-        expect(response.length).to eq 1
+        response.length.should eq 1
       end
     end
 
@@ -225,7 +225,7 @@ describe Api2::ChannelsController do
 
         assert_response :ok
         response = JSON.parse(@response.body)
-        expect(response['status']).to eq Channel::STATUS_APPROVED
+        response['status'].should eq Channel::STATUS_APPROVED
       end
     end
 
@@ -257,7 +257,7 @@ describe Api2::ChannelsController do
 
         assert_response :ok
         response = JSON.parse(@response.body)
-        expect(response['status']).to eq Channel::STATUS_PENDING
+        response['status'].should eq Channel::STATUS_PENDING
       end
     end
 

@@ -120,8 +120,8 @@ end
 Schedule.blueprint do
   project
   name
-  time_from { Time.now }
-  time_to { Time.now + 1.hour }
+  time_from { Time.gm(2000, 1, 1, 10, 0) }
+  time_to { Time.gm(2000, 1, 1, 11, 0) }
   disabled { false }
 end
 
@@ -160,7 +160,7 @@ end
 CallLogRecordedAudio.blueprint do
   call_log
   project_variable
-  description { Faker::Name.name }
+  description { FFaker::Name.name }
   key { Sham.guid }
 end
 
@@ -170,6 +170,7 @@ Contact.blueprint do
 end
 
 ContactAddress.blueprint do
+  contact
   address { Sham.number8 }
 end
 
@@ -305,4 +306,9 @@ LoginTracker.blueprint do
   logged_in_at { DateTime.now }
   status { 'ACTIVE' }
   marked_as { 'FAILED' }
+end
+
+Feed.blueprint do
+  name
+  project
 end

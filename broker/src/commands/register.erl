@@ -23,6 +23,8 @@ run(Args, Session = #session{project = Project, call_log = CallLog, js_context =
       
       NewGroup = Group:register_address(PhoneNumber),
       NewGroup:save(),
+
+      poirot:log(info, "has been registered to ~p", [GroupName]),
       CallLog:info([PhoneNumber, " has been registered to ", GroupName], [])
   end,
  

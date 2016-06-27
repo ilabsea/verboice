@@ -46,6 +46,8 @@ module WorkflowHelper
       when "record" then "microphone"
       when "hangup", "twiml_hangup" then "phone"
       when "transfer" then "callback"
+      when "register" then "i48grad-register"
+      when "deregister" then "i48grad-deregister"
       else "cloud"
       end
     "i48grad #{icon_class}#{error ? " red" : ""}"

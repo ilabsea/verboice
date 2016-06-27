@@ -61,6 +61,7 @@ class CallLogsController < ApplicationController
 
 
   def download_details
+    @filename = "Call details #{@log.id} (#{Time.now}).csv"
   end
 
   def generate_zip

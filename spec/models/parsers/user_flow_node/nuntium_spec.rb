@@ -50,7 +50,7 @@ module Parsers
           Compiler.parse do |c|
             c.Label 1
             c.StartUserStep :nuntium, 1, "Nuntium"
-            c.Nuntium 5, 7, :caller
+            c.Nuntium 'qst_server', 7, rcpt_type: :caller, resource_guid: 5
             c.Trace call_flow_id: call_flow.id, step_id: 1, step_name: 'Nuntium', store: '"Sent text message."'
           end.first
         )
@@ -97,7 +97,7 @@ module Parsers
             Compiler.parse do |c|
               c.Label 1
               c.StartUserStep :nuntium, 1, "Nuntium"
-              c.Nuntium 42, 7, :expr, expr
+              c.Nuntium 'qst_server', 7, rcpt_type: :expr, expr: expr, resource_guid: 42
               c.Trace call_flow_id: call_flow.id, step_id: 1, step_name: 'Nuntium', store: '"Sent text message."'
             end.first
           )

@@ -488,6 +488,7 @@ push_results(_) -> ok.
 
 finalize(completed, State = #state{session = Session =  #session{call_log = CallLog}}) ->
   verboice_telemetry:track_call_finished(Session),
+
   Retries = case Session#session.queued_call of
     undefined -> 0;
     QueuedCall -> QueuedCall#queued_call.retries
@@ -500,6 +501,7 @@ finalize(completed, State = #state{session = Session =  #session{call_log = Call
 
 finalize({failed, Reason}, State = #state{session = Session = #session{call_log = CallLog}}) ->
   verboice_telemetry:track_call_finished(Session),
+  
   StopReason = case Reason of
     {error, Error} -> Error;
     _ ->

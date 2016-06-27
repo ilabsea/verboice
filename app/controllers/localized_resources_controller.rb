@@ -27,7 +27,6 @@ class LocalizedResourcesController < ApplicationController
   include AudioUtils
 
   def save_recording
-    RecordingManager.remove_audio(localized_resource.guid)
     localized_resource.recorded_audio = request.body.read
     localized_resource.save
     head :ok
