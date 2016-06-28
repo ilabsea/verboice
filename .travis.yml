@@ -18,4 +18,4 @@ script:
 - make -C broker eunit
 notifications:
   slack:
-    secure: GpzXwTvHwT3GV8QXktjODXPvXvmxV5CmJNu+MPKe1t4OGrtORRocZgEsmyH/rahuqq7zFCMGqLg4x2nKhLIcGM1+sleTz9lEPVSqE2jmk0NOwyrwa0G16dURZH4x8bb9w+EFaciGD2x83VkhaAaYdXpPXJ9SSqxdp66/0TRkQ6k=
+    secure: EaJ6f98RBFAvALstfyXiF396VL6Re1CeVWmaO05ELmQgAXBd71tA6AHxk5jU9Gc0odV14EbKGEtZDSS7UBvLoBZ5YcWhI6Td+o3MMZgrjh4Auwbx6ogIaa+55WSGLdbgJp6+haVPaiSr7blJQJZNF/HAGAYmkzKMScyZyLhtfYk=
