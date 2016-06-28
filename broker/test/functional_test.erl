@@ -66,7 +66,7 @@ run_queued_call_if_not_before_already_passed() ->
   Project = project:make(),
   Flow = call_flow:make([{project_id, Project}, {broker_flow, [answer, hangup]}]),
   Channel = channel:make([{call_flow_id, Flow}]),
-  QueuedCall = queued_call:make([{project_id, Project}, {channel_id, Channel}, {call_flow_id, Flow}, {address, <<"123">>}, {not_before, util:time_from_now(-60)}]),
+  QueuedCall = queued_call:make([{project_id, Project}, {channel_id, Channel}, {call_flow_id, Flow}, {address, <<"123">>}, {state, <<"queued">>}, {not_before, util:time_from_now(-60)}]),
   scheduler:load(),
 
   SessionPid = mock_broker:wait_dispatch(QueuedCall#queued_call.id),
@@ -88,7 +88,7 @@ dont_run_queued_call_if_not_before() ->
   Flow = call_flow:make([{project_id, Project}, {broker_flow, [answer, hangup]}]),
   Channel = channel:make([{call_flow_id, Flow}]),
   NotBefore = util:time_from_now(6000),
-  QueuedCall = queued_call:make([{project_id, Project}, {channel_id, Channel}, {call_flow_id, Flow}, {address, <<"123">>}, {not_before, NotBefore}]),
+  QueuedCall = queued_call:make([{project_id, Project}, {channel_id, Channel}, {call_flow_id, Flow}, {address, <<"123">>}, {state, <<"queued">>}, {not_before, NotBefore}]),
   scheduler:load(),
   Id = QueuedCall#queued_call.id,
 
@@ -101,7 +101,7 @@ run_queued_call_if_before_not_after() ->
   Project = project:make(),
   Flow = call_flow:make([{project_id, Project}, {broker_flow, [answer, hangup]}]),
   Channel = channel:make([{call_flow_id, Flow}]),
-  QueuedCall = queued_call:make([{project_id, Project}, {channel_id, Channel}, {call_flow_id, Flow}, {address, <<"123">>}, {not_after, util:time_from_now(600)}]),
+  QueuedCall = queued_call:make([{project_id, Project}, {channel_id, Channel}, {call_flow_id, Flow}, {address, <<"123">>}, {state, <<"queued">>}, {not_after, util:time_from_now(600)}]),
   scheduler:load(),
 
   SessionPid = mock_broker:wait_dispatch(QueuedCall#queued_call.id),
