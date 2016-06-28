@@ -63,7 +63,7 @@ group :development, :test do
   gem 'rspec', '~>2.9.0'
   gem 'rspec-rails', '~>2.9.0'
   gem "shoulda-matchers"
-  gem 'ci_reporter'
+  gem 'ci_reporter', '~> 1.6.5'
   gem 'equivalent-xml'
   gem 'pry-debugger', '~> 0.2.3'
   gem 'syntax'
