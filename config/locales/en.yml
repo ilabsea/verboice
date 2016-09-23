@@ -195,7 +195,7 @@ en:
   controllers:
     api_controller:
       problem_action: "There were problems %{action} the %{model_name}"
-    call_flows_controller:	
+    call_flows_controller:
       call_flow_successfully_updated: "Call Flow %{call_flow_name} successfully updated."
       no_file_found: "No file found"
       invalide_extension: "Invalid extension"
@@ -248,7 +248,7 @@ en:
       save: "Save"
     browser:
       compatibility:
-        audio: "Your browser does not support the audio element"  
+        audio: "Your browser does not support the audio element"
 
     devise:
       registrations:
@@ -990,7 +990,7 @@ en:
       container_first_title: "What can I use it for?"
       container_first_desc: "Verboice is an ideal solution for reaching out to communities whatever their level of literacy or technological sophistication. Here are a few of the ways Verboice can help you inform, educate, and improve the lives of any audience with access to basic phone services:"
       container_first_panel_first_title: "Healthier Pregnancies and Happier Babies"
-      container_first_panel_first_desc: "Healthy babies and mothers form the foundation of a thriving community. With Verboice, mother/child health advocates can extend their educational outreach campaigns to communities with previously minimal access to prenatal and maternal health education. From month-by-month updates on what to expect during pregnancy to checkup reminders and newborn care advice, Verboice interactive voice campaigns can make a positive difference that will be felt for generations to come." 
+      container_first_panel_first_desc: "Healthy babies and mothers form the foundation of a thriving community. With Verboice, mother/child health advocates can extend their educational outreach campaigns to communities with previously minimal access to prenatal and maternal health education. From month-by-month updates on what to expect during pregnancy to checkup reminders and newborn care advice, Verboice interactive voice campaigns can make a positive difference that will be felt for generations to come."
       container_first_panel_second_title: "Researching Human Rights Conditions"
       container_first_panel_second_desc: "There's no better authority on the state of human rights in a community than community members themselves. Verboice allows human rights investigators to survey anonymous callers and get an accurate picture of the ground-level conditions in a community. When abuses are noted, human rights organizations can use Verboice to point the way toward supportive/protective resources, supply legal information, and give the most oppressed a voice that carries beyond the confines of their communities."
       container_first_panel_third_title: "Coordinating First Responders"
@@ -1169,7 +1169,7 @@ en:
 
       _text_localized_resource_template:
         label:
-          placeholder: 
+          placeholder:
 
       _undefined_localized_resource_template:
         label:
@@ -1213,7 +1213,7 @@ en:
           to: "to"
           retries: Retries
           retries_no_answer: "Retries if the call was not pick up"
-          retries_desc: Enter comma separated delays in hours
+          retries_desc: "Enter comma separated delays, e.g: 1m for 1 minutes, 1h for 1 hour and 1d for 1 day"
           sun: "Sun"
           mon: "Mon"
           tue: "Tue"

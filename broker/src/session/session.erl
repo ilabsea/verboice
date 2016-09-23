@@ -189,7 +189,7 @@ ready({dial, _, _, QueuedCall = #queued_call{address = undefined}}, _From, State
 
 ready({dial, RealBroker, Channel, QueuedCall}, _From, State = #state{session_id = SessionId, resume_ptr = ResumePtr}) ->
   lager:info("Session (~p) dial", [SessionId]),
-  
+
   AddressWithoutVoipPrefix = channel:address_without_voip_prefix(Channel, QueuedCall#queued_call.address),
   NewSession = case State#state.session of
     undefined ->
@@ -224,7 +224,7 @@ ready({dial, RealBroker, Channel, QueuedCall}, _From, State = #state{session_id 
       CallLog:update({started_at, calendar:universal_time()});
     _ -> ok
   end,
-  
+
   case channel:is_approved(Channel) of
     true ->
       case channel:enabled(Channel) of
@@ -237,7 +237,7 @@ ready({dial, RealBroker, Channel, QueuedCall}, _From, State = #state{session_id 
             true ->
               {_, _, NewSession2} = finalize({failed, blocked}, State#state{session = NewSession}),
               {stop, normal, error, State#state{session = NewSession2}};
-            _ -> 
+            _ ->
               case RealBroker:dispatch(NewSession) of
                 {error, unavailable} ->
                   {stop, normal, unavailable, State#state{session = NewSession}};
@@ -251,7 +251,7 @@ ready({dial, RealBroker, Channel, QueuedCall}, _From, State = #state{session_id 
                   {reply, ok, dialing, State#state{session = NewSession}, ?TIMEOUT_DIALING}
               end
           end;
-        _ -> 
+        _ ->
           {_, _, NewSession2} = finalize({failed, disabled}, State#state{session = NewSession}),
           {stop, normal, error, State#state{session = NewSession2}}
       end;
@@ -298,7 +298,7 @@ dialing(timeout, State = #state{session = Session}) ->
       timeout(Session),
       notify_status(busy, Session),
       finalize({failed, timeout}, State);
-    true -> 
+    true ->
       {next_state, dialing, State, ?TIMEOUT_DIALING}
   end.
 
@@ -314,7 +314,7 @@ in_progress(timeout, State = #state{session = Session = #session{pbx = Pbx}}) ->
   IsTimeout = is_timeout(Session, ?TIMEOUT_SESSION),
 
   if
-    IsTimeout -> 
+    IsTimeout ->
       timeout(Session),
       try
         notify_status(no_ack, Session),
@@ -352,12 +352,12 @@ in_progress({hibernate, NewSession, Ptr}, _From, State = #state{session = _Sessi
   HibernatedSession = #hibernated_session{session_id = SessionId, data = Data},
   HibernatedSession:create(),
   {stop, normal, ok, State#state{hibernated = true}};
-  
+
 in_progress({respawn, NewSessionPid, Ptr}, _From, State = #state{session = Session}) ->
   session:set_pointer(NewSessionPid, Ptr),
-  
+
   channel_queue:unmonitor_session(Session#session.channel#channel.id, self()),
-  
+
   notify_status(completed, Session),
   finalize(completed, State).
 
@@ -501,7 +501,7 @@ finalize(completed, State = #state{session = Session =  #session{call_log = Call
 
 finalize({failed, Reason}, State = #state{session = Session = #session{call_log = CallLog}}) ->
   verboice_telemetry:track_call_finished(Session),
-  
+
   StopReason = case Reason of
     {error, Error} -> Error;
     _ ->
@@ -516,8 +516,11 @@ finalize({failed, Reason}, State = #state{session = Session = #session{call_log 
           end,
 
           case should_reschedule(Reason) of
-            true -> 
+            true ->
               case NewQueuedCall:reschedule() of
+                {error, _} ->
+                  CallLog:error(["Error while loading schedule ", NewQueuedCall#queued_call.schedule_id], []),
+                  {NewRetries, "failed"};
                 no_schedule -> {NewRetries, failed};
                 overdue ->
                   CallLog:error("'Not Before' date exceeded", []),
@@ -532,7 +535,7 @@ finalize({failed, Reason}, State = #state{session = Session = #session{call_log 
             false -> {NewRetries, "failed"}
           end
       end,
-    
+
       % end step interaction
       if
         Reason =:= hangup; Reason =:= error -> CallLog:end_step_interaction();
@@ -543,9 +546,9 @@ finalize({failed, Reason}, State = #state{session = Session = #session{call_log 
       Duration = total_call_duraction(Call,Session),
 
       if
-        NewState == failed; NewState == "failed" -> 
+        NewState == failed; NewState == "failed" ->
           CallLog:update([{state, NewState}, {fail_reason, io_lib:format("~p", [Reason])}, {finished_at, calendar:universal_time()}, {retries, Retries}, {duration, Duration}]);
-        true -> 
+        true ->
           CallLog:update([{state, NewState}, {fail_reason, io_lib:format("~p", [Reason])}, {retries, Retries}, {duration, Duration}])
       end,
       normal
@@ -772,9 +775,7 @@ store_default_language(Session = #session{project = Project}) ->
 %% @private
 is_timeout(#session{started_at = StartedAt}, TimeoutIn) ->
   Now = calendar:universal_time(),
-  {_, S} = StartedAt,
-
-  Diff = 1000 * (calendar:datetime_to_gregorian_seconds(Now) - calendar:datetime_to_gregorian_seconds(S)),
+  Diff = 1000 * (calendar:datetime_to_gregorian_seconds(Now) - calendar:datetime_to_gregorian_seconds(StartedAt)),
   Diff >= TimeoutIn.
 
 %% @private

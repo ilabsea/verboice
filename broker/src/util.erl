@@ -71,12 +71,16 @@ to_poirot([{Key, Value} | T], Metadata) ->
 parse_short_time(Binary) when is_binary(Binary) ->
   parse_short_time(binary_to_list(Binary));
 parse_short_time(String) ->
-  {Amount, Unit} = string:to_integer(string:strip(String)),
+  {Amount, Unit} = case string:to_float(string:strip(String)) of
+    {error, no_float} -> string:to_integer(string:strip(String));
+    Float -> Float
+  end,
+
   case Amount of
     error -> throw({unexpected_short_time, String});
     _ ->
       StrippedUnit = string:strip(Unit),
-      case StrippedUnit of
+      float(case StrippedUnit of
         [] ->
           Amount * 60 * 60;
         _ ->
@@ -87,7 +91,7 @@ parse_short_time(String) ->
             $h -> Amount * 60 * 60;
             $d -> Amount * 60 * 60 * 24
           end
-      end
+      end)
   end.
 
 time_from_now(Seconds) ->

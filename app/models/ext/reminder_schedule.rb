@@ -18,7 +18,7 @@ module Ext
 		validate :time_from_is_before_time_to
 
 		validates :retries_in_hours, :presence => true, :if => Proc.new { |record| record.retries }
-		validates_format_of :retries_in_hours, :with => /^[0-9\.]+(,[0-9\.]+)*$/, :allow_blank => true
+		validates_format_of :retries_in_hours, :with => /^[0-9]+(\.[0-9]+|m|h|d)?(,[0-9]+(\.[0-9]+|m|h|d)?)*$/, :allow_blank => true
 
 		validates :call_flow_id, :presence => true
 
@@ -56,7 +56,7 @@ module Ext
 
 			  start_date_time = Ext::Parser::TimeParser.parse("#{client_date.to_string} #{time_from}", DateTime::DEFAULT_FORMAT_WITHOUT_TIMEZONE, project.time_zone)
 			  end_date_time = Ext::Parser::TimeParser.parse("#{client_date.to_string} #{time_to}", DateTime::DEFAULT_FORMAT_WITHOUT_TIMEZONE, project.time_zone)
-	      
+
 	      errors[:base] << "End time must be greater than the start time." if start_date_time.greater_than? end_date_time
 		  end
     end
@@ -102,7 +102,7 @@ module Ext
 						queued_call.call_log.destroy
 						queued_call.destroy
 					end
-				rescue Exception => e	
+				rescue Exception => e
 					p e.message
 				end
 
@@ -147,7 +147,7 @@ module Ext
 			call_time_string = "#{at_time.strftime(Date::DEFAULT_FORMAT)} #{time_from}"
 			not_before = Ext::Parser::TimeParser.parse(call_time_string, DateTime::DEFAULT_FORMAT_WITHOUT_TIMEZONE, self.project.time_zone)
 			not_before = not_before > Time.now ? not_before : Time.now
-			
+
 			options = {
 				call_flow_id: self.call_flow_id,
 				project_id: self.project_id,
@@ -168,7 +168,7 @@ module Ext
 					if suggested_channel
 						call_log = suggested_channel.call(address, options)
 						raise call_log.fail_reason if call_log.fail_reason
-						queue =  QueuedCall.find_by_call_log_id(call_log.id) 
+						queue =  QueuedCall.find_by_call_log_id(call_log.id)
 						queues << queue.id if queue
 					end
 				end

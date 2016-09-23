@@ -13,8 +13,12 @@
 
 reschedule(#queued_call{schedule_id = undefined}) -> no_schedule;
 reschedule(QueuedCall = #queued_call{schedule_id = ScheduleId}) ->
-  Schedule = schedule:find(ScheduleId),
-  reschedule(QueuedCall, Schedule).
+  try
+    Schedule = schedule:find(ScheduleId),
+    reschedule(QueuedCall, Schedule)
+  catch
+    error:Error -> {error, Error}
+  end.
 
 reschedule(_, #schedule{retries = undefined}) -> max_retries;
 reschedule(Q, S) when Q#queued_call.retries >= length(S#schedule.retries) -> max_retries;

@@ -18,7 +18,7 @@ onReminderSchedules ->
       if data?.reminder_channels
         for reminder_channel in data?.reminder_channels
           @addReminderChannelFromData(reminder_channel)
-      
+
 
       @new_channel_name = ko.observable()
       @new_channel_name_duplicated = ko.computed => if @has_new_channel_name() and @channel_exists(@new_channel_name()) then true else false
@@ -88,7 +88,7 @@ onReminderSchedules ->
         json = {_method: 'POST', reminder_channel_id: reminder_channel.id }
         url = "/ext/projects/#{window.model.project_id()}/reminder_schedules/" + @id() + "/remove_reminder_channel.json"
         $.post url, json, @removeCallback
-      else  
+      else
         @reminder_channels.remove(reminder_channel)
 
     removeCallback: (response) =>
@@ -98,7 +98,7 @@ onReminderSchedules ->
       channel = @findChannelById(reminder_channel_data.channel_id)
       reminder_channel = new ReminderChannel(channel: channel, reminder_schedule_id: @id(), id: reminder_channel_data.id )
       @reminder_channels.push(reminder_channel)
-    
+
     addReminderChannelByChannel: =>
       existed_channel = @findReminderChannelFromChannelName(@new_channel_name())
       if existed_channel
@@ -106,7 +106,7 @@ onReminderSchedules ->
       else
         channel = @findChannelByName(@new_channel_name())
         if channel
-          reminder_channel = new ReminderChannel(channel: channel, reminder_schedule_id: @id()) 
+          reminder_channel = new ReminderChannel(channel: channel, reminder_schedule_id: @id())
           @reminder_channels.push(reminder_channel)
           @new_channel_name("")
 
@@ -137,7 +137,7 @@ onReminderSchedules ->
     close_condition_edition: =>
       @current_condition(null)
 
-    remove_condition: (condition) => 
+    remove_condition: (condition) =>
       @current_condition(null)
       @conditions.remove(condition)
 
@@ -168,7 +168,7 @@ onReminderSchedules ->
     is_numeric: (ch) => !isNaN(parseInt(ch))
     has_conditions: => if $.map(@conditions(), (x) -> x).length > 0 then true else false
     has_retries: => $.trim(@retries_in_hours()).length > 0
-    is_retries_in_hours_valid: => !@has_retries() or (@has_retries and new RegExp("^[0-9\.]+(,[0-9\.]+)*$").test(@retries_in_hours()))
+    is_retries_in_hours_valid: => !@has_retries() or (@has_retries and new RegExp("^[0-9]+(\.[0-9]+|m|h|d)?(,[0-9]+(\.[0-9]+|m|h|d)?)*$").test(@retries_in_hours()))
 
     channel_exists: (channel_name) =>
       $.map(@reminder_channels(), (x) -> x if x.channel() && x.channel().name() == channel_name).length > 0
@@ -185,4 +185,3 @@ onReminderSchedules ->
       conditions: $.map([@condition()], (x) -> x.toJSON() if x.valid())
       retries: @has_retries()
       retries_in_hours: @retries_in_hours() if @has_retries()
-      
