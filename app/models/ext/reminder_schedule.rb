@@ -244,12 +244,8 @@ module Ext
 		end
 
 		def create_schedule_recurrence!
-			if repeat?
-				rule = IceCube::Rule.daily
-			end
-
 			self.schedule = IceCube::Schedule.new(start = from_date_time, :duration => to_date_time.to_i - from_date_time.to_i)
-			self.schedule.add_recurrence_rule rule if rule
+			self.schedule.add_recurrence_rule IceCube::Rule.daily if repeat?
 		end
 
 		def update_schedule_type!
@@ -262,8 +258,8 @@ module Ext
 				schedule_model = self.retries_schedule.nil? ? project.schedules.build : self.retries_schedule
 				schedule_model.name = "reminder_schedule_retries_#{Guid.new.to_s}"
 				schedule_model.retries = self.retries_in_hours
-			 	schedule_model.time_from = from_date_time.to_time
-			 	schedule_model.time_to = to_date_time.to_time
+			 	schedule_model.time_from = from_date_time('UTC').to_time
+			 	schedule_model.time_to = to_date_time('UTC').to_time
 			 	schedule_model.disabled = true # disalbe from schedule list UI
 			 	schedule_model.weekdays = Ext::Weekday::DAY_NAMES.map { |x| Ext::Weekday::DAY_NAMES.index(x) }.join(",")
 
@@ -275,14 +271,16 @@ module Ext
 			end
 		end
 
-		def from_date_time
+		def from_date_time time_zone = nil
+			time_zone ||= project.time_zone
 			date_time_string = "#{start_date.to_string(Date::DEFAULT_FORMAT)} #{time_from}"
-			Ext::Parser::TimeParser.parse(date_time_string, DateTime::DEFAULT_FORMAT_WITHOUT_TIMEZONE, project.time_zone)
+			Ext::Parser::TimeParser.parse(date_time_string, DateTime::DEFAULT_FORMAT_WITHOUT_TIMEZONE, time_zone)
 		end
 
-		def to_date_time
+		def to_date_time time_zone = nil
+			time_zone ||= project.time_zone
 			date_time_string = "#{start_date.to_string(Date::DEFAULT_FORMAT)} #{time_to}"
-			Ext::Parser::TimeParser.parse(date_time_string, DateTime::DEFAULT_FORMAT_WITHOUT_TIMEZONE, project.time_zone)
+			Ext::Parser::TimeParser.parse(date_time_string, DateTime::DEFAULT_FORMAT_WITHOUT_TIMEZONE, time_zone)
 		end
 
 		def reset_repeat_everyday_to_one_time!

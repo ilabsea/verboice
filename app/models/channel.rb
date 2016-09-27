@@ -84,7 +84,7 @@ class Channel < ActiveRecord::Base
 
     call_log
   end
-  
+
   def address_with_prefix_called_number address
     prefix_called_number = config["prefix_called_number"]
     "#{prefix_called_number}#{address}"
@@ -102,7 +102,7 @@ class Channel < ActiveRecord::Base
 
     account = options[:account] || self.account
 
-    prefix  = config["normalized_called_number"] 
+    prefix  = config["normalized_called_number"]
     address = Channel.normalized_called_number(address, prefix)
     address = address_with_prefix_called_number(address)
 
@@ -203,9 +203,9 @@ class Channel < ActiveRecord::Base
       :scheduled_call_id => options[:scheduled_call_id]
     )
 
-    queued_call.not_before = queued_call.schedule.with_time_zone(time_zone) do |time_zoned_schedule|
-      time_zoned_schedule.next_available_time(queued_call.not_before || Time.now.utc)
-    end if queued_call.schedule
+    # queued_call.not_before = queued_call.schedule.with_time_zone(time_zone) do |time_zoned_schedule|
+    #   time_zoned_schedule.next_available_time(queued_call.not_before || Time.now.utc)
+    # end if queued_call.schedule
 
     queued_call.save!
 
@@ -311,5 +311,5 @@ class Channel < ActiveRecord::Base
   def approved?
     status == STATUS_APPROVED
   end
-  
+
 end

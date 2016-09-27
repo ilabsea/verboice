@@ -12,6 +12,7 @@ start_link() ->
 get_timezone_offset(TimeZone) when is_binary(TimeZone) ->
   NewTimeZone = case TimeZone of
     <<"Phnom Penh">> -> <<"Bangkok">>;
+    <<"Asia/Phnom Penh">> -> <<"Asia/Bangkok">>;
     _ -> TimeZone
   end,
   gen_server:call(?SERVER, {get_offset, NewTimeZone});
