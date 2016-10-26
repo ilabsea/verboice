@@ -37,6 +37,11 @@ module Api2
         @call_logs = @call_logs.where(address: params[:address]) if params[:address].present?
       end
 
+      if params[:id].present?
+        ids = params[:id].split(",")
+        @call_logs = @call_logs.where(id: ids)
+      end
+
       @call_logs = @call_logs.where(["direction = ?", params[:direction]]) if params[:direction].present?
 
       @call_logs = @call_logs.by_channel_id(params[:channel_id]) if params[:channel_id].present?
