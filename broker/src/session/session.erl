@@ -268,7 +268,7 @@ dialing({answer, Pbx}, State = #state{session_id = SessionId, session = Session 
   CallLog:update([{started_at, calendar:universal_time()}]),
 
   monitor(process, Pbx:pid()),
-  NewSession = NewQueuedCallSession#session{pbx = Pbx, started_at = calendar:universal_time() },
+  NewSession = NewQueuedCallSession#session{pbx = Pbx, started_at = {datetime, calendar:universal_time()} },
   notify_status('in-progress', NewSession),
   FlowPid = case Ptr of
     undefined -> spawn_run(NewSession, Ptr);
@@ -418,12 +418,16 @@ notify_status_to_hub(Status, Session = #session{call_log = CallLog, js_context =
   end.
 
 session_vars(JS) ->
-  lists:foldl(fun({Name, Value}, Vars) ->
-    case Name of
-      <<"var_", VarName/binary>> -> [{binary_to_list(VarName), Value} | Vars];
-      _ -> Vars
-    end
-  end, [], erjs_context:to_list(JS)).
+  case JS of
+    undefined -> [];
+    _ -> 
+      lists:foldl(fun({Name, Value}, Vars) ->
+        case Name of
+          <<"var_", VarName/binary>> -> [{binary_to_list(VarName), Value} | Vars];
+          _ -> Vars
+        end
+      end, [], erjs_context:to_list(JS))
+  end.
 
 handle_event(stop, _, State) ->
   {stop, normal, State}.

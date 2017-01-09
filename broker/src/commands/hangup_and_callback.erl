@@ -9,11 +9,10 @@
 
 run(Args, Session) ->
   Prefix = proplists:get_value(dial_prefix, Args),
-  When = proplists:get_value('when', Args),
   SelectedCallFlowId = proplists:get_value(selected_call_flow_id, Args),
   Retries = proplists:get_value(retries, Args),
 
-  NotBefore = not_before(When, Args),
+  NotBefore = not_before(Args),
 
   NewSessionId = session:new_id(),
   {ok, NewPid} = session:new(NewSessionId),
@@ -55,6 +54,7 @@ run(Args, Session) ->
   case SelectedCallFlowId of
     undefined ->
       scheduler:enqueue(QueuedCall),
+      poirot:log(info, "Callback at ~p", [NotBefore]),
       {{respawn_continuous, NewPid}, Session};
     _ ->
       RetrySchedule = schedule:create( #schedule{
@@ -69,6 +69,7 @@ run(Args, Session) ->
 
       QueuedCallWithSchedule = QueuedCall#queued_call{ session_id = undefined, schedule_id = RetrySchedule:id() },
       scheduler:enqueue(QueuedCallWithSchedule),
+      poirot:log(info, "Callback at ~p", [NotBefore]),
       {{respawn, NewPid}, Session}
   end.
 
@@ -90,12 +91,13 @@ dial_address_test() ->
   ?assertEqual(<<"123">>, dial_address(<<"123">>, "12")).
 -endif.
 
-not_before(When, Args) ->
+not_before(Args) ->
+  When = proplists:get_value('when', Args),
   case When of
     "later" ->
       Delay = proplists:get_value(delay, Args),
       Seconds = util:parse_short_time(Delay),
-      datetime_utils:time_from_now(Seconds);
+      datetime_utils:time_from_now(list_to_integer(float_to_list(Seconds, [{decimals, 0}])));
     _ ->
       datetime_utils:time_from_now(application:get_env(verboice, seconds_for_call_back, 15))
   end.
