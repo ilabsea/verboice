@@ -37,8 +37,10 @@ class CallLog < ActiveRecord::Base
     'terminated' => 'terminated',
     'blocked' => "blocked",
     'disabled' => "disabled",
-    'external_step_broken' => 'error (external step was broken)',
-    'unknown_resource' => 'error (step was broken)'
+    'external_step_broken' => 'error (external step is broken)',
+    'unknown_resource' => 'error (step is broken)',
+    'is broken' => 'error (step is broken)',
+    'is missing phone number' => 'error (step is broken)'
   }
 
   DATE_FORMAT_EXPORT = [
