@@ -1,5 +1,5 @@
 -module(channel_queue).
--export([start_link/1, whereis_channel/1, enqueue/1, wakeup/1, reload/1, unmonitor_session/2]).
+-export([start_link/1, whereis_channel/1, enqueue/1, wakeup/1, reload/1, unmonitor_session/2, get_info/1]).
 
 -behaviour(gen_server).
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2, terminate/2, code_change/3]).
@@ -9,6 +9,9 @@
 -include("db.hrl").
 
 -record(state, {self, active = true, channel, current_calls = 0, sessions, max_calls, queued_calls}).
+
+get_info(ChannelId) ->
+  gen_server:call(?QUEUE(ChannelId), get_info).
 
 start_link(Channel = #channel{id = Id}) ->
   gen_server:start_link(?QUEUE(Id), ?MODULE, Channel, []).
@@ -55,6 +58,9 @@ init(Channel) ->
   }}.
 
 %% @private
+handle_call(get_info, _, State) ->
+  {reply, State, State};
+
 handle_call(_Request, _From, State) ->
   {reply, {error, unknown_call}, State}.
 
@@ -140,6 +146,7 @@ do_dispatch(State = #state{current_calls = C, queued_calls = Q, sessions = S}) -
                     Call:delete(),
                     do_dispatch(State#state{queued_calls = Q2});
                   unavailable ->
+                    error_logger:info_msg("Connection was down while trying to deliver queued call ~p", [Call#queued_call.id]),
                     State#state{active = false}
                 end;
               _ ->
