@@ -68,6 +68,9 @@ module Verboice
     # Version of your assets, change this if you want to expire all your assets
     config.assets.version = '1.0'
 
+    # Do not initialize full app on assets precompile
+    config.assets.initialize_on_precompile = false
+
     config.google_analytics = ''
     config.version_name = Rails.env == "production" ? (File.read(".hgtags").try(:split, "\n").try(:last).try(:split, " ").try(:last).try(:strip) rescue 'Development') : "Development"
 

@@ -1,4 +1,5 @@
 -module(queued_call).
+-compile([{parse_transform, lager_transform}]).
 -export([reschedule/1, start_session/1, should_trigger/1]).
 -export([called_at/1, variables/1]).
 -define(TABLE_NAME, "queued_calls").
@@ -45,20 +46,31 @@ start_session(QueuedCall = #queued_call{call_flow_id = CallFlowId}) when is_numb
 start_session(QueuedCall = #queued_call{callback_url = CallbackUrl}) when is_binary(CallbackUrl) ->
   start_session(#session{flow = flow:callback_flow(CallbackUrl)}, QueuedCall);
 start_session(QueuedCall = #queued_call{flow = Flow}) ->
-  start_session(#session{flow = twiml:parse(Flow)}, QueuedCall).
+  ParsedFlow = try
+                 twiml:parse(Flow)
+               catch
+                 %% If we fail to parse the flow, simply return undefined;
+                 %% the session will finalize with status of failed and an
+                 %% appropriate error message.
+                 _:_ ->
+                   lager:warning("Failed to parse TwiML flow: ~p", [Flow]),
+                   undefined
+               end,
+  start_session(#session{flow = ParsedFlow}, QueuedCall).
 
 start_session(Session, QueuedCall) ->
   Project = project:find(QueuedCall#queued_call.project_id),
-  {StatusUrl, StatusUser, StatusPass} = case QueuedCall#queued_call.status_callback_url of
+  {StatusUrl, StatusUser, StatusPass, StatusIncludeVars} = case QueuedCall#queued_call.status_callback_url of
     undefined -> project:status_callback(Project);
     <<>> -> project:status_callback(Project);
-    Url -> {Url, undefined, undefined}
+    Url -> {Url, undefined, undefined, false}
   end,
   Session#session{
     address = QueuedCall#queued_call.address,
     status_callback_url = StatusUrl,
     status_callback_user = StatusUser,
     status_callback_password = StatusPass,
+    status_callback_include_vars = StatusIncludeVars,
     callback_params = QueuedCall#queued_call.callback_params,
     queued_call = QueuedCall,
     project = Project

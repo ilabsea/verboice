@@ -1,12 +1,12 @@
 -module(call_log_srv).
--export([new/2, error/3, info/3, trace/3, trace_record/5, update/2, id/1, associate_pbx_log/2, hangup/2]).
+-export([new/2, error/3, info/3, trace/3, trace_record/5, update/2, id/1, associate_pbx_log/2, hangup/2, hangup_status/1]).
 -export([completed/3, end_step_interaction/1]).
 
 -behaviour(gen_server).
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2, terminate/2, code_change/3]).
 
 -define(SERVER, ?MODULE).
--record(state, {call_log, owner_pid, timeout}).
+-record(state, {call_log, owner_pid, timeout, did_hangup = false, hangup_listeners = []}).
 
 -define(STOP_TIMEOUT, 500).
 
@@ -43,6 +43,9 @@ end_step_interaction({?MODULE, Pid}) ->
 hangup(SessionId, Reason) ->
   gen_server:cast({global, {call_log_srv, SessionId}}, {hangup, Reason}).
 
+hangup_status({?MODULE, Pid}) ->
+  gen_server:call(Pid, hangup_status).
+
 id({?MODULE, Pid}) ->
   gen_server:call(Pid, get_id).
 
@@ -59,6 +62,14 @@ init({CallLog, Owner}) ->
 handle_call(get_id, _From, State = #state{call_log = CallLog, timeout = Timeout}) ->
   {reply, CallLog#call_log.id, State, Timeout};
 
+handle_call(hangup_status, From, State = #state{did_hangup = false, hangup_listeners = Listeners, timeout = Timeout}) ->
+  {noreply, State#state{hangup_listeners = [From | Listeners]}, Timeout};
+handle_call(hangup_status, _From, State = #state{did_hangup = true, call_log = CallLog, timeout = Timeout}) ->
+  Status = case {CallLog#call_log.fail_code, CallLog#call_log.fail_details} of
+    {undefined, undefined} -> ok;
+    {Code, Details} -> {fail, Code, Details}
+  end,
+  {reply, Status, State, Timeout};
 handle_call(end_step_interaction, _From, State = #state{call_log = CallLog}) ->
   NewCallLog = CallLog:append_step_interaction("end"),
   {reply, NewCallLog#call_log.step_interaction, State#state{call_log = NewCallLog}}.
@@ -73,14 +84,26 @@ handle_cast({log, Level, Message, Details}, State = #state{call_log = CallLog, t
   call_log_entry_srv:log(CallLog#call_log.id, Level, Message, Details),
   {noreply, State, Timeout};
 
-handle_cast({log, _, _, _}, State) ->
-  {noreply, State};
-
 handle_cast({update, Fields}, State = #state{call_log = CallLog, timeout = Timeout}) ->
   NewCallLog = CallLog:update(Fields),
+  case is_list(Fields) of
+    true -> case proplists:get_value(finished_at, Fields) of
+              undefined -> ok;
+              FinishedAt -> contact:update_last_activity(CallLog#call_log.contact_id, FinishedAt)
+            end;
+    _ -> ok
+  end,
   {noreply, State#state{call_log = NewCallLog}, Timeout};
 
 handle_cast({trace_record, CallFlowId, StepId, StepName, Result}, State = #state{call_log = CallLog, timeout = Timeout}) ->
+  % TraceRecord = #trace_record{
+  %   call_flow_id = CallFlowId,
+  %   step_id = StepId,
+  %   step_name = StepName,
+  %   call_id = CallLog#call_log.id,
+  %   result = Result
+  % },
+  % TraceRecord:save(),
   call_log_entry_srv:trace(CallLog#call_log.id, CallFlowId, StepId, StepName, Result),
   NewCallLog = CallLog:append_step_interaction(StepName),
   {noreply, State#state{call_log = NewCallLog}, Timeout};
@@ -95,17 +118,14 @@ handle_cast({completed, Duration, Retries}, State = #state{call_log = CallLog, t
   NewCallLog:update([{state, "completed"}, {finished_at, calendar:universal_time()}, {duration, Duration}, {retries, Retries}]),
   {noreply, State#state{call_log = NewCallLog}, Timeout};
 
-handle_cast({hangup, {_Code, <<"Unknown">>}}, State = #state{timeout = Timeout}) ->
-  {noreply, State, Timeout};
+handle_cast({hangup, {_Code, <<"Unknown">>}}, State = #state{timeout = Timeout, hangup_listeners = Listeners}) ->
+  reply_hangup_listeners(ok, Listeners),
+  {noreply, State#state{did_hangup = true, hangup_listeners = []}, Timeout};
 
-handle_cast({hangup, {Code, Reason}}, State = #state{call_log = CallLog, timeout = Timeout}) ->
-  FullCode = case Code of
-    undefined -> undefined;
-    <<"0">> -> undefined;
-    _ -> "ISDN:" ++ binary_to_list(Code)
-  end,
-  NewCallLog = call_log:update(CallLog#call_log{fail_code = FullCode, fail_details = Reason}),
-  {noreply, State#state{call_log = NewCallLog}, Timeout}.
+handle_cast({hangup, {Code, Reason}}, State = #state{call_log = CallLog, timeout = Timeout, hangup_listeners = Listeners}) ->
+  NewCallLog = call_log:update(CallLog#call_log{fail_code = Code, fail_details = Reason}),
+  reply_hangup_listeners({fail, Code, Reason}, Listeners),
+  {noreply, State#state{did_hangup = true, hangup_listeners = [], call_log = NewCallLog}, Timeout}.
 
 %% @private
 handle_info({'DOWN', _Ref, process, Pid, _Reason}, State = #state{owner_pid = Pid}) ->
@@ -125,3 +145,8 @@ terminate(_Reason, _State) ->
 %% @private
 code_change(_OldVsn, State, _Extra) ->
   {ok, State}.
+
+reply_hangup_listeners(_Status, []) -> ok;
+reply_hangup_listeners(Status, [Listener | Listeners]) ->
+  gen_server:reply(Listener, Status),
+  reply_hangup_listeners(Status, Listeners).

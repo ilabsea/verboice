@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20160504025619) do
+ActiveRecord::Schema.define(:version => 20170124193643) do
 
   create_table "accounts", :force => true do |t|
     t.string   "email",                               :default => "", :null => false
@@ -132,16 +132,16 @@ ActiveRecord::Schema.define(:version => 20160504025619) do
     t.integer  "call_flow_id"
     t.string   "fail_reason"
     t.string   "pbx_logs_guid"
+    t.datetime "not_after"
+    t.integer  "contact_id"
+    t.string   "fail_details"
+    t.string   "fail_code"
     t.integer  "duration",             :default => 0
     t.integer  "retries",              :default => 0
     t.text     "step_interaction"
     t.string   "prefix_called_number"
     t.boolean  "store_log_entries"
-    t.datetime "not_after"
     t.integer  "parent_id"
-    t.integer  "contact_id"
-    t.string   "fail_details"
-    t.string   "fail_code"
   end
 
   add_index "call_logs", ["account_id", "id"], :name => "index_call_logs_on_account_id_and_id"
@@ -170,8 +170,8 @@ ActiveRecord::Schema.define(:version => 20160504025619) do
     t.datetime "updated_at",                           :null => false
     t.string   "type"
     t.string   "guid"
-    t.boolean  "enabled",      :default => true
     t.string   "status",       :default => "approved"
+    t.boolean  "enabled",      :default => true
   end
 
   add_index "channels", ["call_flow_id"], :name => "index_channels_on_call_flow_id"
@@ -200,10 +200,11 @@ ActiveRecord::Schema.define(:version => 20160504025619) do
   add_index "contact_scheduled_calls", ["scheduled_call_id"], :name => "index_contact_scheduled_calls_on_scheduled_call_id"
 
   create_table "contacts", :force => true do |t|
-    t.datetime "created_at", :null => false
-    t.datetime "updated_at", :null => false
+    t.datetime "created_at",       :null => false
+    t.datetime "updated_at",       :null => false
     t.boolean  "anonymous"
     t.integer  "project_id"
+    t.datetime "last_activity_at"
   end
 
   add_index "contacts", ["project_id"], :name => "index_contacts_on_project_id"
@@ -453,7 +454,7 @@ ActiveRecord::Schema.define(:version => 20160504025619) do
     t.integer  "account_id"
     t.string   "name"
     t.string   "channel_name"
-    t.boolean  "enabled"
+    t.boolean  "enabled",      :default => true
     t.datetime "created_at",                      :null => false
     t.datetime "updated_at",                      :null => false
     t.string   "kind"
@@ -524,15 +525,16 @@ ActiveRecord::Schema.define(:version => 20160504025619) do
 
   create_table "projects", :force => true do |t|
     t.string   "name"
-    t.datetime "created_at",                                :null => false
-    t.datetime "updated_at",                                :null => false
+    t.datetime "created_at",                                      :null => false
+    t.datetime "updated_at",                                      :null => false
     t.integer  "account_id"
     t.string   "status_callback_url"
     t.text     "encrypted_config"
-    t.string   "time_zone",              :default => "UTC"
+    t.string   "time_zone",                    :default => "UTC"
     t.text     "languages"
     t.string   "default_language"
-    t.boolean  "store_call_log_entries", :default => true
+    t.boolean  "store_call_log_entries",       :default => true
+    t.boolean  "status_callback_include_vars", :default => false
   end
 
   create_table "queued_calls", :force => true do |t|
@@ -553,11 +555,11 @@ ActiveRecord::Schema.define(:version => 20160504025619) do
     t.text     "variables"
     t.string   "session_id"
     t.text     "callback_params"
-    t.datetime "answered_at"
-    t.string   "state",               :default => "queued"
     t.datetime "not_after"
     t.integer  "contact_id"
     t.integer  "scheduled_call_id"
+    t.datetime "answered_at"
+    t.string   "state",               :default => "queued"
   end
 
   add_index "queued_calls", ["call_flow_id"], :name => "index_queued_calls_on_call_flow_id"

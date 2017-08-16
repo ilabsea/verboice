@@ -1,22 +1,15 @@
 -module(asterisk_config).
--export([generate/2, expand_domain/1]).
+-export([generate/1, expand_domain/1]).
 
 -include_lib("kernel/include/inet.hrl").
 -include("db.hrl").
 
--define(DNS_RESOLVER_TIMEOUT, 1000).
-
-generate(RegFilePath, ChannelsFilePath) ->
-  {ok, RegFile} = file:open(RegFilePath, [write]),
-  try file:open(ChannelsFilePath, [write]) of
-    {ok, ChannelsFile} ->
-      try generate_config(RegFile, ChannelsFile) of
-        R -> R
-      after
-        file:close(ChannelsFile)
-      end
+generate(ConfigFilePath) ->
+  {ok, ConfigFile} = file:open(ConfigFilePath, [write]),
+  try generate_config(ConfigFile) of
+    R -> R
   after
-    file:close(RegFile)
+    file:close(ConfigFile)
   end.
 
 % returns a tuple with the channels index and registrations index for the generated files
@@ -28,12 +21,18 @@ generate(RegFilePath, ChannelsFilePath) ->
 % domain names mapped to identical IP addresses. A list of more than one
 % element might indicate someone attempting to steal SIP calls from another
 % user.
-generate_config(RegFile, ChannelsFile) ->
+generate_config(ConfigFile) ->
   Channels = channel:find_all_sip(),
-  generate_config(Channels, RegFile, ChannelsFile, dict:new(), dict:new(), dict:new()).
+  generate_config(Channels, ConfigFile, dict:new(), dict:new(), dict:new()).
 
-generate_config([], _, _, _, ChannelIndex, RegistryIndex) -> {ChannelIndex, RegistryIndex};
-generate_config([Channel | Rest], RegFile, ChannelsFile, ResolvCache, ChannelIndex, RegistryIndex) ->
+generate_config([], _, _, ChannelIndex, RegistryIndex) -> {ChannelIndex, RegistryIndex};
+generate_config([Channel | Rest], ConfigFile, ResolvCache, ChannelIndex, RegistryIndex) ->
+  HeaderLines = binary:split(erlang:iolist_to_binary(pretty_print(Channel)), <<"\n">>, [global]),
+  lists:foreach(fun(Line) ->
+    file:write(ConfigFile, ["; ", Line, "\n"])
+  end, HeaderLines),
+  file:write(ConfigFile, "\n"),
+
   Section = ["verboice_", integer_to_list(Channel#channel.id)],
   Username = channel:username(Channel),
   Password = channel:password(Channel),
@@ -43,104 +42,150 @@ generate_config([Channel | Rest], RegFile, ChannelsFile, ResolvCache, ChannelInd
   Number = channel:number(Channel),
   DtmfMode = channel:dtmf_mode(Channel),
   CodecType = channel:codec_type(Channel),
-  Qualify = channel:qualify(Channel),
+  % Qualify = channel:qualify(Channel),
 
   case Domain of
     [] ->
-      file:write(ChannelsFile, ["[", Section, "]\n"]),
-      file:write(ChannelsFile, "type=friend\n"),
-      file:write(ChannelsFile, "canreinvite=no\n"),
-      file:write(ChannelsFile, "nat=yes\n"),
-      file:write(ChannelsFile, "qualify=yes\n"),
-      file:write(ChannelsFile, ["secret=", Password, "\n"]),
-      file:write(ChannelsFile, "insecure=no\n"),
-      file:write(ChannelsFile, "context=verboice\n"),
-      file:write(ChannelsFile, "host=dynamic\n"),
-      file:write(ChannelsFile, "\n"),
-      generate_config(Rest, RegFile, ChannelsFile, ResolvCache, ChannelIndex, RegistryIndex);
+      % Endpoint
+      file:write(ConfigFile, ["[", Section, "]\n"]),
+      file:write(ConfigFile, "type=endpoint\n"),
+      file:write(ConfigFile, "context=verboice\n"),
+      file:write(ConfigFile, ["aors=", Section, "\n"]),
+      file:write(ConfigFile, ["auth=", Section, "\n"]),
+      file:write(ConfigFile, "disallow=all\n"),
+      file:write(ConfigFile, "allow=ulaw\n"),
+      file:write(ConfigFile, "allow=gsm\n"),
+      file:write(ConfigFile, "rtp_symmetric=yes\n"),
+      file:write(ConfigFile, "direct_media=no\n"),
+      file:write(ConfigFile, "rewrite_contact=yes\n"),
+      file:write(ConfigFile, "identify_by=auth_username\n"),
+      file:write(ConfigFile, "\n"),
+
+      % Auth
+      file:write(ConfigFile, ["[", Section, "]\n"]),
+      file:write(ConfigFile, "type=auth\n"),
+      file:write(ConfigFile, "auth_type=userpass\n"),
+      file:write(ConfigFile, ["username=", Section, "\n"]),
+      file:write(ConfigFile, ["password=", Password, "\n"]),
+      file:write(ConfigFile, "\n"),
+
+      % AOR
+      file:write(ConfigFile, ["[", Section, "]\n"]),
+      file:write(ConfigFile, "type=aor\n"),
+      file:write(ConfigFile, "qualify_frequency=60\n"),
+      file:write(ConfigFile, "max_contacts=1\n"),
+      file:write(ConfigFile, "remove_existing=yes\n"),
+      file:write(ConfigFile, "\n"),
+
+      generate_config(Rest, ConfigFile, ResolvCache, ChannelIndex, RegistryIndex);
 
     _ ->
-      file:write(ChannelsFile, ["[", Section, "](!)\n"]),
-      file:write(ChannelsFile, "type=peer\n"),
-      file:write(ChannelsFile, "canreinvite=no\n"),
-      file:write(ChannelsFile, "nat=yes\n"),
-      file:write(ChannelsFile, ["qualify=", Qualify, "\n"]),
-
-  if
-    length(DtmfMode) > 0 -> file:write(ChannelsFile, ["dtmfmode=", DtmfMode, "\n"]);
-    true -> ok
-  end,
-  
-  if 
-    length(CodecType) > 0 -> file:write(ChannelsFile, ["allow=", CodecType, "\n"]);
-    true -> ok
-  end,
-
-      if length(Username) > 0 andalso length(Password) > 0 ->
-        file:write(ChannelsFile, ["fromuser=", Username, "\n"]),
-        file:write(ChannelsFile, ["defaultuser=", Username, "\n"]),
-        file:write(ChannelsFile, ["secret=", Password, "\n"]);
-        true -> ok
+      HasAuth = length(Username) > 0 andalso length(Password) > 0,
+      UserOrNumber = case length(Username) > 0 of
+        true -> Username;
+        _ -> Number
       end,
 
-      file:write(ChannelsFile, "insecure=invite,port\n"),
-      file:write(ChannelsFile, "context=verboice\n"),
+    if
+      length(DtmfMode) > 0 -> file:write(ConfigFile, ["dtmfmode=", DtmfMode, "\n"]);
+      true -> ok
+    end,
+
+    if
+      length(CodecType) > 0 -> file:write(ConfigFile, ["allow=", CodecType, "\n"]);
+      true -> ok
+    end,
+
+      % Registration
+      NewRegistryIndex = case channel:register(Channel) of
+        true ->
+          file:write(ConfigFile, ["[", Section, "]\n"]),
+          file:write(ConfigFile, "type=registration\n"),
+          if HasAuth ->
+            file:write(ConfigFile, ["outbound_auth=", Section, "\n"]);
+            true -> ok
+          end,
+          file:write(ConfigFile, ["server_uri=sip:", Domain, "\n"]),
+          file:write(ConfigFile, ["client_uri=sip:", UserOrNumber, "@", Domain, "\n"]),
+          %% When Asterisk Version > 13.1...
+          % file:write(ConfigFile, "line=yes\n"),
+          % file:write(ConfigFile, ["endpoint=", Section, "\n"]),
+          file:write(ConfigFile, "\n"),
+          dict:store({Username, Domain}, Channel#channel.id, RegistryIndex);
+
+        _ -> RegistryIndex
+      end,
 
   if length(SipPort) > 0 ->
-    file:write(ChannelsFile, ["port=", SipPort, "\n"]);
+    file:write(ConfigFile, ["port=", SipPort, "\n"]);
     true -> ok
   end,
 
   case Protocol of
     <<"tcp">> ->
-      file:write(ChannelsFile, "transport=tcp\n"),
-      file:write(ChannelsFile, "tcpenable=yes\n");
+      file:write(ConfigFile, "transport=tcp\n"),
+      file:write(ConfigFile, "tcpenable=yes\n");
     _ -> ok
   end,
 
-      file:write(ChannelsFile, "\n"),
 
-      case channel:is_outbound(Channel) of
-        true ->
-          file:write(ChannelsFile, ["[", Section, "-outbound](", Section, ")\n"]),
-          file:write(ChannelsFile, ["host=", Domain, "\n"]),
-          file:write(ChannelsFile, ["domain=", Domain, "\n"]),
-          file:write(ChannelsFile, ["fromdomain=", Domain, "\n"]),
-          file:write(ChannelsFile, ["type=peer\n"]),
-          file:write(ChannelsFile, "\n");
-        _ -> ok
-      end,
+  % Endpoint
+  file:write(ConfigFile, ["[", Section, "]\n"]),
+  file:write(ConfigFile, "type=endpoint\n"),
+  file:write(ConfigFile, "context=verboice\n"),
+  file:write(ConfigFile, ["aors=", Section, "\n"]),
+  if HasAuth ->
+    file:write(ConfigFile, ["outbound_auth=", Section, "\n"]);
+    true -> ok
+  end,
+  file:write(ConfigFile, ["from_user=", UserOrNumber, "\n"]),
+  file:write(ConfigFile, ["from_domain=", Domain, "\n"]),
+  file:write(ConfigFile, "disallow=all\n"),
+  file:write(ConfigFile, "allow=ulaw\n"),
+  file:write(ConfigFile, "allow=gsm\n"),
+  file:write(ConfigFile, "\n"),
 
-      {Expanded, NewCache} = expand_domain(Domain, ResolvCache),
-      {NewChannelIndex, _} = lists:foldl(fun ({Host, IPs, Port}, {R1, I}) ->
-        file:write(ChannelsFile, ["[", Section, "-inbound-", integer_to_list(I), "](", Section, ")\n"]),
-        file:write(ChannelsFile, ["host=", Host, "\n"]),
-        case Port of
-          undefined -> ok;
-          _ ->
-            file:write(ChannelsFile, ["port=", integer_to_list(Port), "\n"])
-        end,
-        file:write(ChannelsFile, ["domain=", Host, "\n"]),
-        file:write(ChannelsFile, ["fromdomain=", Host, "\n"]),
-        file:write(ChannelsFile, "type=user\n"),
-        file:write(ChannelsFile, "\n"),
+  % Auth
+  if HasAuth ->
+    file:write(ConfigFile, ["[", Section, "]\n"]),
+    file:write(ConfigFile, "type=auth\n"),
+    file:write(ConfigFile, "auth_type=userpass\n"),
+    file:write(ConfigFile, ["username=", Username, "\n"]),
+    file:write(ConfigFile, ["password=", Password, "\n"]),
+    file:write(ConfigFile, "\n");
+    true -> ok
+  end,
 
-        R3 = lists:foldl(fun (IP, R2) ->
-          dict:append({util:to_string(IP), Number}, Channel#channel.id, R2)
-        end, R1, IPs),
-        {R3, I + 1}
-      end, {ChannelIndex, 0}, Expanded),
+  % AOR
+  file:write(ConfigFile, ["[", Section, "]\n"]),
+  file:write(ConfigFile, "type=aor\n"),
+  file:write(ConfigFile, "qualify_frequency=60\n"),
+  file:write(ConfigFile, ["contact=sip:", Domain, "\n"]),
+  file:write(ConfigFile, "\n"),
 
-      NewRegistryIndex = case channel:register(Channel) of
-        true ->
-          file:write(RegFile, ["register => ", Username, ":", Password, "@", Domain, "/", Number, "\n"]),
-          dict:store({Username, Domain}, Channel#channel.id, RegistryIndex);
-        _ ->
-          RegistryIndex
-      end,
+  % Identify
+  file:write(ConfigFile, ["[", Section, "]\n"]),
+  file:write(ConfigFile, "type=identify\n"),
+  file:write(ConfigFile, ["endpoint=", Section, "\n"]),
 
-      generate_config(Rest, RegFile, ChannelsFile, NewCache, NewChannelIndex, NewRegistryIndex)
-  end.
+  {Expanded, NewCache} = expand_domain(Domain, ResolvCache),
+  {NewChannelIndex, _} = lists:foldl(fun ({_Host, IPs, Port}, {R1, I}) ->
+    case Port of
+      undefined -> ok;
+      _ -> ok
+        % file:write(ConfigFile, ["port=", integer_to_list(Port), "\n"])
+    end,
+
+    R3 = lists:foldl(fun (IP, R2) ->
+      file:write(ConfigFile, ["match=", IP, "\n"]),
+      dict:append({util:to_string(IP), Number}, Channel#channel.id, R2)
+    end, R1, IPs),
+    {R3, I + 1}
+  end, {ChannelIndex, 0}, Expanded),
+  file:write(ConfigFile, "\n"),
+
+  generate_config(Rest, ConfigFile, NewCache, NewChannelIndex, NewRegistryIndex)
+end.
 
 expand_domain(<<>>, ResolvCache) -> {[], ResolvCache};
 expand_domain(Domain, ResolvCache) ->
@@ -158,10 +203,10 @@ expand_domain(Domain, ResolvCache) ->
 
 expand_domain(Domain) ->
   Query = binary_to_list(iolist_to_binary(["_sip._udp.", Domain])),
-  case inet_res:getbyname(Query, srv, ?DNS_RESOLVER_TIMEOUT) of
+  case inet_res:getbyname(Query, srv) of
     {ok, #hostent{h_addr_list = AddrList}} ->
       lists:foldl(fun({_, _, Port, Host}, Out) ->
-        New = case inet_res:gethostbyname(Host, inet, ?DNS_RESOLVER_TIMEOUT) of
+        New = case inet_res:gethostbyname(Host) of
           {ok, #hostent{h_addr_list = IpList}} ->
             IPs = map_ips(IpList),
             {Host, IPs, Port};
@@ -170,7 +215,7 @@ expand_domain(Domain) ->
         [New | Out]
       end, [], AddrList);
     _ ->
-      case inet_res:gethostbyname(Domain, inet, ?DNS_RESOLVER_TIMEOUT) of
+      case inet_res:gethostbyname(Domain) of
         {ok, #hostent{h_addr_list = IpList}} ->
           IPs = map_ips(IpList),
           [{Domain, IPs, undefined}];
@@ -187,3 +232,12 @@ is_ip(Address) ->
 map_ips(IpList) ->
   [iolist_to_binary(io_lib:format("~B.~B.~B.~B", [A,B,C,D])) || {A,B,C,D} <- IpList].
 
+
+pretty_print(Channel) ->
+  io_lib_pretty:print(Channel, fun pretty_print/2).
+
+pretty_print(channel, N) ->
+  N = record_info(size, channel) - 1,
+  record_info(fields, channel);
+pretty_print(_, _) ->
+  no.

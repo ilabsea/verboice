@@ -5,7 +5,12 @@
       %input.ux-text.w20.right{ ko(value: 'name', valueUpdate: '"afterkeydown"', css: '{ "error": is_name_invalid }')}
 
     .content
-      %label= t('views.call_flows._transfer_step_template.label.forward_to')
+      %p
+        %label
+          Forward to the specified phone number.
+          %br
+          You can use interpolation to refer to variables in the number, such as
+          %code 5551000{ext}.
       %br
 
       %span.forwardto{ko(css: "{ orange: is_address_invalid }")}
@@ -16,7 +21,7 @@
 
       %span.forwardto
         = t('views.call_flows._transfer_step_template.label.channel')
-      %select{ko(value: 'channel')}
+      %select.w20{ko(value: 'channel')}
         %option{:value => nil}= t('views.call_flows._transfer_step_template.label.use_current_channel')
         = options_from_collection_for_select(current_account.channels, 'name', 'name')
       %br
@@ -38,4 +43,4 @@
               %li 1 hour
 
       .bottom-actions
-        %button.fdelete{ 'data-bind' => 'click: remove_with_confirm' }= t('views.call_flows._transfer_step_template.action.remove_this_step')
+        = render partial: 'bottom_actions'

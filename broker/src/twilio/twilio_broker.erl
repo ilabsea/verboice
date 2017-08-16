@@ -1,9 +1,13 @@
 -module(twilio_broker).
--export([start_link/0, init/0, dispatch/1, create_channel/1, destroy_channel/1, get_channel_status/1]).
+-export([start_link/0, init/0, dispatch/1, create_channel/1, destroy_channel/1, get_channel_status/1, parse_exception/2]).
 
 -behaviour(broker).
 -include("session.hrl").
 -include("uri.hrl").
+
+-include_lib("xmerl/include/xmerl.hrl").
+
+-compile([{parse_transform, lager_transform}]).
 
 start_link() ->
   broker:start_link(?MODULE).
@@ -32,11 +36,25 @@ dispatch(_Session = #session{session_id = SessionId, channel = Channel, address 
   ],
 
   Response = uri:post_form(RequestBody, [{basic_auth, {AccountSid, AuthToken}}], RequestUrl),
-  io:format("Response: ~p~n", [Response]),
+  lager:info("Twilio response: ~p~n", [Response]),
   case Response of
     {ok, {{_, 201, _}, _, _}} -> ok;
-    {ok, {{_, _, Reason}, _, _}} -> {error, Reason};
+    {ok, {{_, _, Reason}, _, Msg}} -> parse_exception(Reason, Msg);
     _ ->
       timer:apply_after(timer:minutes(1), broker, notify_ready, [?MODULE]),
       {error, unavailable}
+  end.
+
+parse_exception(Reason, Body) ->
+  try
+    {Doc, []} = xmerl_scan:string(Body),
+    [Exception] = xmerl_xs:select("/TwilioResponse/RestException", Doc),
+    FullCode = case xmerl_xs:value_of(xmerl_xs:select("./Code", Exception)) of
+      [Code] -> "twilio:" ++ Code;
+      _ -> undefined
+    end,
+    [Message] = xmerl_xs:value_of(xmerl_xs:select("./Message", Exception)),
+    {error, Message, FullCode}
+  catch
+    _ -> {error, Reason}
   end.

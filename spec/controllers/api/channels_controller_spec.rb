@@ -42,6 +42,73 @@ describe Api::ChannelsController do
       assert_response :ok
       response.body.should eq(chan.to_json)
     end
+
+    it "should return not found for non existing channel by id" do
+      get :get_by_id, :id => 0
+      assert_response :not_found
+    end
+
+    it "should return from id" do
+      chan = Channels::CustomSip.make account: @account, call_flow: call_flow
+
+      get :get_by_id, :id => chan.id
+
+      assert_response :ok
+      response.body.should eq(chan.to_json)
+    end
+
+    it "should return shared channel from id" do
+      other_account = Account.make
+      other_call_flow = other_account.projects.make.call_flows.make
+      shared_read_chan = Channels::CustomSip.make account: other_account, call_flow: other_call_flow
+      ChannelPermission.create! model_id: shared_read_chan.id, account_id: @account.id, role: "read"
+
+      get :get_by_id, :id => shared_read_chan.id
+
+      assert_response :ok
+      response.body.should eq(shared_read_chan.to_json)
+    end
+  end
+
+  describe "list" do
+    it "should return all channels" do
+      chan1 = Channels::CustomSip.make account: @account, call_flow: call_flow
+      chan2 = Channels::CustomSip.make account: @account, call_flow: call_flow
+
+      get :list
+
+      assert_response :ok
+      response.body.should eq([chan1.name, chan2.name].to_json)
+    end
+  end
+
+  describe "all" do
+    it "should return all channels" do
+      chan1 = Channels::CustomSip.make account: @account, call_flow: call_flow
+      chan2 = Channels::CustomSip.make account: @account, call_flow: call_flow
+
+      get :all
+
+      assert_response :ok
+      response.body.should eq([chan1, chan2].to_json)
+    end
+
+    it "should include shared channels" do
+      other_account = Account.make
+      other_call_flow = other_account.projects.make.call_flows.make
+
+      chan = Channels::CustomSip.make account: @account, call_flow: call_flow
+      shared_read_chan = Channels::CustomSip.make account: other_account, call_flow: other_call_flow
+      shared_admin_chan = Channels::CustomSip.make account: other_account, call_flow: other_call_flow
+
+      ChannelPermission.create! model_id: shared_read_chan.id, account_id: @account.id, role: "read"
+      ChannelPermission.create! model_id: shared_admin_chan.id, account_id: @account.id, role: "admin"
+
+      get :all
+
+      assert_response :ok
+      response.body.should eq([chan, shared_read_chan, shared_admin_chan].to_json)
+    end
   end
 
   describe "create" do
@@ -168,17 +235,39 @@ describe Api::ChannelsController do
     end
   end
 
-  describe "list" do
-    before(:each) do
-      Channels::Custom.make account: @account
+  describe "enable" do
+    it "should return not found for non existing channel" do
+      post :enable, :id => 1
+      assert_response :not_found
     end
 
-    it "should list all channels" do
-      get :list
+    it "enables a channel" do
+      chan = Channel.all_leaf_subclasses.sample.make :name => 'foo', :account => @account, :enabled => false
 
+      chan.should_not be_enabled
+
+      post :enable, :id => chan.id
       assert_response :ok
-      response = ActiveSupport::JSON.decode(@response.body)
-      response.length.should eq(1)
+
+      chan.reload.should be_enabled
+    end
+  end
+
+  describe "disable" do
+    it "should return not found for non existing channel" do
+      post :enable, :id => 1
+      assert_response :not_found
+    end
+
+    it "disables a channel" do
+      chan = Channel.all_leaf_subclasses.sample.make :name => 'foo', :account => @account
+
+      chan.should be_enabled
+
+      post :disable, :id => chan.id
+      assert_response :ok
+
+      chan.reload.should_not be_enabled
     end
   end
 end

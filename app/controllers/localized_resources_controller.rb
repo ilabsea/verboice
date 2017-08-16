@@ -17,14 +17,15 @@
 
 class LocalizedResourcesController < ApplicationController
 
-  expose(:project) { load_project }
+  before_filter :check_project_admin, only: [:save_recording, :save_file]
+  before_filter :check_project_reader, only: [:play_recording, :play_file]
+
+  expose(:project) { @project }
   expose(:resource) { project.resources.find(params[:resource_id]) }
   expose(:localized_resources) { resource.localized_resources }
   expose(:localized_resource)
 
   skip_before_filter :verify_authenticity_token, :only => [:save_recording, :save_file]
-
-  include AudioUtils
 
   def save_recording
     localized_resource.recorded_audio = request.body.read
@@ -37,14 +38,10 @@ class LocalizedResourcesController < ApplicationController
   end
 
   def save_file
-    localized_resource.filename = "#{params[:filename]}" if params[:filename].present?
-    localized_resource.uploaded_audio = convert_to_8000_hz_wav(request.body.read, request.content_type)
+    localized_resource.filename = params[:filename] if params[:filename].present?
+    localized_resource.uploaded_audio = request.body.read
     localized_resource.save
-    if params[:filename].present? && request.content_type.audio_mime_type?
-      render :text => "OK"
-    else
-      render :text => I18n.t("controllers.localized_resources_controller.invalid_audio_file")
-    end
+    head :ok
   end
 
   def play_file

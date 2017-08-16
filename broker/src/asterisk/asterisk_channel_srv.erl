@@ -1,11 +1,22 @@
 -module(asterisk_channel_srv).
+-compile([{parse_transform, lager_transform}]).
 -export([start_link/0, find_channel/2, register_channel/2, regenerate_config/0, set_channel_status/1, get_channel_status/1]).
 
 -behaviour(gen_server).
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2, terminate/2, code_change/3]).
 
+-include("db.hrl").
+
 -define(SERVER, ?MODULE).
+
+% chan_pjsip will stop attempting outbound registrations if it receives a
+% 401/403, until the next reload. Since failure counts are incremented on each
+% check_status, care must be taken to allow at least two reloads before
+% disabling a channel.
+
 -define(RELOAD_INTERVAL, timer:minutes(2)).
+-define(STATUS_INTERVAL, timer:seconds(30)).
+-define(REGISTRATION_FAILURES_THRESHOLD, 7).
 
 % channels: dict({ip, number}, [channel_id])
 %   Static host registered peers. This is built by asterisk_config:generate/2.
@@ -20,7 +31,12 @@
 % channel_status: dict(channel_id, {channel_id, registration_ok, error_message})
 %   Registration statuses
 %
--record(state, {channels, dynamic_channels, registry, channel_status, config_job_state = idle, status_job_state = idle}).
+% registration_failures: dict(channel_id, {failure_count, last_updated_at})
+%   Number of times a registration failures has been seen after last
+%   channel update, and the timestamp of the last update. If more than
+%   ?REGISTRATION_FAILURES_THRESHOLD, the channel will be automatically disabled.
+%
+-record(state, {channels, dynamic_channels, registry, channel_status, config_job_state = idle, status_job_state = idle, registration_failures}).
 
 start_link() ->
   gen_server:start_link({local, ?SERVER}, ?MODULE, {}, []).
@@ -44,9 +60,9 @@ get_channel_status(ChannelIds) ->
 init({}) ->
   agi_events:add_sup_handler(asterisk_call_manager, []),
   regenerate_config(),
-  timer:send_interval(timer:seconds(30), check_status),
+  timer:send_interval(?STATUS_INTERVAL, check_status),
   timer:send_after(?RELOAD_INTERVAL, sip_reload),
-  {ok, #state{channels = dict:new(), dynamic_channels = dict:new(), registry = dict:new()}}.
+  {ok, #state{channels = dict:new(), dynamic_channels = dict:new(), registry = dict:new(), registration_failures = dict:new()}}.
 
 %% @private
 handle_call({find_channel, PeerIp, Number}, _From, State) ->
@@ -99,18 +115,19 @@ handle_call(_Request, _From, State) ->
   {reply, {error, unknown_call}, State}.
 
 %% @private
-handle_cast(regenerate_config, State = #state{config_job_state = JobState}) ->
+handle_cast(regenerate_config, State = #state{config_job_state = JobState, registration_failures = RegFailures}) ->
   NewState = case JobState of
     idle ->
       spawn_link(fun() ->
         {ok, BaseConfigPath} = application:get_env(asterisk_config_dir),
-        RegFilePath = filename:join(BaseConfigPath, "sip_verboice_registrations.conf"),
-        ChannelsFilePath = filename:join(BaseConfigPath, "sip_verboice_channels.conf"),
-        {ChannelIndex, RegistryIndex} = asterisk_config:generate(RegFilePath, ChannelsFilePath),
+        ConfigFilePath = filename:join(BaseConfigPath, "pjsip_verboice.conf"),
+        {ChannelIndex, RegistryIndex} = asterisk_config:generate(ConfigFilePath),
         ami_client:sip_reload(),
         gen_server:cast(?MODULE, {set_channels, ChannelIndex, RegistryIndex})
       end),
-      State#state{config_job_state = working};
+      %% reset the count of registration failures
+      NewRegFailures = reset_registration_failures(RegFailures),
+      State#state{config_job_state = working, registration_failures = NewRegFailures};
     working ->
       State#state{config_job_state = must_regenerate};
     must_regenerate ->
@@ -119,16 +136,31 @@ handle_cast(regenerate_config, State = #state{config_job_state = JobState}) ->
   {noreply, NewState};
 
 handle_cast({set_channels, ChannelIndex, RegistryIndex}, State = #state{config_job_state = JobState}) ->
-  io:format("Updated registry: ~n~p~n~p~n", [ChannelIndex, RegistryIndex]),
+  lager:info("Updated Asterisk Channel registry: ~B IP-number and ~B SIP registrations",
+             [dict:size(ChannelIndex), dict:size(RegistryIndex)]),
+  lager:debug("Asterisk Channel registry: ~n~p~n~p~n", [ChannelIndex, RegistryIndex]),
   case JobState of
     must_regenerate -> regenerate_config();
     _ -> ok
   end,
   {noreply, State#state{channels = ChannelIndex, registry = RegistryIndex, config_job_state = idle}};
 
-handle_cast({set_channel_status, Status}, State = #state{channel_status = PrevStatus}) ->
+handle_cast({set_channel_status, Status}, State = #state{channel_status = PrevStatus, registration_failures = RegFailures}) ->
   channel:log_broken_channels(PrevStatus, Status),
-  {noreply, State#state{channel_status = Status, status_job_state = idle}};
+
+  % increment the registration failures
+  {NewRegFailures, DisableChannels} = update_registration_failures(Status, RegFailures),
+  if
+    length(DisableChannels) > 0 ->
+      % disable channels that have excedeed the number of failed status checks
+      channel:disable_by_ids(DisableChannels),
+      % and rewrite configuration
+      timer:apply_after(0, ?MODULE, regenerate_config, []);
+    true ->
+      ok
+  end,
+
+  {noreply, State#state{channel_status = Status, status_job_state = idle, registration_failures = NewRegFailures}};
 
 handle_cast(_Msg, State) ->
   {noreply, State}.
@@ -173,3 +205,35 @@ find_registered_channel(ChannelIds, ChannelStatus) ->
         Result
     end, undefined, ChannelIds).
 
+reset_registration_failures(RegFailures) ->
+  Channels = channel:find_all_sip(),
+  lists:foldl(reset_registration_failures_folder(RegFailures), dict:new(), Channels).
+
+reset_registration_failures_folder(RegFailures) ->
+  fun(#channel{id = ChannelId, updated_at = UpdatedAt}, RegIn) ->
+      FailureCount = case dict:find(ChannelId, RegFailures) of
+                       {ok, {PrevCount, UpdatedAt}} ->
+                         %% maintain failure count only when the
+                         %% updated timestamp hasn't changed
+                         PrevCount;
+                       _ ->
+                         0
+                     end,
+      dict:store(ChannelId, {FailureCount, UpdatedAt}, RegIn)
+  end.
+
+update_registration_failures(ChannelStatus, RegFailures) ->
+  dict:fold(fun update_registration_failures/3, {RegFailures, []}, ChannelStatus).
+
+update_registration_failures(ChannelId, {_, true, _}, {RegIn, DisableIn}) ->
+  {dict:erase(ChannelId, RegIn), DisableIn};
+update_registration_failures(ChannelId, {_, false, _}, {RegIn, DisableIn}) ->
+  case dict:find(ChannelId, RegIn) of
+    {ok, {FailureCount, _}} when FailureCount + 1 >= ?REGISTRATION_FAILURES_THRESHOLD ->
+      {dict:erase(ChannelId, RegIn), [ChannelId | DisableIn]};
+    {ok, {FailureCount, UpdatedAt}} ->
+      {dict:store(ChannelId, {FailureCount + 1, UpdatedAt}, RegIn), DisableIn};
+    _ ->
+      %% we didn't know about the channel, so ignore it
+      {RegIn, DisableIn}
+  end.

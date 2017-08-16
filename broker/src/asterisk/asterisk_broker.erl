@@ -36,19 +36,20 @@ dial_address(#channel{type = <<"Channels::Custom">>, config = Config}, Address) 
 
 dial_address(Channel = #channel{id = Id}, Address) ->
   case channel:domain(Channel) of
-    [] -> ["SIP/verboice_", integer_to_list(Id), "/", Address];
-    _ -> ["SIP/verboice_", integer_to_list(Id), "-outbound/", Address]
+    []     -> ["PJSIP/", Address, "@verboice_", integer_to_list(Id)];
+    Domain -> ["PJSIP/verboice_", integer_to_list(Id), "/sip:", Address, "@", Domain]
   end.
 
 dispatch(#session{session_id = SessionId, channel = Channel, address = Address}) ->
   CallerId = channel:number(Channel),
   DialAddress = dial_address(Channel, Address),
   {ok, BrokerPort} = application:get_env(broker_port),
+  BrokerHost = application:get_env(verboice, broker_host, "localhost"),
   ami_client:originate([
     {callerid, CallerId},
     {channel, DialAddress},
     {application, "AGI"},
-    {data, ["agi://localhost:", integer_to_list(BrokerPort), ",", SessionId]},
+    {data, ["agi://", BrokerHost, ":", integer_to_list(BrokerPort), ",", SessionId]},
     {async, true},
     {actionid, SessionId},
     {timeout, 60000},

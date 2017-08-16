@@ -1,6 +1,7 @@
 source 'http://rubygems.org'
 
 gem 'rails', '3.2.22'
+gem "puma", "2.16.0"
 
 gem 'haml-rails'
 gem "jquery-rails"
@@ -12,14 +13,12 @@ gem 'devise', '3.4.1'
 gem "daemons"
 
 gem "instedd-rails"
-gem 'instedd_telemetry', git: 'https://github.com/instedd/telemetry_rails.git'
-
 gem 'decent_exposure'
 gem 'attr_encrypted'
 gem 'foreman'
 gem 'oauth2', :require => 'oauth2'
 gem 'delayed_job_active_record'
-gem 'rubyzip'
+gem 'rubyzip', :require => 'zip/zip'
 gem 'zip-zip'
 gem 'rest-client'
 gem 'enumerated_attribute', :git => "https://github.com/edave/enumerated_attribute.git"
@@ -39,7 +38,9 @@ gem 'ruby-openid'
 gem 'omniauth'
 gem 'omniauth-openid'
 gem 'recurring_select', git: "https://github.com/instedd/recurring_select", branch: 'instedd'
-gem 'listings'
+gem 'listings', '~> 0.1.7'
+gem 'instedd_telemetry', github: "instedd/telemetry_rails", ref: "aee5fc99e3dbe06e6cdd077c8042a2ada0bb6995"
+gem 'ruby-asterisk'
 gem 'ice_cube'
 gem 'aws-sdk-v1'
 gem 'rails_config'
@@ -78,6 +79,7 @@ group :development do
   gem 'rvm-capistrano', require: false
   gem 'licit'
   gem 'thin'
+  gem 'rails-dev-tweaks'
 end
 
 group :test do

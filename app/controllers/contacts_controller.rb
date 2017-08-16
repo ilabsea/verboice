@@ -18,17 +18,17 @@
 class ContactsController < ApplicationController
   before_filter :authenticate_account!
   before_filter :load_project
-  before_filter :load_filters, :only => :index
-  before_filter :init_pagination, :only => :index
+  before_filter :load_filters, :only => [:index, :destroy_from_filter]
+  before_filter :load_sorting, :only => :index
   before_filter :initialize_context, :only => [:show, :edit, :update, :destroy, :calls]
-  before_filter :call_logs, only: :edit
-  before_filter :check_project_admin, :only => [:create, :edit, :update, :destroy]
+  before_filter :check_project_admin, :only => [:create, :edit, :update, :destroy, :destroy_from_filter]
   before_filter :init_calls_context, :only => [:calls, :queued_calls]
 
   def index
-    @contacts = ContactsFinder.for(@project).find(@filters, includes: [:addresses, :recorded_audios, :persisted_variables, :project_variables])
+    @page = params[:page] || 1
+    @contacts = ContactsFinder.for(@project).find(@filters, includes: [:addresses, :recorded_audios, :persisted_variables, :project_variables], sorting: @sorting)
     @project_variables = @project.project_variables
-    @recorded_audio_descriptions = RecordedAudio.select(:description).where(:contact_id => @contacts.collect(&:id)).collect(&:description).to_set
+    @fields = ContactsFinder.contact_fields
     @implicit_variables = ImplicitVariable.subclasses
 
     respond_to do |format|
@@ -70,6 +70,7 @@ class ContactsController < ApplicationController
 
   def edit
     load_empty_variables(@contact)
+    @persisted_variables = @contact.persisted_variables
   end
 
   def create
@@ -109,6 +110,11 @@ class ContactsController < ApplicationController
       format.html { redirect_to project_contacts_url(@project) }
       format.json { head :no_content }
     end
+  end
+
+  def destroy_from_filter
+    contacts = ContactsFinder.for(@project).find(@filters).destroy_all
+    redirect_to project_contacts_path(@project), notice: "#{pluralize(contacts.count, 'contact')} were deleted"
   end
 
   def calls
@@ -200,21 +206,16 @@ class ContactsController < ApplicationController
     @filters = params[:filters_json].present? ? JSON.parse(params[:filters_json]) : []
   end
 
-  def init_calls_context
-    @contact = @project.contacts.find(params[:id])
-    init_pagination
+  def load_sorting
+    @sorting = if params[:sort_type].presence
+      { params[:sort_type] => params[:sort_key], :direction => (params[:sort_dir] == 'down' ? 'DESC' : 'ASC')  }.with_indifferent_access
+    end
   end
 
-  def init_pagination
+  def init_calls_context
+    @contact = @project.contacts.find(params[:id])
     @page = params[:page] || 1
-    @per_page = params[:per_page] || 10
-  end
-  
-  def call_logs
-    @logs = @project.call_logs.includes(:channel).includes(:call_flow).includes(:call_log_answers).includes(:call_log_recorded_audios)
-    @logs = @logs.search "address:#{@contact.first_address}"
-    @logs = @logs.order 'call_logs.id DESC'
-    @logs = @logs.page(@page).per(@per_page)
+    @per_page = 10
   end
 
   def load_recorded_audio_descriptions

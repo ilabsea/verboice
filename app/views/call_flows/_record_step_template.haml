@@ -49,4 +49,4 @@
       %br/
 
     .bottom-actions
-      %button.fdelete{ 'data-bind' => 'click: remove_with_confirm' }= t('views.call_flows._record_step_template.action.remove_this_step')
+      = render partial: 'bottom_actions'

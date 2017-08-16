@@ -13,11 +13,12 @@ run(Args, Session = #session{pbx = Pbx, call_log = CallLog, contact = Contact, p
   SilenceTime = proplists:get_value(silence_detection, Args),
 
   CallLogId = CallLog:id(),
-  Filename = filename(CallLogId, Key),
-  filelib:ensure_dir(Filename),
+  LocalFilename = local_filename(CallLogId, Key),
+  AsteriskFilename = asterisk_filename(CallLogId, Key),
+  filelib:ensure_dir(LocalFilename),
 
-  poirot:log(info, "Recording to filename: ~s, stop keys: ~s, timeout: ~B, silent: ~B", [Filename, StopKeys, Timeout, SilenceTime]),
-  case Pbx:record(Filename, StopKeys, Timeout, SilenceTime) of
+  poirot:log(info, "Recording to filename: ~s, stop keys: ~s, timeout: ~B, as: ~s", [LocalFilename, StopKeys, Timeout, AsteriskFilename, SilenceTime]),
+  case Pbx:record(AsteriskFilename, LocalFilename, StopKeys, Timeout, SilenceTime) of
     ok ->
       RecordedAudio = #recorded_audio{
         contact_id = Contact#contact.id,
@@ -35,10 +36,18 @@ run(Args, Session = #session{pbx = Pbx, call_log = CallLog, contact = Contact, p
       throw({error_recording, Reason})
   end.
 
-filename(CallLogId, Key) ->
-  {ok, RecordDir} = application:get_env(record_dir),
+filename(RecordDir, CallLogId, Key) ->
   filename:join([RecordDir, util:to_string(CallLogId), "results", Key ++ ".wav"]).
 
+local_filename(CallLogId, Key) ->
+  {ok, RecordDir} = application:get_env(record_dir),
+  filename(RecordDir, CallLogId, Key).
+
+asterisk_filename(CallLogId, Key) ->
+  case application:get_env(asterisk_record_dir) of
+    {ok, RecordDir} -> filename(RecordDir, CallLogId, Key);
+    _ -> local_filename(CallLogId, Key)
+  end.
 create_call_log_recorded_audio(OldVarName, VarName, Key, Description, ProjectId, CallLogId) ->
   case VarName of
     undefined -> io:format("do nothing ~n");
@@ -56,15 +65,15 @@ create_call_log_recorded_audio(OldVarName, VarName, Key, Description, ProjectId,
       end,
 
       ProjectVariable = case ProjectVariableOld of
-        undefined -> 
+        undefined ->
           case ProjectVariableCur of
             undefined ->
               NewProjectVariable = #project_variable{project_id = ProjectId, name = VarName},
               NewProjectVariable:save() ;
             _ -> ProjectVariableCur
           end;
-        _ -> 
-          if 
+        _ ->
+          if
             OldVarName /= VarName -> ProjectVariableOld:update([{name, VarName}]);
             true -> io:format("do nothing ~n")
           end,
@@ -73,7 +82,7 @@ create_call_log_recorded_audio(OldVarName, VarName, Key, Description, ProjectId,
 
       ProjectVariableId = ProjectVariable#project_variable.id,
 
-      CallLogRecordedAudio = call_log_recorded_audio:find([ {call_log_id, CallLogId}, 
+      CallLogRecordedAudio = call_log_recorded_audio:find([ {call_log_id, CallLogId},
                                                             {project_variable_id, ProjectVariableId }
                                                           ]),
       case CallLogRecordedAudio of
@@ -85,10 +94,10 @@ create_call_log_recorded_audio(OldVarName, VarName, Key, Description, ProjectId,
             description = Description
           },
           NewCallLogRecordedAudio:save();
-        _ -> 
-          CallLogRecordedAudio:update([ {call_log_id, CallLogId}, 
-                                        {project_variable_id, ProjectVariableId}, 
-                                        {key, Key}, 
+        _ ->
+          CallLogRecordedAudio:update([ {call_log_id, CallLogId},
+                                        {project_variable_id, ProjectVariableId},
+                                        {key, Key},
                                         {description, Description}
                                       ])
       end

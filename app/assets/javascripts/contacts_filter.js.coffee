@@ -6,6 +6,7 @@ class @ContactsFilter
       if @count()? then "(#{if @count() == 0 then 'no' else @count()} #{if @count() == 1 then 'contact' else 'contacts'} found)" else ""
     @json = ko.computed =>
       ko.toJSON(filter.to_hash() for filter in @filters())
+    @variablesAndFields = window.fields.concat(window.variables);
 
   addFilter: =>
     filter = new Filter()
@@ -27,11 +28,13 @@ class Filter
     @other_types = ['value', 'variable']
     @other_type = ko.observable()
 
-    if attrs.project_variable_id?
-      @variable(_.find(window.variables, (v) -> v.id == attrs.project_variable_id))
+    if variable_id = attrs.project_variable_id or attrs.implicit_key
+      @variable(_.find(window.variables, (v) -> v.id == variable_id))
+    else if attrs.field_name
+      @variable(_.find(window.fields, (v) -> v.id == attrs.field_name))
 
-    if attrs.other_project_variable_id?
-      @other_variable(_.find(window.variables, (v) -> v.id == attrs.other_project_variable_id))
+    if other_variable_id = attrs.other_project_variable_id or attrs.other_implicit_key
+      @other_variable(_.find(window.variables, (v) -> v.id == other_variable_id))
       @other_type('variable')
     else
       @value(attrs.value || '')
@@ -62,17 +65,28 @@ class Filter
         "#{@variable()?.name} #{@operator()?.text} #{right}"
 
   to_hash: =>
-    {
-      project_variable_id: @variable()?.id
-      operator: @operator()?.value
-      value: @value() if @other_type() == 'value'
-      other_project_variable_id: @other_variable()?.id if @other_type() == 'variable'
-    }
+    hash = { operator: @operator()?.value }
+
+    if @variable()?.implicit
+      hash.implicit_key = @variable().id
+    else if @variable()?.field
+      hash.field_name = @variable().id
+    else if @variable()?.id?
+      hash.project_variable_id = @variable().id
+
+    unless @operator()?.unary
+      if @other_type() == 'value'
+        hash.value = @value()
+      else if @other_type() == 'variable'
+        if @other_variable()?.implicit
+          hash.other_implicit_key = @other_variable().id
+        else if @other_variable()?.id?
+          hash.other_project_variable_id = @other_variable().id
+
+    return hash
 
   expand: =>
     @expanded(true)
 
   close: =>
     @expanded(false)
-
-

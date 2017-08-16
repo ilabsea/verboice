@@ -18,7 +18,7 @@
     - else
       - @all_channels.each do |channel, permission|
         %tr
-          %td
+          %td{'class' => channel_row_class(channel)}
             - status = @channel_status[channel.id]
             - status_ok = status.nil? || status[:ok]
             - clazz = (channel.enabled? && channel.approved?) ? '' : 'lightgreytext'

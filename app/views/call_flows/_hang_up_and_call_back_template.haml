@@ -63,4 +63,4 @@
             %input{'type' => 'text', 'placeholder' => '1,2,4', 'data-bind' => 'value: retries'}
 
       .bottom-actions
-        %button.fdelete{ 'data-bind' => 'click: remove_with_confirm' } Remove this step
+        = render partial: 'bottom_actions'

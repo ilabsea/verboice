@@ -145,7 +145,7 @@ ready({answer, Pbx, ChannelId, CallerId}, State = #state{session_id = SessionId}
         store_log_entries = Project#project.store_call_log_entries
       }),
       Flow = call_flow:flow(CallFlow),
-      {StatusUrl, StatusUser, StatusPass} = project:status_callback(Project),
+      {StatusUrl, StatusUser, StatusPass, StatusIncludeVars} = project:status_callback(Project),
 
       #session{
         session_id = SessionId,
@@ -158,6 +158,7 @@ ready({answer, Pbx, ChannelId, CallerId}, State = #state{session_id = SessionId}
         address = CallerId,
         contact = Contact,
         status_callback_url = StatusUrl,
+        status_callback_include_vars = StatusIncludeVars,
         status_callback_user = StatusUser,
         status_callback_password = StatusPass,
         started_at = calendar:universal_time()
@@ -190,75 +191,69 @@ ready({dial, _, _, QueuedCall = #queued_call{address = undefined}}, _From, State
 ready({dial, RealBroker, Channel, QueuedCall}, _From, State = #state{session_id = SessionId, resume_ptr = ResumePtr}) ->
   lager:info("Session (~p) dial", [SessionId]),
 
-  AddressWithoutVoipPrefix = channel:address_without_voip_prefix(Channel, QueuedCall#queued_call.address),
-  NewSession = case State#state.session of
-    undefined ->
-      CallLog = call_log_srv:new(SessionId, call_log:find(QueuedCall#queued_call.call_log_id)),
-      {Contact, _ContactAddress} = get_contact(QueuedCall#queued_call.project_id, AddressWithoutVoipPrefix, QueuedCall#queued_call.call_log_id),
-      Session = QueuedCall:start_session(),
+  NewSession = #session{call_log = CallLog, flow = Flow} = prepare_session(QueuedCall, Channel, State),
 
-      poirot:add_meta([
-        {address, QueuedCall#queued_call.address},
-        {project_id, QueuedCall#queued_call.project_id},
-        {call_log_id, QueuedCall#queued_call.call_log_id},
-        {channel_id, Channel#channel.id},
-        {channel_name, Channel#channel.name}
-      ]),
-
-      Session#session{
-        session_id = SessionId,
-        channel = Channel,
-        call_log = CallLog,
-        contact = Contact,
-        started_at = calendar:universal_time()
-      };
-
-    Session ->
-      CallLog = Session#session.call_log,
-      Session#session{queued_call = QueuedCall, address = AddressWithoutVoipPrefix}
-  end,
-
-  % Don't the started_at if we are resuming an existing session
+  %% Don't set the started_at if we are resuming an existing session
   case ResumePtr of
     undefined ->
       CallLog:update({started_at, calendar:universal_time()});
-    _ -> ok
+    _ ->
+      ok
   end,
 
-  case channel:is_approved(Channel) of
-    true ->
-      case channel:enabled(Channel) of
+  case Flow of
+    undefined ->
+      {_, _, NewSession1} = finalize({failed, {error, "Invalid Flow"}}, State#state{session = NewSession}),
+      {stop, normal, error, State#state{session = NewSession1}};
+    _ ->
+      case channel:is_approved(Channel) of
         true ->
-          QuotaReaches = case channel_quota:find([{channel_id, Channel#channel.id}]) of
-            undefined -> false;
-            ChannelQuota -> ChannelQuota:enabled() andalso ChannelQuota:blocked()
-          end,
-          case QuotaReaches of
+          case channel:enabled(Channel) of
             true ->
-              {_, _, NewSession2} = finalize({failed, blocked}, State#state{session = NewSession}),
-              {stop, normal, error, State#state{session = NewSession2}};
-            _ ->
-              case RealBroker:dispatch(NewSession) of
-                {error, unavailable} ->
-                  {stop, normal, unavailable, State#state{session = NewSession}};
-                {error, Reason} ->
-                  {_, _, NewSession2} = finalize({failed, Reason}, State#state{session = NewSession}),
+              QuotaReaches = case channel_quota:find([{channel_id, Channel#channel.id}]) of
+                undefined -> false;
+                ChannelQuota -> ChannelQuota:enabled() andalso ChannelQuota:blocked()
+              end,
+
+              case QuotaReaches of
+                true ->
+                  {_, _, NewSession2} = finalize({failed, blocked}, State#state{session = NewSession}),
                   {stop, normal, error, State#state{session = NewSession2}};
                 _ ->
-              lager:info("Dialing to ~s through channel ~s", [QueuedCall#queued_call.address, Channel#channel.name]),
-                  notify_status(ringing, NewSession),
-                  CallLog:update([{state, "active"}, {fail_reason, undefined}]),
-                  {reply, ok, dialing, State#state{session = NewSession}, ?TIMEOUT_DIALING}
-              end
+                  case RealBroker:dispatch(NewSession) of
+                    {error, unavailable} ->
+                      {stop, normal, unavailable, State#state{session = NewSession}};
+                    {error, Reason} ->
+                      {_, _, NewSession2} = finalize({failed, Reason}, State#state{session = NewSession}),
+                      {stop, normal, error, State#state{session = NewSession2}};
+                    _ ->
+                  lager:info("Dialing to ~s through channel ~s", [QueuedCall#queued_call.address, Channel#channel.name]),
+                      notify_status(ringing, NewSession),
+                      CallLog:update([{state, "active"}, {fail_reason, undefined}]),
+                      {reply, ok, dialing, State#state{session = NewSession}, ?TIMEOUT_DIALING}
+                  end
+              end;
+            _ ->
+              {_, _, NewSession2} = finalize({failed, disabled}, State#state{session = NewSession}),
+              {stop, normal, error, State#state{session = NewSession2}}
           end;
         _ ->
           {_, _, NewSession2} = finalize({failed, disabled}, State#state{session = NewSession}),
           {stop, normal, error, State#state{session = NewSession2}}
-      end;
-    _ ->
-      {_, _, NewSession2} = finalize({failed, disabled}, State#state{session = NewSession}),
-      {stop, normal, error, State#state{session = NewSession2}}
-    end.
+      end
+      % case RealBroker:dispatch(NewSession) of
+      %   {error, unavailable} ->
+      %     {stop, normal, unavailable, State#state{session = NewSession}};
+      %   {error, Reason} ->
+      %     {_, _, NewSession2} = finalize({failed, Reason}, State#state{session = NewSession}),
+      %     {stop, normal, error, State#state{session = NewSession2}};
+      %   _ ->
+      %     lager:info("Dialing to ~s through channel ~s", [QueuedCall#queued_call.address, Channel#channel.name]),
+      %     notify_status(ringing, NewSession),
+      %     CallLog:update([{state, "active"}, {fail_reason, undefined}]),
+      %             {reply, ok, dialing, State#state{session = NewSession}, ?TIMEOUT_DIALING}
+      % end
+  end.
 
 dialing({answer, Pbx}, State = #state{session_id = SessionId, session = Session = #session{call_log = CallLog}, resume_ptr = Ptr}) ->
   lager:info("Session (~p) answer", [SessionId]),
@@ -287,7 +282,7 @@ dialing({reject, Reason}, State = #state{session = Session = #session{session_id
     no_answer -> 'no-answer';
     _ -> failed
   end,
-  notify_status(Status, Session),
+  notify_status(Status, Session, Reason),
   finalize({failed, Reason}, State);
 
 dialing(timeout, State = #state{session = Session}) ->
@@ -307,7 +302,7 @@ in_progress({completed, NewSession, ok}, State) ->
   finalize(completed, State#state{session = NewSession});
 
 in_progress({completed, NewSession, {failed, Reason}}, State) ->
-  notify_status(failed, NewSession),
+  notify_status(failed, NewSession, Reason),
   finalize({failed, Reason}, State#state{session = NewSession});
 
 in_progress(timeout, State = #state{session = Session = #session{pbx = Pbx}}) ->
@@ -344,6 +339,7 @@ in_progress({hibernate, NewSession, Ptr}, _From, State = #state{session = _Sessi
     contact_id = NewSession#session.contact#contact.id,
     default_language = NewSession#session.default_language,
     status_callback_url = NewSession#session.status_callback_url,
+    status_callback_include_vars = NewSession#session.status_callback_include_vars,
     status_callback_user = NewSession#session.status_callback_user,
     status_callback_password = NewSession#session.status_callback_password,
     resume_ptr = Ptr,
@@ -361,16 +357,48 @@ in_progress({respawn, NewSessionPid, Ptr}, _From, State = #state{session = Sessi
   notify_status(completed, Session),
   finalize(completed, State).
 
+
+prepare_session(QueuedCall, Channel, #state{session_id = SessionId, session = undefined}) ->
+  Session = QueuedCall:start_session(),
+  NewCallLog = call_log_srv:new(SessionId, call_log:find(QueuedCall#queued_call.call_log_id)),
+  {Contact, _} = get_contact(QueuedCall#queued_call.project_id, QueuedCall#queued_call.address, QueuedCall#queued_call.call_log_id),
+
+  poirot:add_meta([
+                   {address, QueuedCall#queued_call.address},
+                   {project_id, QueuedCall#queued_call.project_id},
+                   {call_log_id, QueuedCall#queued_call.call_log_id},
+                   {channel_id, Channel#channel.id},
+                   {channel_name, Channel#channel.name}
+                  ]),
+
+  Session#session{
+    session_id = SessionId,
+    channel = Channel,
+    call_log = NewCallLog,
+    contact = Contact
+   };
+
+prepare_session(QueuedCall, _, #state{session = Session}) ->
+  Session#session{queued_call = QueuedCall, address = QueuedCall#queued_call.address}.
+
 notify_status(Status, Session) ->
-  notify_status_to_callback_url(Status, Session),
+  notify_status(Status, Session, undefined).
+
+notify_status(Status, Session, Reason) ->
+  notify_status_to_callback_url(Status, Session, Reason),
   notify_status_to_hub(Status, Session).
 
-notify_status_to_callback_url(Status, Session = #session{call_log = CallLog, address = Address, callback_params = CallbackParams, started_at = StartedAt}) ->
+notify_status_to_callback_url(Status, Session = #session{call_log = CallLog, address = Address, callback_params = CallbackParams, started_at = StartedAt, js_context = JS}, Reason) ->
   case Session#session.status_callback_url of
     undefined -> ok;
     <<>> -> ok;
     Url ->
       CallSid = util:to_string(CallLog:id()),
+      SessionVars = case Session#session.status_callback_include_vars of
+        true -> session_vars(JS);
+        1 -> session_vars(JS);
+        _ -> []
+      end,
       spawn(fun() ->
         Uri = uri:parse(binary_to_list(Url)),
         Duration = case StartedAt of
@@ -380,14 +408,31 @@ notify_status_to_callback_url(Status, Session = #session{call_log = CallLog, add
             Now = calendar:universal_time(),
             calendar:datetime_to_gregorian_seconds(Now) - StartedAtSeconds
         end,
-        QueryString = [{"CallSid", CallSid}, {"CallStatus", Status}, {"From", Address}, {"CallDuration", erlang:integer_to_list(Duration)} | CallbackParams],
+        CallReasonParams = case Reason of
+          undefined -> [];
+          busy -> [];
+          no_answer -> [];
+          hangup -> [{"CallStatusReason", "Busy"}];
+          {internal_error, ErrDetails} -> [{"CallStatusReason", ErrDetails}];
+          {error, ErrDetails} -> [{"CallStatusReason", ErrDetails}];
+          {error, ErrDetails, ErrCode} -> [{"CallStatusReason", ErrDetails}, {"CallStatusCode", ErrCode}];
+          _ ->
+            case CallLog:hangup_status() of
+              ok -> [];
+              {fail, HangupCode, HangupReason} ->
+                [{"CallStatusReason", HangupReason}, {"CallStatusCode", HangupCode}]
+            end
+        end,
+        QueryString = [{"CallSid", CallSid}, {"CallStatus", Status}, {"From", Address}, {"CallDuration", erlang:integer_to_list(Duration)} | (CallReasonParams ++ CallbackParams ++ SessionVars)],
         AuthOptions = case Session#session.status_callback_user of
           undefined -> [];
           [] -> [];
           <<>> -> [];
           User -> [{basic_auth, {User, Session#session.status_callback_password}}]
         end,
-        (Uri#uri{query_string = QueryString}):get([{full_result, false} | AuthOptions])
+        MergedQueryString = Uri#uri.query_string ++ QueryString,
+        NewUri = Uri#uri{query_string = MergedQueryString},
+        NewUri:get([{full_result, false} | AuthOptions])
       end)
   end.
 
@@ -417,10 +462,12 @@ notify_status_to_hub(Status, Session = #session{call_log = CallLog, js_context =
        ok
   end.
 
+session_vars(undefined) ->
+  [];
 session_vars(JS) ->
   case JS of
     undefined -> [];
-    _ -> 
+    _ ->
       lists:foldl(fun({Name, Value}, Vars) ->
         case Name of
           <<"var_", VarName/binary>> -> [{binary_to_list(VarName), Value} | Vars];
@@ -456,16 +503,16 @@ handle_sync_event(_Event, _From, StateName, State) ->
 
 %% @private
 handle_info({'DOWN', _Ref, process, Pid, Reason}, _, State = #state{session = Session, pbx_pid = Pid}) ->
-  notify_status(failed, Session),
+  notify_status(failed, Session, "PBX unexpected error"),
   lager:error("PBX closed unexpectedly with reason: ~s", [Reason]),
-  finalize({failed, {error, Reason}}, State);
+  finalize({failed, {internal_error, Reason}}, State);
 
 handle_info({'DOWN', _Ref, process, Pid, Reason}, _, State = #state{session = Session, flow_pid = Pid}) ->
   Pbx = Session#session.pbx,
   Pbx:terminate(),
-  notify_status(failed, Session),
+  notify_status(failed, Session, "Verboice flow unexpected error"),
   lager:error("Flow process died unexpectedly with reason: ~s", [Reason]),
-  finalize({failed, {error, Reason}}, State);
+  finalize({failed, {internal_error, Reason}}, State);
 
 handle_info(_Info, StateName, State) ->
   {next_state, StateName, State, ?TIMEOUT_INPROGRESS}.
@@ -490,7 +537,7 @@ push_results(#session{call_flow = #call_flow{id = CallFlowId, store_in_fusion_ta
   delayed_job:enqueue({struct, "CallFlow::FusionTablesPush::Pusher"}, Task, ?PUSH_DELAY_SECONDS);
 push_results(_) -> ok.
 
-finalize(completed, State = #state{session = Session =  #session{call_log = CallLog}}) ->
+finalize(completed, State = #state{session = Session = #session{call_log = CallLog}}) ->
   verboice_telemetry:track_call_finished(Session),
 
   Retries = case Session#session.queued_call of
@@ -506,58 +553,69 @@ finalize(completed, State = #state{session = Session =  #session{call_log = Call
 finalize({failed, Reason}, State = #state{session = Session = #session{call_log = CallLog}}) ->
   verboice_telemetry:track_call_finished(Session),
 
-  StopReason = case Reason of
-    {error, Error} -> Error;
-    _ ->
-      {Retries, NewState} = case Session#session.queued_call of
-        undefined -> {0, "failed"};
-        QueuedCall ->
-          % reset answered_at for reschedule
-          NewQueuedCall = QueuedCall#queued_call{answered_at = undefined},
-          NewRetries = case NewQueuedCall#queued_call.retries of
-            undefined -> 0;
-            Value -> Value
-          end,
-
-          case should_reschedule(Reason) of
-            true ->
-              case NewQueuedCall:reschedule() of
-                {error, _} ->
-                  CallLog:error(["Error while loading schedule ", NewQueuedCall#queued_call.schedule_id], []),
-                  {NewRetries, "failed"};
-                no_schedule -> {NewRetries, failed};
-                overdue ->
-                  CallLog:error("'Not Before' date exceeded", []),
-                  {NewRetries, "failed"};
-                max_retries ->
-                  CallLog:error("Max retries exceeded", []),
-                  {NewRetries, "failed"};
-                #queued_call{not_before = {datetime, NotBefore}} ->
-                  CallLog:info(["Call rescheduled to start at ", httpd_util:rfc1123_date(calendar:universal_time_to_local_time(NotBefore))], []),
-                  {NewRetries, "queued"}
-              end;
-            false -> {NewRetries, "failed"}
-          end
+  {Retries, NewState} = case Session#session.queued_call of
+    undefined -> {0, "failed"};
+    QueuedCall ->
+      % reset answered_at for reschedule
+      NewQueuedCall = QueuedCall#queued_call{answered_at = undefined},
+      NewRetries = case NewQueuedCall#queued_call.retries of
+        undefined -> 0;
+        Value -> Value
       end,
 
-      % end step interaction
-      if
-        Reason =:= hangup; Reason =:= error -> CallLog:end_step_interaction();
-        true -> ok
-      end,
-
-      Call = call_log:find(CallLog:id()),
-      Duration = total_call_duraction(Call,Session),
-
-      if
-        NewState == failed; NewState == "failed" ->
-          CallLog:update([{state, NewState}, {fail_reason, io_lib:format("~p", [Reason])}, {finished_at, calendar:universal_time()}, {retries, Retries}, {duration, Duration}]);
+      case should_reschedule(Reason) of
         true ->
-          CallLog:update([{state, NewState}, {fail_reason, io_lib:format("~p", [Reason])}, {retries, Retries}, {duration, Duration}])
-      end,
-      normal
+          case NewQueuedCall:reschedule() of
+            {error, _} ->
+              CallLog:error(["Error while loading schedule ", NewQueuedCall#queued_call.schedule_id], []),
+              {NewRetries, "failed"};
+            no_schedule -> {NewRetries, failed};
+            overdue ->
+              CallLog:error("'Not Before' date exceeded", []),
+              {NewRetries, "failed"};
+            max_retries ->
+              CallLog:error("Max retries exceeded", []),
+              {NewRetries, "failed"};
+            #queued_call{not_before = {datetime, NotBefore}} ->
+              CallLog:info(["Call rescheduled to start at ", httpd_util:rfc1123_date(calendar:universal_time_to_local_time(NotBefore))], []),
+              {NewRetries, "queued"}
+          end;
+        false -> {NewRetries, "failed"}
+      end
   end,
 
+  lager:info("Call failed with reason ~p", [Reason]),
+  FailInfo = case Reason of
+    hangup ->
+      CallLog:end_step_interaction(),
+      [{fail_reason, "hangup"}];
+    busy ->                      [{fail_reason, "busy"}];
+    no_answer ->                 [{fail_reason, "no-answer"}];
+    blocked -> [{fail_reason, "blocked"}];
+    {error, ErrDetails} ->
+      CallLog:end_step_interaction(),
+      [{fail_reason, "error"}, {fail_details, ErrDetails}];
+    {error, ErrDetails, Code} ->
+      CallLog:end_step_interaction(),
+      [{fail_reason, "error"}, {fail_details, ErrDetails}, {fail_code, Code}];
+    {internal_error, Details} ->
+      CallLog:end_step_interaction(),
+      [{fail_reason, "internal error"}, {fail_details, io_lib:format("~p", [Details])}];
+    _ ->
+      CallLog:end_step_interaction(),
+      [{fail_reason, "unknown error"}]
+  end,
+
+  Call = call_log:find(CallLog:id()),
+  Duration = total_call_duraction(Call, Session),
+
+  CallLog:update([{state, NewState}, {finished_at, calendar:universal_time()}, {retries, Retries}, {duration, Duration}] ++ FailInfo),
+  StopReason = case Reason of
+    {error, ErrDetails2} -> ErrDetails2;
+    {error, ErrDetails2, _} -> ErrDetails2;
+    {internal_error, FatalError} -> FatalError;
+    _ -> normal
+  end,
   {stop, StopReason, State}.
 
 spawn_run(Session, undefined) ->
@@ -613,6 +671,8 @@ default_variables(#session{address = Address, contact = Contact, queued_call = Q
   CallLogId = util:to_string(CallLog:id()),
   Context = create_default_erjs_context(CallLogId, Address),
   ProjectVars = project_variable:names_for_project(ProjectId),
+
+  io:format("Contact: ~p~n", [Contact]),
   Variables = persisted_variable:find_all({contact_id, Contact#contact.id}),
   JsContext = erjs_context:set(var_caller_id, binary_to_list(Address), Context),
   NewJsContext = erjs_context:set(var_call_at, datetime_utils:strftime(datetime_utils:in_zone(TimeZone, StartedAt)), JsContext),
@@ -659,7 +719,7 @@ create_default_erjs_context(CallLogId, PhoneNumber) ->
     end}
   ]).
 
-initialize_context(Context, QueuedCall = #queued_call{}) ->
+initialize_context(Context, #queued_call{variables = Vars}) ->
   lists:foldl(fun({Name, Value}, C) ->
     case Value of
       undefined -> C;
@@ -669,7 +729,7 @@ initialize_context(Context, QueuedCall = #queued_call{}) ->
         VarName = binary_to_atom(iolist_to_binary(["var_", Name]), utf8),
         erjs_context:set(VarName, Value, C)
     end
-  end, Context, QueuedCall:variables());
+  end, Context, Vars);
 initialize_context(Context, _) -> Context.
 
 default_variables(Context, _ProjectVars, []) -> Context;
@@ -728,10 +788,10 @@ run(Session = #session{flow = Flow, stack = Stack}, Ptr) ->
       lager:error("~p", [Reason]),
       {{failed, Reason}, Session};
     Class:Error ->
-      poirot:add_meta([{error, iolist_to_binary(io_lib:format("Fatal Error: ~p", [Error]))}]),
+      poirot:add_meta([{error, iolist_to_binary(io_lib:format("Fatal Internal Error: ~p", [Error]))}]),
       lager:error("Error during session ~p: ~p:~p~n~p~n",
         [Session#session.session_id, Class, Error, erlang:get_stacktrace()]),
-      {{failed, {error, Error}}, Session}
+      {{failed, {internal_error, Error}}, Session}
   end.
 
 end_flow(Session = #session{stack = []}) -> {ok, Session};

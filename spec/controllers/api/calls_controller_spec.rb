@@ -40,6 +40,15 @@ describe Api::CallsController do
       call_log = CallLog.last
       result = JSON.parse(@response.body)
       result['call_id'].should == call_log.id
+      call_log.channel_id.should eq(channel.id)
+    end
+
+    it "calls with channel id" do
+      get :call, :address => 'foo', :channel_id => channel.id, :callback => 'bar'
+      call_log = CallLog.last
+      result = JSON.parse(@response.body)
+      result['call_id'].should == call_log.id
+      call_log.channel_id.should eq(channel.id)
     end
 
     it "schedule call in the future" do
@@ -86,6 +95,12 @@ describe Api::CallsController do
       get :call, :channel => channel.name
       response.should_not be_success
     end
+
+    it "rejects a call using a disabled channel" do
+      channel.disable!
+      get :call, :address => 'foo', :channel_id => channel.id, :callback => 'bar'
+      response.should_not be_success
+    end
   end
 
   it "call state" do
@@ -95,5 +110,22 @@ describe Api::CallsController do
     result = JSON.parse(@response.body)
     result['call_id'].should == call_log.id
     result['state'].should == call_log.state.to_s
+  end
+
+  it "cancells a call" do
+    project = Project.make account: @controller.current_account
+    call_log = CallLog.make :call_flow => CallFlow.make(project: project)
+    queued_call = QueuedCall.make :call_log => call_log
+
+    post :cancel, :id => call_log.id
+
+    result = JSON.parse(@response.body)
+    result['call_id'].should eq(call_log.id)
+    result['state'].should eq('canceled')
+
+    call_log = CallLog.find_by_id(call_log.id)
+    call_log.state.should eq(:canceled)
+
+    QueuedCall.find_by_id(queued_call.id).should be_nil
   end
 end

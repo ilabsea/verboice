@@ -65,6 +65,11 @@
   = f.text_field :status_callback_url, :label => t('views.projects._form.label.url'), readonly: readonly
   = f.text_field :status_callback_url_user, :label => t('views.projects._form.label.user'), :autocomplete => 'off', readonly: readonly
   = f.password_field :status_callback_url_password, :label => t('views.projects._form.label.password'), :autocomplete => 'off', readonly: readonly
+  = f.label :status_callback_include_vars, "Include session variables in query string", style: 'display:inline-block'
+  = f.check_box :status_callback_include_vars
+
+  %br
+  %br
 
   - if @project.new_record? || project_admin?
     %hr

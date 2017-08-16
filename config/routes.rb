@@ -32,6 +32,8 @@ Verboice::Application.routes.draw do
     resources :queued_calls
     member do
       get :call
+      post :enable
+      post :disable
     end
   end
 
@@ -84,6 +86,7 @@ Verboice::Application.routes.draw do
           get :invitable
           post :upload_csv
           post :import_csv
+          delete :destroy_from_filter
         end
         member do
           get :calls
@@ -184,18 +187,23 @@ Verboice::Application.routes.draw do
 
   namespace :api, defaults: {format: 'json'} do
     match "call" => "calls#call"
-    resources :calls, only: [] do
+    resources :calls, only: [:destroy] do
       member do
         match :state
         match :redirect
+        match :cancel
       end
     end
     get "channels" => "channels#list"
     resources :channels, only: [:create] do
       collection do
+        get "all", :action => "all"
+        get "all/:id", :action => "get_by_id"
         get ":name", :action => "get"
         put ":name", :action => "update"
         delete ":name", :action => "destroy"
+        post ":id/enable", :action => "enable"
+        post ":id/disable", :action => "disable"
       end
     end
     resources :projects, only: [:index, :show] do
@@ -326,7 +334,7 @@ Verboice::Application.routes.draw do
 
   root :to => 'home#index'
 
-  get 'terms_and_conditions', :to => redirect('/')
+  get 'terms_and_conditions', :to => redirect('http://instedd.org/terms-of-service/')
 
   match '/hub/*path' => 'hub#api', format: false
 

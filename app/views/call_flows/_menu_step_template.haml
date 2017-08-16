@@ -68,5 +68,5 @@
         = store_value_tags_without_checkbox
         / = store_value_tags
         %br
-    .bottom-actions
-      %button.fdelete{ 'data-bind' => 'click: remove_with_confirm' }= t('views.call_flows._menu_step_template.action.remove_this_step')
+      .bottom-actions
+        = render partial: 'bottom_actions'

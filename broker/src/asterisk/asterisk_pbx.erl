@@ -69,13 +69,13 @@ capture_digits(Timeout, FinishOnKey, Min, Max, Pid, Keys) ->
       end
   end.
 
-record(FileName, StopKeys, Timeout, SilenceDetection, {?MODULE, Pid}) ->
+record(AsteriskFilename, FileName, StopKeys, Timeout, {?MODULE, Pid}) ->
   TempFile = filename:rootname(FileName) ++ ".gsm",
   file:write_file(TempFile, <<>>),
   file:change_mode(TempFile, 8#666),
 
   try
-    case agi_session:record_file(Pid, filename:absname(filename:rootname(FileName)), "gsm", StopKeys, Timeout * 1000, SilenceDetection) of
+    case agi_session:record_file(Pid, filename:absname(filename:rootname(AsteriskFilename)), "gsm", StopKeys, Timeout * 1000) of
       hangup -> throw(hangup);
       error -> throw(error);
       _ ->

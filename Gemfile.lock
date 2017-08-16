@@ -1,6 +1,6 @@
 GIT
   remote: git://github.com/instedd/alto_guisso.git
-  revision: 6d72573c211f45ff95d36847af733449acdfa04a
+  revision: f9452bb8eb0b8a2788b3f290d5bdb4f545f89427
   branch: master
   specs:
     alto_guisso (0.0.2)
@@ -8,7 +8,7 @@ GIT
 
 GIT
   remote: git://github.com/instedd/alto_guisso_rails.git
-  revision: bd944d08c59e5835285f0d956fb1fb00402fc385
+  revision: 9d4aa030f4e02ce63014aa7519078780e2eb25d0
   branch: master
   specs:
     alto_guisso_rails (0.0.1)
@@ -21,13 +21,23 @@ GIT
 
 GIT
   remote: git://github.com/instedd/ruby-hub_client.git
-  revision: 9fef94a685e4ba16a9826e00cc22fd88c3a0cef9
+  revision: dc96567ccd1a1c5e1f3eb851c86da6cd8c6c64f8
   branch: master
   specs:
     hub_client (0.0.1)
       alto_guisso
       rails
       rest-client
+
+GIT
+  remote: git://github.com/instedd/telemetry_rails.git
+  revision: aee5fc99e3dbe06e6cdd077c8042a2ada0bb6995
+  ref: aee5fc99e3dbe06e6cdd077c8042a2ada0bb6995
+  specs:
+    instedd_telemetry (0.0.1)
+      global_phone
+      global_phone_dbgen
+      rails
 
 GIT
   remote: https://github.com/edave/enumerated_attribute.git
@@ -38,7 +48,7 @@ GIT
 
 GIT
   remote: https://github.com/instedd/poirot.git
-  revision: d9442158055b142d4cabb61d88dc1343edc30b6b
+  revision: ea1615dbd6f93b1808521e3869d1fca3a4ede894
   branch: master
   specs:
     hercule (0.0.2)
@@ -46,7 +56,7 @@ GIT
 
 GIT
   remote: https://github.com/instedd/poirot_rails.git
-  revision: a9d4c5fd413baf1caaf3cd56e805cd3c0268bd8c
+  revision: 22bbb52ca0fba0603873ed7d9b0c976d2675664c
   branch: master
   specs:
     poirot_rails (0.0.4)
@@ -67,15 +77,6 @@ GIT
       jquery-rails (>= 3.0)
       rails (>= 3.2)
       sass-rails (>= 3.1)
-
-GIT
-  remote: https://github.com/instedd/telemetry_rails.git
-  revision: 8ddfee2b94a2c1bef837b0a583538dfa72781948
-  specs:
-    instedd_telemetry (0.0.1)
-      global_phone
-      global_phone_dbgen
-      rails
 
 GIT
   remote: https://github.com/lchanmann/csv_builder.git
@@ -127,7 +128,7 @@ GEM
     arel (3.0.3)
     attr_encrypted (1.3.4)
       encryptor (>= 1.3.0)
-    attr_required (1.0.0)
+    attr_required (1.0.1)
     awesome_print (1.6.1)
     aws-sdk-v1 (1.66.0)
       json (~> 1.4)
@@ -189,7 +190,7 @@ GEM
       thread_safe (~> 0.1)
       warden (~> 1.2.3)
     diff-lcs (1.1.3)
-    domain_name (0.5.25)
+    domain_name (0.5.20170404)
       unf (>= 0.0.5, < 1.0.0)
     elasticsearch (1.0.14)
       elasticsearch-api (= 1.0.14)
@@ -234,9 +235,9 @@ GEM
     hashie (3.4.3)
     highline (1.7.8)
     hike (1.2.3)
-    http-cookie (1.0.2)
+    http-cookie (1.0.3)
       domain_name (~> 0.5)
-    httpclient (2.6.0.1)
+    httpclient (2.8.2.4)
     i18n (0.7.0)
     ice_cube (0.13.0)
     instedd-pigeon (0.3.1)
@@ -255,12 +256,12 @@ GEM
       thor (>= 0.14, < 2.0)
     json (1.8.3)
     jwt (1.5.1)
-    kaminari (0.16.3)
+    kaminari (0.17.0)
       actionpack (>= 3.0.0)
       activesupport (>= 3.0.0)
     language_list (1.1.0)
     licit (0.2.2)
-    listings (0.1.6)
+    listings (0.1.7)
       bootstrap-kaminari-views
       haml-rails
       kaminari
@@ -284,7 +285,7 @@ GEM
       net-ssh (>= 2.6.5)
     net-sftp (2.1.2)
       net-ssh (>= 2.6.5)
-    net-ssh (2.9.2)
+    net-ssh (2.9.4)
     net-ssh-gateway (1.2.0)
       net-ssh (>= 2.6.5)
     netrc (0.10.3)
@@ -315,12 +316,13 @@ GEM
     pry-debugger (0.2.3)
       debugger (~> 1.3)
       pry (>= 0.9.10, < 0.11.0)
+    puma (2.16.0)
     quiet_assets (1.1.0)
       railties (>= 3.1, < 5.0)
     rack (1.4.7)
     rack-cache (1.6.1)
       rack (>= 0.4)
-    rack-oauth2 (1.2.1)
+    rack-oauth2 (1.4.0)
       activesupport (>= 2.3)
       attr_required (>= 0.0.5)
       httpclient (>= 2.4)
@@ -341,6 +343,9 @@ GEM
       activesupport (= 3.2.22)
       bundler (~> 1.0)
       railties (= 3.2.22)
+    rails-dev-tweaks (1.2.0)
+      actionpack (>= 3.1)
+      railties (>= 3.1)
     rails_config (0.3.3)
       activesupport (>= 3.0)
     railties (3.2.22)
@@ -374,6 +379,7 @@ GEM
       activesupport (>= 3.0)
       railties (>= 3.0)
       rspec (~> 2.9.0)
+    ruby-asterisk (0.1.0)
     ruby-openid (2.7.0)
     rubyzip (1.1.7)
     rvm (1.11.3.9)
@@ -419,7 +425,7 @@ GEM
       json (>= 1.8.0)
     unf (0.1.4)
       unf_ext
-    unf_ext (0.0.7.1)
+    unf_ext (0.0.7.4)
     warden (1.2.6)
       rack (>= 1.0)
     webmock (1.22.1)
@@ -472,7 +478,7 @@ DEPENDENCIES
   jquery-rails
   language_list
   licit
-  listings
+  listings (~> 0.1.7)
   machinist!
   mocha
   mysql2
@@ -484,14 +490,17 @@ DEPENDENCIES
   password_strength
   poirot_rails!
   pry-debugger (~> 0.2.3)
+  puma (= 2.16.0)
   quiet_assets
   rails (= 3.2.22)
+  rails-dev-tweaks
   rails_config
   recaptcha
   recurring_select!
   rest-client
   rspec (~> 2.9.0)
   rspec-rails (~> 2.9.0)
+  ruby-asterisk
   ruby-openid
   rubyzip
   rvm

@@ -36,6 +36,10 @@ broker/erl_crash.dump
 vendor/ruby
 vendor/bundle
 admin/backups/verboice*
+spec/support/etc/asterisk-sounds/*
+spec/support/etc/asterisk-remote/extensions.conf
+spec/support/etc/asterisk-verboice/extensions.conf
+spec/support/etc/asterisk-recordings/*
 
 *.sublime-project
 *.sublime-workspace

@@ -1,4 +1,4 @@
-module Ext 
+module Ext
   class ReminderSchedulesController < ExtApplicationController
     def index
       load_project
@@ -17,7 +17,7 @@ module Ext
         flash[:notice] = "Reminder has been save successfully"
         render json: @reminder
       else
-         render json: @reminder.errors.full_messages  
+         render json: @reminder.errors.full_messages
       end
     end
 
@@ -32,7 +32,7 @@ module Ext
         end
       rescue Exception => e
         flash[:error] = e.message
-      end   
+      end
     end
 
     def destroy
@@ -52,7 +52,7 @@ module Ext
       term = params[:term] || ''
       channels = []
       current_account.available_channels.map do |channel|
-        channels.push({label: channel.name, value: channel.name}) if channel.name.downcase.start_with?(term.downcase)
+        channels.push({label: channel.name, value: channel.name}) if (channel.enabled? && channel.name.downcase.start_with?(term.downcase))
       end
       render :json => channels
     end

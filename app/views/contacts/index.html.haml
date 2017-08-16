@@ -54,12 +54,14 @@
 .contacts-list
   #contactsFilter.filters-box.w30.tablewrapp
     .search
-      = form_tag search_project_contacts_path(@project), remote: true, method: 'GET' do
+      = form_tag search_project_contacts_path(@project), remote: true, method: 'GET', id: 'filters-form' do
         %p
           Filters
           %span{'data-bind' => 'text: countDescription'}
         %hr
         = hidden_field_tag :filters_json, params[:filters_json] || '[]', 'data-bind' => 'value: json', 'class' => 'filters'
+        - [:sort_key, :sort_type, :sort_dir].each do |key|
+          = hidden_field_tag key, params[key]
         = render 'shared/contacts_filter'
         %button.fsearch Search
 
@@ -68,6 +70,10 @@
       = form_tag from_filter_project_scheduled_calls_path(@project) do
         = hidden_field_tag :filters_json, params[:filters_json] || '[]', 'data-bind' => 'value: json'
         %button.fedit Create a scheduled call from these filters
+      - if project_admin?
+        = form_tag destroy_from_filter_project_contacts_path(@project), method: 'DELETE' do
+          = hidden_field_tag :filters_json, params[:filters_json] || '[]', 'data-bind' => 'value: json'
+          %button.fdelete{'data-confirm' => "Are you sure you want to delete all the filtered contacts?"} Delete all filtered contacts
 
   #contactsList
     = render 'list'
@@ -75,5 +81,6 @@
 %br.clear
 
 :javascript
-  window.variables = #{@project_variables.to_json};
+  window.variables = #{(@project_variables + @implicit_variables).to_json};
+  window.fields = #{@fields.to_json};
   initContactsFilter(#{@contacts.total_count})

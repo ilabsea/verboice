@@ -27,6 +27,17 @@ module Api
       end
     end
 
+    def get_by_id
+      id = params[:id]
+      channel = current_account.channels.find_by_id(id) || current_account.shared_channels.find_by_model_id(id).try(:channel)
+
+      if channel.present?
+        render :json => channel
+      else
+        head :not_found
+      end
+    end
+
     def create
       data = request.raw_post
       data = JSON.parse(data).with_indifferent_access
@@ -68,9 +79,35 @@ module Api
       end
     end
 
+    def enable
+      channel = current_account.channels.find_by_id(params[:id])
+      if channel.present?
+        channel.enable!
+        head :ok
+      else
+        head :not_found
+      end
+    end
+
+    def disable
+      channel = current_account.channels.find_by_id(params[:id])
+      if channel.present?
+        channel.disable!
+        head :ok
+      else
+        head :not_found
+      end
+    end
+
     def list
       channels = current_account.channels
       render json: channels, each_serializer: CustomChannelSerializer
+    end
+
+    def all
+      owned_channels = current_account.channels.all
+      shared_channels = current_account.shared_channels.all.map(&:channel)
+      render :json => (owned_channels + shared_channels).uniq
     end
 
   end

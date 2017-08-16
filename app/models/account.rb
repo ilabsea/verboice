@@ -18,8 +18,12 @@
 class Account < ActiveRecord::Base
   # Include default devise modules. Others available are:
   # :token_authenticatable, :confirmable, :lockable and :timeoutable
-  devise :database_authenticatable, :registerable,
-         :recoverable, :rememberable, :trackable, :validatable, :confirmable, :omniauthable
+  DEVISE_MODULES = [:database_authenticatable, :registerable,
+                    :recoverable, :rememberable, :trackable, :validatable, :omniauthable]
+  DEVISE_CONFIRMABLE = Rails.configuration.verboice_configuration[:skip_account_confirmation] \
+                        ? [] : [:confirmable]
+
+  devise *(DEVISE_MODULES + DEVISE_CONFIRMABLE)
 
   # Setup accessible (or protected) attributes for your model
   attr_accessible :email, :password, :password_confirmation, :remember_me, :locale
@@ -45,6 +49,7 @@ class Account < ActiveRecord::Base
   has_many :identities, dependent: :destroy
 
   has_one :google_oauth_token, :class_name => 'OAuthToken', :conditions => {:service => :google}, :dependent => :destroy
+  has_many :enabled_channels, :class_name => 'Channel', :conditions => {:enabled => true}
 
   after_save :telemetry_track_activity
 
@@ -116,6 +121,12 @@ class Account < ActiveRecord::Base
     nil
   end
 
+  def find_channel_by_id(channel_id)
+    channel = channels.find_by_id(channel_id)
+    channel ||= shared_channels.find_by_model_id(channel_id).try(&:channel)
+    channel
+  end
+
   def find_channel_by_name(channel_name)
     channel = channels.find_by_name(channel_name)
     channel ||= shared_channels.all.map(&:channel).find { |c| c.name == channel_name }
@@ -123,12 +134,17 @@ class Account < ActiveRecord::Base
   end
 
   def call(options = {})
-    channel = find_channel_by_name options[:channel]
+    channel = if options[:channel].present?
+      find_channel_by_name options[:channel]
+    else
+      find_channel_by_id options[:channel_id]
+    end
+
     if channel
       options[:account] = self
       channel.call options[:address], options
     else
-      raise "Channel not found: #{options[:channel]}"
+      raise "Channel not found: #{options[:channel] || options[:channel_id]}"
     end
   end
 

@@ -1,25 +1,31 @@
 -module(channel).
--export([find_all_sip/0, find_all_twilio/0, domain/1, number/1, limit/1, broker/1, username/1, password/1, is_outbound/1, register/1, log_broken_channels/2]).
--export([account_sid/1, auth_token/1]).
 -export([enabled/1, port/1, protocol/1, dtmf_mode/1, codec_type/1, is_approved/1, qualify/1]).
 -export([address_without_voip_prefix/2]).
 -compile([{parse_transform, lager_transform}]).
+-export([find_all_sip/0, find_all_twilio/0,
+         domain/1, number/1, username/1, password/1,
+         broker/1, is_outbound/1, limit/1, register/1,
+         log_broken_channels/2,
+         disable_by_id/1, disable_by_ids/1,
+         account_sid/1, auth_token/1]).
+
 -define(CACHE, true).
 -define(TABLE_NAME, "channels").
 -define(MAP, [{config, yaml_serializer}]).
 -include_lib("erl_dbmodel/include/model.hrl").
 
 find_all_sip() ->
-  find_all({type, in, ["Channels::Sip", "Channels::CustomSip", "Channels::TemplateBasedSip", "Channels::SipServer"]}).
+  find_all([{enabled, 1}, {type, in, ["Channels::Sip", "Channels::CustomSip", "Channels::TemplateBasedSip", "Channels::SipServer"]}]).
 
 find_all_twilio() ->
-  find_all({type, "Channels::Twilio"}).
+  find_all([{enabled, 1}, {type, "Channels::Twilio"}]).
 
 domain(Channel = #channel{type = <<"Channels::TemplateBasedSip">>}) ->
   case proplists:get_value("kind", Channel#channel.config) of
-    % TODO: Load template domains from yaml file
+    % Keep in sync with config/sip_channel_templates.yml
     "Callcentric" -> "callcentric.com";
-    "Skype" -> "sip.skype.com"
+    "Skype" -> "sip.skype.com";
+    "Nexmo" -> "sip.nexmo.com"
   end;
 
 domain(#channel{config = Config}) ->
@@ -119,3 +125,31 @@ channel_was_disconnected(ChannelId, Status) ->
     {ok, {_, false, _}} -> true;
     _ -> false
   end.
+
+disable_by_id(ChannelId) ->
+  case channel:find(ChannelId) of
+    Channel = #channel{} ->
+      lager:info("Disabling channel ~s (id: ~B)", [Channel#channel.name, ChannelId]),
+      % Keep in sync with channel.rb
+      %   self.enabled = false
+      %   save!
+      %   queued_calls.each do |call|
+      %     call.cancel_call!
+      %   end
+      %   queued_calls.destroy_all
+
+      db:update(["UPDATE channels SET enabled = 0 WHERE id = ",
+                 mysql:encode(ChannelId)]),
+      db:update(["UPDATE call_logs SET state = 'cancelled' WHERE id IN ",
+                 "(SELECT call_log_id FROM queued_calls WHERE channel_id = ",
+                 mysql:encode(ChannelId), ")"]),
+      db:update(["DELETE FROM queued_calls WHERE channel_id = ",
+                 mysql:encode(ChannelId)]),
+      ok;
+    _ ->
+      % channel not found
+      ok
+  end.
+
+disable_by_ids(ChannelIds) ->
+  lists:foreach(fun disable_by_id/1, ChannelIds).

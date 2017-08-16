@@ -57,11 +57,10 @@
       %br/
 
       = t('views.call_flows._capture_step_template.label.valid_values')
-      %br/
       %input.w25{'type' => 'text', 'data-bind' => 'value: valid_values'}
       %br/
 
-      %span.validation
+      %span
         = t('views.call_flows._capture_step_template.label.finish_on_key')
       %input.w06{'type' => 'text', 'size' => 1, 'data-bind' => 'value: finish_on_key'}
       %br/
@@ -73,4 +72,4 @@
 
       %hr
       .bottom-actions
-        %button.fdelete{ 'data-bind' => 'click: remove_with_confirm' }= t('views.call_flows._capture_step_template.action.remove_this_step')
+        = render partial: 'bottom_actions'
