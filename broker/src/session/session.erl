@@ -268,8 +268,8 @@ dialing({answer, Pbx}, State = #state{session_id = SessionId, session = Session 
   FlowPid = case Ptr of
     undefined -> spawn_run(NewSession, Ptr);
     _ ->
-      RusumeSession = store_default_language(NewSession),
-      spawn_run(RusumeSession, Ptr)
+      ResumeSession = store_default_language(NewSession),
+      spawn_run(ResumeSession, Ptr)
   end,
 
   {next_state, in_progress, State#state{pbx_pid = Pbx:pid(), flow_pid = FlowPid, session = NewSession}, ?TIMEOUT_INPROGRESS};
@@ -672,7 +672,6 @@ default_variables(#session{address = Address, contact = Contact, queued_call = Q
   Context = create_default_erjs_context(CallLogId, Address),
   ProjectVars = project_variable:names_for_project(ProjectId),
 
-  io:format("Contact: ~p~n", [Contact]),
   Variables = persisted_variable:find_all({contact_id, Contact#contact.id}),
   JsContext = erjs_context:set(var_caller_id, binary_to_list(Address), Context),
   NewJsContext = erjs_context:set(var_call_at, datetime_utils:strftime(datetime_utils:in_zone(TimeZone, StartedAt)), JsContext),
@@ -719,6 +718,7 @@ create_default_erjs_context(CallLogId, PhoneNumber) ->
     end}
   ]).
 
+initialize_context(Context, #queued_call{variables = undefined}) -> Context;
 initialize_context(Context, #queued_call{variables = Vars}) ->
   lists:foldl(fun({Name, Value}, C) ->
     case Value of
