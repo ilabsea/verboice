@@ -17,9 +17,9 @@
 
 class CallLog < ActiveRecord::Base
   include CallLogSearch
-  
+
   CSV_MAX_ROWS = 262144 # 2 ^ 18
-  
+
   STATE_ACTIVE = :active
   STATE_COMPLETED = :completed
   STATE_FAILED = :failed
@@ -33,6 +33,7 @@ class CallLog < ActiveRecord::Base
     'busy'      => 'hangup',
     'hangup'    => 'incompleted',
     'marked_as_failed' => "marked_as_failed",
+    'unknown error' => "marked_as_failed",
     'no_ack' => 'no_ack',
     'terminated' => 'terminated',
     'blocked' => "blocked",
