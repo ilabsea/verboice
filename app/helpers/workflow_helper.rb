@@ -51,6 +51,7 @@ module WorkflowHelper
       when 'mark_as_failed' then 'error red'
       when 'mark_as_successful' then 'accept green'
       when 'write_variable' then 'i48grad-addressbook'
+      when 'datetime' then 'i48grad-date'
       else 'cloud'
       end
     "i48grad #{icon_class}#{error ? " red" : ""}"
