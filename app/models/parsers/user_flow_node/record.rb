@@ -49,6 +49,7 @@ module Parsers
           compiler.Label @id
           compiler.StartUserStep :record, @id, @name
           compiler.append @explanation_resource.equivalent_flow
+          compiler.Trace context_for '"Message recorded."'
           compiler.Record @id, @name, {:silence_detection => @silence_detection, :stop_keys => @stop_key, :timeout => @timeout, :old_var_name => @old_persisted_variable_name, :var_name => @persisted_variable_name}
           compiler.SetStepResult :recorded, "record_url(#{@id})"
           compiler.append @confirmation_resource.equivalent_flow

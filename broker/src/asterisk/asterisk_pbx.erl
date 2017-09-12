@@ -1,5 +1,5 @@
 -module(asterisk_pbx).
--export([new/1, pid/1, answer/1, hangup/1, can_play/2, play/2, capture/6, record/5, terminate/1, sound_path_for/2, sound_quality/1, dial/4]).
+-export([new/1, pid/1, answer/1, hangup/1, can_play/2, play/2, capture/6, record/6, terminate/1, sound_path_for/2, sound_quality/1, dial/4]).
 
 -behaviour(pbx).
 
@@ -69,13 +69,13 @@ capture_digits(Timeout, FinishOnKey, Min, Max, Pid, Keys) ->
       end
   end.
 
-record(AsteriskFilename, FileName, StopKeys, Timeout, {?MODULE, Pid}) ->
+record(AsteriskFilename, FileName, StopKeys, Timeout, SilenceTime, {?MODULE, Pid}) ->
   TempFile = filename:rootname(FileName) ++ ".gsm",
   file:write_file(TempFile, <<>>),
   file:change_mode(TempFile, 8#666),
 
   try
-    case agi_session:record_file(Pid, filename:absname(filename:rootname(AsteriskFilename)), "gsm", StopKeys, Timeout * 1000) of
+    case agi_session:record_file(Pid, filename:absname(filename:rootname(AsteriskFilename)), "gsm", StopKeys, Timeout * 1000, SilenceTime) of
       hangup -> throw(hangup);
       error -> throw(error);
       _ ->
@@ -92,7 +92,7 @@ dial(Channel, Address, undefined, {?MODULE, Pid}) ->
   end,
 
   case agi_session:dial(Pid, [DialAddress, "60", "mg"]) of
-    answer -> 
+    answer ->
       case agi_session:get_variable(Pid, "DIALSTATUS") of
         hangup -> throw(hangup);
         {ok, Value} -> case Value of
@@ -106,7 +106,7 @@ dial(Channel, Address, undefined, {?MODULE, Pid}) ->
     hangup -> throw(hangup);
     _ -> failed
   end;
-  
+
 dial(Channel, Address, CallerId, Pbx = {?MODULE, Pid}) ->
   agi_session:set_callerid(Pid, CallerId),
   dial(Channel, Address, undefined, Pbx).

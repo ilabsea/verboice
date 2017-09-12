@@ -17,7 +17,7 @@ run(Args, Session = #session{pbx = Pbx, call_log = CallLog, contact = Contact, p
   AsteriskFilename = asterisk_filename(CallLogId, Key),
   filelib:ensure_dir(LocalFilename),
 
-  poirot:log(info, "Recording to filename: ~s, stop keys: ~s, timeout: ~B, as: ~s", [LocalFilename, StopKeys, Timeout, AsteriskFilename, SilenceTime]),
+  poirot:log(info, "Recording to filename: ~s, stop keys: ~s, timeout: ~B, as: ~s, silence: ~B", [LocalFilename, StopKeys, Timeout, AsteriskFilename, SilenceTime]),
   case Pbx:record(AsteriskFilename, LocalFilename, StopKeys, Timeout, SilenceTime) of
     ok ->
       RecordedAudio = #recorded_audio{
@@ -50,7 +50,7 @@ asterisk_filename(CallLogId, Key) ->
   end.
 create_call_log_recorded_audio(OldVarName, VarName, Key, Description, ProjectId, CallLogId) ->
   case VarName of
-    undefined -> io:format("do nothing ~n");
+    undefined -> ok;
     _ ->
       ExistingProjectVariables = project_variable:find_all([{project_id, ProjectId}, {name, OldVarName}]),
       ProjectVariableOld = case length(ExistingProjectVariables) of
@@ -75,7 +75,7 @@ create_call_log_recorded_audio(OldVarName, VarName, Key, Description, ProjectId,
         _ ->
           if
             OldVarName /= VarName -> ProjectVariableOld:update([{name, VarName}]);
-            true -> io:format("do nothing ~n")
+            true -> ok
           end,
           ProjectVariableOld
       end,
