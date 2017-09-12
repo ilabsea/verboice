@@ -9,11 +9,11 @@ run(Args, Session = #session{js_context = JS, call_log = CallLog, call_flow = Ca
     undefined -> CallFlow#call_flow.callback_url;
     X -> list_to_binary(X)
   end,
-  
+
   ResponseType = proplists:get_value(response_type, Args, flow),
   Params = proplists:get_value(params, Args, []),
   Variables = proplists:get_value(variables, Args, []),
-  
+
   Method = util:to_string(proplists:get_value(method, Args, "post")),
   Async = proplists:get_value(async, Args),
   JsonBody = proplists:get_value(json_body, Args),
@@ -22,7 +22,10 @@ run(Args, Session = #session{js_context = JS, call_log = CallLog, call_flow = Ca
   Call = call_log:find(CallLog:id()),
 
   VariablesParams = get_variable_params(Variables, JS),
-  QueryString = prepare_params(Params ++ VariablesParams, [{"address", Call#call_log.address}, {"channel_id", Call#call_log.channel_id}, {"CallSid", util:to_string(CallLog:id())} | CallbackParams], JS),
+  QueryString = case CallbackParams of
+    undefined -> prepare_params(Params ++ VariablesParams, [{"address", Call#call_log.address}, {"channel_id", Call#call_log.channel_id}, {"CallSid", util:to_string(CallLog:id())}], JS);
+    _ -> prepare_params(Params ++ VariablesParams, [{"address", Call#call_log.address}, {"channel_id", Call#call_log.channel_id}, {"CallSid", util:to_string(CallLog:id())} | CallbackParams], JS)
+  end,
   RequestUrl = interpolate(Url, Args, Session),
 
   PoirotMeta = [
