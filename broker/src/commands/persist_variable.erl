@@ -9,24 +9,28 @@ run(Args, Session = #session{js_context = JS}) ->
   Type = proplists:get_value(type, Args),
   {Value, JS2} = erjs:eval(Expression, JS),
 
-  TypeBin = list_to_binary(Type),
-  poirot:log(info, "Saving variable '~s' with value: ~s", [Name, Value]),
-  NewValue = case TypeBin of
-    <<>> -> Value;
-    <<"CurrentDate">> -> 
-      get_current_date();    
-    UnitBin ->
-      Today = erlang:date(),
-      NewDate = time_ago(Value, Today, UnitBin),
-      date_to_string_format(NewDate)
-  end,
+  case Value of
+    null -> {next, Session#session{js_context = JS2}};
+    _ ->
+      poirot:log(info, "Saving variable '~s' with value: ~s", [Name, Value]),
 
-  store_peristed_variable(Name, NewValue, Session), % return a PersistedVar
-  % create_session_call_log_variable(CallLog:id(), PersistedVar#persisted_variable.project_variable_id, NewValue),
+      TypeBin = list_to_binary(Type),
+      NewValue = case TypeBin of
+        <<>> -> Value;
+        <<"CurrentDate">> -> get_current_date();
+        UnitBin ->
+          Today = erlang:date(),
+          NewDate = time_ago(Value, Today, UnitBin),
+          date_to_string_format(NewDate)
+      end,
 
-  VarName = list_to_atom("var_" ++ Name),
-  JS3 = erjs_context:set(VarName, NewValue, JS2),
-  {next, Session#session{js_context = JS3}}.
+      store_peristed_variable(Name, NewValue, Session), % return a PersistedVar
+      % create_session_call_log_variable(CallLog:id(), PersistedVar#persisted_variable.project_variable_id, NewValue),
+
+      VarName = list_to_atom("var_" ++ Name),
+      JS3 = erjs_context:set(VarName, NewValue, JS2),
+      {next, Session#session{js_context = JS3}}
+  end.
 
 store_peristed_variable(Name, NewValue, Session) ->
   StorePersistedVar = (find_or_create_persisted_variable(Name, Session))#persisted_variable{value = NewValue},
@@ -36,7 +40,7 @@ store_peristed_variable(Name, NewValue, Session) ->
   StorePersistedVar.
 
 get_2_digits_string(Value) ->
-  TwoDigit = if  
+  TwoDigit = if
     Value < 10 -> "0" ++ integer_to_list(Value);
     true -> integer_to_list(Value)
    end,
@@ -51,8 +55,6 @@ date_to_string_format(Date) ->
   {Year, Month, Day} = Date,
   DateString = get_2_digits_string(Day)++ "/" ++ get_2_digits_string(Month) ++ "/" ++ integer_to_list(Year),
   list_to_binary(DateString).
-
-
 
 find_or_create_persisted_variable(Name, #session{contact = Contact, project = Project}) ->
   case Name of

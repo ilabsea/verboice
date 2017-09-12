@@ -66,14 +66,16 @@ module Parsers
               }.merge( @instructions_resource.capture_flow ))
             c.Assign "value_#{@id}", 'digits'
             c.PersistVariable @persisted_variable_name, "value_#{@id}" if @persisted_variable_name
+
             c.If valid_digits_condition do |c|
+              c.Trace context_for '"User pressed: " + (digits ? digits : "<empty>")'
               c.SetStepResult :pressed, "digits"
               c.Goto "end#{@id}"
             end
 
             invalid_resource_block = lambda { |c|
-              c.SetStepResult :invalid_key
               c.Trace context_for '"Invalid key pressed"'
+              c.SetStepResult :invalid_key
               c.append @invalid_resource.equivalent_flow
             }
 
@@ -89,6 +91,7 @@ module Parsers
             end
             c.Assign "attempt_number#{@id}", "attempt_number#{@id} + 1"
           end
+
           c.Trace context_for %("Missed input for #{@number_of_attempts} times.")
           c.append @default.equivalent_flow if @default
           c.Label "end#{@id}"
