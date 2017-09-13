@@ -9,7 +9,7 @@
 //= require jquery
 //= require jquery_ujs
 //= require jquery.migrate
-//= require jquery.fancybox-2.1.5
+//= require jquery.fancybox-1.3.4.pack
 //= require jquery.control-key-.1.0
 //= require jquery.tooltipster
 //= require underscore
@@ -26,6 +26,7 @@
 //= require_directory ./custom_bindings
 //= require_directory ./devise
 //= require_directory ./password
+
 $(function(){
   $('.listing').on('change', 'select', function(){
     var select = $(this);
