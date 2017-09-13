@@ -19,9 +19,20 @@ class Api2::SessionsController < Api2Controller
   before_filter :ensure_params_exist
 
   def create
-    if AltoGuissoRails.valid_credentials?(params[:account][:email], params[:account][:password])
-      account = Account.find_by_email(params[:account][:email])
-      render :json=> {:success=>true, :auth_token => account.auth_token, :email=> account.email, role: account.role}
+    authenticated = false
+
+    account = Account.find_by_email(params[:account][:email])
+
+    if account
+      authenticated = if Guisso.enabled?
+        AltoGuissoRails.valid_credentials?(params[:account][:email], params[:account][:password])
+      else
+        account.valid_password?(params[:account][:password])
+      end
+    end
+
+    if authenticated
+      render json: { success: true, auth_token: account.auth_token, email: account.email, role: account.role }
     else
       response_with_invalid_credential
     end
@@ -33,7 +44,7 @@ class Api2::SessionsController < Api2Controller
     return unless params[:account].blank?
     render :json=>{:success=>false, :message=>"missing user_login parameter"}, :status=>422
   end
- 
+
   def response_with_invalid_credential
     render :json=> {:success=>false, :message=>"Error with your login or password"}, :status=>401
   end
