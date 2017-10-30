@@ -27,18 +27,6 @@
     %br/
     = f.password_field :callback_url_password, :class => "w30", autocomplete: 'new-password', value: call_flow.callback_url_password
 
-  - if OAuth2::Client.service_configured?(:google) && !call_flow.new_record?
-    %hr
-    %p= t('views.call_flows._form.label.fusion_tables_title')
-    %p.desc= t('views.call_flows._form.label.fusion_tables_desc')
-    %p
-      = f.check_box :store_in_fusion_tables, :class => "store_in_fusion_tables"
-      = f.label t('views.call_flows._form.label.store_results_call_flow')
-    .fusion_tables_settings{:style => "display: #{call_flow.store_in_fusion_tables ? 'block' : 'none'};"}
-      = f.label :fusion_table_name, t('views.call_flows._form.label.fusion_table_name')
-      %br
-      = f.text_field :fusion_table_name, :class => 'w30 fusion_table_name', :onpaste => "return false", :autocomplete => 'off'
-      = link_to current_account.google_oauth_token.nil? ? t('views.call_flows._form.action.set_google_account') : t('views.call_flows._form.action.change_google_account'), oauth_project_call_flow_path(call_flow), :class => 'button farrow link_to_oauth'
   %hr
   - if call_flow.new_record?
     %button.white{:type => "submit"}= t('views.call_flows._form.action.save')
