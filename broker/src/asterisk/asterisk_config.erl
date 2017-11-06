@@ -37,11 +37,11 @@ generate_config([Channel | Rest], ConfigFile, ResolvCache, ChannelIndex, Registr
   Username = channel:username(Channel),
   Password = channel:password(Channel),
   Domain = channel:domain(Channel),
-  SipPort = channel:port(Channel),
-  Protocol = channel:protocol(Channel),
   Number = channel:number(Channel),
-  DtmfMode = channel:dtmf_mode(Channel),
-  CodecType = channel:codec_type(Channel),
+  % DtmfMode = channel:dtmf_mode(Channel),
+  % CodecType = channel:codec_type(Channel),
+  % SipPort = channel:port(Channel),
+  % Protocol = channel:protocol(Channel),
   % Qualify = channel:qualify(Channel),
 
   case Domain of
@@ -53,12 +53,17 @@ generate_config([Channel | Rest], ConfigFile, ResolvCache, ChannelIndex, Registr
       file:write(ConfigFile, ["aors=", Section, "\n"]),
       file:write(ConfigFile, ["auth=", Section, "\n"]),
       file:write(ConfigFile, "disallow=all\n"),
+      file:write(ConfigFile, "allow=alaw\n"),
       file:write(ConfigFile, "allow=ulaw\n"),
       file:write(ConfigFile, "allow=gsm\n"),
       file:write(ConfigFile, "rtp_symmetric=yes\n"),
       file:write(ConfigFile, "direct_media=no\n"),
       file:write(ConfigFile, "rewrite_contact=yes\n"),
       file:write(ConfigFile, "identify_by=auth_username\n"),
+      % if
+      %   length(DtmfMode) > 0 -> file:write(ConfigFile, ["dtmfmode=", DtmfMode, "\n"]);
+      %   true -> ok
+      % end,
       file:write(ConfigFile, "\n"),
 
       % Auth
@@ -86,16 +91,6 @@ generate_config([Channel | Rest], ConfigFile, ResolvCache, ChannelIndex, Registr
         _ -> Number
       end,
 
-    if
-      length(DtmfMode) > 0 -> file:write(ConfigFile, ["dtmfmode=", DtmfMode, "\n"]);
-      true -> ok
-    end,
-
-    if
-      length(CodecType) > 0 -> file:write(ConfigFile, ["allow=", CodecType, "\n"]);
-      true -> ok
-    end,
-
       % Registration
       NewRegistryIndex = case channel:register(Channel) of
         true ->
@@ -116,71 +111,75 @@ generate_config([Channel | Rest], ConfigFile, ResolvCache, ChannelIndex, Registr
         _ -> RegistryIndex
       end,
 
-  if length(SipPort) > 0 ->
-    file:write(ConfigFile, ["port=", SipPort, "\n"]);
-    true -> ok
-  end,
+  % if length(SipPort) > 0 ->
+  %   file:write(ConfigFile, ["port=", SipPort, "\n"]);
+  %   true -> ok
+  % end,
 
-  case Protocol of
-    <<"tcp">> ->
-      file:write(ConfigFile, "transport=tcp\n"),
-      file:write(ConfigFile, "tcpenable=yes\n");
-    _ -> ok
-  end,
+  % case Protocol of
+  %   <<"tcp">> ->
+  %     file:write(ConfigFile, "transport=tcp\n"),
+  %     file:write(ConfigFile, "tcpenable=yes\n");
+  %   _ -> ok
+  % end,
 
-
-  % Endpoint
-  file:write(ConfigFile, ["[", Section, "]\n"]),
-  file:write(ConfigFile, "type=endpoint\n"),
-  file:write(ConfigFile, "context=verboice\n"),
-  file:write(ConfigFile, ["aors=", Section, "\n"]),
-  if HasAuth ->
-    file:write(ConfigFile, ["outbound_auth=", Section, "\n"]);
-    true -> ok
-  end,
-  file:write(ConfigFile, ["from_user=", UserOrNumber, "\n"]),
-  file:write(ConfigFile, ["from_domain=", Domain, "\n"]),
-  file:write(ConfigFile, "disallow=all\n"),
-  file:write(ConfigFile, "allow=ulaw\n"),
-  file:write(ConfigFile, "allow=gsm\n"),
-  file:write(ConfigFile, "\n"),
-
-  % Auth
-  if HasAuth ->
+    % Endpoint
     file:write(ConfigFile, ["[", Section, "]\n"]),
-    file:write(ConfigFile, "type=auth\n"),
-    file:write(ConfigFile, "auth_type=userpass\n"),
-    file:write(ConfigFile, ["username=", Username, "\n"]),
-    file:write(ConfigFile, ["password=", Password, "\n"]),
-    file:write(ConfigFile, "\n");
-    true -> ok
-  end,
+    file:write(ConfigFile, "type=endpoint\n"),
+    file:write(ConfigFile, "context=verboice\n"),
+    file:write(ConfigFile, ["aors=", Section, "\n"]),
+    if HasAuth ->
+      file:write(ConfigFile, ["outbound_auth=", Section, "\n"]);
+      true -> ok
+    end,
+    file:write(ConfigFile, ["from_user=", UserOrNumber, "\n"]),
+    file:write(ConfigFile, ["from_domain=", Domain, "\n"]),
+    file:write(ConfigFile, "disallow=all\n"),
+    file:write(ConfigFile, "allow=alaw\n"),
+    file:write(ConfigFile, "allow=ulaw\n"),
+    file:write(ConfigFile, "allow=gsm\n"),
+    % if
+    %   length(DtmfMode) > 0 -> file:write(ConfigFile, ["dtmfmode=", DtmfMode, "\n"]);
+    %   true -> ok
+    % end,
+    file:write(ConfigFile, "\n"),
 
-  % AOR
-  file:write(ConfigFile, ["[", Section, "]\n"]),
-  file:write(ConfigFile, "type=aor\n"),
-  file:write(ConfigFile, "qualify_frequency=60\n"),
-  file:write(ConfigFile, ["contact=sip:", Domain, "\n"]),
-  file:write(ConfigFile, "\n"),
-
-  % Identify
-  file:write(ConfigFile, ["[", Section, "]\n"]),
-  file:write(ConfigFile, "type=identify\n"),
-  file:write(ConfigFile, ["endpoint=", Section, "\n"]),
-
-  {Expanded, NewCache} = expand_domain(Domain, ResolvCache),
-  {NewChannelIndex, _} = lists:foldl(fun ({_Host, IPs, Port}, {R1, I}) ->
-    case Port of
-      undefined -> ok;
-      _ -> ok
-        % file:write(ConfigFile, ["port=", integer_to_list(Port), "\n"])
+    % Auth
+    if HasAuth ->
+      file:write(ConfigFile, ["[", Section, "]\n"]),
+      file:write(ConfigFile, "type=auth\n"),
+      file:write(ConfigFile, "auth_type=userpass\n"),
+      file:write(ConfigFile, ["username=", Username, "\n"]),
+      file:write(ConfigFile, ["password=", Password, "\n"]),
+      file:write(ConfigFile, "\n");
+      true -> ok
     end,
 
-    R3 = lists:foldl(fun (IP, R2) ->
-      file:write(ConfigFile, ["match=", IP, "\n"]),
-      dict:append({util:to_string(IP), Number}, Channel#channel.id, R2)
-    end, R1, IPs),
-    {R3, I + 1}
+    % AOR
+    file:write(ConfigFile, ["[", Section, "]\n"]),
+    file:write(ConfigFile, "type=aor\n"),
+    file:write(ConfigFile, "qualify_frequency=60\n"),
+    file:write(ConfigFile, ["contact=sip:", Domain, "\n"]),
+    file:write(ConfigFile, "\n"),
+
+    % Identify
+    file:write(ConfigFile, ["[", Section, "]\n"]),
+    file:write(ConfigFile, "type=identify\n"),
+    file:write(ConfigFile, ["endpoint=", Section, "\n"]),
+
+    {Expanded, NewCache} = expand_domain(Domain, ResolvCache),
+    {NewChannelIndex, _} = lists:foldl(fun ({_Host, IPs, Port}, {R1, I}) ->
+      case Port of
+        undefined -> ok;
+        _ -> ok
+          % file:write(ConfigFile, ["port=", integer_to_list(Port), "\n"])
+      end,
+
+      R3 = lists:foldl(fun (IP, R2) ->
+        file:write(ConfigFile, ["match=", IP, "\n"]),
+        dict:append({util:to_string(IP), Number}, Channel#channel.id, R2)
+      end, R1, IPs),
+      {R3, I + 1}
   end, {ChannelIndex, 0}, Expanded),
   file:write(ConfigFile, "\n"),
 
