@@ -38,7 +38,7 @@ generate_config([Channel | Rest], ConfigFile, ResolvCache, ChannelIndex, Registr
   Password = channel:password(Channel),
   Domain = channel:domain(Channel),
   Number = channel:number(Channel),
-  % DtmfMode = channel:dtmf_mode(Channel),
+  DtmfMode = channel:dtmf_mode(Channel),
   % CodecType = channel:codec_type(Channel),
   % SipPort = channel:port(Channel),
   % Protocol = channel:protocol(Channel),
@@ -60,10 +60,10 @@ generate_config([Channel | Rest], ConfigFile, ResolvCache, ChannelIndex, Registr
       file:write(ConfigFile, "direct_media=no\n"),
       file:write(ConfigFile, "rewrite_contact=yes\n"),
       file:write(ConfigFile, "identify_by=auth_username\n"),
-      % if
-      %   length(DtmfMode) > 0 -> file:write(ConfigFile, ["dtmfmode=", DtmfMode, "\n"]);
-      %   true -> ok
-      % end,
+      if
+        length(DtmfMode) > 0 -> file:write(ConfigFile, ["dtmf_mode=", DtmfMode, "\n"]);
+        true -> ok
+      end,
       file:write(ConfigFile, "\n"),
 
       % Auth
@@ -138,10 +138,10 @@ generate_config([Channel | Rest], ConfigFile, ResolvCache, ChannelIndex, Registr
     file:write(ConfigFile, "allow=alaw\n"),
     file:write(ConfigFile, "allow=ulaw\n"),
     file:write(ConfigFile, "allow=gsm\n"),
-    % if
-    %   length(DtmfMode) > 0 -> file:write(ConfigFile, ["dtmfmode=", DtmfMode, "\n"]);
-    %   true -> ok
-    % end,
+    if
+      length(DtmfMode) > 0 -> file:write(ConfigFile, ["dtmf_mode=", DtmfMode, "\n"]);
+      true -> ok
+    end,
     file:write(ConfigFile, "\n"),
 
     % Auth
