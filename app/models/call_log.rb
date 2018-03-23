@@ -34,7 +34,7 @@ class CallLog < ActiveRecord::Base
     'busy'      => 'hangup',
     'hangup'    => 'incompleted',
     'marked_as_failed' => "marked_as_failed",
-    'unknown error' => "marked_as_failed",
+    'unknown error' => "Failed (unknown error)",
     'no_ack' => 'no_ack',
     'terminated' => 'terminated',
     'blocked' => "blocked",

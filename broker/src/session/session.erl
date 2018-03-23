@@ -241,18 +241,6 @@ ready({dial, RealBroker, Channel, QueuedCall}, _From, State = #state{session_id 
           {_, _, NewSession2} = finalize({failed, disabled}, State#state{session = NewSession}),
           {stop, normal, error, State#state{session = NewSession2}}
       end
-      % case RealBroker:dispatch(NewSession) of
-      %   {error, unavailable} ->
-      %     {stop, normal, unavailable, State#state{session = NewSession}};
-      %   {error, Reason} ->
-      %     {_, _, NewSession2} = finalize({failed, Reason}, State#state{session = NewSession}),
-      %     {stop, normal, error, State#state{session = NewSession2}};
-      %   _ ->
-      %     lager:info("Dialing to ~s through channel ~s", [QueuedCall#queued_call.address, Channel#channel.name]),
-      %     notify_status(ringing, NewSession),
-      %     CallLog:update([{state, "active"}, {fail_reason, undefined}]),
-      %             {reply, ok, dialing, State#state{session = NewSession}, ?TIMEOUT_DIALING}
-      % end
   end.
 
 dialing({answer, Pbx}, State = #state{session_id = SessionId, session = Session = #session{call_log = CallLog}, resume_ptr = Ptr}) ->
@@ -542,7 +530,7 @@ finalize(completed, State = #state{session = Session = #session{call_log = CallL
 
   Retries = case Session#session.queued_call of
     undefined -> 0;
-    QueuedCall -> QueuedCall#queued_call.retries
+    QueuedCall -> QueuedCall:retries()
   end,
 
   Call = call_log:find(CallLog:id()),
@@ -553,58 +541,11 @@ finalize(completed, State = #state{session = Session = #session{call_log = CallL
 finalize({failed, Reason}, State = #state{session = Session = #session{call_log = CallLog}}) ->
   verboice_telemetry:track_call_finished(Session),
 
-  {Retries, NewState} = case Session#session.queued_call of
-    undefined -> {0, "failed"};
-    QueuedCall ->
-      % reset answered_at for reschedule
-      NewQueuedCall = QueuedCall#queued_call{answered_at = undefined},
-      NewRetries = case NewQueuedCall#queued_call.retries of
-        undefined -> 0;
-        Value -> Value
-      end,
-
-      case should_reschedule(Reason) of
-        true ->
-          case NewQueuedCall:reschedule() of
-            {error, _} ->
-              CallLog:error(["Error while loading schedule ", NewQueuedCall#queued_call.schedule_id], []),
-              {NewRetries, "failed"};
-            no_schedule -> {NewRetries, failed};
-            overdue ->
-              CallLog:error("'Not Before' date exceeded", []),
-              {NewRetries, "failed"};
-            max_retries ->
-              CallLog:error("Max retries exceeded", []),
-              {NewRetries, "failed"};
-            #queued_call{not_before = {datetime, NotBefore}} ->
-              CallLog:info(["Call rescheduled to start at ", httpd_util:rfc1123_date(calendar:universal_time_to_local_time(NotBefore))], []),
-              {NewRetries, "queued"}
-          end;
-        false -> {NewRetries, "failed"}
-      end
-  end,
+  {Retries, NewState} = reschedule_failed_call(Reason, Session),
 
   lager:info("Call failed with reason ~p", [Reason]),
-  FailInfo = case Reason of
-    hangup ->
-      CallLog:end_step_interaction(),
-      [{fail_reason, "hangup"}];
-    busy ->                      [{fail_reason, "busy"}];
-    no_answer ->                 [{fail_reason, "no-answer"}];
-    blocked -> [{fail_reason, "blocked"}];
-    {error, ErrDetails} ->
-      CallLog:end_step_interaction(),
-      [{fail_reason, "error"}, {fail_details, ErrDetails}];
-    {error, ErrDetails, Code} ->
-      CallLog:end_step_interaction(),
-      [{fail_reason, "error"}, {fail_details, ErrDetails}, {fail_code, Code}];
-    {internal_error, Details} ->
-      CallLog:end_step_interaction(),
-      [{fail_reason, "internal error"}, {fail_details, io_lib:format("~p", [Details])}];
-    _ ->
-      CallLog:end_step_interaction(),
-      [{fail_reason, "unknown error"}]
-  end,
+  
+  FailInfo = fail_info(Reason, CallLog),
 
   Call = call_log:find(CallLog:id()),
   Duration = total_call_duraction(Call, Session),
@@ -825,6 +766,49 @@ answer_duration(#session{call_log = CallLog, queued_call = QueuedCall}) ->
 should_reschedule(marked_as_failed) -> false;
 should_reschedule(hangup) -> false;
 should_reschedule(_) -> true.
+
+reschedule_failed_call(_, #session{queued_call = undefined}) -> {0, "failed"};
+reschedule_failed_call(Reason, #session{queued_call = QueuedCall, call_log = CallLog}) ->
+  % reset answered_at for reschedule
+  NewQueuedCall = QueuedCall#queued_call{answered_at = undefined},
+  NewRetries = NewQueuedCall:retries(),
+
+  case should_reschedule(Reason) of
+    true ->
+      case NewQueuedCall:reschedule() of
+        {error, _} ->
+          CallLog:error(["Error while loading schedule ", NewQueuedCall#queued_call.schedule_id], []),
+          {NewRetries, "failed"};
+        no_schedule -> {NewRetries, failed};
+        overdue ->
+          CallLog:error("'Not Before' date exceeded", []),
+          {NewRetries, "failed"};
+        max_retries ->
+          CallLog:error("Max retries exceeded", []),
+          {NewRetries, "failed"};
+        #queued_call{not_before = {datetime, NotBefore}} ->
+          CallLog:info(["Call rescheduled to start at ", httpd_util:rfc1123_date(calendar:universal_time_to_local_time(NotBefore))], []),
+          {NewRetries, "queued"}
+      end;
+    false -> {NewRetries, "failed"}
+  end.
+
+fail_info(busy, _) -> [{fail_reason, "busy"}];
+fail_info(no_answer, _) -> [{fail_reason, "no-answer"}];
+fail_info(blocked, _) -> [{fail_reason, "blocked"}];
+fail_info(hangup, CallLog) ->
+  CallLog:end_step_interaction(),
+  [{fail_reason, "hangup"}];
+fail_info({error, ErrDetails}, CallLog) ->
+  CallLog:end_step_interaction(),
+  [{fail_reason, "error"}, {fail_details, ErrDetails}];
+fail_info({error, ErrDetails, Code}, CallLog) ->
+  CallLog:end_step_interaction(),
+  [{fail_reason, "error"}, {fail_details, ErrDetails}, {fail_code, Code}];
+fail_info({internal_error, Details}, CallLog) ->
+  CallLog:end_step_interaction(),
+  [{fail_reason, "internal error"}, {fail_details, io_lib:format("~p", [Details])}];
+fail_info(_, _) -> [{fail_reason, "unknown error"}].
 
 store_default_language(Session = #session{project = Project}) ->
   JsContext = default_variables(Session),

@@ -1,7 +1,7 @@
 -module(queued_call).
 -compile([{parse_transform, lager_transform}]).
 -export([reschedule/1, start_session/1, should_trigger/1]).
--export([called_at/1, variables/1]).
+-export([called_at/1, variables/1, retries/1]).
 -define(TABLE_NAME, "queued_calls").
 -include("session.hrl").
 
@@ -90,3 +90,6 @@ called_at(#queued_call{not_before = NotBefore}) -> NotBefore.
 
 variables(#queued_call{variables = Vars}) when is_list(Vars) -> Vars;
 variables(#queued_call{variables = Vars}) -> yaml_serializer:load(Vars).
+
+retries(#queued_call{retries = undefined}) -> 0;
+retries(#queued_call{retries = Retries}) -> Retries.
