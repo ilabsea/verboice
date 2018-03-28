@@ -31,6 +31,7 @@ class CallLog < ActiveRecord::Base
     'internal error' => 'failed',
     'timeout'   => 'no_answer',
     'no_answer' => 'no_answer',
+    'no-answer' => 'no_answer',
     'busy'      => 'hangup',
     'hangup'    => 'incompleted',
     'marked_as_failed' => "marked_as_failed",

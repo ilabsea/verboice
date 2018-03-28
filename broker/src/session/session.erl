@@ -279,10 +279,11 @@ dialing(timeout, State = #state{session = Session}) ->
   if
     IsTimeout ->
       timeout(Session),
-      notify_status(busy, Session),
+      notify_status(timeout, Session),
       finalize({failed, timeout}, State);
     true ->
-      {next_state, dialing, State, ?TIMEOUT_DIALING}
+      notify_status('no-answer', Session),
+      finalize({failed, no_answer}, State)
   end.
 
 in_progress({completed, NewSession, ok}, State) ->
@@ -815,6 +816,7 @@ store_default_language(Session = #session{project = Project}) ->
   Session#session{js_context = JsContext, default_language = project:default_language(Project)}.
 
 %% @private
+is_timeout(#session{started_at = undefined}, _TimeoutIn) -> false;
 is_timeout(#session{started_at = StartedAt}, TimeoutIn) ->
   Now = calendar:universal_time(),
   Diff = 1000 * (calendar:datetime_to_gregorian_seconds(Now) - calendar:datetime_to_gregorian_seconds(StartedAt)),
