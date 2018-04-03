@@ -20,11 +20,11 @@
   - else
     %p
       = "#{t('views.home.get_started')}:"
-      = link_button_to t('views.home.create_an_account'), new_account_registration_path, :class => "orange"
+      = link_button_to t('views.home.create_a_test_account'), "http://verboice.instedd.org", :class => "orange"
     %p
     %p
       = t('views.home.already_a_member')
-      = link_to t('views.home.log_in'), new_account_session_path
+      = link_to t('views.home.log_in'), guisso_sign_in_path_for(:account)
   .clear
   / #container
   .home-middle-bar
