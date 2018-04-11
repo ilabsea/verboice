@@ -60,32 +60,36 @@ handle_event({new_session, Pid, Env}, State) ->
               {ok, State};
             _ ->
               Channel = channel:find(ChannelId),
-              case channel:is_approved(Channel) of
-                true ->
-                  case channel:enabled(Channel) of
-                    true -> 
-                      CallerId = case proplists:get_value(callerid, Env) of
-                        <<>> -> undefined;
-                        <<"unknown">> -> undefined;
-                        X -> X
-                      end,
+              case channel:callable_status(Channel) of
+                notapproved ->
+                  error_logger:info_msg("ChannelId: (~p) was disabled", [ChannelId]),
+                  agi_session:close(Pid),
+                  {ok, State};
+                disabled ->
+                  error_logger:info_msg("ChannelId: (~p) was disabled", [ChannelId]),
+                  agi_session:close(Pid),
+                  {ok, State};
+                quota_reached ->
+                  error_logger:info_msg("ChannelId: (~p) was blocked caused of quota is reached", [ChannelId]),
+                  agi_session:close(Pid),
+                  {ok, State};
+                ok ->
+                  CallerId = case proplists:get_value(callerid, Env) of
+                    <<>> -> undefined;
+                    <<"unknown">> -> undefined;
+                    X -> X
+                  end,
 
-                      case session:new() of
-                        {ok, SessionPid} ->
-                          session:answer(SessionPid, Pbx, ChannelId, CallerId),
-                          asterisk_pbx_log_srv:associate_call_log(AsteriskChannelId, session:id(SessionPid)),
-                          {ok, State};
-                        {error, _Reason} ->
-                          agi_session:close(Pid),
-                          {ok, State}
-                      end;
-                    _ -> 
-                      error_logger:info_msg("ChannelId: (~p) was disabled", [ChannelId]),
+                  case session:new() of
+                    {ok, SessionPid} ->
+                      session:answer(SessionPid, Pbx, ChannelId, CallerId),
+                      asterisk_pbx_log_srv:associate_call_log(AsteriskChannelId, session:id(SessionPid)),
+                      {ok, State};
+                    {error, _Reason} ->
                       agi_session:close(Pid),
                       {ok, State}
                   end;
                 _ ->
-                  error_logger:info_msg("ChannelId: (~p) was disabled", [ChannelId]),
                   agi_session:close(Pid),
                   {ok, State}
               end

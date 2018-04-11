@@ -1,6 +1,6 @@
 -module(channel).
 -export([enabled/1, port/1, protocol/1, dtmf_mode/1, codec_type/1, is_approved/1, qualify/1]).
--export([address_without_voip_prefix/2]).
+-export([address_without_voip_prefix/2, callable_status/1]).
 -compile([{parse_transform, lager_transform}]).
 -export([find_all_sip/0, find_all_twilio/0,
          domain/1, number/1, username/1, password/1,
@@ -153,3 +153,23 @@ disable_by_id(ChannelId) ->
 
 disable_by_ids(ChannelIds) ->
   lists:foreach(fun disable_by_id/1, ChannelIds).
+
+callable_status(Channel = #channel{id = Id}) ->
+  case channel:is_approved(Channel) of
+    true ->
+      case channel:enabled(Channel) of
+        true ->
+          case channel_quota:find([{channel_id, Id}]) of
+            undefined -> ok;
+            ChannelQuota -> 
+              case (ChannelQuota:enabled() andalso ChannelQuota:blocked()) of
+                true -> quota_reached;
+                _ -> ok
+              end
+          end;
+        _ ->
+          disabled
+      end;
+    _ ->
+      notapproved
+  end.

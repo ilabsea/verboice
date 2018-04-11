@@ -206,40 +206,31 @@ ready({dial, RealBroker, Channel, QueuedCall}, _From, State = #state{session_id 
       {_, _, NewSession1} = finalize({failed, {error, "Invalid Flow"}}, State#state{session = NewSession}),
       {stop, normal, error, State#state{session = NewSession1}};
     _ ->
-      case channel:is_approved(Channel) of
-        true ->
-          case channel:enabled(Channel) of
-            true ->
-              QuotaReaches = case channel_quota:find([{channel_id, Channel#channel.id}]) of
-                undefined -> false;
-                ChannelQuota -> ChannelQuota:enabled() andalso ChannelQuota:blocked()
-              end,
-
-              case QuotaReaches of
-                true ->
-                  {_, _, NewSession2} = finalize({failed, blocked}, State#state{session = NewSession}),
-                  {stop, normal, error, State#state{session = NewSession2}};
-                _ ->
-                  case RealBroker:dispatch(NewSession) of
-                    {error, unavailable} ->
-                      {stop, normal, unavailable, State#state{session = NewSession}};
-                    {error, Reason} ->
-                      {_, _, NewSession2} = finalize({failed, Reason}, State#state{session = NewSession}),
-                      {stop, normal, error, State#state{session = NewSession2}};
-                    _ ->
-                  lager:info("Dialing to ~s through channel ~s", [QueuedCall#queued_call.address, Channel#channel.name]),
-                      notify_status(ringing, NewSession),
-                      CallLog:update([{state, "active"}, {fail_reason, undefined}]),
-                      {reply, ok, dialing, State#state{session = NewSession}, ?TIMEOUT_DIALING}
-                  end
-              end;
-            _ ->
-              {_, _, NewSession2} = finalize({failed, disabled}, State#state{session = NewSession}),
-              {stop, normal, error, State#state{session = NewSession2}}
-          end;
-        _ ->
+      case channel:callable_status(Channel) of
+        notapproved -> 
           {_, _, NewSession2} = finalize({failed, disabled}, State#state{session = NewSession}),
-          {stop, normal, error, State#state{session = NewSession2}}
+          {stop, normal, error, State#state{session = NewSession2}};
+        disabled -> 
+          {_, _, NewSession2} = finalize({failed, disabled}, State#state{session = NewSession}),
+          {stop, normal, error, State#state{session = NewSession2}};
+        quota_reached -> 
+          {_, _, NewSession2} = finalize({failed, blocked}, State#state{session = NewSession}),
+          {stop, normal, error, State#state{session = NewSession2}};
+        ok -> 
+          case RealBroker:dispatch(NewSession) of
+            {error, unavailable} ->
+              {stop, normal, unavailable, State#state{session = NewSession}};
+            {error, Reason} ->
+              {_, _, NewSession2} = finalize({failed, Reason}, State#state{session = NewSession}),
+              {stop, normal, error, State#state{session = NewSession2}};
+            _ ->
+              lager:info("Dialing to ~s through channel ~s", [QueuedCall#queued_call.address, Channel#channel.name]),
+              notify_status(ringing, NewSession),
+              CallLog:update([{state, "active"}, {fail_reason, undefined}]),
+              {reply, ok, dialing, State#state{session = NewSession}, ?TIMEOUT_DIALING}
+          end;
+        _ -> 
+          {stop, normal, unavailable, State#state{session = NewSession}}
       end
   end.
 
