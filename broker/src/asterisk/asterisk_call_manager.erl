@@ -6,6 +6,8 @@
 
 -define(DEVELOPMENT, "development").
 
+-include("db.hrl").
+
 %% @private
 init(_) ->
   {ok, undefined}.
@@ -62,7 +64,7 @@ handle_event({new_session, Pid, Env}, State) ->
               Channel = channel:find(ChannelId),
               case channel:callable_status(Channel) of
                 notapproved ->
-                  error_logger:info_msg("ChannelId: (~p) was disabled", [ChannelId]),
+                  error_logger:info_msg("ChannelId: (~p) was pending", [ChannelId]),
                   agi_session:close(Pid),
                   {ok, State};
                 disabled ->
@@ -80,14 +82,21 @@ handle_event({new_session, Pid, Env}, State) ->
                     X -> X
                   end,
 
-                  case session:new() of
-                    {ok, SessionPid} ->
-                      session:answer(SessionPid, Pbx, ChannelId, CallerId),
-                      asterisk_pbx_log_srv:associate_call_log(AsteriskChannelId, session:id(SessionPid)),
-                      {ok, State};
-                    {error, _Reason} ->
+                  case Channel#channel.call_flow_id of
+                    undefined ->
+                      lager:info("No associated incoming call_flow with channel ~p", [ChannelId]),
                       agi_session:close(Pid),
-                      {ok, State}
+                      {ok, State};
+                    _ ->
+                      case session:new() of
+                        {ok, SessionPid} ->
+                          session:answer(SessionPid, Pbx, ChannelId, CallerId),
+                          asterisk_pbx_log_srv:associate_call_log(AsteriskChannelId, session:id(SessionPid)),
+                          {ok, State};
+                        {error, _Reason} ->
+                          agi_session:close(Pid),
+                          {ok, State}
+                      end
                   end;
                 _ ->
                   agi_session:close(Pid),

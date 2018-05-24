@@ -208,7 +208,7 @@ ready({dial, RealBroker, Channel, QueuedCall}, _From, State = #state{session_id 
     _ ->
       case channel:callable_status(Channel) of
         notapproved -> 
-          {_, _, NewSession2} = finalize({failed, disabled}, State#state{session = NewSession}),
+          {_, _, NewSession2} = finalize({failed, notapproved}, State#state{session = NewSession}),
           {stop, normal, error, State#state{session = NewSession2}};
         disabled -> 
           {_, _, NewSession2} = finalize({failed, disabled}, State#state{session = NewSession}),
@@ -788,6 +788,8 @@ reschedule_failed_call(Reason, #session{queued_call = QueuedCall, call_log = Cal
 fail_info(busy, _) -> [{fail_reason, "busy"}];
 fail_info(no_answer, _) -> [{fail_reason, "no-answer"}];
 fail_info(blocked, _) -> [{fail_reason, "blocked"}];
+fail_info(notapproved, _) -> [{fail_reason, "blocked"}];
+fail_info(disabled, _) -> [{fail_reason, "disabled"}];
 fail_info(hangup, CallLog) ->
   CallLog:end_step_interaction(),
   [{fail_reason, "hangup"}];
