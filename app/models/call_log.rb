@@ -29,7 +29,7 @@ class CallLog < ActiveRecord::Base
     'failed'    => 'failed',
     'error'     => 'failed',
     'internal error' => 'failed',
-    'timeout'   => 'no_answer',
+    'timeout'   => 'timeout',
     'no_answer' => 'no_answer',
     'no-answer' => 'no_answer',
     'busy'      => 'hangup',

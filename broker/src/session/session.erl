@@ -242,7 +242,7 @@ dialing({answer, Pbx}, State = #state{session_id = SessionId, session = Session 
   CallLog:update([{started_at, calendar:universal_time()}]),
 
   monitor(process, Pbx:pid()),
-  NewSession = NewQueuedCallSession#session{pbx = Pbx, started_at = {datetime, calendar:universal_time()} },
+  NewSession = NewQueuedCallSession#session{pbx = Pbx, started_at = calendar:universal_time()},
   notify_status('in-progress', NewSession),
   FlowPid = case Ptr of
     undefined -> spawn_run(NewSession, Ptr);
@@ -384,9 +384,8 @@ notify_status_to_callback_url(Status, Session = #session{call_log = CallLog, add
         Duration = case StartedAt of
           undefined -> 0;
           _ ->
-            StartedAtSeconds = calendar:datetime_to_gregorian_seconds(StartedAt),
             Now = calendar:universal_time(),
-            calendar:datetime_to_gregorian_seconds(Now) - StartedAtSeconds
+            calendar:datetime_to_gregorian_seconds(Now) - calendar:datetime_to_gregorian_seconds(StartedAt)
         end,
         CallReasonParams = case Reason of
           undefined -> [];
@@ -790,6 +789,8 @@ fail_info(no_answer, _) -> [{fail_reason, "no-answer"}];
 fail_info(blocked, _) -> [{fail_reason, "blocked"}];
 fail_info(notapproved, _) -> [{fail_reason, "blocked"}];
 fail_info(disabled, _) -> [{fail_reason, "disabled"}];
+fail_info(timeout, _) -> [{fail_reason, "timeout"}];
+fail_info(no_ack, _) -> [{fail_reason, "no_ack"}];
 fail_info(hangup, CallLog) ->
   CallLog:end_step_interaction(),
   [{fail_reason, "hangup"}];
