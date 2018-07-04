@@ -236,7 +236,7 @@ en:
       csv_is_too_big: "Sorry, too many records to download. The system can only handle %{max} records. You have %{count} numbers of records."
     ext:
       reminder_groups_controller:
-        successfully_updated: "Reminder group %{reminder_group_name} successfully updated."
+        successfully_updated: "Contact group %{reminder_group_name} successfully updated."
         no_file_found: "No file found"
         invalid_extension: "Invalid extension"
         invalid_file: "Invalid file: %{ex}"
@@ -430,7 +430,7 @@ en:
           messages: "Messages"
           confirmation: "Confirmation:"
           phone_book_type: "Phone book type"
-          reminder_group: "Reminder group"
+          reminder_group: "Contact group"
           to: "To"
           store_registered_date: 'Store registered date as'
           select: "--- Select ---"
@@ -444,7 +444,7 @@ en:
           messages: "Messages"
           confirmation: "Confirmation:"
           phone_book_type: "Phone book type"
-          reminder_group: "Reminder group"
+          reminder_group: "Contact group"
           select: "--- Select ---"
         action:
           remove_this_step: "Remove this step"
@@ -837,31 +837,31 @@ en:
           title: "New Pregnancy Reminder"
 
       reminder_groups:
-        title: "Reminder group"
+        title: "Contact groups"
         label:
           name: "Name"
           contacts: "Contacts"
           add_contact: "Add contact"
-          successfully_created: "Reminder group is successfully created"
-          create_error: "Failed to create reminder group"
-          successfully_updated: "Reminder group is successfully updated"
-          update_error: "Failed to update reminder group"
-          successfully_deleted: "Reminder group has been deleted"
-          delete_error: "Failed to delete reminder group"
-          confirm_delete: "Are you sure you want to delete this reminder group?"
+          successfully_created: "Contact group has been successfully created"
+          create_error: "Failed to create contact group"
+          successfully_updated: "Contact group has been successfully updated"
+          update_error: "Failed to update contact group"
+          successfully_deleted: "Contact group has been successfully deleted"
+          delete_error: "Failed to delete contact group"
+          confirm_delete: "Are you sure you want to delete this contact group?"
           address_exists: "Address already exists"
           name_exists: "Name is already exists"
         action:
           edit: "Edit"
           save: "Save"
           cancel: "Cancel"
-          new: "New reminder group"
-          import_csv: "Import reminder contact list"
+          new: "New contact group"
+          import_csv: "Import contact list"
           upload: "Upload"
 
       reminder_schedules:
-        title: "Reminder schedule"
-        desc: "List of all the reminder schedules"
+        title: "Scheduled calls"
+        desc: "List of all the scheduled call"
         label:
           add_channel: "Add Channel"
           name: "Name"
@@ -870,7 +870,7 @@ en:
           when: "When"
           and: "and"
           using: "using"
-          reminder_group: "Reminder group"
+          reminder_group: "Contact group"
           select_reminder_group: "Select contact"
           call_flow: "Call flow"
           select_call_flow: "Select call flow"
@@ -914,15 +914,15 @@ en:
           edit: "Edit"
           done: "Done"
           confirm_delete: "Are you sure?"
-          new_reminder_schedule: "New reminder schedule"
+          new_reminder_schedule: "New scheduled call"
           add_condition: "Add condition"
 
       shared:
         _project_tabs:
           action:
-            reminder_group: "Reminder Group"
+            reminder_group: "Contact Groups"
             reminder_phone_book: "Reminder Phone Book"
-            reminder_schedule: "Reminder Schedule"
+            reminder_schedule: "Scheduled Calls"
             pregnancy_reminder: "Pregnancy Reminder"
 
     external_services:

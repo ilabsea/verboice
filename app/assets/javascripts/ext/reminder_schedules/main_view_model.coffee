@@ -60,7 +60,7 @@ onReminderSchedules ->
 
     saveReminderScheduleCallback: (data) =>
       #if reminder schedule is new, we need to set id
-      $.status.showNotice("Reminder schedule successfully #{if @currentReminderSchedule().id() then 'saved' else 'created'}", 2000)
+      $.status.showNotice("Scheduled call successfully #{if @currentReminderSchedule().id() then 'saved' else 'created'}", 2000)
       @currentReminderSchedule().id(data.id)
 
       @currentReminderSchedule(null)
@@ -69,10 +69,10 @@ onReminderSchedules ->
       window.location.href = "/ext/projects/#{@project_id()}/reminder_schedules";
 
     deleteReminderSchedule: (reminderSchedule) =>
-      if confirm("Are you sure you want to delete this reminder schedule?")
+      if confirm("Are you sure you want to delete this scheduled call?")
         $.post "/ext/projects/#{@project_id()}/reminder_schedules/#{reminderSchedule.id()}.json", {_method: 'delete'}, =>
           @reminder_schedules.remove(reminderSchedule)
-          $.status.showNotice("Reminder schedule successfully deleted", 2000)
+          $.status.showNotice("Scheduled call successfully deleted", 2000)
 
     find_channel: (id) =>
       return channel for channel in @channels() when channel.id() == id
