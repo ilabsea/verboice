@@ -280,7 +280,7 @@ GEM
     multi_json (1.12.1)
     multi_xml (0.5.5)
     multipart-post (2.0.0)
-    mysql2 (0.3.11)
+    mysql2 (0.3.21)
     net-scp (1.2.1)
       net-ssh (>= 2.6.5)
     net-sftp (2.1.2)
@@ -481,7 +481,7 @@ DEPENDENCIES
   listings (~> 0.1.7)
   machinist!
   mocha
-  mysql2
+  mysql2 (~> 0.3.21)
   newrelic_rpm
   nokogiri
   oauth2
@@ -514,3 +514,6 @@ DEPENDENCIES
   webmock
   whenever
   zip-zip
+
+BUNDLED WITH
+   1.15.1

@@ -6,7 +6,7 @@ gem "puma", "2.16.0"
 gem 'haml-rails'
 gem "jquery-rails"
 
-gem 'mysql2'
+gem 'mysql2', '~> 0.3.21'
 gem 'nokogiri'
 gem 'guid'
 gem 'devise', '3.4.1'
