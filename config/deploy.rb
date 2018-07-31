@@ -35,6 +35,7 @@ require 'capistrano/ext/multistage'
 set :application, "verboice"
 set :repository,  "https://github.com/ilabsea/verboice"
 set :scm, :git
+set :deploy_to, "/u/apps/verboice"
 set :deploy_via, :remote_cache
 
 default_environment['TERM'] = ENV['TERM']
@@ -82,6 +83,56 @@ namespace :deploy do
   end
 end
 
+namespace :verboice do
+  desc 'Update Verboice Broker service Ubuntu systemd'
+  task :update_broker, :roles => :app do
+    service_name = 'verboice-broker.service'
+    file_path = "#{shared_path}/systemd/#{service_name}"
+    service_path = "/lib/systemd/system/#{service_name}"
+    
+    sudo "systemctl disable #{service_name}"
+    sudo "cp --remove-destination #{file_path} #{service_path}"
+    sudo 'systemctl daemon-reload'
+    sudo "systemctl enable #{service_name}"
+  end
+
+  desc 'Update Verboice delayed job service Ubuntu systemd'
+  task :update_delayed_job, :roles => :app do
+    service_name = 'verboice-delayed-job.service'
+    file_path = "#{shared_path}/systemd/#{service_name}"
+    service_path = "/lib/systemd/system/#{service_name}"
+    
+    sudo "systemctl disable #{service_name}"
+    sudo "cp --remove-destination #{file_path} #{service_path}"
+    sudo 'systemctl daemon-reload'
+    sudo "systemctl enable #{service_name}"
+  end
+
+  desc 'Quiet Verboice dependencies, broker and delayed job services'
+  task :quiet, :roles => :app do
+    run 'sudo pgrep -f verboice-broker | xargs kill -USR1'
+    run 'sudo pgrep -f verboice-delayed_job | xargs kill -USR1'
+  end
+
+  desc 'Start Verboice dependencies, broker and delayed job services'
+  task :start, :roles => :app do
+    run 'sudo systemctl start verboice-broker.service'
+    run 'sudo systemctl start verboice-delayed-job.service'
+  end
+
+  desc 'Stop Verboice dependencies, broker and delayed job services'
+  task :stop, :roles => :app do
+    run 'sudo systemctl stop verboice-broker.service'
+    run 'sudo systemctl stop verboice-delayed-job.service'
+  end
+
+  desc "Restart Verboice dependencies, broker and delayed job services"
+  task :restart, :roles => :app do
+    sudo 'systemctl restart verboice-broker.service'
+    sudo 'systemctl restart verboice-delayed-job.service'
+  end
+end
+
 namespace :foreman do
   desc 'Export the Procfile to Ubuntu upstart scripts'
   task :export, :roles => :app do
@@ -119,5 +170,11 @@ after "deploy:update_code", "deploy:symlink_help"
 after "deploy:update_code", "deploy:prepare_broker"
 after "deploy:update_code", "deploy:compile_broker"
 
-after "deploy:update", "foreman:export"    # Export foreman scripts
-after "deploy:restart", "foreman:restart"   # Restart application scripts
+if ENV['UBUNTU'].to_f >= 16
+  after 'deploy:update', 'verboice:update_broker'
+  after 'deploy:update', 'verboice:update_delayed_job'
+  after 'deploy:restart', 'verboice:restart'
+else
+  after "deploy:update", "foreman:export"    # Export foreman scripts
+  after "deploy:restart", "foreman:restart"   # Restart application scripts
+end
