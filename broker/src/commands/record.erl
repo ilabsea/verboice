@@ -29,7 +29,7 @@ run(Args, Session = #session{pbx = Pbx, call_log = CallLog, contact = Contact, p
       },
       RecordedAudio:save(),
 
-  create_call_log_recorded_audio(OldVarName, VarName, Key, Description, Project#project.id, CallLogId),
+      create_call_log_recorded_audio(OldVarName, VarName, Key, Description, Project#project.id, CallLogId),
       {next, Session};
 
     {error, Reason} ->
@@ -48,6 +48,7 @@ asterisk_filename(CallLogId, Key) ->
     {ok, RecordDir} -> filename(RecordDir, CallLogId, Key);
     _ -> local_filename(CallLogId, Key)
   end.
+
 create_call_log_recorded_audio(OldVarName, VarName, Key, Description, ProjectId, CallLogId) ->
   case VarName of
     undefined -> ok;
