@@ -77,11 +77,15 @@ record(AsteriskFilename, FileName, StopKeys, Timeout, SilenceTime, {?MODULE, Pid
   try
     case agi_session:record_file(Pid, filename:absname(filename:rootname(AsteriskFilename)), "gsm", StopKeys, Timeout * 1000, SilenceTime) of
       hangup ->
-        FileSize = filelib:file_size(TempFile),
-        if 
-          FileSize > 0 ->
-            sox:convert(TempFile, FileName); %% record even caller hangup
-          true -> throw(hangup)
+        case application:get_env(recoreded_on_hangup) of
+          {ok, true} -> 
+            FileSize = filelib:file_size(TempFile),
+            if 
+              FileSize > 0 ->
+                sox:convert(TempFile, FileName); %% record even caller hangup
+              true -> throw(hangup)
+            end;
+          _ -> throw(hangup)
         end;
       error -> throw(error);
       _ ->
