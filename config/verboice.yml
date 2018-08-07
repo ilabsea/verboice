@@ -2,6 +2,8 @@ broker_port: 9999
 ispeech_format: mp3
 asset_host: "http://default-domain.com"
 skip_account_confirmation: false
+registration_account_label: 'views.layouts.action.create_account'
+registration_account_url: 'http://default-domain.com/accounts/sign_up'
 default_url_options:
   host: "default-domain.com"
   protocol: "http"
