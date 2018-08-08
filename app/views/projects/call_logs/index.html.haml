@@ -49,11 +49,7 @@
           %td= log.channel.try(:name)
           %td= log.project.try(:name)
           %td= log.call_flow.try(:name)
-          %td
-            - if log.state == CallLog::STATE_FAILED
-              = CallLog::FAIL_REASONS[log.fail_reason.gsub(/\"/, "").strip]
-            - else
-              = log.state
+          %td= log.status_display
 
           %td= log.parent ? "ref_id:#{log.parent.id};#{log.step_interaction}" : log.step_interaction
 

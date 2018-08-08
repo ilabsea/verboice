@@ -35,7 +35,9 @@ require 'capistrano/ext/multistage'
 set :application, "verboice"
 set :repository,  "https://github.com/ilabsea/verboice"
 set :scm, :git
+
 set :deploy_to, "/u/apps/verboice"
+
 set :deploy_via, :remote_cache
 
 default_environment['TERM'] = ENV['TERM']
@@ -168,7 +170,7 @@ after "deploy:update_code", "deploy:symlink_configs"
 after "deploy:update_code", "deploy:symlink_data"
 after "deploy:update_code", "deploy:symlink_help"
 after "deploy:update_code", "deploy:prepare_broker"
-after "deploy:update_code", "deploy:compile_broker"
+#after "deploy:update_code", "deploy:compile_broker"
 
 if ENV['UBUNTU'].to_f >= 16
   after 'deploy:update', 'verboice:update_broker'

@@ -25,6 +25,14 @@ Verboice::Application.routes.draw do
 
   devise_for :accounts, controllers: {omniauth_callbacks: "omniauth_callbacks"}
   guisso_for :account
+
+  scope '/plugin' do
+    Plugin.all.each do |plugin|
+      scope plugin.name do
+        plugin.hooks[:routes].each { |plugin_routes_block| instance_eval &plugin_routes_block }
+      end
+    end
+  end
   
   resources :call_log_recorded_audios, only: [:update]
 

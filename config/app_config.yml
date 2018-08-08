@@ -1,6 +1,6 @@
 development:
   allow_prefix_called_number: true
-  sip_require_approval: true
+  sip_require_approval: false
 
 test:
   allow_prefix_called_number: false

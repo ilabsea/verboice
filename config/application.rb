@@ -39,6 +39,8 @@ module Verboice
 
     # Custom directories with classes and modules you want to be autoloadable.
     config.autoload_paths += %W(#{Rails.root}/lib/extras)
+    config.autoload_paths += Dir["#{config.root}/plugins"]
+    config.autoload_paths += Dir["#{config.root}/plugins/*/{controllers,models,workers}"]
     config.paths['log'] = $log_path if $log_path
 
     # Only load the plugins named here, in the order given (default is alphabetical).

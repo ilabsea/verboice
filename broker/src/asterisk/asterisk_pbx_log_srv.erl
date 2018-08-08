@@ -8,6 +8,8 @@
 -define(SERVER(Channel), {global, {?MODULE, Channel}}).
 -record(state, {guid, session_id}).
 
+-compile([{parse_transform, lager_transform}]).
+
 start_link(Channel) ->
   gen_server:start_link(?SERVER(Channel), ?MODULE, Channel, []).
 
@@ -60,6 +62,7 @@ handle_cast({hangup, Event}, State=#state{guid=Guid,session_id=SessionId}) ->
     C -> "ISDN:" ++ binary_to_list(C)
   end,
   create_log(Guid, ["Channel hangup. Reason: ", Reason]),
+  lager:info("Code: ~p, Reason: ~p", [Code, Reason]),
   call_log_srv:hangup(SessionId, {Code, Reason}),
   {stop, normal, State};
 

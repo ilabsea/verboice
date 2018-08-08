@@ -32,7 +32,7 @@ class CallLog < ActiveRecord::Base
     'timeout'   => 'timeout',
     'no_answer' => 'no_answer',
     'no-answer' => 'no_answer',
-    'busy'      => 'hangup',
+    'busy'      => 'busy',
     'hangup'    => 'incompleted',
     'marked_as_failed' => "marked_as_failed",
     'unknown error' => "Failed (unknown error)",
@@ -44,6 +44,11 @@ class CallLog < ActiveRecord::Base
     'unknown_resource' => 'error (step is broken)',
     'is broken' => 'error (step is broken)',
     'is missing phone number' => 'error (step is broken)'
+  }
+
+  FAIL_DETAILS = {
+    'Normal Clearing' => 'incompleted',
+    'Call Rejected' => 'busy'
   }
 
   DATE_FORMAT_EXPORT = [
@@ -82,6 +87,18 @@ class CallLog < ActiveRecord::Base
 
   def state
     read_attribute(:state).try(:to_sym)
+  end
+
+  def status_display
+    if state == CallLog::STATE_FAILED
+      if fail_reason.gsub(/\"/, "").strip == CallLog::STATE_FAILED.to_s
+        CallLog::FAIL_DETAILS[fail_details.gsub(/\"/, "").strip]
+      else
+        CallLog::FAIL_REASONS[fail_reason.gsub(/\"/, "").strip]
+      end
+    else
+      state
+    end
   end
 
   def direction

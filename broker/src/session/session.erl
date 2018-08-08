@@ -803,7 +803,15 @@ fail_info({error, ErrDetails, Code}, CallLog) ->
 fail_info({internal_error, Details}, CallLog) ->
   CallLog:end_step_interaction(),
   [{fail_reason, "internal error"}, {fail_details, io_lib:format("~p", [Details])}];
-fail_info(_, _) -> [{fail_reason, "unknown error"}].
+fail_info(_, CallLog) ->
+  Call = call_log:find(CallLog:id()),
+  FailReason = case Call#call_log.fail_details of
+    <<"User alerting, no answer">> -> "no-answer";
+    <<"Call Rejected">> -> "busy";
+    _ -> "unknown error"
+  end,
+  lager:info("Call Log fail details: (~p)", [Call#call_log.fail_details]),
+  [{fail_reason, FailReason}].
 
 store_default_language(Session = #session{project = Project}) ->
   JsContext = default_variables(Session),

@@ -16,7 +16,8 @@
 # along with Verboice.  If not, see <http://www.gnu.org/licenses/>.
 
 class CallLogsController < ApplicationController
-  before_filter :authenticate_account!
+  skip_before_filter :authenticate_account!, only: [:play_result]
+#  before_filter :authenticate_account!
   before_filter :prepare_log_detail, only: [:show, :progress, :download_details]
 
   before_filter :initial_paginate_params, only: [:index]
@@ -54,8 +55,8 @@ class CallLogsController < ApplicationController
   end
 
   def play_result
-    load_project
-    @log = @project.call_logs.find params[:id]
+#    load_project
+    @log = CallLog.find params[:id]
     send_file RecordingManager.for(@log).result_path_for(params[:key]), :type => "audio/x-wav"
   end
 

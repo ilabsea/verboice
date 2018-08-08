@@ -47,6 +47,11 @@ gem 'rails_config'
 gem 'awesome_print'
 gem 'fabrication'
 
+# gem 'wit'
+gem 'rest-client'
+gem 'google-api-client', '0.7.0'
+# gem 'google-cloud-speech', '0.20.0'
+
 gem "active_model_serializers", '~> 0.8.3'
 gem "recaptcha", :require => "recaptcha/rails"
 gem "password_strength"
@@ -78,7 +83,7 @@ group :development do
   gem 'rvm'
   gem 'rvm-capistrano', require: false
   gem 'licit'
-  gem 'thin'
+  # gem 'thin'
   gem 'rails-dev-tweaks'
 end
 
