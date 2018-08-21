@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20170124193643) do
+ActiveRecord::Schema.define(:version => 20180808074619) do
 
   create_table "accounts", :force => true do |t|
     t.string   "email",                               :default => "", :null => false
@@ -579,6 +579,14 @@ ActiveRecord::Schema.define(:version => 20170124193643) do
   add_index "recorded_audios", ["call_log_id"], :name => "index_recorded_audios_on_call_log_id"
   add_index "recorded_audios", ["contact_id"], :name => "index_recorded_audios_on_contact_id"
   add_index "recorded_audios", ["project_id", "created_at"], :name => "index_recorded_audios_on_project_id_and_created_at"
+
+  create_table "reports", :force => true do |t|
+    t.integer  "call_id"
+    t.text     "properties"
+    t.string   "location"
+    t.datetime "created_at", :null => false
+    t.datetime "updated_at", :null => false
+  end
 
   create_table "resources", :force => true do |t|
     t.string   "name"

@@ -1,0 +1,27 @@
+= render 'shared/project_tabs_and_title', :project => @project, :shared_project => @shared_project
+
+%h1
+  Preview file
+%p.desc
+  = @file_name
+%br/
+%br/
+.box.tab
+  %br/
+  %table.GralTable.ButtonTable.w-pagination
+    - @rows.each do |r|
+      %tr
+        - for index in 0 .. (@rows.first.size - 1) do
+          %td= r[index]
+        %td
+        %td
+        %td
+  %br/
+%ul.tabs.bottom
+  - @sheet_list.each do |list|
+    - if @sheet_list.find_index(list) == @index
+      %li.active
+        %a{:href => project_reports_view_excel_path(@project, :index => @sheet_list.find_index(list), :file_path => @file_path)}= list
+    - else
+      %li
+        %a{:href => project_reports_view_excel_path(@project, :index => @sheet_list.find_index(list), :file_path => @file_path)}= list

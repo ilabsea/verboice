@@ -21,8 +21,8 @@
   %li{ :class =>"#{"active" if params[:controller] == "projects" && params[:action] == 'edit'}" }
     = link_to t('views.shared._project_tabs_and_title.action.settings'), edit_project_path(project)
   = render "ext/shared/project_tabs", :project => project
-  - if Options.is_on? :wit_ai
-    %li{ :class =>"#{"active" if params[:controller] == "wit_ais"}" }
-      = link_to t('views.shared._project_tabs_and_title.action.wit_ai'), wit_ais_path()
+  - if Options.is_on? :report
+    %li{ :class =>"#{"active" if params[:controller] == "reports"}" }
+      = link_to t('views.project.reports'), project_reports_path()
 .tabsline
 %br

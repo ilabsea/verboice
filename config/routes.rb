@@ -345,7 +345,7 @@ Verboice::Application.routes.draw do
   get 'terms_and_conditions', :to => redirect('http://instedd.org/terms-of-service/')
 
   match '/hub/*path' => 'hub#api', format: false
-
+  get '/projects/:project_id/reports' => "reports#index", as: :project_reports
   mount Listings::Engine => "/listings"
   mount InsteddTelemetry::Engine => "/instedd_telemetry"
 end
