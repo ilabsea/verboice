@@ -1,16 +1,16 @@
 class Service
-
-	def self.from_voice_to_speech audio_file, call_id
-	  speech = Speech.new(Options.google_api_key)
-    audio_url = "#{Options.verboice_url}/calls/#{call_id}/results/#{audio_file}"
+	
+  def self.from_voice_to_speech audio_file, call_id
+	  speech = Speech.new(Reports::Settings.google_api_key)
+    audio_url = "#{Reports::Settings.verboice_url}/calls/#{call_id}/results/#{audio_file}"
     log = CallLog.find call_id
     file_audio = RecordingManager.for(log).result_path_for(audio_file)
-    result = speech.recognize file_audio, Options.language_recognition
+    result = speech.recognize file_audio, Reports::Settings.language_recognition
     return result['transcript']
 	end
 
 	def self.from_speech_to_understanding message
-    wit = Wit.new(access_token: Options.wit_token)
+    wit = Wit.new(access_token: Reports::Settings.wit_token)
     json_response = wit.message message
     return json_response
 	end
@@ -24,7 +24,7 @@ class Service
   end
 
   def self.create_entities entities_name, rows
-    wit = Wit.new(access_token: Options.wit_token)
+    wit = Wit.new(access_token: Reports::Settings.wit_token)
     values = []
     rows.each do |r|
       if r[0] != nil
@@ -44,7 +44,7 @@ class Service
   end
 
   def self.update_entities entities_name, rows
-    wit = Wit.new(access_token: Options.wit_token)
+    wit = Wit.new(access_token: Reports::Settings.wit_token)
     values = []
     rows.each do |r|
       if r[0] != nil
@@ -77,7 +77,7 @@ class Service
   end
 
   def self.get_entities
-    wit = Wit.new(access_token: Options.wit_token)
+    wit = Wit.new(access_token: Reports::Settings.wit_token)
     entities = wit.get_entities()
     return entities
   end

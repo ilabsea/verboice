@@ -9,10 +9,8 @@ class ReportsController < ApplicationController
     else
       audio_file = "1533197539228"
       message = Service::from_voice_to_speech(audio_file, params['CallSid'])
-      puts message
       # message = "There are two cases of headaches and eye problems and one case of wheezing in Hanoi"
       json_response = Service::from_speech_to_understanding message
-      puts json_response
       parser = WitAiParser.new(params['CallSid'])
       parser.parse(json_response)
       report = parser.to_report_object()
