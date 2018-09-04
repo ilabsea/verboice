@@ -1,5 +1,4 @@
 set :user, 'ilab'
-set :branch, '20170528_merge_tag_instedd_314'
+set :branch, 'stable-merge-bitbucket'
 
-#server 'verboice.com', :app, :web, :db, primary: true
-server '125.212.239.87', :app, :web, :db, primary: true
+server '192.168.1.100', :app, :web, :db, primary: true

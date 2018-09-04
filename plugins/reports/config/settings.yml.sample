@@ -8,5 +8,3 @@ case_key: "case"
 symptoms_key: "symptoms"
 number_of_case_key: "number_of_case"
 location_key: "place"
-plugins:
-  report: on

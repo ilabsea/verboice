@@ -16,6 +16,7 @@
 # along with Verboice.  If not, see <http://www.gnu.org/licenses/>.
 
 require 'bundler/capistrano'
+require 'yaml'
 
 if ENV['RVM']
   require 'rvm/capistrano'
@@ -68,7 +69,12 @@ namespace :deploy do
 
   task :symlink_configs, :roles => :app do
     %W(asterisk credentials freeswitch verboice voxeo newrelic oauth nuntium poirot guisso database aws log_file app_config step_config api recaptcha login hub telemetry).each do |file|
-      run "ln -nfs #{shared_path}/#{file}.yml #{release_path}/config/"
+      run "ln -nfs #{shared_path}/config/#{file}.yml #{release_path}/config/"
+    end
+
+    verboice_config = YAML.load_file(File.expand_path('../verboice.yml', __FILE__))
+    if ['yes', 'true', 'on'].include? verboice_config["plugins"]["report"]
+      run "ln -nfs #{shared_path}/config/plugins/reports/settings.yml #{release_path}/plugins/reports/config/"
     end
   end
 
@@ -170,7 +176,7 @@ after "deploy:update_code", "deploy:symlink_configs"
 after "deploy:update_code", "deploy:symlink_data"
 after "deploy:update_code", "deploy:symlink_help"
 after "deploy:update_code", "deploy:prepare_broker"
-#after "deploy:update_code", "deploy:compile_broker"
+after "deploy:update_code", "deploy:compile_broker"
 
 if ENV['UBUNTU'].to_f >= 16
   after 'deploy:update', 'verboice:update_broker'

@@ -9,3 +9,5 @@ default_url_options:
   protocol: "http"
 default_mailer_options:
   from: "verboice@instedd.org"
+plugins:
+  report: on

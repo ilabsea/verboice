@@ -24,12 +24,12 @@ ENV['BUNDLE_GEMFILE'] ||= File.expand_path('../../Gemfile', __FILE__)
 require 'bundler/setup' if File.exists?(ENV['BUNDLE_GEMFILE'])
 require File.expand_path('../initializers/date_comparison',  __FILE__)
 
-module Options
+module Plugins
   extend self
 
-  CONFIG = YAML.load_file(File.expand_path('../../plugins/reports/config/settings.yml', __FILE__))
+  CONFIG = YAML.load_file(File.expand_path('../verboice.yml', __FILE__))
 
-  def is_on?(plugin)
+  def on?(plugin)
     plugins[plugin.to_s] == true
   end
 
