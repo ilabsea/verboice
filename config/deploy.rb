@@ -73,7 +73,7 @@ namespace :deploy do
     end
 
     verboice_config = YAML.load_file(File.expand_path('../verboice.yml', __FILE__))
-    if ['yes', 'true', 'on'].include? verboice_config["plugins"]["report"]
+    if ['yes', true, 'on', 'true'].include? verboice_config["plugins"]["report"]
       run "ln -nfs #{shared_path}/config/plugins/reports/settings.yml #{release_path}/plugins/reports/config/"
     end
   end

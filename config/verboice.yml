@@ -10,4 +10,4 @@ default_url_options:
 default_mailer_options:
   from: "verboice@instedd.org"
 plugins:
-  report: on
+  report: off
