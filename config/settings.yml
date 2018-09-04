@@ -1,8 +1,0 @@
-verboice_url: 'http://192.168.1.126:3000'
-verboice_first_audio_file: '1507648840602.wav'
-google_api_key: 'AIzaSyCH6lu4WD2i4NXNbOPD8n6exAZYx0e6G8U'
-language_recognition: 'vi-VN'
-wit_token: 'WJFUWYNI7UZQITXZWLENMVLFHBNK4EBQ'
-output_log_file: '/tmp/recognize.log'
-plugins:
-  report: on
