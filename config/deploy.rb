@@ -56,8 +56,8 @@ namespace :deploy do
   end
 
   task :prepare_broker, :roles => :app do
-    run "test -f #{shared_path}/verboice.config || cp #{release_path}/broker/verboice.config #{shared_path}"
-    run "ln -nfs #{shared_path}/verboice.config #{release_path}/broker/verboice.config"
+    run "test -f #{shared_path}/config/broker/verboice.config || cp #{release_path}/broker/verboice.config #{shared_path}/config/broker/"
+    run "ln -nfs #{shared_path}/config/broker/verboice.config #{release_path}/broker/verboice.config"
 
     run "test -d #{shared_path}/log/broker || mkdir #{shared_path}/log/broker"
     run "ln -nfs #{shared_path}/log/broker #{release_path}/broker/log"
