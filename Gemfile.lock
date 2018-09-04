@@ -40,6 +40,13 @@ GIT
       rails
 
 GIT
+  remote: git://github.com/sokmesakhiev/wit-ruby.git
+  revision: 880173fbbf29f67a25a661e524633e5b9ece23bf
+  branch: master
+  specs:
+    wit (6.0.0)
+
+GIT
   remote: https://github.com/edave/enumerated_attribute.git
   revision: ec1021d11874f37d30589f91814d069884348fdf
   specs:
@@ -535,6 +542,7 @@ DEPENDENCIES
   uglifier (>= 1.0.3)
   webmock
   whenever
+  wit!
   zip-zip
 
 BUNDLED WITH

@@ -48,3 +48,5 @@ script/sphinx3
 config/recaptcha.yml
 config/aws.yml
 config/telemetry.yml
+
+plugins/reports/config/settings.yml

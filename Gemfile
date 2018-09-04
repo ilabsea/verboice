@@ -46,6 +46,7 @@ gem 'aws-sdk-v1'
 gem 'rails_config'
 gem 'awesome_print'
 gem 'fabrication'
+gem 'wit', github: "sokmesakhiev/wit-ruby", branch: 'master'
 
 # gem 'wit'
 gem 'rest-client'

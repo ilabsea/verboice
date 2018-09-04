@@ -15,26 +15,25 @@ class Service
     return json_response
 	end
 
-	def self.extract_understanding cases
-		properties = {}
-		index = 0
-    cases.each do |obj|
-    	properties[index] = {}
-    	properties[index]["number"] = obj["entities"]["number"][0]["value"]
-    	properties[index]["symptoms"] = obj["entities"]["symptom"].map {|s| s["value"] }
-    end
-	  return properties
-	end
-
   def self.import_entities entities_name, rows
+    if get_entities().include? entities_name
+      update_entities(entities_name, rows)
+    else
+      create_entities(entities_name, rows)
+    end
+  end
+
+  def self.create_entities entities_name, rows
     wit = Wit.new(access_token: Options.wit_token)
     values = []
     rows.each do |r|
-      values << {
-                  "value" => "#{r[0]}",
-                  "expressions" => 
-                    [ r[0]]
-                }
+      if r[0] != nil
+        values << {
+                    "value" => "#{r[0]}",
+                    "expressions" => 
+                      [ r[0]]
+                  }
+      end
     end
     new_entity_obj = {
                         "doc" => "Value number of #{entities_name}",
@@ -44,17 +43,43 @@ class Service
     new_entity = wit.post_entities(new_entity_obj)
   end
 
+  def self.update_entities entities_name, rows
+    wit = Wit.new(access_token: Options.wit_token)
+    values = []
+    rows.each do |r|
+      if r[0] != nil
+        values << {
+                    "value" => "#{r[0]}",
+                    "expressions" => 
+                      [ r[0]]
+                  }
+      end
+    end
+    new_entity_obj = {
+                        "doc" => "Value number of #{entities_name}",
+                        "id" => entities_name,
+                        "values" => values
+                      }
+    new_entity = wit.put_entities(entities_name, new_entity_obj)
+  end
+
   def self.read_sheet spreadsheet, index
     sheet = spreadsheet.worksheet index.to_i
     return sheet.rows
   end
 
-  def self.save_csv file_obj
+  def self.save_excel file_obj
     file_path = Rails.root.join('public', 'uploads', file_obj.original_filename)
-    File.open( file_path, 'wb') do |file|
+    File.open( file_path, "wb") do |file|
       file.write(file_obj.read)
     end
     return file_path
+  end
+
+  def self.get_entities
+    wit = Wit.new(access_token: Options.wit_token)
+    entities = wit.get_entities()
+    return entities
   end
 
 end

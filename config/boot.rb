@@ -27,7 +27,7 @@ require File.expand_path('../initializers/date_comparison',  __FILE__)
 module Options
   extend self
 
-  CONFIG = YAML.load_file(File.expand_path('../settings.yml', __FILE__))
+  CONFIG = YAML.load_file(File.expand_path('../../plugins/reports/config/settings.yml', __FILE__))
 
   def is_on?(plugin)
     plugins[plugin.to_s] == true
