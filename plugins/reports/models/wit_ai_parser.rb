@@ -1,7 +1,7 @@
 class WitAiParser
 
+	REPORT_KEY = Reports::Settings.report_key
 	CASE_KEY = Reports::Settings.case_key
-	NUMBER_OF_CASE_KEY = Reports::Settings.number_of_case_key
 	SYMPTOMS_KEY = Reports::Settings.symptoms_key
 	LOCATION_KEY = Reports::Settings.location_key
 
@@ -13,8 +13,8 @@ class WitAiParser
 		index = 0
 		report = {}
 		properties = {}
-		if response["entities"][CASE_KEY]
-			response["entities"][CASE_KEY].each do |obj|
+		if response["entities"][REPORT_KEY]
+			response["entities"][REPORT_KEY].each do |obj|
 	    	properties[index] = extract_properties_from_case(obj)
 	    	index = index + 1;
 	    end
@@ -30,16 +30,16 @@ class WitAiParser
 
 	def extract_properties_from_case case_obj
 		properties = {}
-  	properties[NUMBER_OF_CASE_KEY] = case_obj["entities"][NUMBER_OF_CASE_KEY][0]["value"] if case_obj["entities"][NUMBER_OF_CASE_KEY]
+  	properties[CASE_KEY] = case_obj["entities"][CASE_KEY][0]["value"] if case_obj["entities"][CASE_KEY]
   	properties[SYMPTOMS_KEY] = case_obj["entities"][SYMPTOMS_KEY].map {|s| s["value"]} if case_obj["entities"][SYMPTOMS_KEY]
 		return properties
 	end
 
 	def extract_properties_from_none_case response
 		properties = {}
-  	properties[NUMBER_OF_CASE_KEY] = response["entities"][NUMBER_OF_CASE_KEY][0]["value"] if response["entities"][NUMBER_OF_CASE_KEY]
+  	properties[CASE_KEY] = response["entities"][CASE_KEY][0]["value"] if response["entities"][CASE_KEY]
   	properties[SYMPTOMS_KEY] = response["entities"][SYMPTOMS_KEY].map {|s| s["value"]} if response["entities"][SYMPTOMS_KEY]
-  	return nil if (properties[NUMBER_OF_CASE_KEY] == nil and properties[SYMPTOMS_KEY] == nil)
+  	return nil if (properties[CASE_KEY] == nil and properties[SYMPTOMS_KEY] == nil)
 		return properties
 	end
 
