@@ -8,7 +8,7 @@ class ReportsController < ApplicationController
     unless finished_calls.include?(params['CallStatus'])
       render :text => ""
     else
-      audio_file = "1533197539228"
+      audio_file = Reports::Settings.verboice_first_audio_file
       message = Service::from_voice_to_speech(audio_file, params['CallSid'])
       # message = "There are two cases of headaches and eye problems and one case of wheezing in Hanoi"
       json_response = Service::from_speech_to_understanding message
@@ -18,7 +18,7 @@ class ReportsController < ApplicationController
         report = parser.to_report_object()
         report.save!
       rescue
-        # report.create!(:)
+        report.create!({:message => message, :call_id => params['CallSid'], :properties => {}, :location => nil })
       end
       render :json => json_response
     end

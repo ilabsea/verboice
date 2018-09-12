@@ -1,4 +1,6 @@
 verboice_url: 'http://localhost:3001'
+verboice_ip: "192.168.1.148"
+verboice_first_audio_file: '1507648840602'
 google_api_key: 'GOOGLE API KEY'
 language_recognition: 'en-US' # https://cloud.google.com/speech-to-text/docs/languages
 wit_token: 'WIT APPLICATION TOKEN'
