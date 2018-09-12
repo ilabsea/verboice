@@ -1,40 +1,46 @@
 class WitAiParser
 
+	CASE_KEY = Reports::Settings.case_key
+	NUMBER_OF_CASE_KEY = Reports::Settings.number_of_case_key
+	SYMPTOMS_KEY = Reports::Settings.symptoms_key
+	LOCATION_KEY = Reports::Settings.location_key
+
 	def initialize(call_id)
 		@call_id = call_id
 	end
 
-	def parse(response)
-		case_key = Reports::Settings.case_key
-		number_of_case_key = Reports::Settings.number_of_case_key
-		symptoms_key = Reports::Settings.symptoms_key
-		location_key = Reports::Settings.location_key
+	def parse_to_report(response)
 		index = 0
-		if response["entities"][case_key]
-			cases = response["entities"][case_key] 
-			@properties = {}
-			cases.each do |obj|
-	    	@properties[index] = {}
-	    	@properties[index][number_of_case_key] = obj["entities"][number_of_case_key][0]["value"] if obj["entities"][number_of_case_key]
-	    	@properties[index][symptoms_key] = obj["entities"][symptoms_key].map {|s| s["value"]} if obj["entities"][symptoms_key]
-	      index = index + 1;
+		report = {}
+		properties = {}
+		if response["entities"][CASE_KEY]
+			response["entities"][CASE_KEY].each do |obj|
+	    	properties[index] = extract_properties_from_case(obj)
+	    	index = index + 1;
 	    end
 	  end
-	  @properties[index] = {}
-  	@properties[index][number_of_case_key] = response["entities"][number_of_case_key][0]["value"] if response["entities"][number_of_case_key]
-  	@properties[index][symptoms_key] = response["entities"][symptoms_key].map {|s| s["value"]} if response["entities"][symptoms_key]
-  	@properties.delete(index) if @properties[index][number_of_case_key] == nil and @properties[index][symptoms_key] == nil
-	  @location = response["entities"][location_key] ? response["entities"][location_key][0]["value"] : ""
-    @message = response["_text"]
+	  properties[index] = extract_properties_from_none_case response
+	  report = Report.new
+		report.message = response["_text"]
+		report.properties = properties
+		report.location = response["entities"][LOCATION_KEY] ? response["entities"][LOCATION_KEY][0]["value"] : ""
+		report.call_id = @call_id
+    return report
 	end
 
-	def to_report_object()
-		report = Report.new
-		report.message = @message
-		report.properties = @properties
-		report.location = @location
-		report.call_id = @call_id
-		return report
+	def extract_properties_from_case case_obj
+		properties = {}
+  	properties[NUMBER_OF_CASE_KEY] = case_obj["entities"][NUMBER_OF_CASE_KEY][0]["value"] if case_obj["entities"][NUMBER_OF_CASE_KEY]
+  	properties[SYMPTOMS_KEY] = case_obj["entities"][SYMPTOMS_KEY].map {|s| s["value"]} if case_obj["entities"][SYMPTOMS_KEY]
+		return properties
+	end
+
+	def extract_properties_from_none_case response
+		properties = {}
+  	properties[NUMBER_OF_CASE_KEY] = response["entities"][NUMBER_OF_CASE_KEY][0]["value"] if response["entities"][NUMBER_OF_CASE_KEY]
+  	properties[SYMPTOMS_KEY] = response["entities"][SYMPTOMS_KEY].map {|s| s["value"]} if response["entities"][SYMPTOMS_KEY]
+  	return nil if (properties[NUMBER_OF_CASE_KEY] == nil and properties[SYMPTOMS_KEY] == nil)
+		return properties
 	end
 
 end

@@ -14,11 +14,10 @@ class ReportsController < ApplicationController
       json_response = Service::from_speech_to_understanding message
       begin
         parser = WitAiParser.new(params['CallSid'])
-        parser.parse(json_response)
-        report = parser.to_report_object()
+        report = parser.parse_to_report(json_response)
         report.save!
       rescue
-        report.create!({:message => message, :call_id => params['CallSid'], :properties => {}, :location => nil })
+        Report.create!({:message => message, :call_id => params['CallSid'], :properties => {}, :location => nil })
       end
       render :json => json_response
     end
