@@ -1,5 +1,5 @@
 verboice_url: 'http://localhost:3001'
-verboice_ip: "127.0.0.1"
+whitelist_ips: ['127.0.0.1']
 verboice_first_audio_file: '1507648840602'
 google_api_key: 'GOOGLE API KEY'
 language_recognition: 'en-US' # https://cloud.google.com/speech-to-text/docs/languages

@@ -25,6 +25,8 @@ class CallLog < ActiveRecord::Base
   STATE_FAILED = :failed
   STATE_SUSPENDED = :suspended
 
+  FINISHED_CALL_STATUSES = [STATE_COMPLETED.to_s, STATE_FAILED.to_s]
+
   FAIL_REASONS = {
     'failed'    => 'failed',
     'error'     => 'failed',

@@ -1,4 +1,5 @@
 require 'spec_helper'
+
 describe Report do
 	let(:super_user) { Account.make role: Account::ADMIN }
   let(:user) { Account.make role: Account::USER }

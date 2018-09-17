@@ -21,14 +21,16 @@ module Api2
     def index
       @call_logs = api_current_account.call_logs
       @call_log_ids = @call_logs.map {|c| c.id }
-      @reports = Report.joins(:call_log).where("reports.call_id in (#{@call_log_ids.join(',')})").select(["reports.call_id","call_logs.project_id","message", "properties", "location", "address", "call_logs.created_at"])
+      @reports = Report.joins(:call_log).where("reports.call_id in (#{@call_log_ids.join(',')})").select(["reports.call_id","call_logs.project_id","message", "properties", "location", "reports.address", "call_logs.created_at"]).order('reports.id DESC')
       @reports = @reports.where("reports.location = '#{params[:location]}'") unless params[:location].to_s.empty?
       @reports = @reports.where("call_logs.address = '#{params[:phone_number]}'") unless params[:phone_number].to_s.empty?
+      
       unless (params[:from].to_s.empty? and params[:to].to_s.empty?)
         from = Time.parse(params[:from]).to_s
         to = Time.parse(params[:to]).to_s
         @reports = @reports.where("call_logs.created_at between '#{from}' AND '#{to}'") 
       end
+
       render json: @reports
     end
   end

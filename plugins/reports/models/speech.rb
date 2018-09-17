@@ -8,6 +8,7 @@ class Speech
   def recognize audio_file, language = 'en-US', encoding = 'linear16', bit_rate = 8000, max_alternatives = 3
     url = "https://speech.googleapis.com/v1/speech:recognize?key=#{@api_key}"
     content = fetch_content audio_file
+    
     params = {
       config: {
         encoding: encoding,
@@ -19,6 +20,7 @@ class Speech
         content: content
       }
     }
+
     response = do_post_request url, params
     if response.code == 200
       transcript response.body
@@ -34,7 +36,7 @@ class Speech
         result = r if result['confidence'] < r['confidence']
       end
 
-      puts "Result - transcript: #{result['transcript']}, confidence: #{result['confidence']}"
+      Rails.logger.info "Result - transcript: #{result['transcript']}, confidence: #{result['confidence']}"
 
       result
     end
@@ -46,7 +48,7 @@ class Speech
     begin
       content = File.open(file, 'rb') { |f| Base64.strict_encode64(f.read) }
     rescue Exception => e
-      puts "File #{file} doesn't exist"
+      Rails.logger.info "File #{file} doesn't exist"
     end
 
     content

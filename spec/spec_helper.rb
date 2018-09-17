@@ -31,6 +31,8 @@ WebMock.disable_net_connect!(allow_localhost: true)
 # in spec/support/ and its subdirectories.
 Dir[Rails.root.join("spec/support/**/*.rb")].each {|f| require f}
 
+Dir[Rails.root.join("plugins/**/spec/support/**/*.rb")].each {|f| require f}
+
 RSpec.configure do |config|
   # ## Mock Framework
   #
