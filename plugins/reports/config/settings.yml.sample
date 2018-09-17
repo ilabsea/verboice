@@ -9,3 +9,4 @@ report_key: "report"
 symptoms_key: "symptoms"
 case_key: "case"
 location_key: "place"
+default_max_fetch: 100

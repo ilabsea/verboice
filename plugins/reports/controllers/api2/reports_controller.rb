@@ -19,19 +19,29 @@ module Api2
 
     # GET /call_logs
     def index
-      @call_logs = api_current_account.call_logs
-      @call_log_ids = @call_logs.map {|c| c.id }
-      @reports = Report.joins(:call_log).where("reports.call_id in (#{@call_log_ids.join(',')})").select(["reports.call_id","call_logs.project_id","message", "properties", "location", "reports.address", "call_logs.created_at"]).order('reports.id DESC')
-      @reports = @reports.where("reports.location = '#{params[:location]}'") unless params[:location].to_s.empty?
-      @reports = @reports.where("call_logs.address = '#{params[:phone_number]}'") unless params[:phone_number].to_s.empty?
-      
-      unless (params[:from].to_s.empty? and params[:to].to_s.empty?)
-        from = Time.parse(params[:from]).to_s
-        to = Time.parse(params[:to]).to_s
-        @reports = @reports.where("call_logs.created_at between '#{from}' AND '#{to}'") 
+      reports = Report.order('id DESC').limit(Reports::Settings.default_max_fetch)
+      reports = reports.where(location: params[:location]) if params[:location].present?
+      reports = reports.where(address: params[:phone_number]) if params[:phone_number].present?
+
+      if params[:from].present?
+        begin
+          from = Time.parse(params[:from])
+          reports = reports.where("created_at >= ?", from)
+        rescue
+          Rails.logger.info "Invalid time - from: #{params[:from]}"
+        end
       end
 
-      render json: @reports
+      if params[:to].present?
+        begin
+          to = Time.parse(params[:to])
+          reports = reports.where("created_at <= ?", to)
+        rescue
+          Rails.logger.info "Invalid time - to: #{params[:to]}"
+        end
+      end
+
+      render json: reports
     end
   end
 end
