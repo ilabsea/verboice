@@ -43,5 +43,13 @@ module Api2
 
       render json: reports
     end
+
+    # PUT /reports/:id
+    def update
+      report = Report.find(params[:id])
+      report.update_attributes(params[:report])
+      render json: report
+    end
+
   end
 end
