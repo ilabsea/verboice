@@ -20,7 +20,7 @@ require 'yaml'
 
 if ENV['RVM']
   require 'rvm/capistrano'
-  set :rvm_ruby_string, '1.9.3-p550'
+  set :rvm_ruby_string, '1.9.3'
   set :rvm_type, :system
 else
   default_run_options[:shell] = "/bin/bash --login"
