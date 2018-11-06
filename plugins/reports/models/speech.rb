@@ -36,7 +36,9 @@ class Speech
         result = r if result['confidence'] < r['confidence']
       end
 
-      Rails.logger.info "Result - transcript: #{result['transcript']}, confidence: #{result['confidence']}"
+      msg = "Result - transcript: #{result['transcript']}, confidence: #{result['confidence']}"
+      Rails.logger.info msg
+      speech_logger.info "[#{Time.now}] INFO #{msg}"
 
       result
     end
@@ -56,6 +58,10 @@ class Speech
 
   def do_post_request url, params
     RestClient.post(url, params.to_json, {content_type: :json, accept: :json})
+  end
+
+  def speech_logger
+    @@speech_logger ||= Logger.new(Reports::Settings.output_log_file)
   end
 
 end
