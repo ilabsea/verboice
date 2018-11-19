@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20180822012913) do
+ActiveRecord::Schema.define(:version => 20181119065018) do
 
   create_table "accounts", :force => true do |t|
     t.string   "email",                               :default => "", :null => false
@@ -282,7 +282,7 @@ ActiveRecord::Schema.define(:version => 20180822012913) do
   create_table "ext_reminder_schedules", :force => true do |t|
     t.string   "name"
     t.date     "start_date"
-    t.integer  "schedule_type",       :default => 0
+    t.integer  "schedule_type",                :default => 0
     t.integer  "recursion"
     t.string   "days"
     t.integer  "call_flow_id"
@@ -294,11 +294,12 @@ ActiveRecord::Schema.define(:version => 20180822012913) do
     t.string   "conditions"
     t.integer  "reminder_group_id"
     t.text     "schedule"
-    t.boolean  "retries",             :default => false
+    t.boolean  "retries",                      :default => false
     t.integer  "retries_schedule_id"
     t.string   "retries_in_hours"
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.boolean  "is_marked_incoming_call_flow", :default => false
   end
 
   create_table "external_service_steps", :force => true do |t|
@@ -582,11 +583,12 @@ ActiveRecord::Schema.define(:version => 20180822012913) do
 
   create_table "reports", :force => true do |t|
     t.integer  "call_id"
-    t.text     "properties"
+    t.text     "properties", :limit => 16777215
     t.string   "location"
-    t.datetime "created_at", :null => false
-    t.datetime "updated_at", :null => false
-    t.text     "message"
+    t.datetime "created_at",                     :null => false
+    t.datetime "updated_at",                     :null => false
+    t.text     "message",    :limit => 16777215
+    t.string   "address"
   end
 
   create_table "resources", :force => true do |t|

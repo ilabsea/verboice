@@ -44,11 +44,11 @@
 
     .w30
       %label{ko(css: {error: :channel_error}), :for => :channel}= t('views.ext.reminder_schedules.label.channel')
-    %ul.w30.list_item{ko(css: { :'list_item_border' => 'has_channel()==true' } ,  foreach: 'reminder_channels()' ) } 
+    %ul.w30.list_item{ko(css: { :'list_item_border' => 'has_channel()==true' } ,  foreach: 'reminder_channels()' ) }
       <!-- ko if: channel() -->
       %li
         %div.left-side{ko(text: 'channel().name()')}
-        %button.clist-remove.right-side{ko(click: '$parent.removeReminderChannelByChannel')}  
+        %button.clist-remove.right-side{ko(click: '$parent.removeReminderChannelByChannel')}
         %div.clear
       <!-- /ko -->
 
@@ -59,12 +59,17 @@
     %ul.clist.w30
       %li
         %input.ux-search.ui-autocomplete-input.ux-text{ ko(autocomplete: 'new_channel_name', value: 'new_channel_name', valueUpdate: 'afterkeydown'), type: :text, placeholder: "#{t('views.ext.reminder_schedules.label.add_channel')}", url: "/ext/projects/#{@project.id}/reminder_schedules/channels_autocomplete", minChar: 3}
-        %button.clist-add{ko(disable: :new_channel_name_duplicated, click: 'addReminderChannelByChannel')}      
+        %button.clist-add{ko(disable: :new_channel_name_duplicated, click: 'addReminderChannelByChannel')}
 
     %p
       %label{ko(css: {error: :call_flow_error}), :for => :call_flow}= t('views.ext.reminder_schedules.label.call_flow')
       %br/
       %select.w30{ko(css: {error: :call_flow_error}, options: '$root.call_flows', optionsText: "'name'", value: :call_flow, optionsCaption: "'#{t('views.ext.reminder_schedules.label.select_call_flow')}'")}
+
+    %p
+      %input{ko(checked: :is_marked_incoming_call_flow, value: true), type: 'checkbox', id: 'is_marked_incoming_call_flow'}
+      %label{for: :is_marked_incoming_call_flow}
+        =t('views.ext.reminder_schedules.label.is_marked_incoming_call_flow')
 
     %hr{style:"width:60%"}
     %br/
@@ -88,7 +93,7 @@
         .left-side{style:"margin-left:6px;"}=t('views.ext.reminder_schedules.label.after')
 
       .clear
-    
+
       %div
         %select.w20{ko(options: '$root.variables', optionsText: "'name'", value: :variable, css: {error: '$parent.condition_variable_error()'}, attr: {disabled: '$parent.is_repeat()==false'}), style: "margin-left:25px;"}
     <!-- /ko -->
