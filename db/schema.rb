@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20181119065018) do
+ActiveRecord::Schema.define(:version => 20181128033908) do
 
   create_table "accounts", :force => true do |t|
     t.string   "email",                               :default => "", :null => false
@@ -338,6 +338,13 @@ ActiveRecord::Schema.define(:version => 20181119065018) do
   add_index "external_services", ["guid"], :name => "index_external_services_on_guid"
   add_index "external_services", ["project_id"], :name => "index_external_services_on_project_id"
 
+  create_table "fail_outgoing_calls", :force => true do |t|
+    t.string   "address"
+    t.integer  "call_flow_id"
+    t.datetime "created_at",   :null => false
+    t.datetime "updated_at",   :null => false
+  end
+
   create_table "feeds", :force => true do |t|
     t.string   "name"
     t.string   "key"
@@ -542,14 +549,14 @@ ActiveRecord::Schema.define(:version => 20181119065018) do
     t.integer  "channel_id"
     t.integer  "call_log_id"
     t.string   "address"
-    t.datetime "created_at",                                :null => false
-    t.datetime "updated_at",                                :null => false
+    t.datetime "created_at",                                         :null => false
+    t.datetime "updated_at",                                         :null => false
     t.string   "callback_url"
     t.binary   "flow"
     t.string   "status_callback_url"
     t.integer  "schedule_id"
     t.datetime "not_before"
-    t.integer  "retries",             :default => 0
+    t.integer  "retries",                      :default => 0
     t.integer  "project_id"
     t.integer  "call_flow_id"
     t.string   "time_zone"
@@ -560,7 +567,8 @@ ActiveRecord::Schema.define(:version => 20181119065018) do
     t.integer  "contact_id"
     t.integer  "scheduled_call_id"
     t.datetime "answered_at"
-    t.string   "state",               :default => "queued"
+    t.string   "state",                        :default => "queued"
+    t.boolean  "is_marked_incoming_call_flow", :default => false
   end
 
   add_index "queued_calls", ["call_flow_id"], :name => "index_queued_calls_on_call_flow_id"

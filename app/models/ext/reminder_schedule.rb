@@ -152,7 +152,8 @@ module Ext
 				call_flow_id: self.call_flow_id,
 				project_id: self.project_id,
 				# time_zone: self.project.time_zone,
-				not_before: not_before
+				not_before: not_before,
+        is_marked_incoming_call_flow: self.is_marked_incoming_call_flow
 			}
 			options[:account] = self.project.account if self.project
 			options[:schedule_id] = self.retries_schedule.id if self.retries_schedule
