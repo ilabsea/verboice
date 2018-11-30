@@ -6,5 +6,7 @@ class CreateFailOutgoingCalls < ActiveRecord::Migration
 
       t.timestamps
     end
+
+    add_index :fail_outgoing_calls, :address, :unique => true
   end
 end

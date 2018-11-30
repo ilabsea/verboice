@@ -345,6 +345,8 @@ ActiveRecord::Schema.define(:version => 20181128033908) do
     t.datetime "updated_at",   :null => false
   end
 
+  add_index "fail_outgoing_calls", ["address"], :name => "index_fail_outgoing_calls_on_address", :unique => true
+
   create_table "feeds", :force => true do |t|
     t.string   "name"
     t.string   "key"
