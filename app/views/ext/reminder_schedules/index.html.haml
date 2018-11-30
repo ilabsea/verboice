@@ -69,7 +69,8 @@
     %p
       %input{ko(checked: :is_marked_incoming_call_flow, value: true), type: 'checkbox', id: 'is_marked_incoming_call_flow'}
       %label{for: :is_marked_incoming_call_flow}
-        =t('views.ext.reminder_schedules.label.is_marked_incoming_call_flow')
+        =t('views.ext.reminder_schedules.label.reserve_incoming_call')
+      = tip_info t('views.ext.reminder_schedules.label.is_marked_incoming_call_flow')
 
     %hr{style:"width:60%"}
     %br/

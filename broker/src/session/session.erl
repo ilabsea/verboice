@@ -122,6 +122,15 @@ init(SessionId) ->
   poirot:push(poirot:new_activity("Session ~p", [SessionId])),
   {ok, ready, #state{session_id = SessionId}}.
 
+delete_fail_call(Address) ->
+  lager:info("Address in delete_fail_call ", [Address]),
+  case fail_outgoing_call:find([{address, Address}]) of
+    undefined ->
+      lager:info("**no fail call for this number**");
+    FailCall ->
+      fail_outgoing_call:delete(#fail_outgoing_call{id = FailCall#fail_outgoing_call.id})
+  end.
+
 ready({answer, Pbx, ChannelId, CallerId}, State = #state{session_id = SessionId}) ->
   lager:info("Session (~p) answer", [SessionId]),
   monitor(process, Pbx:pid()),
@@ -135,6 +144,7 @@ ready({answer, Pbx, ChannelId, CallerId}, State = #state{session_id = SessionId}
         FailCall ->
           call_flow:find(FailCall#fail_outgoing_call.call_flow_id)
       end,
+      delete_fail_call(CallerId),
 
       Project = project:find(CallFlow#call_flow.project_id),
       {Contact, ContactAddress} = get_contact(CallFlow#call_flow.project_id, CallerId, 1),
@@ -283,22 +293,11 @@ dialing(timeout, State = #state{session = Session}) ->
       finalize({failed, no_answer}, State)
   end.
 
-delete_fail_call(NewSession) ->
-  Address = NewSession#session.address,
-  case fail_outgoing_call:find([{address, Address}]) of
-    undefined ->
-      lager:info("**no fail call for this number**");
-    FailCall ->
-      fail_outgoing_call:delete(#fail_outgoing_call{id = FailCall#fail_outgoing_call.id})
-  end.
-
 in_progress({completed, NewSession, ok}, State) ->
-  delete_fail_call(NewSession),
   notify_status(completed, NewSession),
   finalize(completed, State#state{session = NewSession});
 
 in_progress({completed, NewSession, {failed, Reason}}, State) ->
-  delete_fail_call(NewSession),
   notify_status(failed, NewSession, Reason),
   finalize({failed, Reason}, State#state{session = NewSession});
 
