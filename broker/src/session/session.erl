@@ -122,15 +122,6 @@ init(SessionId) ->
   poirot:push(poirot:new_activity("Session ~p", [SessionId])),
   {ok, ready, #state{session_id = SessionId}}.
 
-delete_fail_call(Address) ->
-  lager:info("Address in delete_fail_call ", [Address]),
-  case fail_outgoing_call:find([{address, Address}]) of
-    undefined ->
-      lager:info("**no fail call for this number**");
-    FailCall ->
-      fail_outgoing_call:delete(#fail_outgoing_call{id = FailCall#fail_outgoing_call.id})
-  end.
-
 ready({answer, Pbx, ChannelId, CallerId}, State = #state{session_id = SessionId}) ->
   lager:info("Session (~p) answer", [SessionId]),
   monitor(process, Pbx:pid()),
@@ -812,7 +803,16 @@ handle_upsert_fail_outgoing_call(QueuedCall) ->
       FailCall = fail_outgoing_call:find_or_create([{address, Address}]),
       FailCall:update([{call_flow_id, CallFlowId}]);
     true ->
-      lager:info("don't update fail outgoing call")
+      ok
+  end.
+
+delete_fail_call(Address) ->
+  case fail_outgoing_call:find([{address, Address}]) of
+    undefined ->
+      ok;
+    FailCall ->
+      lager:info("Delete number from fail outgoing calls:", [Address]),
+      fail_outgoing_call:delete(#fail_outgoing_call{id = FailCall#fail_outgoing_call.id})
   end.
 
 fail_info(busy, _) -> [{fail_reason, "busy"}];
