@@ -95,7 +95,6 @@ process_call(Call, State = #state{last_id = LastId, waiting_calls = WaitingCalls
         true ->
           poirot:log(info, "Call 'not after' date overdue ~p", [Call#queued_call.id]),
           Call:delete(),
-          io:format("call: ~p~n", [Call]),
           WaitingCalls
       end;
     false ->

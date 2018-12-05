@@ -106,7 +106,6 @@ handle_cast({associate_pbx_log, PbxLogId}, State = #state{call_log = CallLog, ti
 
 handle_cast({completed, Duration, Retries}, State = #state{call_log = CallLog, timeout = Timeout}) ->
   NewCallLog = CallLog:append_step_interaction("end"),
-
   NewCallLog:update([{state, "completed"}, {finished_at, calendar:universal_time()}, {duration, Duration}, {retries, Retries}]),
   {noreply, State#state{call_log = NewCallLog}, Timeout};
 
@@ -115,7 +114,9 @@ handle_cast({hangup, {_Code, <<"Unknown">>}}, State = #state{timeout = Timeout, 
   {noreply, State#state{did_hangup = true, hangup_listeners = []}, Timeout};
 
 handle_cast({hangup, {Code, Reason}}, State = #state{call_log = CallLog, timeout = Timeout, hangup_listeners = Listeners}) ->
-  NewCallLog = call_log:update(CallLog#call_log{fail_code = Code, fail_details = Reason}),
+  ReloadCallLog = call_log:find(CallLog#call_log.id),
+  % Reload call log in case there are many async between finished call(completed, failed)
+  NewCallLog = call_log:update(ReloadCallLog#call_log{started_at = CallLog#call_log.started_at, fail_code = Code, fail_details = Reason}),
   reply_hangup_listeners({fail, Code, Reason}, Listeners),
   {noreply, State#state{did_hangup = true, hangup_listeners = [], call_log = NewCallLog}, Timeout}.
 

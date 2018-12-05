@@ -748,10 +748,11 @@ answer_duration(#session{call_log = CallLog, queued_call = QueuedCall}) ->
       end
   end,
 
-  Now = calendar:universal_time(),
   case AnsweredAt of
     undefined -> 0;
-    _ -> calendar:datetime_to_gregorian_seconds(Now) - calendar:datetime_to_gregorian_seconds(AnsweredAt)
+    _ ->
+      Now = calendar:universal_time(),
+      calendar:datetime_to_gregorian_seconds(Now) - calendar:datetime_to_gregorian_seconds(AnsweredAt)
   end.
 
 should_reschedule(marked_as_failed) -> false;

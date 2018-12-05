@@ -20,8 +20,6 @@ handle_event({originateresponse, Packet}, State) ->
       case session:find(SessionId) of
         undefined -> ok;
         SessionPid ->
-          Val = proplists:get_value(reason, OriginateResponse),
-          io:format("Event handler Response value: ~p~n", [Val]),
           Reason = case proplists:get_value(reason, OriginateResponse) of
             <<"3">> -> no_answer;
             <<"5">> -> busy;
