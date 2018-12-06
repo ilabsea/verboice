@@ -811,7 +811,7 @@ delete_fail_call(Address) ->
     undefined ->
       ok;
     FailCall ->
-      lager:info("Delete number from fail outgoing calls:", [Address]),
+      lager:info("Delete number from fail outgoing calls: ~p", [Address]),
       fail_outgoing_call:delete(#fail_outgoing_call{id = FailCall#fail_outgoing_call.id})
   end.
 
