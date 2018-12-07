@@ -25,6 +25,7 @@ class CallFlow < ActiveRecord::Base
 
   has_many :call_logs, :dependent => :nullify
   has_many :channels, :dependent => :nullify
+  has_many :fail_outgoing_calls, :dependent => :destroy
   has_many :queued_calls, :dependent => :destroy
   has_many :traces, :dependent => :destroy
   has_many :call_flow_external_services, :dependent => :destroy
@@ -50,7 +51,7 @@ class CallFlow < ActiveRecord::Base
   before_save :clear_flow, :if => lambda { mode_callback_url?}
   before_save :clear_callback_url, :if => lambda { mode_flow? }
   before_save :update_flow_with_user_flow
-  
+
   enum_attr :mode, %w(callback_url ^flow)
   config_accessor :callback_url_user, :callback_url_password
   attr_encrypted :config, :key => ENCRYPTION_KEY, :marshal => true
@@ -93,7 +94,7 @@ class CallFlow < ActiveRecord::Base
   def resources
     guids = []
     resources = []
-    user_flow.each do |step| 
+    user_flow.each do |step|
       guids += guids_from_step(step)
     end if user_flow
     project.resources.each do |resource|
