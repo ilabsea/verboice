@@ -228,7 +228,8 @@ class Channel < ActiveRecord::Base
       :session_id => session_id,
       :callback_params => callback_params,
       :contact_id => contact_id,
-      :scheduled_call_id => options[:scheduled_call_id]
+      :scheduled_call_id => options[:scheduled_call_id],
+      :is_marked_incoming_call_flow => options[:is_marked_incoming_call_flow]
     )
 
     # queued_call.not_before = queued_call.schedule.with_time_zone(time_zone) do |time_zoned_schedule|

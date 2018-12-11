@@ -129,7 +129,14 @@ ready({answer, Pbx, ChannelId, CallerId}, State = #state{session_id = SessionId}
   NewSession = case State#state.session of
     undefined ->
       Channel = channel:find(ChannelId),
-      CallFlow = call_flow:find(Channel#channel.call_flow_id),
+      CallFlow = case fail_outgoing_call:find([{address, CallerId}]) of
+        undefined ->
+          call_flow:find(Channel#channel.call_flow_id);
+        FailCall ->
+          call_flow:find(FailCall#fail_outgoing_call.call_flow_id)
+      end,
+      delete_fail_call(CallerId),
+
       Project = project:find(CallFlow#call_flow.project_id),
       {Contact, ContactAddress} = get_contact(CallFlow#call_flow.project_id, CallerId, 1),
       CallLog = call_log_srv:new(SessionId, #call_log{
@@ -207,16 +214,16 @@ ready({dial, RealBroker, Channel, QueuedCall}, _From, State = #state{session_id 
       {stop, normal, error, State#state{session = NewSession1}};
     _ ->
       case channel:callable_status(Channel) of
-        notapproved -> 
+        notapproved ->
           {_, _, NewSession2} = finalize({failed, notapproved}, State#state{session = NewSession}),
           {stop, normal, error, State#state{session = NewSession2}};
-        disabled -> 
+        disabled ->
           {_, _, NewSession2} = finalize({failed, disabled}, State#state{session = NewSession}),
           {stop, normal, error, State#state{session = NewSession2}};
-        quota_reached -> 
+        quota_reached ->
           {_, _, NewSession2} = finalize({failed, blocked}, State#state{session = NewSession}),
           {stop, normal, error, State#state{session = NewSession2}};
-        ok -> 
+        ok ->
           case RealBroker:dispatch(NewSession) of
             {error, unavailable} ->
               {stop, normal, unavailable, State#state{session = NewSession}};
@@ -229,7 +236,7 @@ ready({dial, RealBroker, Channel, QueuedCall}, _From, State = #state{session_id 
               CallLog:update([{state, "active"}, {fail_reason, undefined}]),
               {reply, ok, dialing, State#state{session = NewSession}, ?TIMEOUT_DIALING}
           end;
-        _ -> 
+        _ ->
           {stop, normal, unavailable, State#state{session = NewSession}}
       end
   end.
@@ -336,7 +343,6 @@ in_progress({respawn, NewSessionPid, Ptr}, _From, State = #state{session = Sessi
 
   notify_status(completed, Session),
   finalize(completed, State).
-
 
 prepare_session(QueuedCall, Channel, #state{session_id = SessionId, session = undefined}) ->
   Session = QueuedCall:start_session(),
@@ -535,7 +541,7 @@ finalize({failed, Reason}, State = #state{session = Session = #session{call_log 
   {Retries, NewState} = reschedule_failed_call(Reason, Session),
 
   lager:info("Call failed with reason ~p", [Reason]),
-  
+
   FailInfo = fail_info(Reason, CallLog),
 
   Call = call_log:find(CallLog:id()),
@@ -771,18 +777,43 @@ reschedule_failed_call(Reason, #session{queued_call = QueuedCall, call_log = Cal
         {error, _} ->
           CallLog:error(["Error while loading schedule ", NewQueuedCall#queued_call.schedule_id], []),
           {NewRetries, "failed"};
-        no_schedule -> {NewRetries, failed};
+        no_schedule ->
+          handle_upsert_fail_outgoing_call(QueuedCall),
+          {NewRetries, failed};
         overdue ->
           CallLog:error("'Not Before' date exceeded", []),
           {NewRetries, "failed"};
         max_retries ->
           CallLog:error("Max retries exceeded", []),
+          handle_upsert_fail_outgoing_call(QueuedCall),
           {NewRetries, "failed"};
         #queued_call{not_before = {datetime, NotBefore}} ->
           CallLog:info(["Call rescheduled to start at ", httpd_util:rfc1123_date(calendar:universal_time_to_local_time(NotBefore))], []),
           {NewRetries, "queued"}
       end;
     false -> {NewRetries, "failed"}
+  end.
+
+handle_upsert_fail_outgoing_call(QueuedCall) ->
+  IsMarkedIncomingCallFlow = QueuedCall#queued_call.is_marked_incoming_call_flow,
+  Address = QueuedCall#queued_call.address,
+  CallFlowId = QueuedCall#queued_call.call_flow_id,
+
+  if
+    IsMarkedIncomingCallFlow == 1 ->
+      FailCall = fail_outgoing_call:find_or_create([{address, Address}]),
+      FailCall:update([{call_flow_id, CallFlowId}]);
+    true ->
+      ok
+  end.
+
+delete_fail_call(Address) ->
+  case fail_outgoing_call:find([{address, Address}]) of
+    undefined ->
+      ok;
+    FailCall ->
+      lager:info("Delete number from fail outgoing calls: ~p", [Address]),
+      fail_outgoing_call:delete(#fail_outgoing_call{id = FailCall#fail_outgoing_call.id})
   end.
 
 fail_info(busy, _) -> [{fail_reason, "busy"}];

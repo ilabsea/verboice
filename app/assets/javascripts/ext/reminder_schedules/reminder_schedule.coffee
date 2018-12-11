@@ -32,6 +32,7 @@ onReminderSchedules ->
       @start_date = ko.observable if !@is_repeat() then data?.start_date_display else ""
       @from_time = ko.observable data?.time_from
       @to_time = ko.observable data?.time_to
+      @is_marked_incoming_call_flow = ko.observable data?.is_marked_incoming_call_flow
 
       #conditions
       @conditions = ko.observableArray if data?.conditions then $.map(data.conditions, (x) -> new Condition(x)) else []
@@ -181,6 +182,7 @@ onReminderSchedules ->
       client_start_date: @start_date()
       time_from: @from_time()
       time_to: @to_time()
+      is_marked_incoming_call_flow: @is_marked_incoming_call_flow()
       schedule_type: @repeat()
       conditions: $.map([@condition()], (x) -> x.toJSON() if x.valid())
       retries: @has_retries()

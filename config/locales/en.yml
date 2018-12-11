@@ -874,6 +874,8 @@ en:
           select_reminder_group: "Select contact"
           call_flow: "Call flow"
           select_call_flow: "Select call flow"
+          reserve_incoming_call: "Marked as next incoming call flow"
+          is_marked_incoming_call_flow: "Mark this call flow as next incoming call when cannot reach contact(phone number)"
           schedule: "Schedule"
           select_schedule: "Select schedule"
           channel: "Channel(s)"
