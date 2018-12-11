@@ -104,9 +104,9 @@ class CallLogsController < ApplicationController
 
   def check_max_row
     if @logs.count > CallLog::CSV_MAX_ROWS
-      flash[:error] = I18n.t("controllers.call_logs_controller.csv_is_too_big",
+      flash_error = I18n.t("controllers.call_logs_controller.csv_is_too_big",
         max: CallLog::CSV_MAX_ROWS, count: @logs.count)
-      redirect_to :back
+      render :flash_message, :locals => { :flash_error => flash_error }, layout: false
     end
   end
 
@@ -119,7 +119,7 @@ class CallLogsController < ApplicationController
 
   def prepare_log_detail
     @log = CallLog.for_account(current_account).find_by_id params[:id]
-      
+
     if params[:project_id].present?
       load_project
       @log = @project.call_logs.find params[:id]
