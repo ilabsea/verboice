@@ -1,7 +1,7 @@
 source 'http://rubygems.org'
 
 gem 'rails', '3.2.22'
-gem "puma", "2.16.0"
+gem "puma", "3.11.4"
 
 gem 'haml-rails'
 gem "jquery-rails"
@@ -66,7 +66,7 @@ group :assets do
 end
 
 group :development, :test do
-  gem 'machinist', git: 'https://github.com/tbuehl/machinist.git', branch: '1.0-maintenance'
+  gem 'machinist', git: 'https://github.com/notahat/machinist.git', branch: '1.0-maintenance'
   gem 'ffaker'
   gem 'mocha', :require => false
   gem 'rspec', '~>2.9.0'
