@@ -36,6 +36,11 @@
               %li 10 seconds
               %li 2 minutes
               %li 1 hour
+      .content
+        %hr
+        %input{ type: 'checkbox', 'data-bind' => 'checked: record_call, attr: { id: ("record_call_" + id) }' }
+        %label{ title: 'When checked, the forwarded call will be recorded.', 'data-bind' => 'attr: { for: ("record_call_" + id) }'} Record call
+        %br
 
       .bottom-actions
         %button.fdelete{ 'data-bind' => 'click: remove_with_confirm' }= t('views.call_flows._transfer_step_template.action.remove_this_step')
