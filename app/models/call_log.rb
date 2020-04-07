@@ -59,6 +59,7 @@ class CallLog < ActiveRecord::Base
   has_many :recorded_audios, :dependent => :destroy
   has_many :call_log_recorded_audios, :dependent => :destroy
   has_many :pbx_logs, :foreign_key => :guid, :primary_key => :pbx_logs_guid
+  has_many :recorded_audios, :foreign_key => 'call_log_id'
 
   before_validation :set_account_to_project_account, :if => :call_flow_id?
 

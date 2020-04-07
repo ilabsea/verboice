@@ -139,6 +139,8 @@ ActiveRecord::Schema.define(:version => 20160504025619) do
     t.string   "prefix_called_number"
     t.boolean  "store_log_entries"
     t.integer  "parent_id"
+    t.string   "fail_details"
+    t.string   "fail_code"
   end
 
   add_index "call_logs", ["account_id", "id"], :name => "index_call_logs_on_account_id_and_id"

@@ -32,14 +32,38 @@
     = @log.project.try(:name)
   .item
     %b State:
-    = @log.state
-  .item
-    %b Fail Reason:
-    = @log.fail_reason
-%br/
-%p
-  = link_to 'Download CSV', download_details_project_call_log_path(@project, @log, :format => :csv), :class => "button fimport"
+    = @log.state.capitalize
+  - if @log.fail_reason
+    .item
+      %b Failure information:
+      = call_log_fail_info(@log)
 
+%br
+%h3 Attachments
+.tablewrapp.call-log-attachtments
+  %table
+    %tr
+      %td.description
+        CSV
+      %td.icon
+        %div.i48grad-dataBase
+      %td
+      %td.details
+        = link_to 'Download', download_details_call_log_path(@log, :format => :csv), :class => "button fimport"
+    -@log.recorded_audios.each do |recorded_audio|
+      %tr
+        %td.description
+          = recorded_audio.description
+        %td.icon
+          %div.i48grad-sound
+        %td
+          %audio{controls: true, controlsList: "nodownload"}
+            %source{src: result_call_log_path(@log, :key => recorded_audio.key), type: "audio/mpeg"}
+        %td.details
+          = link_to 'Download', result_call_log_path(@log, :key => recorded_audio.key), :class => "button fimport"
+
+%br
+%h3 Workflow Logs
 .tablewrapp.user-flow-log
   %table
     -@activities.each do |activity|
@@ -59,6 +83,7 @@
             = activity.fields['step_data']
 
 - if @log.pbx_logs_guid
+  %br
   %h3 Network Logs
   %table.GralTable
     %tr
@@ -69,4 +94,3 @@
         %td= pbx_log.created_at
         %td= pbx_log.details
   %br
-
