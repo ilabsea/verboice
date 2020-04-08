@@ -1,5 +1,5 @@
 -module(agi_session).
--export([start_link/1, close/1, get_variable/2, ringing/1, answer/1, hangup/1, stream_file/3, wait_for_digit/2, record_file/6, set_callerid/2, dial/2]).
+-export([start_link/1, close/1, get_variable/2, ringing/1, answer/1, hangup/1, stream_file/3, wait_for_digit/2, record_file/6, set_callerid/2, dial/2, mix_monitor/2, stop_mix_monitor/1]).
 -compile([{parse_transform, lager_transform}]).
 
 -behaviour(gen_server).
@@ -79,6 +79,14 @@ dial(Pid, ArgList) ->
     #response{result = "-1"} -> hangup;
     _ -> error
   end.
+
+mix_monitor(Pid, [AsteriskFilename]) ->
+  lager:info("Monitoring the call in ~p ", [AsteriskFilename]),
+  gen_server:call(Pid, {execute, ["EXEC MIXMONITOR \"", AsteriskFilename, "\" bp"]}).
+
+stop_mix_monitor(Pid) ->
+  lager:info("Stop monitoring "),
+  gen_server:call(Pid, {execute, ["EXEC STOPMIXMONITOR"]}).
 
 %% @private
 init(Sock) ->

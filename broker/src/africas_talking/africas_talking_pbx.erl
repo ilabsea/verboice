@@ -1,6 +1,6 @@
--module(twilio_pbx).
+-module(africas_talking_pbx).
 -compile([{parse_transform, lager_transform}]).
--export([pid/1, answer/1, reject/1, hangup/1, can_play/2, play/2, capture/6, terminate/1, sound_path_for/2, sound_quality/1, dial/6, record/5]).
+-export([pid/1, answer/1, reject/1, hangup/1, can_play/2, play/2, capture/6, terminate/1, sound_path_for/2, sound_quality/1, dial/6, record/4]).
 -behaviour(pbx).
 
 -export([start_link/1, find/1, new/1, resume/2, user_hangup/1]).
@@ -17,16 +17,16 @@
 -include("uri.hrl").
 
 start_link(CallSid) ->
-  gen_server:start_link({global, {twilio_pbx, CallSid}}, ?MODULE, {}, []).
+  gen_server:start_link({global, {africas_talking_pbx, CallSid}}, ?MODULE, {}, []).
 
 find(CallSid) ->
-  case global:whereis_name({twilio_pbx, CallSid}) of
+  case global:whereis_name({africas_talking_pbx, CallSid}) of
     undefined -> undefined;
     Pid -> {?MODULE, Pid}
   end.
 
 new(CallSid) ->
-  {ok, Pid} = twilio_pbx_sup:start_session(CallSid),
+  {ok, Pid} = africas_talking_pbx_sup:start_session(CallSid),
   {?MODULE, Pid}.
 
 pid(?PBX) -> Pid.
@@ -52,7 +52,7 @@ capture(Caption, Timeout, FinishOnKey, Min, Max, ?PBX(Pid)) ->
     X -> X
   end.
 
-record(_AsteriskFile, FileName, StopKeys, Timeout, ?PBX(Pid)) ->
+record(FileName, StopKeys, Timeout, ?PBX(Pid)) ->
   case gen_server:call(Pid, {record, FileName, StopKeys, Timeout}, timer:minutes(5)) of
     hangup -> throw(hangup);
     X -> X
@@ -87,15 +87,21 @@ user_hangup(?PBX) ->
 
 %% @private
 init({}) ->
-  CallbackUrl = verboice_config:twilio_callback_url(),
+  CallbackUrl = verboice_config:broker_httpd_base_url() ++ "africas_talking",
   {ok, #state{callback_url = CallbackUrl}, 1000}.
+
+%% @private
+numDigitsWithoutInfinity(infinity) -> 99;
+% ".inf" param is received whenever max < min and the flow that was generated using the Verboice Designer
+numDigitsWithoutInfinity(".inf") -> 99;
+numDigitsWithoutInfinity(Number) -> Number.
 
 %% @private
 handle_call({resume, _Params}, From, State = #state{session = undefined}) ->
   {noreply, State#state{awaiter = From}};
 
 handle_call({resume, Params}, From, State = #state{session = Session, waiting = {capture, Min}}) ->
-  Reply = case proplists:get_value("Digits", Params) of
+  Reply = case proplists:get_value("dtmfDigits", Params) of
     undefined -> timeout;
     Digits ->
       if
@@ -105,6 +111,7 @@ handle_call({resume, Params}, From, State = #state{session = Session, waiting = 
   end,
   gen_server:reply(Session, Reply),
   {noreply, State#state{awaiter = From, waiting = undefined}};
+
 
 handle_call({resume, Params}, From, State = #state{session = Session, waiting = {record, FileName}}) ->
   Reply = case proplists:get_value("RecordingUrl", Params) of
@@ -122,7 +129,7 @@ handle_call({resume, Params}, From, State = #state{session = Session, waiting = 
     "busy" -> busy;
     "no-answer" -> no_answer;
     "failed" -> failed;
-    "canceled" -> cancelled;
+    "canceled" -> canceled;
     Other ->
       lager:warning("Unknown DialCallStatus: ~p", [Other]),
       failed
@@ -137,11 +144,12 @@ handle_call({resume, _Params}, From, State = #state{session = Session}) ->
 handle_call({play, Resource}, _From, State) ->
   {reply, ok, append(resource_command(Resource, State), State)};
 
+handle_call({capture, Resource, Timeout, [], Min, Max}, From, State) ->
+  Command = {'GetDigits', [{timeout, Timeout}, {numDigits, numDigitsWithoutInfinity(Max)}], [resource_command(Resource, State)]},
+  flush(From, append_with_callback(Command, State#state{waiting = {capture, Min}}));
+
 handle_call({capture, Resource, Timeout, FinishOnKey, Min, Max}, From, State) ->
-  Command =
-    {'Gather', [{timeout, Timeout}, {finishOnKey, FinishOnKey}, {numDigits, Max}],
-      [resource_command(Resource, State)]
-    },
+  Command = {'GetDigits', [{timeout, Timeout}, {finishOnKey, FinishOnKey}, {numDigits, numDigitsWithoutInfinity(Max)}], [resource_command(Resource, State)]},
   flush(From, append_with_callback(Command, State#state{waiting = {capture, Min}}));
 
 handle_call({record, FileName, StopKeys, Timeout}, From, State) ->
@@ -150,7 +158,7 @@ handle_call({record, FileName, StopKeys, Timeout}, From, State) ->
   flush(From, append_with_callback(Command, State#state{waiting = {record, FileName}}));
 
 handle_call({dial, Number, _CallerId}, From, State) ->
-  Command = {'Dial', [{action, State#state.callback_url}], [binary_to_list(Number)]},
+  Command = {'Dial', [{phoneNumbers, "+" ++ binary_to_list(Number)}], []},
   flush(From, append(Command, State#state{waiting = dial}));
 
 handle_call(user_hangup, _From, State) ->
@@ -161,7 +169,8 @@ handle_call(user_hangup, _From, State) ->
   {reply, ok, State, timer:seconds(5)};
 
 handle_call(hangup, _From, State) ->
-  {noreply, HangupState} = flush(undefined, append('Hangup', State)),
+  TerminateCmd = {'Say', [{language, "en"}], ["."]},
+  {noreply, HangupState} = flush(undefined, append(TerminateCmd, State)),
   {reply, ok, HangupState};
 
 handle_call(reject, _From, State) ->
@@ -184,9 +193,10 @@ handle_info(_Info, State) ->
 
 %% @private
 terminate(_Reason, State) ->
+  TerminateCmd = {'Say', [{language, "en"}], ["."]},
   case State#state.awaiter of
     undefined -> ok;
-    _ -> flush(nobody, append('Hangup', State))
+    _ -> flush(nobody, append(TerminateCmd, State))
   end.
 
 %% @private
@@ -196,11 +206,11 @@ code_change(_OldVsn, State, _Extra) ->
 resource_command({text, Language, Text}, _) ->
   {'Say', [{language, Language}], [binary_to_list(Text)]};
 
-resource_command({file, Name}, #state{callback_url = CallbackUrl}) ->
-  {'Play', [[CallbackUrl, Name, ".mp3"]]};
+resource_command({file, Name}, _) ->
+  {'Play', [{url, [[verboice_config:broker_httpd_base_url(), Name, ".mp3"]]}], []};
 
 resource_command({url, Url}, _) ->
-  {'Play', [Url]}.
+  {'Play', [{url, [Url]}], []}.
 
 append(Command, State = #state{commands = Commands}) ->
   State#state{commands = [Command | Commands]}.
@@ -224,4 +234,3 @@ retrieve_recording_with_retries(RequestUri, FileName, Retries) ->
       end;
     Ret -> {error, Ret}
   end.
-
