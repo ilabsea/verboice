@@ -18,12 +18,9 @@
 class CallLogsController < ApplicationController
   before_filter :authenticate_account!
   
-  before_filter :paginate, only: [:index, :queued]
   before_filter :search, only: [:index, :download, :download_project_call_logs, :generate_zip]
   before_filter :check_max_row, only: [:download_project_call_logs]
   before_filter :csv_settings, only: [:download, :download_details, :download_project_call_logs]
-
-  helper_method :paginate
 
   before_filter :prepare_log_detail, only: [:show, :progress, :play_result, :download_details]
 
@@ -131,11 +128,6 @@ class CallLogsController < ApplicationController
       @output_encoding = 'UTF-8'
       @streaming = true
       @csv_options = { :col_sep => ',' }
-    end
-
-    def paginate
-      @page = params[:page] || 1
-      @per_page = params[:per_page] || 10
     end
 
     def prepare_log_detail

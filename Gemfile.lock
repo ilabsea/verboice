@@ -1,4 +1,14 @@
 GIT
+  remote: git://github.com/instedd/telemetry_rails.git
+  revision: 9c15d46229960ec9052d25cb7769298ffbdfb614
+  branch: master
+  specs:
+    instedd_telemetry (0.0.1)
+      global_phone
+      global_phone_dbgen
+      rails
+
+GIT
   remote: https://github.com/edave/enumerated_attribute.git
   revision: ec1021d11874f37d30589f91814d069884348fdf
   specs:
@@ -41,15 +51,6 @@ GIT
       rails (>= 3.2)
 
 GIT
-  remote: https://github.com/instedd/telemetry_rails.git
-  revision: 8ddfee2b94a2c1bef837b0a583538dfa72781948
-  specs:
-    instedd_telemetry (0.0.1)
-      global_phone
-      global_phone_dbgen
-      rails
-
-GIT
   remote: https://github.com/lchanmann/csv_builder.git
   revision: 93300fe8141839eb3ca58f1e5617c7d65ad5dccb
   specs:
@@ -70,6 +71,7 @@ GIT
 
 GEM
   remote: http://rubygems.org/
+  remote: https://rails-assets.org/
   specs:
     actionmailer (3.2.14)
       actionpack (= 3.2.14)
@@ -113,6 +115,9 @@ GEM
     bert (1.1.6)
     bertrpc (1.3.1)
       bert (>= 1.1.0, < 2.0.0)
+    bootstrap-kaminari-views (0.0.5)
+      kaminari (>= 0.13)
+      rails (>= 3.1)
     breadcrumbs_on_rails (2.2.0)
     builder (3.0.4)
     capistrano (2.15.5)
@@ -218,9 +223,18 @@ GEM
       railties (~> 3.0)
       thor (~> 0.14)
     json (1.8.3)
+    kaminari (0.17.0)
+      actionpack (>= 3.0.0)
+      activesupport (>= 3.0.0)
     language_list (1.0.0)
     licit (0.2.2)
-    mail (2.5.4)
+    listings (0.1.13)
+      bootstrap-kaminari-views
+      haml-rails
+      kaminari
+      rails
+      sass-rails
+    mail (2.5.5)
       mime-types (~> 1.16)
       treetop (~> 1.4.8)
     meta_programming (0.2.2)
@@ -257,6 +271,7 @@ GEM
     password_strength (1.0.1)
       activerecord
     polyglot (0.3.5)
+    power_assert (1.2.0)
     pry (0.10.3)
       coderay (~> 1.1.0)
       method_source (~> 0.8.1)
@@ -282,6 +297,7 @@ GEM
       activesupport (= 3.2.14)
       bundler (~> 1.0)
       railties (= 3.2.14)
+    rails-assets-material-components-web (3.1.0)
     rails_config (0.3.3)
       activesupport (>= 3.0)
     railties (3.2.14)
@@ -330,6 +346,8 @@ GEM
       rack (~> 1.0)
       tilt (~> 1.1, != 1.3.0)
     syntax (1.0.0)
+    test-unit (3.3.5)
+      power_assert
     thor (0.19.1)
     tilt (1.4.1)
     timecop (0.3.5)
@@ -390,6 +408,7 @@ DEPENDENCIES
   jquery-rails
   language_list
   licit
+  listings (= 0.1.13)
   machinist!
   mocha
   mysql2
@@ -403,6 +422,7 @@ DEPENDENCIES
   pry-debugger (~> 0.2.3)
   rack-oauth2!
   rails (= 3.2.14)
+  rails-assets-material-components-web!
   rails_config
   rb-readline
   recaptcha
@@ -416,6 +436,7 @@ DEPENDENCIES
   sass-rails (~> 3.2.5)
   shoulda-matchers
   syntax
+  test-unit
   timecop
   uglifier (>= 1.0.3)
   whenever

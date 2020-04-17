@@ -13,7 +13,6 @@ gem "will_paginate", "~> 3.0"
 gem "daemons"
 
 gem "instedd-rails"
-gem 'instedd_telemetry', git: 'https://github.com/instedd/telemetry_rails.git'
 
 gem 'decent_exposure'
 gem 'attr_encrypted'
@@ -46,6 +45,12 @@ gem 'awesome_print'
 gem "active_model_serializers"
 gem "recaptcha", :require => "recaptcha/rails"
 gem "password_strength"
+#gem 'recurring_select', git: "https://github.com/instedd/recurring_select", branch: 'instedd'
+gem 'listings', "0.1.13"
+gem 'instedd_telemetry', github: "instedd/telemetry_rails", branch: 'master'
+gem 'rails-assets-material-components-web', source: 'https://rails-assets.org'
+#gem 'intercom-rails'
+gem 'test-unit'
 
 group :assets do
   gem 'sass-rails',   '~> 3.2.5'
