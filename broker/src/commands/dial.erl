@@ -4,7 +4,8 @@
 -include("db.hrl").
 
 run(Args, Session = #session{pbx = Pbx, channel = CurrentChannel, js_context = JS}) ->
-  Number = proplists:get_value(number, Args),
+  RawNumber = proplists:get_value(number, Args),
+  Number = util:interpolate_js(util:as_binary(RawNumber), JS),
   CallerId = proplists:get_value(caller_id, Args),
 
   Channel = case proplists:get_value(channel_name, Args) of
@@ -32,7 +33,7 @@ run(Args, Session = #session{pbx = Pbx, channel = CurrentChannel, js_context = J
   DialStart = erlang:now(),
 
   try
-    Result = Pbx:dial(Channel, list_to_binary(Number), CallerId),
+    Result = Pbx:dial(Channel, Number, CallerId),
     ResultJS = erjs_context:set(dial_status, Result, JS),
     NewJS = maybe_mark_session_successful(DialStart, SuccessAfterSeconds, ResultJS),
 

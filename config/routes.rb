@@ -200,10 +200,10 @@ Verboice::Application.routes.draw do
         end
       end
 
-      resources :reminder_groups, only: [:index, :create, :update, :destroy]
-
-      post 'reminder_groups/:id/contacts' => 'reminder_groups#contacts', as: 'register_contact_to_reminder_group'
-      
+      resources :reminder_groups, only: [:index, :create, :update, :destroy] do
+        put :register, on: :member
+        put :deregister, on: :member
+      end
     end
 
     resources :logs, only: [] do

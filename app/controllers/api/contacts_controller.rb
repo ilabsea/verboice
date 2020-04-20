@@ -84,7 +84,7 @@ class Api::ContactsController < ApiController
     index
   end
   
-  # POST /projects/:project_id/contact
+  # POST /projects/:project_id/contacts
   def create
     if params[:addresses].nil?
       render json: "Addresses is missing".to_json, status: :bad_request

@@ -16,7 +16,7 @@
 # along with Verboice.  If not, see <http://www.gnu.org/licenses/>.
 module Api
   class ReminderGroupsController < ApiController
-    before_filter :validate_record, only: [:update, :destroy, :contacts]
+    before_filter :validate_record, only: [:update, :destroy, :register, :deregister]
     before_filter :validate_project, only: [:index, :create]
 
     # GET /api/projects/:project_id/reminder_groups
@@ -41,7 +41,7 @@ module Api
       end
     end
 
-    # PUT /api/reminder_groups/:id
+    # PUT /api/projects/:project_id/reminder_groups/:id
     def update
       if params[:reminder_group].present? && params[:reminder_group][:addresses].present? && !params[:reminder_group][:addresses].kind_of?(Array)
         bad_request_invalid_array_parameter 'updating'
@@ -56,7 +56,7 @@ module Api
       end
     end
 
-    # DELETE /api/reminder_groups/:id
+    # DELETE /api/projects/:project_id/reminder_groups/:id
     def destroy
       if @reminder_group.destroy
         render json: @reminder_group
@@ -65,13 +65,26 @@ module Api
       end
     end
 
-    # POST /api/reminder_groups/:id/contacts Create contact
-    def contacts
-      if(params[:address].blank?)
+    # PUT /api/projects/:project_id/reminder_groups/:id/register
+    def register
+      if(params[:address].blank?) or !params[:address].number?
         render json: 'Parameter address is missing', status: :bad_request
       else
-        @reminder_group.register_address(params[:address])
-        render json: @reminder_group, status: :created
+        @reminder_group.register_address params[:address]
+        render json: @reminder_group
+      end
+    end
+
+    # PUT /api/projects/:project_id/reminder_groups/:id/deregister
+    def deregister
+      if(params[:address].blank?) or !params[:address].number?
+        render json: 'Parameter address is missing', status: :bad_request
+      else
+        if @reminder_group.deregister_address params[:address]
+          render json: @reminder_group
+        else
+          render json: "There is no address: #{params[:address]}", status: :no_content
+        end
       end
     end
 
