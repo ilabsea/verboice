@@ -44,7 +44,7 @@ describe Ext::ReminderGroup do
     addresses = [str1, str2]
 
     yaml_result = YAML.dump(addresses)
-    
+
     reminder_group = Ext::ReminderGroup.new @valid.merge(addresses: addresses)
     reminder_group.save
     resultset = ActiveRecord::Base.connection.execute("select addresses from ext_reminder_groups where id = #{reminder_group.id}")
@@ -125,6 +125,33 @@ describe Ext::ReminderGroup do
       array.count.should eq(2)
       array.first.should eq("855884042998")
       array.last.should eq("85592327379")
+    end
+  end
+
+  describe '#import_contact_addresses' do
+    let(:reminder_group) { Ext::ReminderGroup.create @valid }
+    let(:file) { File.open(File.join(Rails.root, '/spec/fixtures/reminder_group_addresses.csv')) }
+
+    context 'all new numbers' do
+      before {
+        reminder_group.addresses.push('85512345671')
+        reminder_group.import_contact_addresses(file)
+      }
+
+      it 'creates all new addresses' do
+        reminder_group.addresses.count.should eq(3)
+      end
+    end
+
+    context 'some new numbers' do
+      before {
+        reminder_group.addresses.push('85512345678')
+        reminder_group.import_contact_addresses(file)
+      }
+
+      it 'creates only new numbers' do
+        reminder_group.addresses.count.should eq(2)
+      end
     end
   end
 

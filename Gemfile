@@ -54,7 +54,7 @@ group :assets do
 end
 
 group :development, :test do
-  gem 'machinist', git: 'https://github.com/tbuehl/machinist.git', branch: '1.0-maintenance'
+  gem 'machinist', git: 'https://github.com/notahat/machinist'
   gem 'ffaker'
   gem 'mocha', :require => false
   gem 'rspec', '~>2.9.0'

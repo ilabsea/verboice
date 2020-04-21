@@ -62,11 +62,10 @@ GIT
       rack (>= 1.1)
 
 GIT
-  remote: https://github.com/tbuehl/machinist.git
-  revision: 2b6ea4c2e876d4e9b3b22cc975057268788c7ff5
-  branch: 1.0-maintenance
+  remote: https://github.com/notahat/machinist
+  revision: dba78a430cd67646a270393c4adfa19a5516f569
   specs:
-    machinist (1.0.6)
+    machinist (2.0)
 
 GEM
   remote: http://rubygems.org/
@@ -187,7 +186,6 @@ GEM
       thor (>= 0.13.6)
     formatted_rails_logger (0.3.0)
       rails (~> 3.2.0)
-    github-markdown (0.6.5)
     global_phone (1.0.1)
     global_phone_dbgen (1.0.0)
       nokogiri (~> 1.5)

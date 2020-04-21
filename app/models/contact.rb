@@ -48,6 +48,50 @@ class Contact < ActiveRecord::Base
       end
     end
 
+    def register_from_file(file, project)
+      CSV.parse(file.read, headers: true) do |row|
+        address = row['phone_number'].to_s.strip.to_number
+        next unless address.is_contact?
+
+        contact = get address, project
+        if contact.nil?
+          contact = project.contacts.build
+          contact.addresses.build(address: address)
+        else
+          contact = self.find(contact.id)
+        end
+
+        contact.persisted_variables_attributes = build_persisted_variables_attrs(project, contact, row)
+        contact.save
+      end
+    end
+
+    def build_persisted_variables_attrs(project, contact, row)
+      attrs = []
+      implicit_keys = ImplicitVariable.subclasses.collect(&:key)
+
+      row.headers.each do |key|
+        value = row[key]
+        project_var = project.project_variables.select { |v| v.name == key }.first
+
+        next if value.blank? || (implicit_keys.exclude?(key) && project_var.nil?)
+
+        _attr = { value: value }
+
+        if implicit_keys.include? key
+          _attr[:implicit_key] = key
+          _attr[:id] = contact.persisted_variables.select{ |v| v.implicit_key == key }.first.try(:id)
+        else
+          _attr[:project_variable_id] = project_var.id
+          _attr[:id] = contact.persisted_variables.select{ |v| v.project_variable_id == project_var.id }.first.try(:id)
+        end
+
+        attrs.push(_attr)
+      end
+
+      return attrs
+    end
+
     def remove_duplicate_address_and_keep_last_update project, project_variable
       removing_contact_ids = []
       removing_contact_address_ids = []
