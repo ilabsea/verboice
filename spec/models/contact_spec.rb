@@ -296,7 +296,7 @@ describe Contact do
   end
 
   describe '.register_from_file' do
-    let(:file) { File.open(File.join(Rails.root, '/spec/fixtures/reminder_group_addresses.csv')) }
+    let(:file) { CSV.read(File.join(Rails.root, '/spec/fixtures/reminder_group_addresses.csv'), headers: true) }
 
     context 'creates all new numbers with persisted_variables' do
       let(:persisted_variables) { project.contacts.first.persisted_variables }
