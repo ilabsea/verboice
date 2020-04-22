@@ -851,6 +851,7 @@ en:
           confirm_delete: "Are you sure you want to delete this contact group?"
           address_exists: "Address already exists"
           name_exists: "Name is already exists"
+          copied: "Copied"
         action:
           edit: "Edit"
           save: "Save"
@@ -858,6 +859,7 @@ en:
           new: "New contact group"
           import_csv: "Import contact list"
           upload: "Upload"
+          copy: "Copy"
 
       reminder_schedules:
         title: "Scheduled calls"

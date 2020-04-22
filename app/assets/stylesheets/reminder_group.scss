@@ -1,0 +1,48 @@
+#reminder_groups-main {
+  .address-wrapper {
+    position: relative;
+    max-height: 50px;
+    overflow: hidden;
+    flex: 1;
+  }
+
+  .fv-body-blur {
+    display: none;
+    justify-content: flex-end;
+    align-items: flex-end;
+    height: 32px;
+    width: 100%;
+    background: linear-gradient(0deg, #d0d0d0, hsla(0,0%,100%,0));
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+  }
+
+  .btn-more {
+    display: block;
+    width: 140px;
+    padding: 0 3px 3px;
+    background: #d0d0d0;
+    box-sizing: border-box;
+    cursor: pointer;
+  }
+
+  .overflowContent {
+    .fv-body-blur {
+      display: flex;
+    }
+  }
+}
+
+.alert {
+  position: fixed;
+  padding: 10px;
+  border-radius: 8px;
+  right: 10;
+  top: 10;
+  background: #111;
+  color: #fff;
+  z-index: 50;
+  display: none;
+}
