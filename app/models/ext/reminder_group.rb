@@ -4,7 +4,7 @@ module Ext
     has_many :reminder_schedules, :dependent => :nullify
 
     assign_has_many_to "Project" ,:ext_reminder_groups, :class_name => "Ext::ReminderGroup", :dependent => :destroy
-    assign_accepts_nested_attributes_for_to "Project", :ext_reminder_groups, 
+    assign_accepts_nested_attributes_for_to "Project", :ext_reminder_groups,
       :reject_if => lambda { |attributes| attributes[:name].blank?},
       :allow_destroy => true
 
@@ -13,11 +13,12 @@ module Ext
     serialize :addresses, Array
     validates :name, :project, :presence => true
     validates :name, :uniqueness => { :scope => :project_id }
-    
+
     attr_accessible :name, :addresses, :project_id
+    attr_accessor :skip_callback
 
     before_save :encoding_addresses
-    after_save :register_contacts
+    after_save :register_contacts, if: -> { !skip_callback }
 
     class << self
       def deserialized_to_array string
@@ -49,7 +50,7 @@ module Ext
       if self.addresses.kind_of?(String)
         self.addresses = Ext::ReminderGroup.deserialized_to_array self.addersses
       end
-      
+
       if self.addresses.include?(address)
         true
       else
@@ -65,5 +66,15 @@ module Ext
       end
     end
 
+    def import_contact_addresses(file)
+      rows = CSV.parse(file.read, headers: true)
+      rows.each do |row|
+        phone_number = row['phone_number'].to_s.strip.to_number
+        next unless phone_number.is_contact?
+        addresses.push(phone_number) unless addresses.include? phone_number
+      end
+
+      Contact.register_from_file(rows, project) if save!(skip_callback: true)
+    end
   end
 end
