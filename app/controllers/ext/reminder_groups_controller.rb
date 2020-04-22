@@ -27,12 +27,7 @@ module Ext
           @reminder = @project.ext_reminder_groups.find(params[:id])
           case extension
           when '.csv'
-            CSV.parse params[:file_name].read do |row|
-              next if !row[0].strip.is_contact?
-
-              @reminder.addresses.push(row[0].strip.to_number) unless @reminder.addresses.include?(row[0].strip.to_number)
-            end
-            @reminder.save!
+            @reminder.import_contact_addresses(params[:file_name])
           else
             raise I18n.t("controllers.ext.reminder_groups_controller.invalid_extension")
           end

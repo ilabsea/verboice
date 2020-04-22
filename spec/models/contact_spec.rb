@@ -152,7 +152,7 @@ describe Contact do
 
       it { @contact1.last_updated_value_than?(@contact2, project_var1).should eq(false) }
     end
-    
+
   end
 
   describe ".remove_duplicate_address_and_keep_last_update" do
@@ -244,7 +244,7 @@ describe Contact do
           Contact.remove_duplicate_address_and_keep_last_update(project, project_var1)
 
           Contact.count.should eq(1)
-          Contact.last.id.should eq(@contact11.id)  
+          Contact.last.id.should eq(@contact11.id)
           @contact11.reload.addresses.count.should eq(2)
         end
       end
@@ -290,6 +290,83 @@ describe Contact do
           @contact1.addresses.count.should eq(1)
           Contact.last.id.should eq(@contact2.id)
           @contact2.addresses.count.should eq(2)
+        end
+      end
+    end
+  end
+
+  describe '.register_from_file' do
+    let(:file) { File.open(File.join(Rails.root, '/spec/fixtures/reminder_group_addresses.csv')) }
+
+    context 'creates all new numbers with persisted_variables' do
+      let(:persisted_variables) { project.contacts.first.persisted_variables }
+      let(:persisted_variable1) { persisted_variables.first }
+      let(:persisted_variable2) { persisted_variables.last }
+
+      before {
+        project_var1
+        Contact.register_from_file(file, project)
+      }
+
+      it 'creates all contacts' do
+        project.contacts.count.should eq(2)
+      end
+
+      it 'create new contacts with persisted_variables' do
+        persisted_variables.size.should eq(2)
+      end
+
+      it 'persisted_variable1 implicit_key is language' do
+        persisted_variable1.implicit_key.should eq('language')
+      end
+
+      it 'persisted_variable1 value is km' do
+        persisted_variable1.value.should eq('km')
+      end
+
+      it 'persisted_variable2 is project_variable' do
+        persisted_variable2.project_variable_id.should_not be_nil
+      end
+
+      it 'persisted_variable2 value is 1' do
+        persisted_variable2.value.should eq('1')
+      end
+    end
+
+    context 'contact already exist' do
+      let(:contact) { project.contacts.first }
+
+      before {
+        Contact.register ['85512345678'], project
+      }
+
+      it 'do not have persisted_variables' do
+        contact.persisted_variables.count.should eq(0)
+      end
+
+      context 'duplicated address and new persisted_variables' do
+        before {
+          Contact.register_from_file(file, project)
+        }
+
+        it 'update persisted_variables to the contact' do
+          contact.persisted_variables.count.should eq(1)
+        end
+      end
+
+      context 'duplicated address and duplicated persisted_variables' do
+        before {
+          contact.persisted_variables.create(value: 'spain', implicit_key: 'language')
+          Contact.register_from_file(file, project)
+          contact.reload
+        }
+
+        it 'update persisted_variables to the contact' do
+          contact.persisted_variables.count.should eq(1)
+        end
+
+        it 'update persisted_variable value' do
+          contact.persisted_variables.first.value.should eq('km')
         end
       end
     end
