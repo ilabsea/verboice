@@ -21,17 +21,22 @@
 
   .btn-more {
     display: block;
-    width: 140px;
-    padding: 0 3px 3px;
+    width: 74px;
     background: #d0d0d0;
     box-sizing: border-box;
     cursor: pointer;
+    margin-right: 64px;
+    text-align: center;
   }
 
   .overflowContent {
     .fv-body-blur {
       display: flex;
     }
+  }
+
+  .total {
+    margin: 6px 0;
   }
 }
 

@@ -103,6 +103,9 @@ onReminderGroups ->
     remove_contact: (contact) =>
       @contacts.remove(contact)
 
+    remove_all_contact: =>
+      @contacts.removeAll()
+
     toJSON: =>
       name: @name()
       addresses: $.map(@contacts(), (x) -> x.address() if x.valid())
