@@ -6,8 +6,8 @@ onReminderGroups ->
 
       @is_ready = ko.observable false
       @current_reminder_group = ko.observable()
-      @saving_reminder_group = ko.observable(false) 
-    
+      @saving_reminder_group = ko.observable(false)
+
     control_key_contact: =>
       allowKeyInput($("#autocomplete-address"), /[0-9\+]/)
 
@@ -56,3 +56,16 @@ onReminderGroups ->
         $.post "/api/projects/#{@project_id()}/reminder_groups/#{reminder_group.id()}.json", {_method: 'delete'}, =>
           @reminder_groups.remove(reminder_group)
           $.status.showNotice(delete_success, 2000)
+
+    reset_reminder_group: (reminder_group) =>
+      if confirm(confirm_reset)
+        json = { reminder_group: { addresses: [] } }
+
+        $.ajax
+          url: "/api/projects/#{@project_id()}/reminder_groups/#{reminder_group.id()}.json"
+          type: 'PUT'
+          data: JSON.stringify(json)
+          contentType: 'application/json'
+          success: (data)=>
+            $.status.showNotice(reset_success, 2000)
+            reminder_group.remove_all_contact()

@@ -852,6 +852,8 @@ en:
           address_exists: "Address already exists"
           name_exists: "Name is already exists"
           copied: "Copied"
+          successfully_reset: 'Reminder group is successfully reset'
+          confirm_reset: 'Are you sure you want to reset this reminder group?'
         action:
           edit: "Edit"
           save: "Save"
@@ -859,7 +861,7 @@ en:
           new: "New reminder group"
           import_csv: "Import reminder contact list"
           upload: "Upload"
-          copy: "Copy"
+          reset: "Reset"
 
       reminder_schedules:
         title: "Reminder schedule"
