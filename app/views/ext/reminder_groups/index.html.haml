@@ -17,14 +17,22 @@
 
 %h2= t('views.ext.reminder_groups.title')
 
+.alert= t('views.ext.reminder_groups.label.copied')
+
 #reminder_groups-main.hidden-until-loaded
   <!-- ko foreach: reminder_groups -->
   <!-- ko if: $data != $root.current_reminder_group() -->
   .box.collapsed.collapsible_crud_box.grey.w60
-    .toptitle
-      %span.title{ko(text: :name)}
-      %span :
-      %span.title{ko(text: 'contacts_display()')}
+    .toptitle{ ko(css: {overflowContent: :showMore}) }
+      .address-wrapper
+        %span.title{ko(text: :name)}
+        %span :
+        %span.title{ko(text: 'contacts_display()')}
+
+        .fv-body-blur
+          %a.btn-more{ko(click: 'copyToClipboard')}= "... #{t('views.ext.reminder_groups.action.copy')}"
+
+
     - if project_admin?
       .rightbuttons
         %button.fdelete{ko(click: '$root.delete_reminder_group')}
@@ -59,7 +67,7 @@
 
       %br/
       = ko_text_field_tag :name, css: {error: :name_error}, html: {class: 'w30'}
-    
+
     %p
       .w30= "#{t('views.ext.reminder_groups.label.contacts')}:"
       <!-- ko foreach: contacts -->
