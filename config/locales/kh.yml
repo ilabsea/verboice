@@ -853,6 +853,7 @@ kh:
           copy: "ថតចម្លង"
           successfully_reset: 'ក្រុមរំលឹកត្រូវបានកំណត់ឡើងវិញដោយជោគជ័យ'
           confirm_reset: 'តើ​អ្នក​ប្រាកដ​ឬ?'
+          total_contacts: "លេខទំនាក់ទំនងសរុប"
         action:
           edit: "កែសម្រួល"
           save: "រក្សាទុក"
