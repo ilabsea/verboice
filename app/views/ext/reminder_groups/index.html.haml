@@ -38,9 +38,8 @@
               = image_tag 'icons/copy.svg', style: 'width: 14px'
               %span.tooltiptext.tooltip-right= t('views.ext.reminder_groups.label.copy')
 
-
       .total
-        %span.title Total numbers:
+        %span.title= "#{t('views.ext.reminder_groups.label.total_contacts')} : "
         %span.title{ko(text: 'contacts().length')}
 
     - if project_admin?
