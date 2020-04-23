@@ -10,7 +10,7 @@
       <%= section t('views.layouts.action.projects'), projects_path, :projects, [:projects, :call_flows, :schedules, :resources, :external_services, :contacts, :reminder_groups, :reminder_schedules, :pregnancy_reminders, :call_logs] %>
     <% end %>
 
-    <% if current_account.admin? %>
+    <% if current_account.admin? || Rails.configuration.verboice_configuration[:enable_channel]%>
       <%= section t('views.layouts.action.channels'), channels_path, :channels, [:channels, :nuntium_channels] %>
     <% end %>
 
