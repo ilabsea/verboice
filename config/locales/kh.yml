@@ -850,6 +850,7 @@ kh:
           address_exists: "លេខ​ទូរស័ព្ទធ្លាប់មានរួចហើយ"
           name_exists: "ឈ្មោះ ធ្លាប់មានរួចហើយ"
           copied: "ថតចម្លងរួច"
+          copy: "ថតចម្លង"
           successfully_reset: 'ក្រុមរំលឹកត្រូវបានកំណត់ឡើងវិញដោយជោគជ័យ'
           confirm_reset: 'តើ​អ្នក​ប្រាកដ​ឬ?'
         action:

@@ -852,6 +852,7 @@ en:
           address_exists: "Address already exists"
           name_exists: "Name is already exists"
           copied: "Copied"
+          copy: "Copy"
           successfully_reset: 'Reminder group is successfully reset'
           confirm_reset: 'Are you sure you want to reset this reminder group?'
         action:
