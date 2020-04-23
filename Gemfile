@@ -54,7 +54,7 @@ group :assets do
 end
 
 group :development, :test do
-  gem 'machinist', git: 'https://github.com/tbuehl/machinist.git', branch: '1.0-maintenance'
+  gem 'machinist', git: 'https://github.com/instedd/machinist.git', branch: '1.0-maintenance'
   gem 'ffaker'
   gem 'mocha', :require => false
   gem 'rspec', '~>2.9.0'
@@ -65,6 +65,7 @@ group :development, :test do
   gem 'pry-debugger', '~> 0.2.3'
   gem 'syntax'
   gem 'timecop'
+  gem 'rb-readline'
 
   gem 'capybara'
   gem 'database_cleaner'
