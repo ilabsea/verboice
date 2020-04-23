@@ -49,8 +49,7 @@
         %div
           %button.farrow.collapse_trigger{ko(click: '$root.edit_reminder_group')}= t('views.ext.reminder_groups.action.edit')
 
-          %div
-            %button.fuTurn.collapse_trigger{ko(click: '$root.reset_reminder_group')}= t('views.ext.reminder_groups.action.reset')
+          %button.fuTurn.collapse_trigger{ko(click: '$root.reset_reminder_group')}= t('views.ext.reminder_groups.action.reset')
 
           .ux-collapsible.collapsed.w40.file_upload{"data-on-expanded" => "grey"}
             %span

@@ -116,6 +116,6 @@ class ChannelsController < ApplicationController
   end
 
   def ensure_account_admin
-    head :forbidden unless current_account.admin?
+    head :forbidden unless (current_account.admin? || Rails.configuration.verboice_configuration[:enable_channel])
   end
 end
