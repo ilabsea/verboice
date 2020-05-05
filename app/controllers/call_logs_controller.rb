@@ -22,9 +22,10 @@ class CallLogsController < ApplicationController
   before_filter :search, only: [:index, :download, :download_project_call_logs, :generate_zip]
   before_filter :check_max_row, only: [:download_project_call_logs]
   before_filter :csv_settings, only: [:download, :download_details, :download_project_call_logs]
-  before_filter :prepare_log_detail, only: [:show, :progress, :play_result, :download_details]
 
   helper_method :paginate
+
+  before_filter :prepare_log_detail, only: [:show, :progress, :play_result, :download_details]
 
   def index
     @logs = @logs.paginate :page => @page, :per_page => @per_page
