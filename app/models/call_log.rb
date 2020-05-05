@@ -61,6 +61,10 @@ class CallLog < ActiveRecord::Base
   has_many :pbx_logs, :foreign_key => :guid, :primary_key => :pbx_logs_guid
   has_many :recorded_audios, :foreign_key => 'call_log_id'
 
+  scope :for_account, ->(account) {
+    joins(:channel).where('call_logs.project_id IN (?) OR call_logs.account_id = ? OR channels.account_id = ?', account.readable_project_ids, account.id, account.id)
+  }
+
   before_validation :set_account_to_project_account, :if => :call_flow_id?
 
   validates_presence_of :account
@@ -170,6 +174,14 @@ class CallLog < ActiveRecord::Base
 
   def last_entry
     self.entries.order('created_at DESC, id DESC').first
+  end
+
+  def self.poirot_activities(id_or_ids)
+    entries = CallLogEntry.where(call_id: id_or_ids)
+    activities = entries.select { |x| x.details.has_key?(:activity) }.map do |x|
+      activity = JSON.load(x.details[:activity])
+      Hercule::Activity.new({'_source' => activity["body"]})
+    end
   end
 
   def step_activities

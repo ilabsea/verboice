@@ -22,6 +22,7 @@ class CallLogsController < ApplicationController
   before_filter :search, only: [:index, :download, :download_project_call_logs, :generate_zip]
   before_filter :check_max_row, only: [:download_project_call_logs]
   before_filter :csv_settings, only: [:download, :download_details, :download_project_call_logs]
+  before_filter :prepare_log_detail, only: [:show, :progress, :play_result, :download_details]
 
   helper_method :paginate
 
@@ -63,9 +64,14 @@ class CallLogsController < ApplicationController
   end
 
   def play_result
-    load_project
-    @log = @project.call_logs.find params[:id]
-    send_file RecordingManager.for(@log).result_path_for(params[:key]), :type => "audio/x-wav"
+    if current_account.projects.find_by_id(@log.project_id) || !current_account.shared_projects.where(:model_id => @log.project_id, :role => 'admin').empty?
+      # Checks if the current_user is the owner of @log.project
+      # ideally it should use ApplicationController#check_project_admin
+      # but it can be done without some further refactors
+      send_file RecordingManager.for(@log).result_path_for(params[:key]), :x_sendfile => true
+    else
+      head :unauthorized
+    end
   end
 
   def download_project_call_logs
@@ -129,5 +135,10 @@ class CallLogsController < ApplicationController
     def paginate
       @page = params[:page] || 1
       @per_page = params[:per_page] || 10
+    end
+
+    def prepare_log_detail
+      @log = CallLog.for_account(current_account).find params[:id]
+      @activities = CallLog.poirot_activities(@log.id).sort_by(&:start)
     end
 end

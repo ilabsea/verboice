@@ -84,4 +84,23 @@ describe Api::CallsController do
     result['call_id'].should == call_log.id
     result['state'].should == call_log.state.to_s
   end
+
+  it "call state for an unknown call" do
+    get :state, :id => 12345678
+    assert_response :not_found
+  end
+
+  it "cancells a call" do
+    project = Project.make account: @controller.current_account
+    call_log = CallLog.make :call_flow => CallFlow.make(project: project)
+    queued_call = QueuedCall.make :call_log => call_log
+    post :cancel, :id => call_log.id
+    result = JSON.parse(@response.body)
+    expect(result['call_id']).to eq(call_log.id)
+    expect(result['state']).to eq('canceled')
+    call_log = CallLog.find_by_id(call_log.id)
+    expect(call_log.state).to eq(:canceled)
+    expect(QueuedCall.find_by_id(queued_call.id)).to be_nil
+  end
+  end
 end
