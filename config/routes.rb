@@ -19,8 +19,6 @@ require 'api_constraints'
 
 Verboice::Application.routes.draw do
 
-  mount InsteddTelemetry::Engine => '/instedd_telemetry'
-
   match '/' => 'home#index',  :as => 'home'
 
   devise_for :accounts, controllers: { registrations: 'registrations', sessions: 'sessions' }
@@ -310,4 +308,7 @@ Verboice::Application.routes.draw do
   root :to => 'home#index'
 
   get 'terms_and_conditions', :to => redirect('/')
+
+  mount Listings::Engine => "/listings"
+  mount InsteddTelemetry::Engine => "/instedd_telemetry"
 end
