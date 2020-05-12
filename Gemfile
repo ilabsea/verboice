@@ -49,7 +49,6 @@ gem 'fabrication'
 gem 'wit', github: "sokmesakhiev/wit-ruby", branch: 'master'
 
 # gem 'wit'
-gem 'rest-client'
 gem 'google-api-client', '0.7.0'
 # gem 'google-cloud-speech', '0.20.0'
 
