@@ -37,7 +37,13 @@ dial_address(#channel{type = <<"Channels::Custom">>, config = Config}, Address) 
 dial_address(Channel = #channel{id = Id}, Address) ->
   case channel:domain(Channel) of
     []     -> ["PJSIP/", Address, "@verboice_", integer_to_list(Id)];
-    Domain -> ["PJSIP/verboice_", integer_to_list(Id), "/sip:", Address, "@", Domain]
+    Domain -> 
+      SipPort = case channel:port(Channel) of
+        undefined -> [];
+        [] -> [];
+        Port -> [":", Port]
+      end,
+      ["PJSIP/verboice_", integer_to_list(Id), "/sip:", Address, "@", Domain, SipPort]
   end.
 
 dispatch(#session{session_id = SessionId, channel = Channel, address = Address}) ->
