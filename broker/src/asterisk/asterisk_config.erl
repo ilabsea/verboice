@@ -40,7 +40,11 @@ generate_config([Channel | Rest], ConfigFile, ResolvCache, ChannelIndex, Registr
   Number = channel:number(Channel),
   DtmfMode = channel:dtmf_mode(Channel),
   % CodecType = channel:codec_type(Channel),
-  % SipPort = channel:port(Channel),
+  SipPort = case channel:port(Channel) of
+    undefined -> [];
+    [] -> [];
+    Port -> [":", Port]
+  end,
   % Protocol = channel:protocol(Channel),
   % Qualify = channel:qualify(Channel),
 
@@ -100,8 +104,8 @@ generate_config([Channel | Rest], ConfigFile, ResolvCache, ChannelIndex, Registr
             file:write(ConfigFile, ["outbound_auth=", Section, "\n"]);
             true -> ok
           end,
-          file:write(ConfigFile, ["server_uri=sip:", Domain, "\n"]),
-          file:write(ConfigFile, ["client_uri=sip:", UserOrNumber, "@", Domain, "\n"]),
+          file:write(ConfigFile, ["server_uri=sip:", Domain, SipPort, "\n"]),
+          file:write(ConfigFile, ["client_uri=sip:", UserOrNumber, "@", Domain, SipPort, "\n"]),
           %% When Asterisk Version > 13.1...
           % file:write(ConfigFile, "line=yes\n"),
           % file:write(ConfigFile, ["endpoint=", Section, "\n"]),
@@ -133,7 +137,7 @@ generate_config([Channel | Rest], ConfigFile, ResolvCache, ChannelIndex, Registr
       true -> ok
     end,
     file:write(ConfigFile, ["from_user=", UserOrNumber, "\n"]),
-    file:write(ConfigFile, ["from_domain=", Domain, "\n"]),
+    file:write(ConfigFile, ["from_domain=", Domain, SipPort, "\n"]),
     file:write(ConfigFile, "disallow=all\n"),
     file:write(ConfigFile, "allow=alaw\n"),
     file:write(ConfigFile, "allow=ulaw\n"),
@@ -159,7 +163,7 @@ generate_config([Channel | Rest], ConfigFile, ResolvCache, ChannelIndex, Registr
     file:write(ConfigFile, ["[", Section, "]\n"]),
     file:write(ConfigFile, "type=aor\n"),
     file:write(ConfigFile, "qualify_frequency=60\n"),
-    file:write(ConfigFile, ["contact=sip:", Domain, "\n"]),
+    file:write(ConfigFile, ["contact=sip:", Domain, SipPort, "\n"]),
     file:write(ConfigFile, "\n"),
 
     % Identify
