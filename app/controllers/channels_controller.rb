@@ -17,6 +17,7 @@
 
 class ChannelsController < ApplicationController
   before_filter :authenticate_account!
+  before_filter :ensure_account_admin
   before_filter :load_call_flows, only: [:new, :edit, :create]
   before_filter :load_channel, only: [:show, :edit, :update, :destroy, :call]
   before_filter :check_channel_admin, only: [:update, :destroy]
@@ -71,7 +72,7 @@ class ChannelsController < ApplicationController
       else
         channel_type.constantize.new
       end
-      
+
       @channel.update_attributes(params[:channel])
       @channel.account = current_account
 
@@ -112,5 +113,9 @@ class ChannelsController < ApplicationController
     t = Project.arel_table
     shared_project_ids = current_account.shared_projects.pluck(:model_id)
     @projects = Project.where(t[:account_id].eq(current_account.id).or(t[:id].in(shared_project_ids))).includes(:call_flows)
+  end
+
+  def ensure_account_admin
+    head :forbidden unless (current_account.admin? || Rails.configuration.verboice_configuration[:enable_channel])
   end
 end
