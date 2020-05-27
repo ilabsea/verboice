@@ -5,6 +5,7 @@
 
 run(Args, Session = #session{pbx = Pbx, channel = CurrentChannel, js_context = JS}) ->
   RawNumber = proplists:get_value(number, Args),
+  Number = util:interpolate_js(util:as_binary(RawNumber), JS),
   CallerId = proplists:get_value(caller_id, Args),
   Number = util:interpolate_js(util:as_binary(RawNumber), JS),
 
