@@ -47,17 +47,16 @@ dial_address(Channel = #channel{id = Id}, Address) ->
   end.
 
 dispatch(#session{session_id = SessionId, channel = Channel, address = Address}) ->
-  CallerId = channel:number(Channel),
   DialAddress = dial_address(Channel, Address),
-  {ok, BrokerPort} = application:get_env(broker_port),
-  BrokerHost = application:get_env(verboice, broker_host, "localhost"),
+  BrokerHost = verboice_config:broker_host(),
+  BrokerPort = verboice_config:broker_port(),
   ami_client:originate([
-    {callerid, CallerId},
     {channel, DialAddress},
     {application, "AGI"},
     {data, ["agi://", BrokerHost, ":", integer_to_list(BrokerPort), ",", SessionId]},
     {async, true},
     {actionid, SessionId},
     {timeout, 60000},
-    {variable, ["verboice_session_id=", SessionId]}
+    {variable, ["verboice_session_id=", SessionId]},
+    {callerId, ["<", channel:number(Channel), ">"]}
   ]).
