@@ -68,7 +68,7 @@ set_callerid(Pid, CallerId) ->
   gen_server:call(Pid, {execute, ["SET CALLERID ", CallerId]}).
 
 dial(Pid, ArgList) ->
-  Separator = case application:get_env(asterisk_agi_use_pipe_separator) of
+  Separator = case verboice_config:asterisk_agi_use_pipe_separator() of
     {ok, true} -> "|";
     _ -> ","
   end,
