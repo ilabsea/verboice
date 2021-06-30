@@ -2,6 +2,7 @@ module Ext
   class ReminderGroup < ExtActiveRecord
     belongs_to :project
     has_many :reminder_schedules, :dependent => :nullify
+    has_many :reminder_group_contacts, foreign_key: :reminder_group_id
 
     assign_has_many_to "Project" ,:ext_reminder_groups, :class_name => "Ext::ReminderGroup", :dependent => :destroy
     assign_accepts_nested_attributes_for_to "Project", :ext_reminder_groups,
@@ -68,10 +69,15 @@ module Ext
 
     def import_contact_addresses(file)
       rows = CSV.parse(file.read, headers: true)
-      rows.each do |row|
-        phone_number = row['phone_number'].to_s.strip.to_number
-        next unless phone_number.is_contact?
-        addresses.push(phone_number) unless addresses.include? phone_number
+      ReminderGroupContact.transaction do
+        rows.each do |row|
+          phone_number = row['phone_number'].to_s.strip.to_number
+          next unless phone_number.is_contact?
+          # TODO Refactor to reminder_group_contacts
+          # addresses.push(phone_number) unless addresses.include? phone_number
+
+          self.reminder_group_contacts.where(address: phone_number).first_or_create
+        end
       end
 
       Contact.register_from_file(rows, project) if save!(skip_callback: true)

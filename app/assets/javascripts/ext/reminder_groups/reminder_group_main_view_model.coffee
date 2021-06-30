@@ -47,6 +47,7 @@ onReminderGroups ->
       # if reminder group is new, we need to set id
       $.status.showNotice((if @current_reminder_group().id() then update_success else create_success), 2000)
       @current_reminder_group().id(data.id)
+      @current_reminder_group().updated_at(data.updated_at)
 
       @current_reminder_group(null)
       @saving_reminder_group(false)

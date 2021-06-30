@@ -21,21 +21,24 @@ module Api
 
     # GET /api/projects/:project_id/reminder_groups
     def index
-      render json: @reminder_groups, root: false
+      render json: @reminder_groups, each_serializer: ReminderGroupSerializer, root: false
     end
 
     # POST /api/projects/:project_id/reminder_groups
     def create
-      params[:reminder_group][:addresses] = params[:reminder_group][:addresses].map(&:to_s).uniq if params[:reminder_group] && params[:reminder_group][:addresses].kind_of?(Array)
+      # params[:reminder_group][:addresses] = params[:reminder_group][:addresses].map(&:to_s).uniq if params[:reminder_group] && params[:reminder_group][:addresses].kind_of?(Array)
       @reminder_group = @reminder_groups.build params[:reminder_group]
       
-      if params[:reminder_group].present? && params[:reminder_group][:addresses].present? && !params[:reminder_group][:addresses].kind_of?(Array)
-        bad_request_invalid_array_parameter 'creating'
-        return
-      end
-
       if @reminder_group.save
-        render json: @reminder_group, status: :created
+        ReminderGroupContact.transaction do
+          if params[:reminder_group][:addresses].present?
+            params[:reminder_group][:addresses].each do |address|
+              create_group_contact @reminder_group, address
+            end
+          end
+        end
+
+        render json: @reminder_group, serializer: ReminderGroupSerializer, status: :created
       else
         render json: errors_to_json(@reminder_group, 'creating'), status: :bad_request
       end
@@ -43,14 +46,16 @@ module Api
 
     # PUT /api/projects/:project_id/reminder_groups/:id
     def update
-      if params[:reminder_group].present? && params[:reminder_group][:addresses].present? && !params[:reminder_group][:addresses].kind_of?(Array)
-        bad_request_invalid_array_parameter 'updating'
-        return
-      end
-
-      params[:reminder_group][:addresses] = params[:reminder_group][:addresses].map(&:to_s).uniq if params[:reminder_group] && params[:reminder_group][:addresses].kind_of?(Array)
       if @reminder_group.update_attributes(params[:reminder_group])
-        render json: @reminder_group
+        ReminderGroupContact.transaction do
+          if params[:reminder_group][:addresses].present?
+            params[:reminder_group][:addresses].each do |address|
+              create_group_contact @reminder_group, address
+            end
+          end
+        end
+
+        render json: @reminder_group, serializer: ReminderGroupSerializer
       else
         render json: errors_to_json(@reminder_group, 'updating'), status: :bad_request
       end
@@ -90,12 +95,6 @@ module Api
 
     private
 
-    def bad_request_invalid_array_parameter action
-      response = errors_to_json(@reminder_group, action)
-      response[:properties].push({addresses: "Attribute was supposed to be a Array, but was a String"})
-      render json: response, status: :bad_request
-    end
-
     def validate_project
       begin
         load_project
@@ -113,6 +112,12 @@ module Api
       rescue
         render json: "The reminder group is not found".to_json, status: :not_found
         return
+      end
+    end
+
+    def create_group_contact reminder_group, address
+      if address.is_contact? and !ReminderGroupContact.exist? reminder_group, address
+        reminder_group.reminder_group_contacts.create(address: address)
       end
     end
 
