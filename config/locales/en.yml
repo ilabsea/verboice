@@ -853,6 +853,7 @@ en:
           name_exists: "Name is already exists"
           copied: "Copied"
           copy: "Copy"
+          exceed_contact_limited: "Phone number is exceed limited(>1000)"
           successfully_reset: 'Reminder group is successfully reset'
           confirm_reset: 'Are you sure you want to reset this reminder group?'
           total_contacts: "Total contacts"
@@ -862,7 +863,7 @@ en:
           save: "Save"
           cancel: "Cancel"
           new: "New reminder group"
-          import_csv: "Import reminder contact list"
+          import_csv: "Import reminder contact list (*.csv)"
           upload: "Upload"
           reset: "Reset"
 

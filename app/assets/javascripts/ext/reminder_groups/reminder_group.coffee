@@ -110,3 +110,6 @@ onReminderGroups ->
     toJSON: =>
       name: @name()
       addresses: $.map(@contacts(), (x) -> x.address() if x.valid())
+
+    exceed_contact_limited: =>
+      @contacts().length > 1000
