@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20160504025619) do
+ActiveRecord::Schema.define(:version => 20210705031243) do
 
   create_table "accounts", :force => true do |t|
     t.string   "email",                               :default => "", :null => false
@@ -238,9 +238,15 @@ ActiveRecord::Schema.define(:version => 20160504025619) do
   create_table "ext_reminder_groups", :force => true do |t|
     t.string   "name"
     t.integer  "project_id"
-    t.binary   "addresses",  :limit => 16777215
-    t.datetime "created_at",                     :null => false
-    t.datetime "updated_at",                     :null => false
+    t.binary   "addresses",       :limit => 16777215
+    t.datetime "created_at",                          :null => false
+    t.datetime "updated_at",                          :null => false
+    t.string   "mode"
+    t.boolean  "enabled_synced"
+    t.string   "endpoint"
+    t.string   "username"
+    t.string   "password"
+    t.string   "synced_schedule"
   end
 
   add_index "ext_reminder_groups", ["project_id"], :name => "index_ext_reminder_groups_on_project_id"
@@ -543,6 +549,15 @@ ActiveRecord::Schema.define(:version => 20160504025619) do
   add_index "recorded_audios", ["call_log_id"], :name => "index_recorded_audios_on_call_log_id"
   add_index "recorded_audios", ["contact_id"], :name => "index_recorded_audios_on_contact_id"
   add_index "recorded_audios", ["project_id", "created_at"], :name => "index_recorded_audios_on_project_id_and_created_at"
+
+  create_table "reminder_group_contacts", :force => true do |t|
+    t.integer  "reminder_group_id"
+    t.string   "address",           :limit => 10
+    t.datetime "created_at",                      :null => false
+    t.datetime "updated_at",                      :null => false
+  end
+
+  add_index "reminder_group_contacts", ["reminder_group_id", "address"], :name => "index_reminder_group_contacts_on_reminder_group_id_and_address", :unique => true
 
   create_table "resources", :force => true do |t|
     t.string   "name"

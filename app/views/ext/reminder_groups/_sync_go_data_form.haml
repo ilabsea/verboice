@@ -1,0 +1,20 @@
+%div
+  .form-group
+    %input#enabled_synced{ko(checked: 'enabled_synced'), type: 'checkbox'}
+    %label{for: 'enabled_synced'} Enable synced data
+
+  .form-group
+    %label Endpint
+    %input.form-control.w30{ko(value: 'endpoint'), type: 'text'}
+
+  .form-group
+    %label Username
+    %input.form-control.w30{ko(value: 'username'), type: 'text'}
+
+  .form-group
+    %label Password
+    %input.form-control.w30{ko(value: 'password'), type: 'password'}
+
+  .form-group
+    %label Synced schedule
+    %input.form-control.w30{ko(value: 'synced_schedule'), type: 'text'}

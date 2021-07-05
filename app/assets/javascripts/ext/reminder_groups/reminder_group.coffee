@@ -9,6 +9,13 @@ onReminderGroups ->
       @new_address = ko.observable null
       @updated_at = ko.observable data?.updated_at
 
+      @mode = ko.observable(data?.mode)
+      @enabled_synced = ko.observable(data?.enabled_synced)
+      @endpoint = ko.observable(data?.endpoint)
+      @username = ko.observable(data?.username)
+      @password = ko.observable(data?.password)
+      @synced_schedule = ko.observable(data?.synced_schedule)
+
       @name_error = ko.computed => if @has_name() then null else "Name is required"
       @name_duplicated = ko.computed => if @has_name() and @name_exists(@name()) then true else false
       @new_address_duplicated = ko.computed => if @has_new_address() and @address_exists(@new_address()) then true else false
@@ -110,6 +117,12 @@ onReminderGroups ->
     toJSON: =>
       name: @name()
       addresses: $.map(@contacts(), (x) -> x.address() if x.valid())
+      mode: @mode()
+      enabled_synced: @enabled_synced()
+      endpoint: @endpoint()
+      username: @username()
+      password: @password()
+      synced_schedule: @synced_schedule()
 
     exceed_contact_limited: =>
       @contacts().length > 1000

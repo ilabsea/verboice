@@ -94,3 +94,32 @@
   z-index: 50;
   display: none;
 }
+
+// Form style
+.form-group {
+  margin-bottom: 1rem;
+  label {
+    display: inline-block;
+    margin-bottom: .5rem;
+  }
+}
+
+.form-control {
+  display: block;
+}
+
+.sync-data {
+  border: 1px solid;
+  padding: 16px;
+  margin-top: 20px;
+}
+
+// Common
+.d-flex {
+  display: flex;
+}
+
+.flex-1 {
+  flex: 1;
+}
+

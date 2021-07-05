@@ -15,7 +15,7 @@ module Ext
     validates :name, :project, :presence => true
     validates :name, :uniqueness => { :scope => :project_id }
 
-    attr_accessible :name, :addresses, :project_id
+    attr_accessible :name, :addresses, :project_id, :mode, :endpoint, :username, :password, :synced_schedule, :enabled_synced
     attr_accessor :skip_callback
 
     before_save :encoding_addresses

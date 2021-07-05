@@ -16,7 +16,9 @@
 # along with Verboice.  If not, see <http://www.gnu.org/licenses/>.
 
 class ReminderGroupSerializer < ActiveModel::Serializer
-  attributes :id, :name, :addresses, :created_at, :updated_at
+  attributes :id, :name, :addresses, :created_at, :updated_at,
+             :mode, :endpoint, :username, :password, :synced_schedule,
+             :enabled_synced
 
   def addresses
     object.reminder_group_contacts.pluck(:address)

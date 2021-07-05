@@ -858,6 +858,8 @@ en:
           confirm_reset: 'Are you sure you want to reset this reminder group?'
           total_contacts: "Total contacts"
           last_updated_at: "Last updated at"
+          manual: Manual
+          synced_with_go_data: Synced with Go.Data
         action:
           edit: "Edit"
           save: "Save"
