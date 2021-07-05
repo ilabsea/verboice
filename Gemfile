@@ -13,7 +13,8 @@ gem "will_paginate", "~> 3.0"
 gem "daemons"
 
 gem "instedd-rails"
-gem 'instedd_telemetry', git: 'https://github.com/instedd/telemetry_rails.git'
+# gem 'instedd_telemetry', git: 'https://github.com/instedd/telemetry_rails.git'
+gem 'instedd_telemetry', github: "instedd/telemetry_rails", ref: "aee5fc99e3dbe06e6cdd077c8042a2ada0bb6995"
 
 gem 'decent_exposure'
 gem 'attr_encrypted'

@@ -1,0 +1,92 @@
+version: '2.0'
+
+services:
+  db:
+    image: mysql:5.6
+    environment:
+      MYSQL_ALLOW_EMPTY_PASSWORD: 'yes'
+    volumes:
+      - db2:/var/lib/mysql
+
+  broker:
+    build: ./broker
+    command: /bin/sh -c 'make && make run'
+    volumes:
+      - ./broker:/app
+      - asterisk:/usr/local/etc/asterisk
+      - sounds:/usr/local/var/lib/asterisk/sounds/verboice
+      - deps:/app/deps
+      - ebin:/app/ebin
+      - verboice-data:/data
+    depends_on:
+      - db
+    environment:
+      AMI_HOST: asterisk-bridge
+      ASTERISK_RECORD_DIR: /data/call_logs/
+      BROKER_HOST: 172.88.0.88
+      DB_HOST: db
+    tty: true
+    networks:
+      default:
+        ipv4_address: 172.88.0.88
+
+  web: &rails
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    environment:
+      DATABASE_HOST: 'db'
+      BROKER_HOST: 'broker'
+      BROKER_PORT: 9999
+    volumes:
+      - .:/app
+      - bundle:/usr/local/bundle
+      - verboice-data:/app/data
+    tmpfs: /app/tmp
+    depends_on:
+      - db
+    command: bundle exec rails server -b 0.0.0.0 -p 3000
+    ports:
+      - '3000:3000'
+
+  asterisk:
+    image: kakadachheang/verboice-asterisk
+    environment:
+      BROKER_HOST: 172.88.0.88
+      LOCAL_NET: 172.88.0.0/16
+      EXTERNAL_ADDRESS: '192.168.1.123'
+    volumes:
+      - asterisk:/etc/asterisk/verboice
+      - sounds:/var/lib/asterisk/sounds/verboice
+      - verboice-data:/data
+    network_mode: host
+
+  asterisk-bridge:
+    image: instedd/host_bridge
+    environment:
+      INPUT_PORT: 5038
+    privileged: true
+
+  ngrok:
+    image: wernight/ngrok
+    ports:
+      - 4040
+    environment:
+      NGROK_PORT: 'broker:8080'
+
+volumes:
+  db2:
+  bundle:
+  asterisk:
+  sounds:
+  deps:
+  ebin:
+  verboice-data:
+
+networks:
+  default:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.88.0.0/16
+          gateway: 172.88.0.1

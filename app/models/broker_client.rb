@@ -16,8 +16,10 @@
 # along with Verboice.  If not, see <http://www.gnu.org/licenses/>.
 
 class BrokerClient
+  TIMEOUT = 10     # in seconds
   PORT = Rails.configuration.verboice_configuration[:broker_port].to_i
-  @client = BERTRPC::Service.new('127.0.0.1', PORT)
+  HOST = Rails.configuration.verboice_configuration[:broker_host] || '127.0.0.1'
+  @client = BERTRPC::Service.new(HOST, PORT, TIMEOUT)
 
   def self.invalidate_cache(entity, id)
     @client.cast.facade.invalidate_cache(entity, id) rescue nil

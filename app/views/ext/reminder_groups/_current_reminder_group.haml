@@ -1,0 +1,32 @@
+.box.collapsible_crud_box.expanded.grey.w60
+  %p
+    <!-- ko ifnot: name_duplicated() -->
+    %label{ko(css: {error: :name_error}), :for => :name}= t('views.ext.reminder_groups.label.name')
+    <!-- /ko -->
+
+    <!-- ko if: name_duplicated() -->
+    %label{ko(css: {error: :name_duplicated}), :for => :name}= t('views.ext.reminder_groups.label.name_exists')
+    <!-- /ko -->
+
+    .form-group= ko_text_field_tag :name, css: {error: :name_error}, html: {class: 'w30'}
+
+    .form-group
+      %label Mode (Choose whether you will add contact manually or sync it from Go.data)
+
+      %select.w30{ko(value: 'mode', name: :mode) }
+        %option{value: 'manual'}= t('views.ext.reminder_groups.label.manual')
+        %option{value: 'synced_with_godata'}= t('views.ext.reminder_groups.label.synced_with_go_data')
+
+  <!-- ko if: mode() == 'manual' -->
+  = render 'manual_contact_form'
+  <!-- /ko -->
+
+  <!-- ko if: mode() == 'synced_with_godata' -->
+  = render 'sync_go_data_form'
+  <!-- /ko -->
+
+  %hr
+
+  %button.white{ko(click: '$root.save_reminder_group', enable: :valid), type: :button}= t('views.ext.reminder_groups.action.save')
+
+  %a.button.white.cancel{ko(click: '$root.cancel_reminder_group'), href: 'javascript:void(0)'}= t('views.ext.reminder_groups.action.cancel')

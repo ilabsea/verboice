@@ -1,0 +1,72 @@
+.box.collapsed.collapsible_crud_box.grey.w60
+  .toptitle{ ko(css: {overflowContent: :showMore}) }
+    .address-wrapper
+      %span.title{ko(text: :name)}
+      %span :
+      %span.title{ko(text: 'contacts_display()')}
+
+      .fv-body-blur
+        .btn-more
+          %a.tooltip{ko(click: 'copyToClipboard')}
+            %span ...
+            = image_tag 'icons/copy.svg', style: 'width: 14px'
+            %span.tooltiptext.tooltip-right= t('views.ext.reminder_groups.label.copy')
+
+    .total
+      %span.title= "#{t('views.ext.reminder_groups.label.total_contacts')} : "
+      %span.title{ko(text: 'contacts().length')}
+
+  - if project_admin?
+    .rightbuttons
+      %button.fdelete{ko(click: '$root.delete_reminder_group')}
+
+    .bottom
+      %div
+        <!-- ko if: !$data.exceed_contact_limited() -->
+        %button.farrow.collapse_trigger{ko(click: '$root.edit_reminder_group')}
+          = t('views.ext.reminder_groups.action.edit')
+        <!-- /ko -->
+
+        <!-- ko if: $data.exceed_contact_limited() -->
+        %a.tooltip{ko(click: 'copyToClipboard')}
+          %button.farrow.collapse_trigger.disabled{ style: "cursor: auto;"}
+            = t('views.ext.reminder_groups.action.edit')
+
+          %span.tooltiptext.tooltip-right{style: "min-width: 200px !important"}
+            = t('views.ext.reminder_groups.label.exceed_contact_limited')
+        <!-- /ko -->
+
+        / synced with go data contact
+        <!-- ko if: mode() == 'synced_with_godata' -->
+        .d-flex{style: 'align-items: center;'}
+          .flex-1{ko(text: 'enabled_synced() ? "Enabled synced" : "Disabled synced"')}
+          .updated_at
+            %span.title= "#{t('views.ext.reminder_groups.label.last_updated_at')} : "
+            %span.title{ko(text: :updated_at)}
+        <!-- /ko -->
+
+        / manual contact
+        <!-- ko if: mode() != 'synced_with_godata' -->
+        %button.fuTurn.collapse_trigger{ko(click: '$root.reset_reminder_group')}
+          = t('views.ext.reminder_groups.action.reset')
+
+        .ux-collapsible.collapsed.w60.file_upload{"data-on-expanded" => "grey"}
+          %span
+            %a.button.fexport{ko(click: 'collapse_expand_import'), :href => "#"}
+              = t('views.ext.reminder_groups.action.import_csv')
+
+            .updated_at.right{style:"padding: 8px 20px 0;"}
+              %span.title= "#{t('views.ext.reminder_groups.label.last_updated_at')} : "
+              %span.title{ko(text: :updated_at)}
+
+          .ux-content.w40
+            = form_tag("", :multipart => true) do
+              %hr
+              = file_field_tag 'file_name', :class =>'button white', accept: '.csv,text/csv'
+              %hr
+              .right
+                %button.grey{ko(click: 'upload'), :type => "submit"}= t('views.ext.reminder_groups.action.upload')
+                %a.button.white.cancel{ko(click: 'cancel_upload'), href: 'javascript:void(0)'}= t('views.ext.reminder_groups.action.cancel')
+              .clear
+
+        <!-- /ko -->
