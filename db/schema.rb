@@ -238,15 +238,12 @@ ActiveRecord::Schema.define(:version => 20210705031243) do
   create_table "ext_reminder_groups", :force => true do |t|
     t.string   "name"
     t.integer  "project_id"
-    t.binary   "addresses",       :limit => 16777215
-    t.datetime "created_at",                          :null => false
-    t.datetime "updated_at",                          :null => false
+    t.binary   "addresses",   :limit => 16777215
+    t.datetime "created_at",                      :null => false
+    t.datetime "updated_at",                      :null => false
     t.string   "mode"
-    t.boolean  "enabled_synced"
-    t.string   "endpoint"
-    t.string   "username"
-    t.string   "password"
-    t.string   "synced_schedule"
+    t.boolean  "enable_sync"
+    t.text     "sync_config"
   end
 
   add_index "ext_reminder_groups", ["project_id"], :name => "index_ext_reminder_groups_on_project_id"

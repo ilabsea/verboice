@@ -1,3 +1,8 @@
+class VariableModel
+  constructor: (obj={}) ->
+    @source = ko.observable obj.source
+    @destination = ko.observable obj.destination
+
 onReminderGroups ->
   class @ReminderGroup
     constructor: (data) ->
@@ -10,11 +15,21 @@ onReminderGroups ->
       @updated_at = ko.observable data?.updated_at
 
       @mode = ko.observable(data?.mode)
-      @enabled_synced = ko.observable(data?.enabled_synced)
-      @endpoint = ko.observable(data?.endpoint)
-      @username = ko.observable(data?.username)
-      @password = ko.observable(data?.password)
-      @synced_schedule = ko.observable(data?.synced_schedule)
+      @enable_sync = ko.observable(data?.enable_sync)
+
+      @endpoint = ko.observable(data?.sync_config.endpoint)
+      @username = ko.observable(data?.sync_config.username)
+      @password = ko.observable(data?.sync_config.password)
+      @schedule = ko.observable(data?.sync_config.schedule)
+      @phone_number_field = ko.observable(data?.sync_config.phone_number_field)
+
+      # Variables
+      @variables = ko.observableArray()
+      if !!data?.sync_config.variables && data?.sync_config.variables.length > 0
+        i = 0
+        while i < data?.sync_config.variables.length
+          @variables.push(data?.sync_config.variables[i])
+          i++
 
       @name_error = ko.computed => if @has_name() then null else "Name is required"
       @name_duplicated = ko.computed => if @has_name() and @name_exists(@name()) then true else false
@@ -30,6 +45,9 @@ onReminderGroups ->
 
       @collapse_expand_import_state = ko.observable false
       @showMore = ko.computed => !!(@contacts().length > 20)
+
+    addVariable: () =>
+      @variables.push(new VariableModel())
 
     copyToClipboard: () =>
       input = document.createElement('input')
@@ -118,11 +136,15 @@ onReminderGroups ->
       name: @name()
       addresses: $.map(@contacts(), (x) -> x.address() if x.valid())
       mode: @mode()
-      enabled_synced: @enabled_synced()
-      endpoint: @endpoint()
-      username: @username()
-      password: @password()
-      synced_schedule: @synced_schedule()
+      enable_sync: @enable_sync()
+      sync_config: {
+        endpoint: @endpoint()
+        username: @username()
+        password: @password()
+        schedule: @schedule()
+        phone_number_field: @phone_number_field()
+        variables: @variables().filter (x) -> !!x.source && !!x.destination
+      }
 
     exceed_contact_limited: =>
       @contacts().length > 1000

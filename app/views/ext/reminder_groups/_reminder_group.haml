@@ -39,7 +39,7 @@
         / synced with go data contact
         <!-- ko if: mode() == 'synced_with_godata' -->
         .d-flex{style: 'align-items: center;'}
-          .flex-1{ko(text: 'enabled_synced() ? "Enabled synced" : "Disabled synced"')}
+          .flex-1{ko(text: 'enable_sync() ? "Enabled synced" : "Disabled synced"')}
           .updated_at
             %span.title= "#{t('views.ext.reminder_groups.label.last_updated_at')} : "
             %span.title{ko(text: :updated_at)}

@@ -17,8 +17,7 @@
 
 class ReminderGroupSerializer < ActiveModel::Serializer
   attributes :id, :name, :addresses, :created_at, :updated_at,
-             :mode, :endpoint, :username, :password, :synced_schedule,
-             :enabled_synced
+             :mode, :enable_sync, :sync_config
 
   def addresses
     object.reminder_group_contacts.pluck(:address)
