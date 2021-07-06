@@ -14,3 +14,7 @@ end
 every "1,31 * * * *" do
   rake "call_log:zombie:terminate_calls"
 end
+
+every "0 * * * *" do
+  rake "reminder_group:sync_from_go_data"
+end

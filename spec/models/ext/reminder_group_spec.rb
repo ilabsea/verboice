@@ -134,24 +134,42 @@ describe Ext::ReminderGroup do
 
     context 'all new numbers' do
       before {
-        reminder_group.addresses.push('85512345671')
         reminder_group.import_contact_addresses(file)
       }
 
       it 'creates all new addresses' do
-        reminder_group.addresses.count.should eq(3)
+        reminder_group.reminder_group_contacts.count.should eq(2)
       end
     end
 
     context 'some new numbers' do
       before {
-        reminder_group.addresses.push('85512345678')
+        reminder_group.reminder_group_contacts.create(address: '85512345678')
         reminder_group.import_contact_addresses(file)
       }
 
       it 'creates only new numbers' do
-        reminder_group.addresses.count.should eq(2)
+        reminder_group.reminder_group_contacts.count.should eq(2)
       end
+    end
+  end
+
+  describe '.upsert_reminder_group_contacts' do
+    let!(:reminder_group) { Ext::ReminderGroup.create @valid }
+    let!(:collection) {
+      [
+        {'Addresses' => [{'Phone number' => '011222333'}]},
+        {'Addresses' => [{'Phone number' => '011222334'}]}
+      ]
+    }
+
+    before {
+      reminder_group.update_attributes(sync_config: { phone_number_field: 'Addresses_0_Phone number' })
+      reminder_group.upsert_reminder_group_contacts(collection)
+    }
+
+    it 'create 2 reminder_group_contacts' do
+      reminder_group.reminder_group_contacts.count.should eq(2)
     end
   end
 end

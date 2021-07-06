@@ -39,4 +39,13 @@ namespace :reminder_group do
 
     end
   end
+
+  desc "Sync from go data platform"
+  task :sync_from_go_data => :environment do
+    Ext::ReminderGroup.where(enable_sync: true).each do |group|
+      next unless group.sync_config.schedule.to_i == Time.now.hour
+
+      Ext::ReminderGroupService.new(group).sync_from_go_data
+    end
+  end
 end

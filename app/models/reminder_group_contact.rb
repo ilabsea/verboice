@@ -13,4 +13,7 @@ class ReminderGroupContact < ActiveRecord::Base
     where(reminder_group_id: reminder_group.id, address: address).count > 0
   end
 
+  def upsert_contact(item, kind='csv')
+    Contact.upsert(self, item, kind)
+  end
 end

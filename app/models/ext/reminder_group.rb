@@ -12,10 +12,11 @@ module Ext
     assign_attr_accessible_to "Project", :ext_reminder_group_attributes
 
     serialize :addresses, Array
+    serialize :sync_config, Hash
     validates :name, :project, :presence => true
     validates :name, :uniqueness => { :scope => :project_id }
 
-    attr_accessible :name, :addresses, :project_id, :mode, :endpoint, :username, :password, :synced_schedule, :enabled_synced
+    attr_accessible :name, :addresses, :project_id, :mode, :enable_sync, :sync_config
     attr_accessor :skip_callback
 
     before_save :encoding_addresses
@@ -72,15 +73,30 @@ module Ext
       ReminderGroupContact.transaction do
         rows.each do |row|
           phone_number = row['phone_number'].to_s.strip.to_number
-          next unless phone_number.is_contact?
           # TODO Refactor to reminder_group_contacts
           # addresses.push(phone_number) unless addresses.include? phone_number
 
-          self.reminder_group_contacts.where(address: phone_number).first_or_create
+          upsert_reminder_group_contact(phone_number, row, 'csv')
         end
       end
 
-      Contact.register_from_file(rows, project) if save!(skip_callback: true)
+    end
+
+    def upsert_reminder_group_contacts(collection)
+      collection.each do |item|
+        # addresses_0_phoneNumber
+        fields = self.sync_config[:phone_number_field].split("_").map { |s| s.number? ? s.to_i : s }
+        phone_number = fields.inject(item) { |obj, field| obj.try(:[], field) }.to_s.strip.to_number
+
+        upsert_reminder_group_contact(phone_number, item, 'json')
+      end
+    end
+
+    def upsert_reminder_group_contact(phone_number, item, kind='csv')
+      return unless phone_number.is_contact?
+
+      reminder_group_contact = self.reminder_group_contacts.find_or_create_by_address(phone_number)
+      reminder_group_contact.upsert_contact(item, kind)
     end
   end
 end

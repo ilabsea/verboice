@@ -1,6 +1,6 @@
 %div
   .form-group
-    %input#enabled_synced{ko(checked: 'enabled_synced'), type: 'checkbox'}
+    %input#enabled_synced{ko(checked: 'enable_sync'), type: 'checkbox'}
     %label{for: 'enabled_synced'} Enable synced data
 
   .form-group
@@ -17,4 +17,18 @@
 
   .form-group
     %label Synced schedule
-    %input.form-control.w30{ko(value: 'synced_schedule'), type: 'text'}
+    %input.form-control.w30{ko(value: 'schedule'), type: 'text'}
+
+  %fieldset
+    %legend Dictionary Variable
+    .form-group.d-flex
+      %label Phone number field
+      %input.form-control.w30{ko(value: 'phone_number_field'), type: 'text'}
+
+    <!-- ko foreach: variables -->
+    .form-group.d-flex
+      %input.form-control{ko(value: '$data.source'), type: 'text', placeholder: "Name"}
+      %input.form-control{ko(value: '$data.destination'), type: 'text', placeholder: "Value"}
+    <!-- /ko -->
+    %div
+      %button{ko(click: 'addVariable' )} + Add variable
