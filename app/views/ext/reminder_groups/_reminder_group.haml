@@ -37,7 +37,7 @@
         <!-- /ko -->
 
         / synced with go data contact
-        <!-- ko if: mode() == 'synced_with_godata' -->
+        <!-- ko if: mode() == 'sync_with_go_data' -->
         .d-flex{style: 'align-items: center;'}
           .flex-1{ko(text: 'enable_sync() ? "Enabled synced" : "Disabled synced"')}
           .updated_at
@@ -46,7 +46,7 @@
         <!-- /ko -->
 
         / manual contact
-        <!-- ko if: mode() != 'synced_with_godata' -->
+        <!-- ko if: mode() != 'sync_with_go_data' -->
         %button.fuTurn.collapse_trigger{ko(click: '$root.reset_reminder_group')}
           = t('views.ext.reminder_groups.action.reset')
 

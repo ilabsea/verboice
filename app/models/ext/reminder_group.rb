@@ -40,7 +40,7 @@ module Ext
     end
 
     def register_contacts
-      Contact.register addresses, project if has_addresses?
+      # Contact.register addresses, project if has_addresses?
     end
 
     def has_addresses?

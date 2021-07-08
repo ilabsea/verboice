@@ -21,7 +21,7 @@ module Api
 
     # GET /api/projects/:project_id/reminder_groups
     def index
-      render json: @reminder_groups, each_serializer: ReminderGroupSerializer, root: false
+      render json: @reminder_groups.includes(:reminder_group_contacts), each_serializer: ReminderGroupSerializer, root: false
     end
 
     # POST /api/projects/:project_id/reminder_groups

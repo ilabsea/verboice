@@ -39,7 +39,11 @@ onReminderGroups ->
       @hasFocus = ko.observable(false)
 
       @error = ko.computed =>
-        @name_error() || @name_duplicated()
+        isError = @name_error() || @name_duplicated()
+        if @mode() == 'sync_with_go_data'
+          isError ||= !@endpoint() || !@username() || !@password() || !@phone_number_field()
+        isError
+
       @valid = ko.computed =>
         !@error()
 
@@ -48,6 +52,9 @@ onReminderGroups ->
 
     addVariable: () =>
       @variables.push(new VariableModel())
+
+    removeVariable: (variable) =>
+      @variables.remove(variable)
 
     copyToClipboard: () =>
       input = document.createElement('input')
@@ -133,18 +140,27 @@ onReminderGroups ->
       @contacts.removeAll()
 
     toJSON: =>
-      name: @name()
-      addresses: $.map(@contacts(), (x) -> x.address() if x.valid())
-      mode: @mode()
-      enable_sync: @enable_sync()
-      sync_config: {
-        endpoint: @endpoint()
-        username: @username()
-        password: @password()
-        schedule: @schedule()
-        phone_number_field: @phone_number_field()
-        variables: @variables().filter (x) -> !!x.source && !!x.destination
-      }
+      obj =
+        name: @name()
+        mode: @mode()
+
+      if @mode() == 'sync_with_go_data'
+        obj = Object.assign(obj,
+          enable_sync: @enable_sync()
+          sync_config:
+            endpoint: @endpoint()
+            username: @username()
+            password: @password()
+            schedule: @schedule()
+            phone_number_field: @phone_number_field()
+            variables: @variables().filter (x) -> (typeof x.source == 'string' && !!x.source) && (typeof x.destination == 'string' && !!x.destination)
+        )
+      else
+        obj = Object.assign(obj,
+          addresses: $.map(@contacts(), (x) -> x.address() if x.valid())
+        )
+
+      obj
 
     exceed_contact_limited: =>
       @contacts().length > 1000
