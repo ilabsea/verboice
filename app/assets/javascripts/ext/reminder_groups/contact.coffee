@@ -16,6 +16,3 @@ onReminderGroups ->
 
 		toJSON: =>
 			address: @address()
-
-
-			

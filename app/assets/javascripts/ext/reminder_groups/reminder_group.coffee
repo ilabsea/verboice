@@ -1,14 +1,15 @@
-class VariableModel
-  constructor: (obj={}) ->
-    @source = ko.observable obj.source
-    @destination = ko.observable obj.destination
-
 onReminderGroups ->
+  class @VariableModel
+    constructor: (obj={}) ->
+      @source = ko.observable obj.source
+      @destination = ko.observable obj.destination
+
   class @ReminderGroup
     constructor: (data) ->
       @id = ko.observable data?.id
       @name = ko.observable data?.name
-      @contacts = ko.observableArray if data?.addresses then $.map(data.addresses, (x) -> new Contact({address: x})) else []
+      @contacts = ko.observableArray if data?.reminder_group_contacts then $.map(data.reminder_group_contacts, (x) -> new Contact({id: x.id, address: x.address})) else []
+      @reminder_group_contacts = data?.reminder_group_contacts || []
       @contacts_display = ko.computed => if @contacts().length == 0 then "No contact" else $.map(@contacts(), (x) -> x.address() if x.valid()).join(", ")
       @has_contacts = ko.computed => if @contacts().length > 0 then true else false
       @new_address = ko.observable null
@@ -157,10 +158,29 @@ onReminderGroups ->
         )
       else
         obj = Object.assign(obj,
-          addresses: $.map(@contacts(), (x) -> x.address() if x.valid())
+          reminder_group_contacts_attributes: @_buildReminderGroupContactAttrs()
         )
 
       obj
+
+    _buildReminderGroupContactAttrs: =>
+      addresses = $.map(@contacts(), (x) -> x.address() if x.valid())
+
+      i = 0
+      while i < @reminder_group_contacts.length
+        if addresses.findIndex( (ad) => ad == @reminder_group_contacts[i].address) < 0
+          @reminder_group_contacts[i]._destroy = '1'
+        else
+          @reminder_group_contacts[i]._destroy = '0'
+        i++
+
+      i = 0
+      while i < addresses.length
+        if @reminder_group_contacts.findIndex((x) => x.address == addresses[i]) < 0
+          @reminder_group_contacts.push({id: '', address: addresses[i]})
+        i++
+
+      @reminder_group_contacts
 
     exceed_contact_limited: =>
       @contacts().length > 1000

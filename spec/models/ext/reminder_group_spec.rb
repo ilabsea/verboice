@@ -27,40 +27,13 @@ describe Ext::ReminderGroup do
     reminder_group.save.should eq false
   end
 
-  it "should encoding addresses to utf-8" do
-    str1 = "foo".encode(Encoding::ASCII_8BIT)
-    str2 = "bar".encode(Encoding::UTF_8)
-    addresses = [str1, str2]
-
-    reminder_group = Ext::ReminderGroup.new @valid.merge(addresses: addresses)
-    reminder_group.save
-    reminder_group.reload.addresses.first.encoding.should == Encoding::UTF_8
-    reminder_group.reload.addresses.last.encoding.should == Encoding::UTF_8
-  end
-
-  it "should not have binary data in addresses" do
-    str1 = "foo".encode(Encoding::ASCII_8BIT)
-    str2 = "bar".encode(Encoding::UTF_8)
-    addresses = [str1, str2]
-
-    yaml_result = YAML.dump(addresses)
-
-    reminder_group = Ext::ReminderGroup.new @valid.merge(addresses: addresses)
-    reminder_group.save
-    resultset = ActiveRecord::Base.connection.execute("select addresses from ext_reminder_groups where id = #{reminder_group.id}")
-    resultset.each do |r|
-      r[0].index("binary").should be_nil
-      r[0].should_not eq(yaml_result)
-    end
-  end
-
   describe "#register_address" do
     it "should register address when it doesn't exists" do
       reminder_group = Ext::ReminderGroup.create @valid
       reminder_group.register_address "1000"
 
-      @project.contacts.size.should == 1
-      @project.contacts.first.addresses.first.address.should == "1000"
+      # @project.contacts.size.should == 1
+      # @project.contacts.first.addresses.first.address.should == "1000"
       reminder_group.addresses.size.should == 1
       reminder_group.addresses.first.should == "1000"
     end

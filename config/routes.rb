@@ -203,6 +203,7 @@ Verboice::Application.routes.draw do
       resources :reminder_groups, only: [:index, :create, :update, :destroy] do
         put :register, on: :member
         put :deregister, on: :member
+        put :reset_contact, on: :member
       end
     end
 

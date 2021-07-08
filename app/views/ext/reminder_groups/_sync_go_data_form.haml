@@ -1,7 +1,7 @@
 %div
   .form-group
-    %input#enabled_synced{ko(checked: 'enable_sync'), type: 'checkbox'}
-    %span{for: 'enabled_synced'} Enable synced data
+    %input#enable_sync{ko(checked: 'enable_sync'), type: 'checkbox'}
+    %label.mb-0{for: 'enable_sync'} Enable sync data
 
   .form-group
     %label{ko(css: {error: '!endpoint()'}), :for => :endpoint}= 'Endpint'
