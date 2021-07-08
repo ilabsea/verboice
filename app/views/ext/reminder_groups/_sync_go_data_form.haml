@@ -1,34 +1,40 @@
 %div
   .form-group
     %input#enabled_synced{ko(checked: 'enable_sync'), type: 'checkbox'}
-    %label{for: 'enabled_synced'} Enable synced data
+    %span{for: 'enabled_synced'} Enable synced data
 
   .form-group
-    %label Endpint
-    %input.form-control.w30{ko(value: 'endpoint'), type: 'text'}
+    %label{ko(css: {error: '!endpoint()'}), :for => :endpoint}= 'Endpint'
+    %input.form-control.w30{ko(value: 'endpoint', css: {error: '!endpoint()'}), type: 'text'}
 
   .form-group
-    %label Username
-    %input.form-control.w30{ko(value: 'username'), type: 'text'}
+    %label{ko(css: {error: '!username()'}), :for => :username}= 'Username'
+    %input.form-control.w30{ko(value: 'username', css: {error: '!username()'}), type: 'text'}
 
   .form-group
-    %label Password
-    %input.form-control.w30{ko(value: 'password'), type: 'password'}
+    %label{ko(css: {error: '!password()'}), :for => :password}= 'Password'
+    %input.form-control.w30{ko(value: 'password', css: {error: '!password()'}), type: 'password'}
 
   .form-group
     %label Synced schedule
-    %input.form-control.w30{ko(value: 'schedule'), type: 'text'}
+    .d-flex.align-items-center
+      %select.form-control.w30{ko(value: 'schedule', options: (0..23).to_a)}
+      %span.ml-1 o'clock
 
   %fieldset
     %legend Dictionary Variable
-    .form-group.d-flex
-      %label Phone number field
-      %input.form-control.w30{ko(value: 'phone_number_field'), type: 'text'}
+
+    .form-group.d-flex.align-items-center
+      %input.flex-1.form-control.mr-1{ko(value: 'phone_number_field', css: {error: '!phone_number_field()'}), type: 'text'}
+      %input.flex-1.form-control{value: 'Phone number', type: 'text', readonly: true}
+      %div{style: 'width: 28px;'}
 
     <!-- ko foreach: variables -->
-    .form-group.d-flex
-      %input.form-control{ko(value: '$data.source'), type: 'text', placeholder: "Name"}
-      %input.form-control{ko(value: '$data.destination'), type: 'text', placeholder: "Value"}
+    .form-group.d-flex.align-items-center
+      %input.flex-1.form-control.mr-1{ko(value: '$data.source'), type: 'text', placeholder: "Source"}
+      %input.flex-1.form-control{ko(value: '$data.destination'), type: 'text', placeholder: "Destination"}
+      %a.button.fdelete{ko(click: '$parent.removeVariable'), style: 'margin-bottom: -4px;'}
     <!-- /ko -->
+
     %div
       %button{ko(click: 'addVariable' )} + Add variable

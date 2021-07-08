@@ -9,3 +9,4 @@ default_mailer_options:
   from: "verboice@instedd.org"
 poirot_elasticsearch_url: http://localhost:9200
 enable_channel: true
+enable_sync_go_data: false
