@@ -183,4 +183,4 @@ onReminderGroups ->
       @reminder_group_contacts
 
     exceed_contact_limited: =>
-      @contacts().length > 1000
+      @contacts().length > 1000 && @mode() == 'manual'

@@ -81,6 +81,14 @@
     border-style: solid;
     border-color: transparent #111 transparent transparent;
   }
+  // end tooltip
+
+  .file-wrapper {
+    border-top: 1px solid #BCBCBC;
+    border-bottom: 1px solid #BCBCBC;
+    margin: 5px 0;
+    padding: 5px 0;
+  }
 }
 
 .alert {
@@ -120,7 +128,7 @@
 
 // Common
 .d-flex {
-  display: flex;
+  display: flex !important;
 }
 
 .align-items-center {
@@ -143,11 +151,22 @@
 .mr-1 {
   margin-right: 5px !important;
 }
-.text-left {
-  text-align: left !important;
-}
+
 .code-higlight {
   background-color: #ccc;
   color: #000;
 }
 
+.text-gray {
+  color: #555 !important;
+}
+.text-left {
+  text-align: left !important;
+}
+.text-right {
+  text-align: right !important;
+}
+
+.pointer {
+  cursor: pointer;
+}
