@@ -871,6 +871,7 @@ en:
           add_attr: "+ Add attribute"
           source_attr: Source attribute
           destination_attr: Destination attribute
+          download_sample: Download Sample file
         action:
           edit: "Edit"
           save: "Save"

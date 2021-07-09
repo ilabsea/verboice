@@ -61,22 +61,25 @@
           = t('views.ext.reminder_groups.action.reset')
 
         .ux-collapsible.collapsed.w60.file_upload{"data-on-expanded" => "grey"}
-          %span
+          %span.d-flex.align-items-center
             %a.button.fexport{ko(click: 'collapse_expand_import'), :href => "#"}
               = t('views.ext.reminder_groups.action.import_csv')
 
-            .updated_at.right{style:"padding: 8px 20px 0;"}
+            .flex-1.updated_at.text-right{style:"padding-right: 20px"}
               %span.title= "#{t('views.ext.reminder_groups.label.last_updated_at')} : "
               %span.title{ko(text: :updated_at)}
 
-          .ux-content.w40
+          .ux-content.w50
             = form_tag("", :multipart => true) do
-              %hr
-              = file_field_tag 'file_name', :class =>'button white', accept: '.csv,text/csv'
-              %hr
-              .right
+              .file-wrapper.d-flex.align-items-center.border
+                .flex-1
+                  = file_field_tag 'file_name', class: 'pointer', accept: '.csv,text/csv'
+
+                %a.button.fimport.text-gray{href: '/reminder_group_addresses.csv', download: true, target: '_blank'}
+                  = t('views.ext.reminder_groups.label.download_sample')
+
+              .mt-1
                 %button.grey{ko(click: 'upload'), :type => "submit"}= t('views.ext.reminder_groups.action.upload')
                 %a.button.white.cancel{ko(click: 'cancel_upload'), href: 'javascript:void(0)'}= t('views.ext.reminder_groups.action.cancel')
-              .clear
 
         <!-- /ko -->
