@@ -12,11 +12,11 @@
 
     - if Rails.configuration.verboice_configuration[:enable_sync_go_data]
       .form-group
-        %label Mode (Choose whether you will add contact manually or sync it from Go.data)
+        %label= t('views.ext.reminder_groups.label.mode')
 
         %select.w30{ko(value: 'mode', name: :mode, disable: '!!id()') }
           %option{value: 'manual'}= t('views.ext.reminder_groups.label.manual')
-          %option{value: 'sync_with_go_data'}= t('views.ext.reminder_groups.label.synced_with_go_data')
+          %option{value: 'sync_with_go_data'}= t('views.ext.reminder_groups.label.sync_with_go_data')
 
   <!-- ko if: mode() != 'sync_with_go_data' -->
   = render 'manual_contact_form'
