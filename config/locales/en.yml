@@ -858,8 +858,19 @@ en:
           confirm_reset: 'Are you sure you want to reset this reminder group?'
           total_contacts: "Total contacts"
           last_updated_at: "Last updated at"
+          mode: Mode (Choose whether you will add contact manually or sync it from Go.data)
           manual: Manual
-          synced_with_go_data: Synced with Go.Data
+          sync_with_go_data: Sync with Go.Data
+          enable_sync_data: Enable sync data
+          endpoint: Endpoint
+          username: Username
+          password: Password
+          sync_schedule: Sync schedule
+          o_clock: "o'clock"
+          dictionary_attrs: Dictionary Attributes
+          add_attr: "+ Add attribute"
+          source_attr: Source attribute
+          destination_attr: Destination attribute
         action:
           edit: "Edit"
           save: "Save"

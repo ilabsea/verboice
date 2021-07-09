@@ -1,40 +1,53 @@
 %div
   .form-group
     %input#enable_sync{ko(checked: 'enable_sync'), type: 'checkbox'}
-    %label.mb-0{for: 'enable_sync'} Enable sync data
+    %label.mb-0{for: 'enable_sync'}
+      = t('views.ext.reminder_groups.label.enable_sync_data')
 
   .form-group
-    %label{ko(css: {error: '!endpoint()'}), :for => :endpoint}= 'Endpint'
+    %label{ko(css: {error: '!endpoint()'}), :for => :endpoint}
+      = t('views.ext.reminder_groups.label.endpoint')
     %input.form-control.w30{ko(value: 'endpoint', css: {error: '!endpoint()'}), type: 'text'}
 
   .form-group
-    %label{ko(css: {error: '!username()'}), :for => :username}= 'Username'
+    %label{ko(css: {error: '!username()'}), :for => :username}
+      = t('views.ext.reminder_groups.label.username')
     %input.form-control.w30{ko(value: 'username', css: {error: '!username()'}), type: 'text'}
 
   .form-group
-    %label{ko(css: {error: '!password()'}), :for => :password}= 'Password'
+    %label{ko(css: {error: '!password()'}), :for => :password}
+      = t('views.ext.reminder_groups.label.password')
     %input.form-control.w30{ko(value: 'password', css: {error: '!password()'}), type: 'password'}
 
   .form-group
-    %label Synced schedule
+    %label= t('views.ext.reminder_groups.label.sync_schedule')
     .d-flex.align-items-center
       %select.form-control.w30{ko(value: 'schedule', options: (0..23).to_a)}
-      %span.ml-1 o'clock
+      %span.ml-1= t('views.ext.reminder_groups.label.o_clock')
 
+  / Dynamic Variables
   %fieldset
-    %legend Dictionary Variable
+    %legend.d-flex
+      %span.mr-1= t('views.ext.reminder_groups.label.dictionary_attrs')
+      .tooltip
+        = tip_info("")
+        .tooltiptext.tooltip-right
+          .text-left= source_attr_description.html_safe
 
     .form-group.d-flex.align-items-center
-      %input.flex-1.form-control.mr-1{ko(value: 'phone_number_field', css: {error: '!phone_number_field()'}), type: 'text'}
+      %input.flex-1.form-control.mr-1{ko(value: 'phone_number_field', css: {error: '!phone_number_field()'}), type: 'text', placeholder: t('views.ext.reminder_groups.label.source_attr')}
+
       %input.flex-1.form-control{value: 'Phone number', type: 'text', readonly: true}
       %div{style: 'width: 28px;'}
 
     <!-- ko foreach: variables -->
     .form-group.d-flex.align-items-center
-      %input.flex-1.form-control.mr-1{ko(value: '$data.source'), type: 'text', placeholder: "Source"}
-      %input.flex-1.form-control{ko(value: '$data.destination'), type: 'text', placeholder: "Destination"}
+      %input.flex-1.form-control.mr-1{ko(value: '$data.source'), type: 'text', placeholder: t('views.ext.reminder_groups.label.source_attr')}
+
+      %input.flex-1.form-control{ko(value: '$data.destination'), type: 'text', placeholder: t('views.ext.reminder_groups.label.destination_attr')}
+
       %a.button.fdelete{ko(click: '$parent.removeVariable'), style: 'margin-bottom: -4px;'}
     <!-- /ko -->
 
     %div
-      %button{ko(click: 'addVariable' )} + Add variable
+      %button{ko(click: 'addVariable' )}= t('views.ext.reminder_groups.label.add_attr')
