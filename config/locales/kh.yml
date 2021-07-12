@@ -856,6 +856,21 @@ kh:
           confirm_reset: 'តើ​អ្នក​ប្រាកដ​ឬ?'
           total_contacts: "លេខទំនាក់ទំនងសរុប"
           last_updated_at: "កាលបរិច្ឆេតកែប្រែចុងក្រោយ"
+          mode: Mode (Choose whether you will add contacts manually or sync it from Go.data)
+          manual: Manual
+          sync_with_go_data: Sync with Go.Data
+          enable_sync_data: Enable sync data
+          endpoint: Endpoint
+          username: Username
+          password: Password
+          sync_schedule: Sync schedule
+          o_clock: "o'clock"
+          dictionary_attrs: Dictionary Attributes
+          add_attr: "+ Add attribute"
+          source_attr: Source attribute
+          destination_attr: Destination attribute
+          download_sample: Download Sample file
+          disable_sync_with_go_data: Disabled sync with Go.data
         action:
           edit: "កែសម្រួល"
           save: "រក្សាទុក"
@@ -864,6 +879,7 @@ kh:
           import_csv: "នាំចូលបញ្ជីលេខទំនាក់ទំនងក្រុមរំលឹក (*.csv)"
           upload: "ផ្ទុក​ឡើង"
           reset: "កំណត់ឡើងវិញ"
+          sync_now: Sync now
 
       reminder_schedules:
         title: "កាលវិភាគ​ទូរស័ព្ទ​នៃ​កម្មវិធីរំលឹក"
