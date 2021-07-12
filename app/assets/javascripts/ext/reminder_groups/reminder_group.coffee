@@ -23,6 +23,7 @@ onReminderGroups ->
       @password = ko.observable(data?.sync_config.password)
       @schedule = ko.observable(data?.sync_config.schedule)
       @phone_number_field = ko.observable(data?.sync_config.phone_number_field)
+      @loading = ko.observable(false)
 
       # Variables
       @variables = ko.observableArray()
@@ -93,6 +94,19 @@ onReminderGroups ->
           action = "/ext/projects/" + project_id + "/reminder_groups/" + @id() + "/import"
           $form.attr("action", action)
           $form.submit()
+
+    sync_reminder_group: () =>
+      @loading(true)
+      $.ajax
+        url: "/api/projects/" + project_id + "/reminder_groups/" + @id() + "/sync_now"
+        type: 'PUT'
+        data: JSON.stringify({})
+        contentType: 'application/json'
+        success: (data)=>
+          @contacts.removeAll()
+          addresses = $.map(data.reminder_group_contacts, (x) -> new Contact({id: x.id, address: x.address}))
+          @contacts.push.apply(@contacts, addresses)
+          @loading(false)
 
     cancel_upload: () =>
       $.each model.reminder_groups(), (index, r) =>

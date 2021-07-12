@@ -38,6 +38,16 @@
 
         / synced with go data contact
         <!-- ko if: mode() == 'sync_with_go_data' -->
+        - if Rails.env.development?
+          <!-- ko if: !loading() -->
+          %button.fimport{ko(click: 'sync_reminder_group')}
+            = t('views.ext.reminder_groups.action.sync_now')
+          <!-- /ko -->
+
+          <!-- ko if: loading() -->
+          %span{style: 'margin-left: 10px;'} Loading...
+          <!-- /ko -->
+
         .d-flex.align-items-center.mt-1
           .flex-1
             <!-- ko if: enable_sync() -->
