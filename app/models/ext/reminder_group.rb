@@ -18,6 +18,8 @@ module Ext
     validates :name, :project, :presence => true
     validates :name, :uniqueness => { :scope => :project_id }
 
+    after_save :touch_sync_status_updated_at, :if => :enable_sync_changed?
+
     attr_accessible :name, :addresses, :project_id, :mode, :enable_sync, :sync_config, :reminder_group_contacts_attributes
 
     class << self
@@ -76,6 +78,7 @@ module Ext
 
         upsert_reminder_group_contact(phone_number, item, 'json')
       end
+      self.touch
     end
 
     def upsert_reminder_group_contact(phone_number, item, kind='csv')
@@ -84,5 +87,10 @@ module Ext
       reminder_group_contact = self.reminder_group_contacts.find_or_initialize_by_address(phone_number)
       reminder_group_contact.upsert_contact(item, kind) if reminder_group_contact.save(skip_callback: true)
     end
+
+    private
+      def touch_sync_status_updated_at
+        self.touch(:sync_status_updated_at)
+      end
   end
 end

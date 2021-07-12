@@ -16,7 +16,7 @@
 # along with Verboice.  If not, see <http://www.gnu.org/licenses/>.
 
 class ReminderGroupSerializer < ActiveModel::Serializer
-  attributes :id, :name, :addresses, :created_at, :updated_at,
+  attributes :id, :name, :addresses, :created_at, :updated_at, :sync_status_updated_at,
              :mode, :enable_sync, :sync_config, :reminder_group_contacts
 
   def addresses
