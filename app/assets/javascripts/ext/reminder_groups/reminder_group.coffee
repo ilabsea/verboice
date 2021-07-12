@@ -24,6 +24,7 @@ onReminderGroups ->
       @schedule = ko.observable(data?.sync_config.schedule)
       @phone_number_field = ko.observable(data?.sync_config.phone_number_field)
       @loading = ko.observable(false)
+      @sync_status_updated_at = ko.observable(data?.sync_status_updated_at)
 
       # Variables
       @variables = ko.observableArray()
