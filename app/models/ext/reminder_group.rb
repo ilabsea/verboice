@@ -40,24 +40,12 @@ module Ext
     end
 
     def register_address(address)
-      #TODO refactoring
-      if self.addresses.kind_of?(String)
-        self.addresses = Ext::ReminderGroup.deserialized_to_array self.addersses
-      end
-
-      if self.addresses.include?(address)
-        true
-      else
-        self.addresses.push(address)
-        self.save
-      end
+      self.reminder_group_contacts.find_or_create_by_address(address)
     end
 
     def deregister_address(address)
-      if addresses.include? (address)
-        addresses.delete(address)
-        save
-      end
+      contact = self.reminder_group_contacts.find_by_address(address)
+      contact.destroy if contact.present?
     end
 
     def import_contact_addresses(file)

@@ -52,12 +52,12 @@
           .flex-1
             <!-- ko if: enable_sync() -->
             = image_tag 'uploadOk.png'
-            %span Sync with Go.data
+            %span= t('views.ext.reminder_groups.label.sync_with_go_data')
             <!-- /ko-->
 
             <!-- ko if: !enable_sync() -->
             = image_tag 'uploadError.png'
-            %span Diabled Sync with Go.data
+            %span= t('views.ext.reminder_groups.label.diable_sync_with_go_data')
             <!-- /ko-->
 
             %div
