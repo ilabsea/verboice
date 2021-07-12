@@ -45,7 +45,7 @@ namespace :reminder_group do
     Ext::ReminderGroup.where(enable_sync: true).each do |group|
       next unless group.sync_config.schedule.to_i == Time.now.hour
 
-      Ext::ReminderGroupService.new(group).sync_from_go_data
+      Ext::ReminderGroupService.new(group).sync_with_go_data
     end
   end
 end

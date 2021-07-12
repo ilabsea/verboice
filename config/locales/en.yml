@@ -880,6 +880,7 @@ en:
           import_csv: "Import reminder contact list (*.csv)"
           upload: "Upload"
           reset: "Reset"
+          sync_now: Sync now
 
       reminder_schedules:
         title: "Reminder schedule"

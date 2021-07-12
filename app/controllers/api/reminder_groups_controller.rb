@@ -16,7 +16,7 @@
 # along with Verboice.  If not, see <http://www.gnu.org/licenses/>.
 module Api
   class ReminderGroupsController < ApiController
-    before_filter :validate_record, only: [:update, :destroy, :register, :deregister, :reset_contact]
+    before_filter :validate_record, only: [:update, :destroy, :register, :deregister, :reset_contact, :sync_now]
     before_filter :validate_project, only: [:index, :create]
 
     # GET /api/projects/:project_id/reminder_groups
@@ -82,6 +82,17 @@ module Api
         else
           render json: "There is no address: #{params[:address]}", status: :no_content
         end
+      end
+    end
+
+    # Only for development
+    def sync_now
+      if @reminder_group.present?
+        Ext::ReminderGroupService.new(@reminder_group).sync_with_go_data
+
+        render json: @reminder_group, serializer: ReminderGroupSerializer
+      else
+        render json: {}, status: :bad_request
       end
     end
 

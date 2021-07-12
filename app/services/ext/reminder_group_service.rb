@@ -24,7 +24,7 @@ module Ext
       def get_contacts(token)
         return unless token.present?
 
-        date = (DateTime.yesterday.beginning_of_day + @config.schedule.to_i.hours).iso8601(3)
+        date = (DateTime.yesterday.beginning_of_day + @config[:schedule].to_i.hours).iso8601(3)
         filter = {"filter"=>"{\"where\": {\"and\":[{\"updatedAt\":{\"gte\":\"#{date}\"}}]}}"}
         uri = URI("#{@config[:endpoint]}/api/outbreaks/8d9a7514-84a1-41ee-a527-3b4532f5d2b7/contacts?#{filter.to_query}&access_token=#{token}")
         res = Net::HTTP.get_response(uri)

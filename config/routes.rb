@@ -204,6 +204,7 @@ Verboice::Application.routes.draw do
         put :register, on: :member
         put :deregister, on: :member
         put :reset_contact, on: :member
+        put :sync_now, on: :member
       end
     end
 
