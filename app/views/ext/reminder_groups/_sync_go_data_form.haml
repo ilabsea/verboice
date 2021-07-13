@@ -5,9 +5,9 @@
       = t('views.ext.reminder_groups.label.enable_sync_data')
 
   .form-group
-    %label{ko(css: {error: '!endpoint()'}), :for => :endpoint}
+    %label{ko(css: {error: '!endpoint() || !validUrl(endpoint())'}), :for => :endpoint}
       = t('views.ext.reminder_groups.label.endpoint')
-    %input.form-control.w30{ko(value: 'endpoint', css: {error: '!endpoint()'}), type: 'text'}
+    %input.form-control.w30{ko(value: 'endpoint', css: {error: '!endpoint() || !validUrl(endpoint())'}), type: 'text'}
 
   .form-group
     %label{ko(css: {error: '!username()'}), :for => :username}

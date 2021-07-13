@@ -59,6 +59,9 @@ onReminderGroups ->
     removeVariable: (variable) =>
       @variables.remove(variable)
 
+    validUrl: (url) =>
+      !!url && !!url.match(/^((https?:\/\/)|(www.))(?:([a-zA-Z]+)|(\d+\.\d+.\d+.\d+)):\d{4}$/)
+
     copyToClipboard: () =>
       input = document.createElement('input')
       value = @contacts().map (x) -> x.address()
