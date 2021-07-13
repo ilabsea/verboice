@@ -32,44 +32,44 @@ describe Ext::ReminderGroup do
       reminder_group = Ext::ReminderGroup.create @valid
       reminder_group.register_address "1000"
 
-      # @project.contacts.size.should == 1
-      # @project.contacts.first.addresses.first.address.should == "1000"
-      reminder_group.addresses.size.should == 1
-      reminder_group.addresses.first.should == "1000"
+      @project.contacts.size.should == 1
+      @project.contacts.first.addresses.first.address.should == "1000"
+      reminder_group.reminder_group_contacts.size.should == 1
+      reminder_group.reminder_group_contacts.first.address.should == "1000"
     end
 
     it "should ignore when it's already exists" do
       reminder_group = Ext::ReminderGroup.create @valid.merge(addresses: ["1000"])
       reminder_group.register_address "1000"
 
-      reminder_group.addresses.size.should == 1
-      reminder_group.addresses.last.should == "1000"
+      reminder_group.reminder_group_contacts.size.should == 1
+      reminder_group.reminder_group_contacts.last.address.should == "1000"
     end
   end
 
   describe "#deregister_address" do
     it "should deregister address when it's exists" do
-      reminder_group = Ext::ReminderGroup.create @valid.merge(addresses: ["1000"])
+      reminder_group = Ext::ReminderGroup.create @valid.merge(reminder_group_contacts_attributes: [{address: "1000"}])
 
       # assert before process
-      reminder_group.addresses.size.should == 1
+      reminder_group.reminder_group_contacts.size.should == 1
 
       reminder_group.deregister_address "1000"
 
       # assert after process
-      reminder_group.addresses.size.should == 0
+      reminder_group.reminder_group_contacts.size.should == 0
     end
 
     it "should ignore when it doesn't exists" do
-      reminder_group = Ext::ReminderGroup.create @valid.merge(addresses: ["1000"])
+      reminder_group = Ext::ReminderGroup.create @valid.merge(reminder_group_contacts_attributes: [{address: "1000"}])
 
       # assert before process
-      reminder_group.addresses.size.should == 1
+      reminder_group.reminder_group_contacts.size.should == 1
       reminder_group.deregister_address "1001"
 
       # assert after process
-      reminder_group.addresses.size.should == 1
-      reminder_group.addresses.first.should == "1000"
+      reminder_group.reminder_group_contacts.size.should == 1
+      reminder_group.reminder_group_contacts.first.address.should == "1000"
     end
   end
 
