@@ -48,6 +48,8 @@ gem "active_model_serializers"
 gem "recaptcha", :require => "recaptcha/rails"
 gem "password_strength"
 
+gem "exception_notification", "~> 4.1.1"
+
 group :assets do
   gem 'sass-rails',   '~> 3.2.5'
   gem 'coffee-rails', '~> 3.2.2'

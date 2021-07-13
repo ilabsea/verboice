@@ -36,3 +36,4 @@ vendor/ruby
 script/sphinx3
 config/recaptcha.yml
 config/telemetry.yml
+config/application.yml

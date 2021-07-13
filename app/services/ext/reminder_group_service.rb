@@ -11,7 +11,11 @@ module Ext
     def sync_with_go_data
       return unless @reminder_group.enable_sync
 
-      get_contacts(get_token)
+      begin
+        get_contacts(get_token)
+      rescue Exception => e
+        ExceptionNotifier.notify_exception(e, data: { msg: e })
+      end
     end
 
     private
