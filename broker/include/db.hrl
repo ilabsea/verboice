@@ -23,3 +23,4 @@
 -record(nuntium_channel, {id, account_id, name, channel_name, enabled, created_at, updated_at, kind, default}).
 -record(account, {id, email, created_at, updated_at}).
 -record(channel_quota, {id, channel_id, enabled, blocked, total, used, created_at, updated_at}).
+-record(reminder_group_contact, {id, reminder_group_id, address, created_at, updated_at}).

@@ -5,13 +5,13 @@
 -include("db.hrl").
 
 run(Args, Session = #session{project = Project, call_log = CallLog, js_context = JsContext}) ->
-  GroupName = proplists:get_value(reminder_group, Args),
+  ReminderGroupName = proplists:get_value(reminder_group, Args),
   Expr = proplists:get_value(number, Args),
-  case reminder_group:find([{project_id, Project#project.id}, {name, GroupName}]) of
+  case reminder_group:find([{project_id, Project#project.id}, {name, ReminderGroupName}]) of
     undefined ->
       StepName = erjs_context:get(current_step_name, JsContext),
       throw("Step " ++ StepName ++ " is broken");
-    Group ->
+    ReminderGroup ->
       PhoneNumber = case Expr of
         [] -> 
           Call = call_log:find(CallLog:id()),
@@ -21,11 +21,11 @@ run(Args, Session = #session{project = Project, call_log = CallLog, js_context =
           OtherNumber
       end,
       
-      NewGroup = Group:register_address(PhoneNumber),
-      NewGroup:save(),
+      NewReminderGroup = ReminderGroup:register_address(PhoneNumber),
+      NewReminderGroup:save(),
 
-      poirot:log(info, "has been registered to ~p", [GroupName]),
-      CallLog:info([PhoneNumber, " has been registered to ", GroupName], [])
+      poirot:log(info, "has been registered to ~p", [ReminderGroupName]),
+      CallLog:info([PhoneNumber, " has been registered to ", ReminderGroupName], [])
   end,
  
   {next, Session}.
