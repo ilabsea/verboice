@@ -863,7 +863,7 @@ en:
           sync_with_go_data: Sync with Go.Data
           enable_sync_data: Enable sync data
           endpoint: Endpoint Url
-          username: Username(email)
+          username: Username/Email
           password: Password
           sync_schedule: Sync schedule
           o_clock: "o'clock"
@@ -873,6 +873,7 @@ en:
           destination_attr: Destination attribute
           download_sample: Download Sample file
           disable_sync_with_go_data: Disabled sync with Go.data
+          authorize_url: Authorize Url
         action:
           edit: "Edit"
           save: "Save"

@@ -1,4 +1,4 @@
-.box.collapsed.collapsible_crud_box.grey.w60
+.box.collapsed.collapsible_crud_box.grey.w60{style: 'padding: 8px;'}
   .toptitle{ ko(css: {overflowContent: :showMore}) }
     .address-wrapper
       %span.title{ko(text: :name)}
@@ -22,65 +22,62 @@
 
     .bottom
       %div
-        <!-- ko if: !$data.exceed_contact_limited() -->
-        %button.farrow.collapse_trigger{ko(click: '$root.edit_reminder_group')}
-          = t('views.ext.reminder_groups.action.edit')
-        <!-- /ko -->
+        .d-flex
+          %div
+            <!-- ko if: !$data.exceed_contact_limited() -->
+            %button.farrow.collapse_trigger{ko(click: '$root.edit_reminder_group')}
+              = t('views.ext.reminder_groups.action.edit')
+            <!-- /ko -->
 
-        <!-- ko if: $data.exceed_contact_limited() -->
-        %a.tooltip{ko(click: 'copyToClipboard')}
-          %button.farrow.collapse_trigger.disabled{ style: "cursor: auto;"}
-            = t('views.ext.reminder_groups.action.edit')
+            <!-- ko if: $data.exceed_contact_limited() -->
+            %a.tooltip{ko(click: 'copyToClipboard')}
+              %button.farrow.collapse_trigger.disabled{ style: "cursor: auto;"}
+                = t('views.ext.reminder_groups.action.edit')
 
-          %span.tooltiptext.tooltip-right{style: "min-width: 200px !important"}
-            = t('views.ext.reminder_groups.label.exceed_contact_limited')
-        <!-- /ko -->
+              %span.tooltiptext.tooltip-right{style: "min-width: 200px !important"}
+                = t('views.ext.reminder_groups.label.exceed_contact_limited')
+            <!-- /ko -->
 
-        / synced with go data contact
-        <!-- ko if: mode() == 'sync_with_go_data' -->
-        - if Rails.env.development?
-          <!-- ko if: !loading() -->
-          %button.fimport{ko(click: 'sync_reminder_group')}
-            = t('views.ext.reminder_groups.action.sync_now')
-          <!-- /ko -->
+            %button.fuTurn.collapse_trigger{ko(click: '$root.reset_reminder_group')}
+              = t('views.ext.reminder_groups.action.reset')
 
-          <!-- ko if: loading() -->
-          %span{style: 'margin-left: 10px;'} Loading...
-          <!-- /ko -->
+            / synced with go data contact
+            <!-- ko if: mode() == 'sync_with_go_data' -->
+            - if Rails.env.development?
+              <!-- ko if: !loading() -->
+              %button.fimport{ko(click: 'sync_reminder_group')}
+                = t('views.ext.reminder_groups.action.sync_now')
+              <!-- /ko -->
 
-        .d-flex.align-items-center.mt-1
-          .flex-1
+              <!-- ko if: loading() -->
+              %span{style: 'margin-left: 10px;'} Loading...
+              <!-- /ko -->
+            <!-- /ko -->
+
+
+          <!-- ko if: mode() == 'sync_with_go_data' -->
+          .flex-1.d-flex.align-items-center.justify-content-end
             <!-- ko if: enable_sync() -->
             = image_tag 'uploadOk.png'
-            %span= t('views.ext.reminder_groups.label.sync_with_go_data')
+            %span.ml-1.mr-1= t('views.ext.reminder_groups.label.sync_with_go_data')
             <!-- /ko-->
 
             <!-- ko if: !enable_sync() -->
             = image_tag 'uploadError.png'
-            %span= t('views.ext.reminder_groups.label.disable_sync_with_go_data')
+            %span.ml-1.mr-1= t('views.ext.reminder_groups.label.disable_sync_with_go_data')
             <!-- /ko-->
 
-            %div
-              (
-              %span{ko(text: :sync_status_updated_at)}
-              )
-
-          .updated_at{style:"padding-right: 20px;"}
-            %span.title= "#{t('views.ext.reminder_groups.label.last_updated_at')} : "
-            %span.title{ko(text: :updated_at)}
-        <!-- /ko -->
-
-        / manual contact
-        <!-- ko if: mode() != 'sync_with_go_data' -->
-        %button.fuTurn.collapse_trigger{ko(click: '$root.reset_reminder_group')}
-          = t('views.ext.reminder_groups.action.reset')
+            (
+            %span{ko(text: :sync_status_updated_at)}
+            )
+          <!-- /ko -->
 
         .ux-collapsible.collapsed.w60.file_upload{"data-on-expanded" => "grey"}
           %span.d-flex.align-items-center
             %a.button.fexport{ko(click: 'collapse_expand_import'), :href => "#"}
               = t('views.ext.reminder_groups.action.import_csv')
 
-            .flex-1.updated_at.text-right{style:"padding-right: 20px"}
+            .flex-1.updated_at.text-right
               %span.title= "#{t('views.ext.reminder_groups.label.last_updated_at')} : "
               %span.title{ko(text: :updated_at)}
 

@@ -11,29 +11,48 @@ module Ext
     def sync_with_go_data
       return unless @reminder_group.enable_sync
 
-      begin
-        get_contacts(get_token)
-      rescue Exception => e
-        ExceptionNotifier.notify_exception(e, data: { msg: e })
-      end
+      get_contacts(get_token)
     end
 
     private
       def get_token
-        uri = URI("#{@config[:endpoint]}/api/oauth/token")
-        res = Net::HTTP.post_form(uri, 'username' => @config[:username], 'password' => @config[:password])
-        res.is_a?(Net::HTTPSuccess) ? JSON.parse(res.body)["access_token"] : nil
+        begin
+          res = Net::HTTP.post_form(URI(@config[:authorize_url]), 'username' => @config[:username], 'password' => @config[:password])
+          return JSON.parse(res.body)["access_token"] if res.is_a?(Net::HTTPSuccess)
+
+          notify_error(Exception.new, res.body)
+        rescue Exception => e
+          notify_error(e)
+        end
       end
 
       def get_contacts(token)
-        return unless token.present?
+        begin
+          res = get_contacts_response(token)
+          return @reminder_group.upsert_reminder_group_contacts(JSON.parse(res.body)) if res.is_a?(Net::HTTPSuccess)
 
+          notify_error(Exception.new, res.body)
+        rescue Exception => e
+          notify_error(e)
+        end
+      end
+
+      def get_contacts_response(token)
         date = (DateTime.yesterday.beginning_of_day + @config[:schedule].to_i.hours).iso8601(3)
         filter = {"filter"=>"{\"where\": {\"and\":[{\"updatedAt\":{\"gte\":\"#{date}\"}}]}}"}
-        uri = URI("#{@config[:endpoint]}/api/outbreaks/8d9a7514-84a1-41ee-a527-3b4532f5d2b7/contacts?#{filter.to_query}&access_token=#{token}")
-        res = Net::HTTP.get_response(uri)
+        uri = URI("#{@config[:endpoint]}?#{filter.to_query}&access_token=#{token}")
 
-        @reminder_group.upsert_reminder_group_contacts(JSON.parse(res.body)) if res.is_a?(Net::HTTPSuccess)
+        http = Net::HTTP.new(uri.host, uri.port)
+        http.read_timeout = ENV['TIMEOUT_DURATION'].present? ? ENV['TIMEOUT_DURATION'].to_i : 60
+        http.get("#{uri.path}?#{uri.query}")
+      end
+
+      def notify_error(exception, message=nil)
+        ExceptionNotifier.notify_exception(exception, data: { msg: "#{msg_error}: #{message}" })
+      end
+
+      def msg_error
+        @msg_error ||= "Project: #{@reminder_group.project.name}(#{@reminder_group.project_id}), Reminder group: #{@reminder_group.name}(#{@reminder_group.id})"
       end
   end
 end
