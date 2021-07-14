@@ -134,6 +134,10 @@
   align-items: center;
 }
 
+.justify-content-end {
+  justify-content: flex-end;
+}
+
 .flex-1 {
   flex: 1;
 }
@@ -151,9 +155,26 @@
   margin-right: 5px !important;
 }
 
+.dictionary-tip-wrapper {
+  padding: 10px;
+  width: 500px;
+  line-height: 1.5;
+
+  .type {
+    width: 108px;
+  }
+
+  a {
+    color: #007bff!important;
+    text-decoration: underline;
+  }
+}
+
 .code-higlight {
-  background-color: #ccc;
-  color: #000;
+  background-color: #fff;
+  color: #dc3545;
+  font-weight: normal;
+  padding: 2px 1px;
 }
 
 .text-gray {

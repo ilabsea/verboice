@@ -5,9 +5,9 @@
       = t('views.ext.reminder_groups.label.enable_sync_data')
 
   .form-group
-    %label{ko(css: {error: '!endpoint() || !validUrl(endpoint())'}), :for => :endpoint}
-      = t('views.ext.reminder_groups.label.endpoint')
-    %input.form-control.w30{ko(value: 'endpoint', css: {error: '!endpoint() || !validUrl(endpoint())'}), type: 'text'}
+    %label{ko(css: {error: '!authorize_url() || !validUrl(authorize_url())'}), :for => :authorize_url}
+      = t('views.ext.reminder_groups.label.authorize_url')
+    %input.form-control.w30{ko(value: 'authorize_url', css: {error: '!authorize_url() || !validUrl(authorize_url())'}), type: 'text'}
 
   .form-group
     %label{ko(css: {error: '!username()'}), :for => :username}
@@ -20,7 +20,18 @@
     %input.form-control.w30{ko(value: 'password', css: {error: '!password()'}), type: 'password'}
 
   .form-group
-    %label= t('views.ext.reminder_groups.label.sync_schedule')
+    %label{ko(css: {error: '!endpoint() || !validUrl(endpoint())'}), :for => :endpoint}
+      = t('views.ext.reminder_groups.label.endpoint')
+    %input.form-control.w30{ko(value: 'endpoint', css: {error: '!endpoint() || !validUrl(endpoint())'}), type: 'text'}
+
+  .form-group
+    %label
+      = t('views.ext.reminder_groups.label.sync_schedule')
+      .tooltip
+        = tip_info("")
+        .tooltiptext.tooltip-right
+          .text-left= schedule_description.html_safe
+
     .d-flex.align-items-center
       %select.form-control.w30{ko(value: 'schedule', options: (0..23).to_a)}
       %span.ml-1= t('views.ext.reminder_groups.label.o_clock')

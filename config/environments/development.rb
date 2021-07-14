@@ -39,7 +39,7 @@ Verboice::Application.configure do
 
   smtp_settings = {}.tap do |settings|
     settings[:address]              = ENV['SETTINGS__SMTP__ADDRESS'] if ENV['SETTINGS__SMTP__ADDRESS'].present?
-    settings[:port]                 = ENV['SETTINGS__SMTP__PORT'] if ENV['SETTINGS__SMTP__PORT'].present?
+    settings[:port]                 = ENV['SETTINGS__SMTP__PORT'].to_i if ENV['SETTINGS__SMTP__PORT'].present?
     settings[:domain]               = ENV['SETTINGS__SMTP__DOMAIN'] if ENV['SETTINGS__SMTP__DOMAIN'].present?
     settings[:user_name]            = ENV['SETTINGS__SMTP__USER_NAME'] if ENV['SETTINGS__SMTP__USER_NAME'].present?
     settings[:password]             = ENV['SETTINGS__SMTP__PASSWORD'] if ENV['SETTINGS__SMTP__PASSWORD'].present?

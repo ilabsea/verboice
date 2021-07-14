@@ -18,6 +18,7 @@ onReminderGroups ->
       @mode = ko.observable(data?.mode)
       @enable_sync = ko.observable(data?.enable_sync)
 
+      @authorize_url = ko.observable(data?.sync_config.authorize_url)
       @endpoint = ko.observable(data?.sync_config.endpoint)
       @username = ko.observable(data?.sync_config.username)
       @password = ko.observable(data?.sync_config.password)
@@ -44,7 +45,7 @@ onReminderGroups ->
       @error = ko.computed =>
         isError = @name_error() || @name_duplicated()
         if @mode() == 'sync_with_go_data'
-          isError ||= !@endpoint() || !@username() || !@password() || !@phone_number_field()
+          isError ||= !@endpoint() || !@username() || !@password() || !@phone_number_field() || !@authorize_url()
         isError
 
       @valid = ko.computed =>
@@ -60,7 +61,7 @@ onReminderGroups ->
       @variables.remove(variable)
 
     validUrl: (url) =>
-      !!url && !!url.match(/^((https?:\/\/)|(www.))(?:([a-zA-Z]+)|(\d+\.\d+.\d+.\d+)):\d{4}$/)
+      !!url && !!url.match(/^https?\:\/\/[^\/\s]+(\/.*)?$/)
 
     copyToClipboard: () =>
       input = document.createElement('input')
@@ -171,6 +172,7 @@ onReminderGroups ->
             username: @username()
             password: @password()
             schedule: @schedule()
+            authorize_url: @authorize_url()
             phone_number_field: @phone_number_field()
             variables: @variables().filter (x) -> (typeof x.source == 'string' && !!x.source) && (typeof x.destination == 'string' && !!x.destination)
         )

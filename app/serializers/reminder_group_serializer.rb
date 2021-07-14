@@ -27,4 +27,7 @@ class ReminderGroupSerializer < ActiveModel::Serializer
     object.updated_at.in_time_zone(object.project.time_zone)
   end
 
+  def sync_status_updated_at
+    object.sync_status_updated_at.in_time_zone(object.project.time_zone)
+  end
 end

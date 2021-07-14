@@ -861,7 +861,7 @@ kh:
           sync_with_go_data: Sync with Go.Data
           enable_sync_data: បើកដំណើរការទិន្នន័យសមកាលកម្ម
           endpoint: Endpoint Url
-          username: ឈ្មោះអ្នកប្រើប្រាស់(email)
+          username: ឈ្មោះអ្នកប្រើប្រាស់/អ៊ីម៉ែល
           password: ពាក្យសម្ងាត់
           sync_schedule: កាលវិភាគសមកាលកម្ម
           o_clock: "o'clock"
@@ -871,6 +871,7 @@ kh:
           destination_attr: Destination attribute
           download_sample: Download Sample file
           disable_sync_with_go_data: Disabled sync with Go.data
+          authorize_url: Authorize Url
         action:
           edit: "កែសម្រួល"
           save: "រក្សាទុក"
