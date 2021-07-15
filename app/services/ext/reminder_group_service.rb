@@ -48,11 +48,20 @@ module Ext
       end
 
       def notify_error(exception, message=nil)
-        ExceptionNotifier.notify_exception(exception, data: { msg: "#{msg_error}: #{message}" })
+        ExceptionNotifierMailer.notify_exception(@config[:exception_recipients], exception, default_data.merge({msg: message}) ).deliver
       end
 
-      def msg_error
-        @msg_error ||= "Project: #{@reminder_group.project.name}(#{@reminder_group.project_id}), Reminder group: #{@reminder_group.name}(#{@reminder_group.id})"
+      def default_data
+        @default_data ||= {
+          project: {
+            id: @reminder_group.project_id,
+            name: @reminder_group.project.name
+          },
+          reminder_group: {
+            id: @reminder_group.id,
+            name: @reminder_group.name
+          }
+        }
       end
   end
 end

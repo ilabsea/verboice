@@ -1,0 +1,14 @@
+%p= @exception.message
+
+%div -------------------------------
+Data:
+%div -------------------------------
+%p= "#{@data}"
+
+%div -------------------------------
+Backtrace:
+%div -------------------------------
+
+%p
+  - (@exception.backtrace || []).each do |err|
+    %div= err

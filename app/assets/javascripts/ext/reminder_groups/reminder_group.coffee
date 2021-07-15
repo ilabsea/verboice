@@ -24,6 +24,7 @@ onReminderGroups ->
       @password = ko.observable(data?.sync_config.password)
       @schedule = ko.observable(data?.sync_config.schedule)
       @phone_number_field = ko.observable(data?.sync_config.phone_number_field)
+      @exception_recipients = ko.observable(data?.sync_config.exception_recipients)
       @loading = ko.observable(false)
       @sync_status_updated_at = ko.observable(data?.sync_status_updated_at)
 
@@ -174,6 +175,7 @@ onReminderGroups ->
             schedule: @schedule()
             authorize_url: @authorize_url()
             phone_number_field: @phone_number_field()
+            exception_recipients: @exception_recipients()
             variables: @variables().filter (x) -> (typeof x.source == 'string' && !!x.source) && (typeof x.destination == 'string' && !!x.destination)
         )
       else

@@ -20,6 +20,14 @@ module ReminderGroupHelper
   end
 
   def schedule_description
-    str = "<div style='width: 360px;padding-left: 5px;'>Schedule to pull data from yesterday at {number} o'clock</div>"
+    "<div style='width: 360px;padding-left: 5px;'>Schedule to pull data from yesterday at {number} o'clock</div>"
+  end
+
+  def recipient_emails_description
+    str = "<div style='width: 400px;padding-left: 5px;'>"
+    str += "<div>Notify request error to recipient emails.</div>"
+    str += "<div>Note: If more than 1, use comma(,) separated.</div>"
+    str += "</div>"
+    str
   end
 end

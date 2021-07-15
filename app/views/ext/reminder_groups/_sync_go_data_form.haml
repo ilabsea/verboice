@@ -36,6 +36,16 @@
       %select.form-control.w30{ko(value: 'schedule', options: (0..23).to_a)}
       %span.ml-1= t('views.ext.reminder_groups.label.o_clock')
 
+  .form-group
+    %label
+      = t('views.ext.reminder_groups.label.exception_recipients')
+      .tooltip
+        = tip_info("")
+        .tooltiptext.tooltip-right
+          .text-left= recipient_emails_description.html_safe
+
+    %input.form-control.w30{ko(value: 'exception_recipients'), type: 'text'}
+
   / Dynamic Variables
   %fieldset
     %legend.d-flex
