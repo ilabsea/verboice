@@ -15,17 +15,21 @@
 # You should have received a copy of the GNU General Public License
 # along with Verboice.  If not, see <http://www.gnu.org/licenses/>.
 
-class BrokerClient
-  TIMEOUT = 10     # in seconds
-  PORT = Rails.configuration.verboice_configuration[:broker_port].to_i
-  HOST = Rails.configuration.verboice_configuration[:broker_host] || '127.0.0.1'
-  @client = BERTRPC::Service.new(HOST, PORT, TIMEOUT)
+class ReminderGroupSerializer < ActiveModel::Serializer
+  attributes :id, :name, :addresses, :created_at, :updated_at, :sync_status_updated_at,
+             :mode, :enable_sync, :sync_config, :reminder_group_contacts
 
-  def self.invalidate_cache(entity, id)
-    @client.cast.facade.invalidate_cache(entity, id) rescue nil
+  def addresses
+    object.reminder_group_contacts.pluck(:address)
   end
 
-  def self.method_missing(name, *args)
-    @client.call.facade.send name, *args
+  def updated_at
+    object.updated_at.in_time_zone(object.project.time_zone)
+  end
+
+  def sync_status_updated_at
+    return unless object.sync_status_updated_at.present?
+
+    object.sync_status_updated_at.in_time_zone(object.project.time_zone)
   end
 end

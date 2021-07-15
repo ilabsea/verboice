@@ -853,17 +853,36 @@ en:
           name_exists: "Name is already exists"
           copied: "Copied"
           copy: "Copy"
+          exceed_contact_limited: "Phone number is exceed limited(>1000)"
           successfully_reset: 'Reminder group is successfully reset'
           confirm_reset: 'Are you sure you want to reset this reminder group?'
           total_contacts: "Total contacts"
+          last_updated_at: "Last updated at"
+          mode: Mode (Choose whether you will add contacts manually or sync it from Go.data)
+          manual: Manual
+          sync_with_go_data: Sync with Go.Data
+          enable_sync_data: Enable sync data
+          endpoint: Endpoint Url
+          username: Username/Email
+          password: Password
+          sync_schedule: Sync schedule
+          o_clock: "o'clock"
+          dictionary_attrs: Dictionary Attributes
+          add_attr: "+ Add attribute"
+          source_attr: Source attribute
+          destination_attr: Destination attribute
+          download_sample: Download Sample file
+          disable_sync_with_go_data: Disabled sync with Go.data
+          authorize_url: Authorize Url
         action:
           edit: "Edit"
           save: "Save"
           cancel: "Cancel"
           new: "New reminder group"
-          import_csv: "Import reminder contact list"
+          import_csv: "Import reminder contact list (*.csv)"
           upload: "Upload"
           reset: "Reset"
+          sync_now: Sync now
 
       reminder_schedules:
         title: "Reminder schedule"

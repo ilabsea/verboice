@@ -16,26 +16,20 @@
 # along with Verboice.  If not, see <http://www.gnu.org/licenses/>.
 module Api
   class ReminderGroupsController < ApiController
-    before_filter :validate_record, only: [:update, :destroy, :register, :deregister]
+    before_filter :validate_record, only: [:update, :destroy, :register, :deregister, :reset_contact, :sync_now]
     before_filter :validate_project, only: [:index, :create]
 
     # GET /api/projects/:project_id/reminder_groups
     def index
-      render json: @reminder_groups, root: false
+      render json: @reminder_groups.includes(:reminder_group_contacts), each_serializer: ReminderGroupSerializer, root: false
     end
 
     # POST /api/projects/:project_id/reminder_groups
     def create
-      params[:reminder_group][:addresses] = params[:reminder_group][:addresses].map(&:to_s).uniq if params[:reminder_group] && params[:reminder_group][:addresses].kind_of?(Array)
       @reminder_group = @reminder_groups.build params[:reminder_group]
       
-      if params[:reminder_group].present? && params[:reminder_group][:addresses].present? && !params[:reminder_group][:addresses].kind_of?(Array)
-        bad_request_invalid_array_parameter 'creating'
-        return
-      end
-
       if @reminder_group.save
-        render json: @reminder_group, status: :created
+        render json: @reminder_group, serializer: ReminderGroupSerializer, status: :created
       else
         render json: errors_to_json(@reminder_group, 'creating'), status: :bad_request
       end
@@ -43,14 +37,8 @@ module Api
 
     # PUT /api/projects/:project_id/reminder_groups/:id
     def update
-      if params[:reminder_group].present? && params[:reminder_group][:addresses].present? && !params[:reminder_group][:addresses].kind_of?(Array)
-        bad_request_invalid_array_parameter 'updating'
-        return
-      end
-
-      params[:reminder_group][:addresses] = params[:reminder_group][:addresses].map(&:to_s).uniq if params[:reminder_group] && params[:reminder_group][:addresses].kind_of?(Array)
       if @reminder_group.update_attributes(params[:reminder_group])
-        render json: @reminder_group
+        render json: @reminder_group, serializer: ReminderGroupSerializer
       else
         render json: errors_to_json(@reminder_group, 'updating'), status: :bad_request
       end
@@ -62,6 +50,15 @@ module Api
         render json: @reminder_group
       else
         render json: errors_to_json(@reminder_group, 'deleting'), status: :bad_request
+      end
+    end
+
+    # PUT /api/projects/:project_id/reminder_groups/:id/reset_contact
+    def reset_contact
+      if @reminder_group.reminder_group_contacts.delete_all
+        render json: @reminder_group, serializer: ReminderGroupSerializer
+      else
+        render json: errors_to_json(@reminder_group, 'updating'), status: :bad_request
       end
     end
 
@@ -88,33 +85,36 @@ module Api
       end
     end
 
+    # Only for development
+    def sync_now
+      if @reminder_group.present?
+        Ext::ReminderGroupService.new(@reminder_group).sync_with_go_data
+
+        render json: @reminder_group, serializer: ReminderGroupSerializer
+      else
+        render json: {}, status: :bad_request
+      end
+    end
+
     private
-
-    def bad_request_invalid_array_parameter action
-      response = errors_to_json(@reminder_group, action)
-      response[:properties].push({addresses: "Attribute was supposed to be a Array, but was a String"})
-      render json: response, status: :bad_request
-    end
-
-    def validate_project
-      begin
-        load_project
-        @reminder_groups = @project.ext_reminder_groups if @project
-      rescue
-        render json: "The project is not found".to_json, status: :not_found
-        return
+      def validate_project
+        begin
+          load_project
+          @reminder_groups = @project.ext_reminder_groups if @project
+        rescue
+          render json: "The project is not found".to_json, status: :not_found
+          return
+        end
       end
-    end
 
-    def validate_record
-      begin
-        load_project
-        @reminder_group = @project.ext_reminder_groups.find(params[:id]) if @project
-      rescue
-        render json: "The reminder group is not found".to_json, status: :not_found
-        return
+      def validate_record
+        begin
+          load_project
+          @reminder_group = @project.ext_reminder_groups.find(params[:id]) if @project
+        rescue
+          render json: "The reminder group is not found".to_json, status: :not_found
+          return
+        end
       end
-    end
-
   end
 end

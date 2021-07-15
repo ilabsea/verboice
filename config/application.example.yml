@@ -1,0 +1,17 @@
+default: &default
+  SETTINGS__SMTP__ADDRESS: address
+  SETTINGS__SMTP__DOMAIN: domain
+  SETTINGS__SMTP__USER_NAME: username
+  SETTINGS__SMTP__PASSWORD: password
+  SETTINGS__SMTP__HOST: host
+  SETTINGS__SMTP__DEFAULT_FROM: notifications@example.org
+  SETTINGS__SMTP__PORT: '587'
+  MAILER_SENDER: notifications@example.org
+  EXCEPTION_RECIPIENTS: amind@instedd.org
+  TIMEOUT_DURATION: '60'
+
+development:
+  <<: *default
+
+production:
+  <<: *default

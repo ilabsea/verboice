@@ -851,17 +851,36 @@ kh:
           name_exists: "ឈ្មោះ ធ្លាប់មានរួចហើយ"
           copied: "ថតចម្លងរួច"
           copy: "ថតចម្លង"
+          exceed_contact_limited: "លេខទូរសព្ទ័លើសចំនួនកំណត់(>1000)"
           successfully_reset: 'ក្រុមរំលឹកត្រូវបានកំណត់ឡើងវិញដោយជោគជ័យ'
           confirm_reset: 'តើ​អ្នក​ប្រាកដ​ឬ?'
           total_contacts: "លេខទំនាក់ទំនងសរុប"
+          last_updated_at: "កាលបរិច្ឆេតកែប្រែចុងក្រោយ"
+          mode: Mode (ជ្រើសរើសថាតើអ្នកនឹងបន្ថែមទំនាក់ទំនងដោយដៃឬ sync ពី Go.data)
+          manual: Manual
+          sync_with_go_data: Sync with Go.Data
+          enable_sync_data: បើកដំណើរការទិន្នន័យសមកាលកម្ម
+          endpoint: Endpoint Url
+          username: ឈ្មោះអ្នកប្រើប្រាស់/អ៊ីម៉ែល
+          password: ពាក្យសម្ងាត់
+          sync_schedule: កាលវិភាគសមកាលកម្ម
+          o_clock: "o'clock"
+          dictionary_attrs: Dictionary Attributes
+          add_attr: "+ Add attribute"
+          source_attr: Source attribute
+          destination_attr: Destination attribute
+          download_sample: Download Sample file
+          disable_sync_with_go_data: Disabled sync with Go.data
+          authorize_url: Authorize Url
         action:
           edit: "កែសម្រួល"
           save: "រក្សាទុក"
           cancel: "បោះបង់"
           new: "ក្រុមនៃការរំលឹកថ្មី"
-          import_csv: "នាំចូលបញ្ជីលេខទំនាក់ទំនងក្រុមរំលឹក"
+          import_csv: "នាំចូលបញ្ជីលេខទំនាក់ទំនងក្រុមរំលឹក (*.csv)"
           upload: "ផ្ទុក​ឡើង"
           reset: "កំណត់ឡើងវិញ"
+          sync_now: Sync now
 
       reminder_schedules:
         title: "កាលវិភាគ​ទូរស័ព្ទ​នៃ​កម្មវិធីរំលឹក"

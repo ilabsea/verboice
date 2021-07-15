@@ -1,4 +1,14 @@
 GIT
+  remote: git://github.com/instedd/telemetry_rails.git
+  revision: aee5fc99e3dbe06e6cdd077c8042a2ada0bb6995
+  ref: aee5fc99e3dbe06e6cdd077c8042a2ada0bb6995
+  specs:
+    instedd_telemetry (0.0.1)
+      global_phone
+      global_phone_dbgen
+      rails
+
+GIT
   remote: https://github.com/edave/enumerated_attribute.git
   revision: ec1021d11874f37d30589f91814d069884348fdf
   specs:
@@ -39,15 +49,6 @@ GIT
       guid
       json
       rails (>= 3.2)
-
-GIT
-  remote: https://github.com/instedd/telemetry_rails.git
-  revision: 8ddfee2b94a2c1bef837b0a583538dfa72781948
-  specs:
-    instedd_telemetry (0.0.1)
-      global_phone
-      global_phone_dbgen
-      rails
 
 GIT
   remote: https://github.com/lchanmann/csv_builder.git
@@ -171,6 +172,9 @@ GEM
     equivalent-xml (0.2.9)
       nokogiri (>= 1.4.3)
     erubis (2.7.0)
+    exception_notification (4.1.1)
+      actionmailer (>= 3.0.4)
+      activesupport (>= 3.0.4)
     execjs (1.3.0)
       multi_json (~> 1.0)
     fabrication (2.5.2)
@@ -376,6 +380,7 @@ DEPENDENCIES
   devise
   enumerated_attribute!
   equivalent-xml
+  exception_notification (~> 4.1.1)
   fabrication
   ffaker
   foreman
@@ -420,6 +425,3 @@ DEPENDENCIES
   uglifier (>= 1.0.3)
   whenever
   will_paginate (~> 3.0)
-
-BUNDLED WITH
-   1.17.3

@@ -20,7 +20,7 @@
 Devise.setup do |config|
   # ==> Mailer Configuration
   # Configure the e-mail address which will be shown in DeviseMailer.
-  config.mailer_sender = "verboice@instedd.org"
+  config.mailer_sender = ENV["MAILER_SENDER"]
 
   # Configure the class responsible to send e-mails.
   config.mailer = "UserMailer"

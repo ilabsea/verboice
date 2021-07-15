@@ -1,0 +1,33 @@
+.box.collapsible_crud_box.expanded.grey.w60
+  %p
+    <!-- ko ifnot: name_duplicated() -->
+    %label{ko(css: {error: :name_error}), :for => :name}= t('views.ext.reminder_groups.label.name')
+    <!-- /ko -->
+
+    <!-- ko if: name_duplicated() -->
+    %label{ko(css: {error: :name_duplicated}), :for => :name}= t('views.ext.reminder_groups.label.name_exists')
+    <!-- /ko -->
+
+    .form-group= ko_text_field_tag :name, css: {error: :name_error}, html: {class: 'w30'}
+
+    - if Rails.configuration.verboice_configuration[:enable_sync_go_data]
+      .form-group
+        %label= t('views.ext.reminder_groups.label.mode')
+
+        %select.w30{ko(value: 'mode', name: :mode, disable: '!!id()') }
+          %option{value: 'manual'}= t('views.ext.reminder_groups.label.manual')
+          %option{value: 'sync_with_go_data'}= t('views.ext.reminder_groups.label.sync_with_go_data')
+
+  <!-- ko if: mode() != 'sync_with_go_data' -->
+  = render 'manual_contact_form'
+  <!-- /ko -->
+
+  <!-- ko if: mode() == 'sync_with_go_data' -->
+  = render 'sync_go_data_form'
+  <!-- /ko -->
+
+  %hr
+
+  %button.white{ko(click: '$root.save_reminder_group', enable: :valid), type: :button}= t('views.ext.reminder_groups.action.save')
+
+  %a.button.white.cancel{ko(click: '$root.cancel_reminder_group'), href: 'javascript:void(0)'}= t('views.ext.reminder_groups.action.cancel')

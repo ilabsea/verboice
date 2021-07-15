@@ -31,11 +31,32 @@ Verboice::Application.configure do
   config.action_controller.perform_caching = false
 
   # Default url for action mailer
-  config.action_mailer.default_url_options = { :host => 'localhost:3000' }
+  config.action_mailer.default_url_options = { host: ENV['SETTINGS__SMTP__HOST'] }
   config.action_mailer.asset_host = 'http://localhost:3000'
 
-  # Don't care if the mailer can't send
+  # Don't care if the mailer can't send.
   config.action_mailer.raise_delivery_errors = false
+
+  smtp_settings = {}.tap do |settings|
+    settings[:address]              = ENV['SETTINGS__SMTP__ADDRESS'] if ENV['SETTINGS__SMTP__ADDRESS'].present?
+    settings[:port]                 = ENV['SETTINGS__SMTP__PORT'].to_i if ENV['SETTINGS__SMTP__PORT'].present?
+    settings[:domain]               = ENV['SETTINGS__SMTP__DOMAIN'] if ENV['SETTINGS__SMTP__DOMAIN'].present?
+    settings[:user_name]            = ENV['SETTINGS__SMTP__USER_NAME'] if ENV['SETTINGS__SMTP__USER_NAME'].present?
+    settings[:password]             = ENV['SETTINGS__SMTP__PASSWORD'] if ENV['SETTINGS__SMTP__PASSWORD'].present?
+  end
+
+  if smtp_settings.present?
+    config.action_mailer.delivery_method = :smtp
+    config.action_mailer.smtp_settings = smtp_settings
+  end
+
+  # Send notification when has exception happen
+  config.middleware.use ExceptionNotification::Rack,
+    :email => {
+      :email_prefix => "[Verboice] ",
+      :sender_address => %{"notifier" <#{ENV['MAILER_SENDER']}>},
+      :exception_recipients => ENV['EXCEPTION_RECIPIENTS'].to_s.split(',')
+    }
 
   # Print deprecation notices to the Rails logger
   config.active_support.deprecation = :notify

@@ -8,7 +8,7 @@ class String
   end
 
   def is_contact?
-    !self.match(/^[\s\d]+$/).nil?  
+    !self.match(/^[\s\d]+$/).nil?
   end
 
   #TODO: be careful modify/delete

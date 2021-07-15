@@ -1,4 +1,5 @@
 broker_port: 9999
+broker_host: broker
 ispeech_format: mp3
 asset_host: "http://default-domain.com"
 default_url_options:
@@ -8,3 +9,4 @@ default_mailer_options:
   from: "verboice@instedd.org"
 poirot_elasticsearch_url: http://localhost:9200
 enable_channel: true
+enable_sync_go_data: false

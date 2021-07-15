@@ -27,33 +27,6 @@ describe Ext::ReminderGroup do
     reminder_group.save.should eq false
   end
 
-  it "should encoding addresses to utf-8" do
-    str1 = "foo".encode(Encoding::ASCII_8BIT)
-    str2 = "bar".encode(Encoding::UTF_8)
-    addresses = [str1, str2]
-
-    reminder_group = Ext::ReminderGroup.new @valid.merge(addresses: addresses)
-    reminder_group.save
-    reminder_group.reload.addresses.first.encoding.should == Encoding::UTF_8
-    reminder_group.reload.addresses.last.encoding.should == Encoding::UTF_8
-  end
-
-  it "should not have binary data in addresses" do
-    str1 = "foo".encode(Encoding::ASCII_8BIT)
-    str2 = "bar".encode(Encoding::UTF_8)
-    addresses = [str1, str2]
-
-    yaml_result = YAML.dump(addresses)
-
-    reminder_group = Ext::ReminderGroup.new @valid.merge(addresses: addresses)
-    reminder_group.save
-    resultset = ActiveRecord::Base.connection.execute("select addresses from ext_reminder_groups where id = #{reminder_group.id}")
-    resultset.each do |r|
-      r[0].index("binary").should be_nil
-      r[0].should_not eq(yaml_result)
-    end
-  end
-
   describe "#register_address" do
     it "should register address when it doesn't exists" do
       reminder_group = Ext::ReminderGroup.create @valid
@@ -61,42 +34,42 @@ describe Ext::ReminderGroup do
 
       @project.contacts.size.should == 1
       @project.contacts.first.addresses.first.address.should == "1000"
-      reminder_group.addresses.size.should == 1
-      reminder_group.addresses.first.should == "1000"
+      reminder_group.reminder_group_contacts.size.should == 1
+      reminder_group.reminder_group_contacts.first.address.should == "1000"
     end
 
     it "should ignore when it's already exists" do
       reminder_group = Ext::ReminderGroup.create @valid.merge(addresses: ["1000"])
       reminder_group.register_address "1000"
 
-      reminder_group.addresses.size.should == 1
-      reminder_group.addresses.last.should == "1000"
+      reminder_group.reminder_group_contacts.size.should == 1
+      reminder_group.reminder_group_contacts.last.address.should == "1000"
     end
   end
 
   describe "#deregister_address" do
     it "should deregister address when it's exists" do
-      reminder_group = Ext::ReminderGroup.create @valid.merge(addresses: ["1000"])
+      reminder_group = Ext::ReminderGroup.create @valid.merge(reminder_group_contacts_attributes: [{address: "1000"}])
 
       # assert before process
-      reminder_group.addresses.size.should == 1
+      reminder_group.reminder_group_contacts.size.should == 1
 
       reminder_group.deregister_address "1000"
 
       # assert after process
-      reminder_group.addresses.size.should == 0
+      reminder_group.reminder_group_contacts.size.should == 0
     end
 
     it "should ignore when it doesn't exists" do
-      reminder_group = Ext::ReminderGroup.create @valid.merge(addresses: ["1000"])
+      reminder_group = Ext::ReminderGroup.create @valid.merge(reminder_group_contacts_attributes: [{address: "1000"}])
 
       # assert before process
-      reminder_group.addresses.size.should == 1
+      reminder_group.reminder_group_contacts.size.should == 1
       reminder_group.deregister_address "1001"
 
       # assert after process
-      reminder_group.addresses.size.should == 1
-      reminder_group.addresses.first.should == "1000"
+      reminder_group.reminder_group_contacts.size.should == 1
+      reminder_group.reminder_group_contacts.first.address.should == "1000"
     end
   end
 
@@ -134,24 +107,42 @@ describe Ext::ReminderGroup do
 
     context 'all new numbers' do
       before {
-        reminder_group.addresses.push('85512345671')
         reminder_group.import_contact_addresses(file)
       }
 
       it 'creates all new addresses' do
-        reminder_group.addresses.count.should eq(3)
+        reminder_group.reminder_group_contacts.count.should eq(2)
       end
     end
 
     context 'some new numbers' do
       before {
-        reminder_group.addresses.push('85512345678')
+        reminder_group.reminder_group_contacts.create(address: '85512345678')
         reminder_group.import_contact_addresses(file)
       }
 
       it 'creates only new numbers' do
-        reminder_group.addresses.count.should eq(2)
+        reminder_group.reminder_group_contacts.count.should eq(2)
       end
+    end
+  end
+
+  describe '.upsert_reminder_group_contacts' do
+    let!(:reminder_group) { Ext::ReminderGroup.create @valid }
+    let!(:collection) {
+      [
+        {'Addresses' => [{'Phone number' => '011222333'}]},
+        {'Addresses' => [{'Phone number' => '011222334'}]}
+      ]
+    }
+
+    before {
+      reminder_group.update_attributes(sync_config: { phone_number_field: 'Addresses_0_Phone number' })
+      reminder_group.upsert_reminder_group_contacts(collection)
+    }
+
+    it 'create 2 reminder_group_contacts' do
+      reminder_group.reminder_group_contacts.count.should eq(2)
     end
   end
 end

@@ -1,0 +1,22 @@
+%p
+  .w30= "#{t('views.ext.reminder_groups.label.contacts')}:"
+
+  <!-- ko foreach: contacts -->
+  .w20{style:"margin-left:5px;"}
+    %div{ko(text: :address), style: "float:left;"}
+    %button.right.clist-remove{ko(click: '$parent.remove_contact'), style: "margin-top:-4px;"}
+  .clear
+  .w20{style:"margin-left:5px; border-bottom: 1px solid white;"}
+  %div{style:"height:10px;"}
+  <!-- /ko -->
+
+  .w20{style:"margin-left:5px;"}
+    <!-- ko if: new_address_duplicated() -->
+    %span.warning= t('views.ext.reminder_groups.label.address_exists')
+    <!-- /ko -->
+
+    %div{style: "float:left;"}
+      %input#autocomplete-address.autocomplete-site-input.ux-search.ui-autocomplete-input{ ko(autocomplete: :new_address, value: :new_address, valueUpdate: 'afterkeydown'), type: :text, placeholder: "#{t('views.ext.reminder_groups.label.add_contact')}", style: "width: 164px;", url: "/projects/#{@project.id}/contacts/invitable.json", minChar: 3}
+
+    %button.right.clist-add{ko(disable: :new_address_button_disabled, click: 'add_new_contact'), type: :button, style:"margin-top:2px;"}
+    .clear

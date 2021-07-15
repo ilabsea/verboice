@@ -46,7 +46,8 @@ onReminderGroups ->
     save_reminder_groupCallback: (data) =>
       # if reminder group is new, we need to set id
       $.status.showNotice((if @current_reminder_group().id() then update_success else create_success), 2000)
-      @current_reminder_group().id(data.id)
+
+      @reminder_groups.replace(@current_reminder_group(), new ReminderGroup(data))
 
       @current_reminder_group(null)
       @saving_reminder_group(false)
@@ -62,7 +63,7 @@ onReminderGroups ->
         json = { reminder_group: { addresses: [] } }
 
         $.ajax
-          url: "/api/projects/#{@project_id()}/reminder_groups/#{reminder_group.id()}.json"
+          url: "/api/projects/#{@project_id()}/reminder_groups/#{reminder_group.id()}/reset_contact"
           type: 'PUT'
           data: JSON.stringify(json)
           contentType: 'application/json'

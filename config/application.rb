@@ -78,5 +78,6 @@ module Verboice
     # set per_page globally
     WillPaginate.per_page = 10
     
+    ENV.update YAML.load_file('config/application.yml')[Rails.env] rescue {}
   end
 end

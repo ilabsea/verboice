@@ -1,19 +1,11 @@
 module Ext
   class ReminderGroupsController < ExtApplicationController
-    def index
-      load_project
-      groups = []
-      @project.ext_reminder_groups.each do |reminder_group|
-        if reminder_group.addresses.kind_of?(String)
-          reminder_group.addresses = Ext::ReminderGroup.deserialized_to_array reminder_group.addresses
-          reminder_group.save
-        end
-        groups.push reminder_group
-      end
+    before_filter :load_project, only: [:index]
 
+    def index
       respond_to do |format|
         format.html
-        format.json { render json: groups }
+        format.json { render json: @project.ext_reminder_groups, each_serializer: ReminderGroupSerializer }
       end
     end
 
