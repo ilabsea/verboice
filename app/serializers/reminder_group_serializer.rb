@@ -28,6 +28,8 @@ class ReminderGroupSerializer < ActiveModel::Serializer
   end
 
   def sync_status_updated_at
+    return unless object.sync_status_updated_at.present?
+
     object.sync_status_updated_at.in_time_zone(object.project.time_zone)
   end
 end
